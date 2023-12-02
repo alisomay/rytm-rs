@@ -189,7 +189,7 @@ fn plock_seq() {
         let first_trig = track.trigs()[0];
 
         clearscreen::clear().unwrap();
-        dbg!(first_trig);
+        dbg!(for_first_trig);
 
         // println!(
         //     "unknown_3msb_flags_retrig_rate: {:08b}",
