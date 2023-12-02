@@ -1,3 +1,5 @@
+// TODO: Correctly represent unset values in pattern, trig, track.
+
 pub mod plock_seq;
 pub mod track;
 pub mod types;

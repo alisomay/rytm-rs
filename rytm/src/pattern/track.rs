@@ -31,7 +31,6 @@ pub struct Track {
     trigs: [Trig; 64],
 
     default_trig_flags: TrigFlags,
-    default_trig_condition: bool,
     default_trig_note: u8,
     default_trig_velocity: u8,
     default_trig_note_length: Length,
@@ -51,6 +50,20 @@ pub struct Track {
 
     pad_scale: PadScale,
     root_note: RootNote,
+
+    /// MSB of default_trig_note.
+    ///
+    /// For now it is always 1.
+    ///
+    /// Maybe it means something?
+    _maybe_useful_flag_from_default_trig_note: u8,
+
+    /// Mid bits of flags_and_speed.
+    ///
+    /// For now they're always 0.
+    ///
+    /// Maybe they means something?
+    _maybe_useful_flags_from_flags_and_speed: u8,
 }
 
 impl Default for Track {
@@ -59,11 +72,9 @@ impl Default for Track {
             trigs: [Trig::default(); 64],
 
             default_trig_flags: TrigFlags::default(),
-            default_trig_condition: false,
             default_trig_note: 0,
             default_trig_velocity: 0,
             default_trig_note_length: Length::default(),
-            // TODO:
             default_trig_probability: 0,
 
             number_of_steps: 0,
@@ -80,6 +91,9 @@ impl Default for Track {
 
             pad_scale: PadScale::default(),
             root_note: RootNote::default(),
+
+            _maybe_useful_flag_from_default_trig_note: 1,
+            _maybe_useful_flags_from_flags_and_speed: 0,
         }
     }
 }
@@ -99,35 +113,34 @@ impl TryFrom<&ar_pattern_track_t> for Track {
                 i,
                 raw_trig_flags,
                 raw_track.notes[i],
-                raw_track.velocities[i],
                 raw_track.note_lengths[i],
+                raw_track.velocities[i],
                 raw_track.micro_timings[i],
-                raw_track.retrig_lengths[i],
                 raw_track.retrig_rates[i],
+                raw_track.retrig_lengths[i],
                 raw_track.retrig_velocity_offsets[i],
                 raw_track.sound_locks[i],
             )?;
         }
 
-        // Sends MIDI
+        // Sends midi
         let sends_midi = raw_track.flags_and_speed & 0b1000_0000 != 0;
-
         // Speed
         let speed: Speed = (raw_track.flags_and_speed & 0b0000_0111).try_into()?;
 
-        // bit8: 1=no trig condition, 0=have trig condition
-        let default_trig_condition = raw_track.default_note & 0b1000_0000 != 0b1000_0000;
+        // TODO: They always seem to be 0.
+        let _maybe_useful_flags_from_flags_and_speed = raw_track.flags_and_speed & 0b0111_1000;
+
+        let _maybe_useful_flag_from_default_trig_note = raw_track.default_note & 0b1000_0000;
         let default_trig_note = raw_track.default_note & 0b0111_1111;
 
         Ok(Self {
             trigs,
 
-            default_trig_condition,
             default_trig_note,
             default_trig_velocity: raw_track.default_velocity,
             default_trig_note_length: raw_track.default_note_length.try_into()?,
             default_trig_flags: unsafe { from_s_u16_t(&raw_track.default_trig_flags).into() },
-            // TODO:
             default_trig_probability: raw_track.trig_probability,
 
             number_of_steps: raw_track.num_steps,
@@ -144,6 +157,9 @@ impl TryFrom<&ar_pattern_track_t> for Track {
 
             pad_scale: raw_track.pad_scale.try_into()?,
             root_note: raw_track.root_note.try_into()?,
+
+            _maybe_useful_flag_from_default_trig_note,
+            _maybe_useful_flags_from_flags_and_speed,
         })
     }
 }
@@ -173,8 +189,8 @@ impl From<&Track> for ar_pattern_track_t {
             velocities[i] = trig.velocity() as u8;
             note_lengths[i] = trig.note_length().into();
             micro_timings[i] = trig.encode_micro_timing();
-            retrig_lengths[i] = trig.retrig_length().into();
-            retrig_rates[i] = trig.retrig_rate().into();
+            retrig_lengths[i] = trig.encode_retrig_length();
+            retrig_rates[i] = trig.encode_retrig_rate();
             retrig_velocity_offsets[i] = trig.retrig_velocity_offset() as i8;
             sound_locks[i] = trig.sound_lock() as u8;
         }
@@ -183,16 +199,14 @@ impl From<&Track> for ar_pattern_track_t {
         let mut encoded_flags_and_speed: u8 = 0;
         encoded_flags_and_speed |= track.speed as u8;
         encoded_flags_and_speed |= if track.sends_midi { 0b1000_0000 } else { 0 };
+        encoded_flags_and_speed |= track._maybe_useful_flags_from_flags_and_speed;
 
         // Encoded euclidean mode.
         let encoded_euc_mode = if track.euclidean_mode { 128 } else { 0 };
 
-        // TODO: Double check
-        // Compile note and trig condition.
-        let mut encoded_default_trig_note = track.default_trig_note;
-        if track.default_trig_condition {
-            encoded_default_trig_note |= 0b1000_0000;
-        }
+        // Compile note and unknown flag.
+        let encoded_default_trig_note =
+            track.default_trig_note | track._maybe_useful_flag_from_default_trig_note;
 
         Self {
             trig_bits: encoded_trig_bits,
@@ -266,11 +280,6 @@ impl Track {
     /// Sets the default trig flags for any trig in this track.
     pub fn set_default_trig_flags<F: Into<TrigFlags>>(&mut self, default_trig_flags: F) {
         self.default_trig_flags = default_trig_flags.into();
-    }
-
-    /// Sets the default trig condition for any trig in this track.
-    pub fn set_default_trig_condition(&mut self, default_trig_condition: bool) {
-        self.default_trig_condition = default_trig_condition;
     }
 
     /// Sets the default trig probability for any trig in this track.
@@ -414,11 +423,6 @@ impl Track {
     /// Returns the default trig flags for any trig in this track.
     pub fn default_trig_flags(&self) -> TrigFlags {
         self.default_trig_flags
-    }
-
-    /// Returns the default trig condition for any trig in this track.
-    pub fn default_trig_condition(&self) -> bool {
-        self.default_trig_condition
     }
 
     /// Returns the default trig probability for any trig in this track.

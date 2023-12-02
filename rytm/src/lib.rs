@@ -52,6 +52,7 @@ impl Rytm {
             self.patterns[pattern_index] =
                 Pattern::try_from_raw(meta.obj_nr as usize, meta, raw_pattern)?;
 
+            dbg!("ok");
             Ok(())
         }
     }
@@ -62,5 +63,21 @@ impl Rytm {
         pattern_index: usize,
     ) -> Result<Vec<u8>, RytmError> {
         self.patterns[pattern_index].as_sysex_message()
+    }
+
+    pub fn patterns(&self) -> &[Pattern] {
+        &self.patterns
+    }
+
+    pub fn patterns_mut(&mut self) -> &mut [Pattern] {
+        &mut self.patterns
+    }
+
+    pub fn pattern_at_work_buffer(&self) -> &Pattern {
+        &self.pattern_at_work_buffer
+    }
+
+    pub fn pattern_at_work_buffer_mut(&mut self) -> &mut Pattern {
+        &mut self.pattern_at_work_buffer
     }
 }

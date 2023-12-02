@@ -47,9 +47,7 @@ where
         let destination_buffer = buffer.as_mut_slice();
         let meta: rytm_sys::ar_sysex_meta_t = self.as_sysex_meta().into();
 
-        /// Safety
-        ///
-        /// TODO:
+        // TODO: Write safety comment.
         unsafe {
             let return_code = rytm_sys::ar_sysex_request(
                 destination_buffer.as_mut_ptr(),

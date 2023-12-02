@@ -4,51 +4,51 @@ use crate::error::ConversionError;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum MicroTime {
     /// `-23/384`
-    M23B384,
+    N23B384,
     /// `-11/192`
-    M11B192,
+    N11B192,
     /// `-7/128`
-    M7B128,
+    N7B128,
     /// `-5/96`
-    M5B96,
+    N5B96,
     /// `-19/384`
-    M19B384,
+    N19B384,
     /// `-3/64`
-    M3B64,
+    N3B64,
     /// `-17/384`
-    M17B384,
+    N17B384,
     /// `-1/24`
-    M1B24,
+    N1B24,
     /// `-5/128`
-    M5B128,
+    N5B128,
     /// `-7/192`
-    M7B192,
+    N7B192,
     /// `-13/384`
-    M13B384,
+    N13B384,
     /// `-1/32`
-    M1B32,
+    N32nd,
     /// `-11/384`
-    M11B384,
+    N11B384,
     /// `-5/192`
-    M5B192,
+    N5B192,
     /// `-3/128`
-    M3B128,
+    N3B128,
     /// `-1/48`
-    M1B48,
+    N1B48,
     /// `-7/384`
-    M7B384,
+    N7B384,
     /// `-1/64`
-    M1B64,
+    N64th,
     /// `-5/384`
-    M5B384,
+    N5B384,
     /// `-1/96`
-    M1B96,
+    N1B96,
     /// `-1/128`
-    M1B128,
+    N1B128,
     /// `-1/192`
-    M1B192,
+    N1B192,
     /// `-1/384`
-    M1B384,
+    N1B384,
     #[default]
     /// The trig is on the grid.
     OnGrid,
@@ -63,7 +63,7 @@ pub enum MicroTime {
     /// `5/384`
     P5B384,
     /// `1/64`
-    P1B64,
+    P64th,
     /// `7/384`
     P7B384,
     /// `1/48`
@@ -75,7 +75,7 @@ pub enum MicroTime {
     /// `11/384`
     P11B384,
     /// `1/32`
-    P1B32,
+    P32nd,
     /// `13/384`
     P13B384,
     /// `7/192`
@@ -105,42 +105,42 @@ impl TryFrom<isize> for MicroTime {
 
     fn try_from(value: isize) -> Result<Self, Self::Error> {
         match value {
-            -23 => Ok(MicroTime::M23B384),
-            -22 => Ok(MicroTime::M11B192),
-            -21 => Ok(MicroTime::M7B128),
-            -20 => Ok(MicroTime::M5B96),
-            -19 => Ok(MicroTime::M19B384),
-            -18 => Ok(MicroTime::M3B64),
-            -17 => Ok(MicroTime::M17B384),
-            -16 => Ok(MicroTime::M1B24),
-            -15 => Ok(MicroTime::M5B128),
-            -14 => Ok(MicroTime::M7B192),
-            -13 => Ok(MicroTime::M13B384),
-            -12 => Ok(MicroTime::M1B32),
-            -11 => Ok(MicroTime::M11B384),
-            -10 => Ok(MicroTime::M5B192),
-            -9 => Ok(MicroTime::M3B128),
-            -8 => Ok(MicroTime::M1B48),
-            -7 => Ok(MicroTime::M7B384),
-            -6 => Ok(MicroTime::M1B64),
-            -5 => Ok(MicroTime::M5B384),
-            -4 => Ok(MicroTime::M1B96),
-            -3 => Ok(MicroTime::M1B128),
-            -2 => Ok(MicroTime::M1B192),
-            -1 => Ok(MicroTime::M1B384),
+            -23 => Ok(MicroTime::N23B384),
+            -22 => Ok(MicroTime::N11B192),
+            -21 => Ok(MicroTime::N7B128),
+            -20 => Ok(MicroTime::N5B96),
+            -19 => Ok(MicroTime::N19B384),
+            -18 => Ok(MicroTime::N3B64),
+            -17 => Ok(MicroTime::N17B384),
+            -16 => Ok(MicroTime::N1B24),
+            -15 => Ok(MicroTime::N5B128),
+            -14 => Ok(MicroTime::N7B192),
+            -13 => Ok(MicroTime::N13B384),
+            -12 => Ok(MicroTime::N32nd),
+            -11 => Ok(MicroTime::N11B384),
+            -10 => Ok(MicroTime::N5B192),
+            -9 => Ok(MicroTime::N3B128),
+            -8 => Ok(MicroTime::N1B48),
+            -7 => Ok(MicroTime::N7B384),
+            -6 => Ok(MicroTime::N64th),
+            -5 => Ok(MicroTime::N5B384),
+            -4 => Ok(MicroTime::N1B96),
+            -3 => Ok(MicroTime::N1B128),
+            -2 => Ok(MicroTime::N1B192),
+            -1 => Ok(MicroTime::N1B384),
             0 => Ok(MicroTime::OnGrid),
             1 => Ok(MicroTime::P1B384),
             2 => Ok(MicroTime::P1B192),
             3 => Ok(MicroTime::P1B128),
             4 => Ok(MicroTime::P1B96),
             5 => Ok(MicroTime::P5B384),
-            6 => Ok(MicroTime::P1B64),
+            6 => Ok(MicroTime::P64th),
             7 => Ok(MicroTime::P7B384),
             8 => Ok(MicroTime::P1B48),
             9 => Ok(MicroTime::P3B128),
             10 => Ok(MicroTime::P5B192),
             11 => Ok(MicroTime::P11B384),
-            12 => Ok(MicroTime::P1B32),
+            12 => Ok(MicroTime::P32nd),
             13 => Ok(MicroTime::P13B384),
             14 => Ok(MicroTime::P7B192),
             15 => Ok(MicroTime::P5B128),
@@ -163,42 +163,42 @@ impl TryFrom<isize> for MicroTime {
 impl From<&MicroTime> for isize {
     fn from(micro_time: &MicroTime) -> Self {
         match micro_time {
-            MicroTime::M23B384 => -23,
-            MicroTime::M11B192 => -22,
-            MicroTime::M7B128 => -21,
-            MicroTime::M5B96 => -20,
-            MicroTime::M19B384 => -19,
-            MicroTime::M3B64 => -18,
-            MicroTime::M17B384 => -17,
-            MicroTime::M1B24 => -16,
-            MicroTime::M5B128 => -15,
-            MicroTime::M7B192 => -14,
-            MicroTime::M13B384 => -13,
-            MicroTime::M1B32 => -12,
-            MicroTime::M11B384 => -11,
-            MicroTime::M5B192 => -10,
-            MicroTime::M3B128 => -9,
-            MicroTime::M1B48 => -8,
-            MicroTime::M7B384 => -7,
-            MicroTime::M1B64 => -6,
-            MicroTime::M5B384 => -5,
-            MicroTime::M1B96 => -4,
-            MicroTime::M1B128 => -3,
-            MicroTime::M1B192 => -2,
-            MicroTime::M1B384 => -1,
+            MicroTime::N23B384 => -23,
+            MicroTime::N11B192 => -22,
+            MicroTime::N7B128 => -21,
+            MicroTime::N5B96 => -20,
+            MicroTime::N19B384 => -19,
+            MicroTime::N3B64 => -18,
+            MicroTime::N17B384 => -17,
+            MicroTime::N1B24 => -16,
+            MicroTime::N5B128 => -15,
+            MicroTime::N7B192 => -14,
+            MicroTime::N13B384 => -13,
+            MicroTime::N32nd => -12,
+            MicroTime::N11B384 => -11,
+            MicroTime::N5B192 => -10,
+            MicroTime::N3B128 => -9,
+            MicroTime::N1B48 => -8,
+            MicroTime::N7B384 => -7,
+            MicroTime::N64th => -6,
+            MicroTime::N5B384 => -5,
+            MicroTime::N1B96 => -4,
+            MicroTime::N1B128 => -3,
+            MicroTime::N1B192 => -2,
+            MicroTime::N1B384 => -1,
             MicroTime::OnGrid => 0,
             MicroTime::P1B384 => 1,
             MicroTime::P1B192 => 2,
             MicroTime::P1B128 => 3,
             MicroTime::P1B96 => 4,
             MicroTime::P5B384 => 5,
-            MicroTime::P1B64 => 6,
+            MicroTime::P64th => 6,
             MicroTime::P7B384 => 7,
             MicroTime::P1B48 => 8,
             MicroTime::P3B128 => 9,
             MicroTime::P5B192 => 10,
             MicroTime::P11B384 => 11,
-            MicroTime::P1B32 => 12,
+            MicroTime::P32nd => 12,
             MicroTime::P13B384 => 13,
             MicroTime::P7B192 => 14,
             MicroTime::P5B128 => 15,
@@ -476,6 +476,10 @@ pub enum Length {
     _128,
     /// `inf`
     Infinite,
+    /// Default value for unset values.
+    ///
+    /// `0xFF``
+    Unset,
 }
 
 impl From<Length> for u8 {
@@ -609,6 +613,7 @@ impl From<Length> for u8 {
             Length::_124 => 125,
             Length::_128 => 126,
             Length::Infinite => 127,
+            Length::Unset => 0xFF,
         }
     }
 }
@@ -617,6 +622,7 @@ impl TryFrom<u8> for Length {
     type Error = ConversionError;
 
     fn try_from(value: u8) -> Result<Self, Self::Error> {
+        dbg!(value);
         match value {
             0 => Ok(Length::_128th),
             1 => Ok(Length::_D188),
@@ -746,6 +752,7 @@ impl TryFrom<u8> for Length {
             125 => Ok(Length::_124),
             126 => Ok(Length::_128),
             127 => Ok(Length::Infinite),
+            0xFF => Ok(Length::Unset),
             _ => Err(ConversionError::Range {
                 value: value.to_string(),
                 type_name: "Length".into(),
@@ -799,7 +806,8 @@ pub enum RetrigRate {
 
 impl TryFrom<u8> for RetrigRate {
     type Error = ConversionError;
-
+    // Trig not enabled 174
+    // TODO: Can not change retrig stuff..
     fn try_from(rate: u8) -> Result<Self, Self::Error> {
         match rate {
             0 => Ok(RetrigRate::_1B1),
@@ -847,6 +855,255 @@ impl From<RetrigRate> for u8 {
             RetrigRate::_1B48 => 14,
             RetrigRate::_1B64 => 15,
             RetrigRate::_1B80 => 16,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+// TODO: Comment rest of the trig conditions.
+/// Trig condition of a trig.
+pub enum TrigCondition {
+    /// 1% probability.
+    P1,
+    /// 3% probability.
+    P3,
+    /// 4% probability.   
+    P4,
+    /// 6% probability.
+    P6,
+    /// 9% probability.
+    P9,
+    /// 13% probability.
+    P13,
+    /// 19% probability.
+    P19,
+    /// 25% probability.
+    P25,
+    /// 33% probability.
+    P33,
+    /// 41% probability.
+    P41,
+    /// 50% probability.
+    P50,
+    /// 59% probability.
+    P59,
+    /// 67% probability.
+    P67,
+    /// 75% probability.
+    P75,
+    /// 81% probability.
+    P81,
+    /// 87% probability.
+    P87,
+    /// 91% probability.
+    P91,
+    /// 94% probability.
+    P94,
+    /// 96% probability.
+    P96,
+    /// 98% probability.
+    P98,
+    /// 99% probability.
+    P99,
+    /// 100% probability.
+    P100,
+    Fill,
+    FillNot,
+    Pre,
+    PreNot,
+    Nei,
+    NeiNot,
+    _1st,
+    _1stNot,
+    _1B2,
+    _2B2,
+    _1B3,
+    _2B3,
+    _3B3,
+    _1B4,
+    _2B4,
+    _3B4,
+    _4B4,
+    _1B5,
+    _2B5,
+    _3B5,
+    _4B5,
+    _5B5,
+    _1B6,
+    _2B6,
+    _3B6,
+    _4B6,
+    _5B6,
+    _6B6,
+    _1B7,
+    _2B7,
+    _3B7,
+    _4B7,
+    _5B7,
+    _6B7,
+    _7B7,
+    _1B8,
+    _2B8,
+    _3B8,
+    _4B8,
+    _5B8,
+    _6B8,
+    _7B8,
+    _8B8,
+    #[default]
+    Unset,
+}
+
+impl TryFrom<u8> for TrigCondition {
+    type Error = ConversionError;
+
+    fn try_from(value: u8) -> Result<Self, Self::Error> {
+        // dbg!(value);
+        // panic!();
+        match value {
+            0 => Ok(TrigCondition::P1),
+            1 => Ok(TrigCondition::P3),
+            2 => Ok(TrigCondition::P4),
+            3 => Ok(TrigCondition::P6),
+            4 => Ok(TrigCondition::P9),
+            5 => Ok(TrigCondition::P13),
+            6 => Ok(TrigCondition::P19),
+            7 => Ok(TrigCondition::P25),
+            8 => Ok(TrigCondition::P33),
+            9 => Ok(TrigCondition::P41),
+            10 => Ok(TrigCondition::P50),
+            11 => Ok(TrigCondition::P59),
+            12 => Ok(TrigCondition::P67),
+            13 => Ok(TrigCondition::P75),
+            14 => Ok(TrigCondition::P81),
+            15 => Ok(TrigCondition::P87),
+            16 => Ok(TrigCondition::P91),
+            17 => Ok(TrigCondition::P94),
+            18 => Ok(TrigCondition::P96),
+            19 => Ok(TrigCondition::P98),
+            20 => Ok(TrigCondition::P99),
+            21 => Ok(TrigCondition::P100),
+            22 => Ok(TrigCondition::Fill),
+            23 => Ok(TrigCondition::FillNot),
+            24 => Ok(TrigCondition::Pre),
+            25 => Ok(TrigCondition::PreNot),
+            26 => Ok(TrigCondition::Nei),
+            27 => Ok(TrigCondition::NeiNot),
+            28 => Ok(TrigCondition::_1st),
+            29 => Ok(TrigCondition::_1stNot),
+            30 => Ok(TrigCondition::_1B2),
+            31 => Ok(TrigCondition::_2B2),
+            32 => Ok(TrigCondition::_1B3),
+            33 => Ok(TrigCondition::_2B3),
+            34 => Ok(TrigCondition::_3B3),
+            35 => Ok(TrigCondition::_1B4),
+            36 => Ok(TrigCondition::_2B4),
+            37 => Ok(TrigCondition::_3B4),
+            38 => Ok(TrigCondition::_4B4),
+            39 => Ok(TrigCondition::_1B5),
+            40 => Ok(TrigCondition::_2B5),
+            41 => Ok(TrigCondition::_3B5),
+            42 => Ok(TrigCondition::_4B5),
+            43 => Ok(TrigCondition::_5B5),
+            44 => Ok(TrigCondition::_1B6),
+            45 => Ok(TrigCondition::_2B6),
+            46 => Ok(TrigCondition::_3B6),
+            47 => Ok(TrigCondition::_4B6),
+            48 => Ok(TrigCondition::_5B6),
+            49 => Ok(TrigCondition::_6B6),
+            50 => Ok(TrigCondition::_1B7),
+            51 => Ok(TrigCondition::_2B7),
+            52 => Ok(TrigCondition::_3B7),
+            53 => Ok(TrigCondition::_4B7),
+            54 => Ok(TrigCondition::_5B7),
+            55 => Ok(TrigCondition::_6B7),
+            56 => Ok(TrigCondition::_7B7),
+            57 => Ok(TrigCondition::_1B8),
+            58 => Ok(TrigCondition::_2B8),
+            59 => Ok(TrigCondition::_3B8),
+            60 => Ok(TrigCondition::_4B8),
+            61 => Ok(TrigCondition::_5B8),
+            62 => Ok(TrigCondition::_6B8),
+            63 => Ok(TrigCondition::_7B8),
+            64 => Ok(TrigCondition::_8B8),
+            0x7F => Ok(TrigCondition::Unset),
+            _ => Err(ConversionError::Range {
+                value: value.to_string(),
+                type_name: "TrigCondition".into(),
+            }),
+        }
+    }
+}
+
+impl From<TrigCondition> for u8 {
+    fn from(value: TrigCondition) -> Self {
+        match value {
+            TrigCondition::P1 => 0,
+            TrigCondition::P3 => 1,
+            TrigCondition::P4 => 2,
+            TrigCondition::P6 => 3,
+            TrigCondition::P9 => 4,
+            TrigCondition::P13 => 5,
+            TrigCondition::P19 => 6,
+            TrigCondition::P25 => 7,
+            TrigCondition::P33 => 8,
+            TrigCondition::P41 => 9,
+            TrigCondition::P50 => 10,
+            TrigCondition::P59 => 11,
+            TrigCondition::P67 => 12,
+            TrigCondition::P75 => 13,
+            TrigCondition::P81 => 14,
+            TrigCondition::P87 => 15,
+            TrigCondition::P91 => 16,
+            TrigCondition::P94 => 17,
+            TrigCondition::P96 => 18,
+            TrigCondition::P98 => 19,
+            TrigCondition::P99 => 20,
+            TrigCondition::P100 => 21,
+            TrigCondition::Fill => 22,
+            TrigCondition::FillNot => 23,
+            TrigCondition::Pre => 24,
+            TrigCondition::PreNot => 25,
+            TrigCondition::Nei => 26,
+            TrigCondition::NeiNot => 27,
+            TrigCondition::_1st => 28,
+            TrigCondition::_1stNot => 29,
+            TrigCondition::_1B2 => 30,
+            TrigCondition::_2B2 => 31,
+            TrigCondition::_1B3 => 32,
+            TrigCondition::_2B3 => 33,
+            TrigCondition::_3B3 => 34,
+            TrigCondition::_1B4 => 35,
+            TrigCondition::_2B4 => 36,
+            TrigCondition::_3B4 => 37,
+            TrigCondition::_4B4 => 38,
+            TrigCondition::_1B5 => 39,
+            TrigCondition::_2B5 => 40,
+            TrigCondition::_3B5 => 41,
+            TrigCondition::_4B5 => 42,
+            TrigCondition::_5B5 => 43,
+            TrigCondition::_1B6 => 44,
+            TrigCondition::_2B6 => 45,
+            TrigCondition::_3B6 => 46,
+            TrigCondition::_4B6 => 47,
+            TrigCondition::_5B6 => 48,
+            TrigCondition::_6B6 => 49,
+            TrigCondition::_1B7 => 50,
+            TrigCondition::_2B7 => 51,
+            TrigCondition::_3B7 => 52,
+            TrigCondition::_4B7 => 53,
+            TrigCondition::_5B7 => 54,
+            TrigCondition::_6B7 => 55,
+            TrigCondition::_7B7 => 56,
+            TrigCondition::_1B8 => 57,
+            TrigCondition::_2B8 => 58,
+            TrigCondition::_3B8 => 59,
+            TrigCondition::_4B8 => 60,
+            TrigCondition::_5B8 => 61,
+            TrigCondition::_6B8 => 62,
+            TrigCondition::_7B8 => 63,
+            TrigCondition::_8B8 => 64,
+            TrigCondition::Unset => 0x7F,
         }
     }
 }

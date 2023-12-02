@@ -6,7 +6,8 @@
 
 mod common;
 use common::*;
-use rytm_rs::query::{GlobalQuery, SettingsQuery};
+use rytm_rs::pattern::MicroTime;
+use rytm_rs::query::{GlobalQuery, PatternQuery, SettingsQuery};
 use rytm_rs::{error::RytmError, Rytm};
 
 #[test]
@@ -163,4 +164,75 @@ fn global() {
     poll_with_query_blocking(&mut rytm, query, conn_out, rx, 1000, callback).unwrap();
 }
 
-// Follow the same pattern for creating reverse engineering environments.
+#[test]
+fn plock_seq() {
+    let mut rytm = Rytm::default();
+    let conn_out = get_connection_to_rytm();
+    let (_conn_in, rx) = make_input_message_forwarder();
+
+    let query = PatternQuery::new(0);
+    let callback = |response: &[u8], rytm: &mut Rytm| -> Result<(), RytmError> {
+        if !is_sysex(response) {
+            // Pass..
+            return Ok(());
+        }
+
+        rytm.update_pattern_from_sysex_response(response, 0)?;
+        let pattern = rytm.patterns()[0];
+        let track = pattern.tracks()[0];
+        let plock_seqs = pattern.plock_seqs();
+        let mut for_first_trig = Vec::new();
+        for p in plock_seqs {
+            for_first_trig.push((p.plock_type, p.track_nr, p.data[0]));
+        }
+
+        let first_trig = track.trigs()[0];
+
+        clearscreen::clear().unwrap();
+        dbg!(first_trig);
+
+        // println!(
+        //     "unknown_3msb_flags_retrig_rate: {:08b}",
+        //     first_trig.unknown_3msb_flags_retrig_rate
+        // );
+        // println!(
+        //     "unknown_flag_retrig_length: {:08b}",
+        //     first_trig.unknown_flag_retrig_length
+        // );
+        // dbg!(track.default_trig_condition());
+        // dbg!(track.default_trig_flags());
+        // dbg!(track.default_trig_note());
+        // dbg!(track.default_trig_note_length());
+        // dbg!(track.default_trig_probability());
+        // dbg!(track.default_trig_velocity());
+
+        // let mut reverse = 0;
+        // reverse |=
+        //     (((encode_micro_timing_byte(&first_trig.micro_timing()) as u8) & 0b1100_0000) >> 2);
+        // reverse |= ((first_trig.unknown_flag_retrig_length & 0b1000_0000) >> 4);
+        // reverse |= ((first_trig.unknown_3msb_flags_retrig_rate & 0b1110_0000) >> 5);
+
+        // dbg!(reverse);
+
+        // dbg!(track);
+        // How does plock effect
+
+        //         [rytm/tests/reverse_engineering.rs:191] first_trig = Trig {
+        //     index: 0,
+        //     flags: 0000_0011_1000_0011 - ENABLE, RETRIG, SYN_PL_SW, SMP_PL_SW, ENV_PL_SW,
+        //     note: 127, // How to set this? is 127 unset because it is 0xFF with trig_condition false?
+        //     trig_condition: false, // What is this?
+        //     velocity: 255, // How to set this?
+        //     note_length: Unset, // ok I guess how to set it?
+        //     micro_timing: OnGrid, // ok
+        //     retrig_rate: _1B12, // ok
+        //     retrig_length: _11D5, // ok
+        //     retrig_velocity_offset: 91, // ok
+        //     sound_lock: 255, // check
+        // }
+
+        Ok(())
+    };
+
+    poll_with_query_blocking(&mut rytm, query, conn_out, rx, 3000, callback).unwrap();
+}

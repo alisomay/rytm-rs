@@ -15,6 +15,7 @@ use std::ops::Deref;
 use self::types::Length;
 use self::types::MicroTime;
 use self::types::RetrigRate;
+use self::types::TrigCondition;
 
 use flags::*;
 
@@ -295,26 +296,21 @@ impl HoldsTrigFlags for TrigFlags {
     }
 }
 
-#[derive(Clone, Copy, Default)]
+#[derive(Clone, Copy, Default, Debug)]
 pub struct Trig {
     index: usize,
     /// The raw flags value.
     ///
     /// Getters and setters are provided for each flag.
+    ///
+    /// Default trig flags are inherited if no parameter locks are set.
     flags: TrigFlags,
     /// The note value.
     ///
-    /// The lower 7 bits are used to store the note value.
     /// Follows the midi note convention. C-4 is `0x3C``.
-    ///
-    /// In this structure the sign bit is always 0x0.
     note: u8,
     /// Stores the state of the trig condition.
-    ///
-    /// If `true` the trig condition is enabled.
-    ///
-    /// If `false` the trig condition is disabled.
-    trig_condition: bool,
+    trig_condition: TrigCondition,
     /// The velocity value for the trig.
     velocity: u8,
 
@@ -347,15 +343,31 @@ impl Trig {
         retrig_velocity_offset: i8,
         sound_lock: u8,
     ) -> Result<Self, RytmError> {
-        // bit8: 1=no trig condition, 0=have trig condition
-        let trig_condition = note & 0b1000_0000 != 0b1000_0000;
+        let trig_condition_msb = note & 0b1000_0000;
         let note = note & 0b0111_1111;
+
+        let trig_condition_most_significant_mid_bits = (micro_timing as u8) & 0b1100_0000;
+        // Shift the micro timing 2 bits to the right so it reads as a relevant signed value. -92..=92 for every value increments and decrements by 4.
+        let micro_timing = (micro_timing & 0b0011_1111) << 2;
+
+        let trig_condition_least_significant_mid_bit = retrig_length & 0b1000_0000;
+        let retrig_length = retrig_length & 0b0111_1111;
+
+        let trig_condition_least_significant_3_bits = retrig_rate & 0b1110_0000;
+        let retrig_rate = retrig_rate & 0b0001_1111;
+
+        let mut trig_condition_value = 0_u8;
+
+        trig_condition_value |= (trig_condition_msb >> 1)
+            | (trig_condition_most_significant_mid_bits >> 2)
+            | (trig_condition_least_significant_mid_bit >> 4)
+            | (trig_condition_least_significant_3_bits >> 5);
 
         Ok(Self {
             index,
             flags: flags.into(),
             note,
-            trig_condition,
+            trig_condition: trig_condition_value.try_into()?,
             velocity,
             note_length: note_length.try_into()?,
             micro_timing: decode_micro_timing_byte(micro_timing)?,
@@ -367,11 +379,28 @@ impl Trig {
     }
 
     pub(crate) fn encode_note(&self) -> u8 {
-        self.note | if self.trig_condition { 0 } else { 0b1000_0000 }
+        (self.trig_condition as u8) & 0b1000_0000 | self.note
     }
 
+    #[allow(overflowing_literals)]
     pub(crate) fn encode_micro_timing(&self) -> i8 {
-        crate::util::encode_micro_timing_byte(&self.micro_timing)
+        let encoded_byte = crate::util::encode_micro_timing_byte(&self.micro_timing);
+        // Shift the micro timing 2 bits to the right to leave space for 2 bits which is a part of encoded trig condition.
+        // Then fill those two bits with the trig condition's most significant mid bits.
+        //
+        // Since we're just setting bits, fabricating values and not doing any arithmetic we can use the literal values.
+        // Overflowing literals are safe in this case.
+        (encoded_byte >> 2) | (((self.trig_condition as i8) & 0b0110_0000) << 1)
+    }
+
+    pub(crate) fn encode_retrig_length(&self) -> u8 {
+        // Apply the trig condition's least significant mid bit to the retrig length's most significant bit.
+        (((self.trig_condition as u8) & 0b0000_1000) << 4) | self.retrig_length as u8
+    }
+
+    pub(crate) fn encode_retrig_rate(&self) -> u8 {
+        // Apply the trig condition's least significant 3 bits to the retrig rate's most significant 3 bits.
+        (((self.trig_condition as u8) & 0b0000_0111) << 5) | self.retrig_rate as u8
     }
 
     /// Returns the index of the trig.
@@ -379,6 +408,8 @@ impl Trig {
         self.index
     }
 
+    // TODO: On device 36..=84 is valid.
+    // Are values set from here valid?
     /// Sets the note value.
     ///
     /// Range `0..=127`
@@ -391,14 +422,14 @@ impl Trig {
     }
 
     /// Sets the trig condition state.
-    pub fn set_trig_condition(&mut self, enable: bool) {
-        self.trig_condition = enable;
-    }
+    // pub fn set_trig_condition(&mut self, enable: bool) {
+    //     self.trig_condition = enable;
+    // }
 
     /// Sets the velocity value.
     ///
     /// Range `0..=127`
-    #[parameter_range(range = "velocity:0..=127")]
+    #[parameter_range(range = "velocity:1..=127")]
     pub fn set_velocity(&mut self, velocity: usize) -> Result<(), RytmError> {
         self.velocity = velocity as u8;
         Ok(())
@@ -458,6 +489,12 @@ impl Trig {
         Ok(())
     }
 
+    /// Sets the trig condition.
+    pub fn set_trig_condition(&mut self, trig_condition: TrigCondition) -> Result<(), RytmError> {
+        self.trig_condition = trig_condition;
+        Ok(())
+    }
+
     /// Sets retrig velocity offset.
     ///
     /// Range `-128..=127`
@@ -486,14 +523,14 @@ impl Trig {
         self.note as usize
     }
 
-    /// Returns the state of the trig condition.
-    pub fn trig_condition(&self) -> bool {
+    /// Returns the value of the trig condition.
+    pub fn trig_condition(&self) -> TrigCondition {
         self.trig_condition
     }
 
     /// Returns the velocity value.
     ///
-    /// Range `0..=127`
+    /// Range `1..=127`
     pub fn velocity(&self) -> usize {
         self.velocity as usize
     }
@@ -561,34 +598,6 @@ impl HoldsTrigFlags for Trig {
 
     fn raw_trig_flags_mut(&mut self) -> &mut u16 {
         self.flags.raw_trig_flags_mut()
-    }
-}
-
-impl std::fmt::Display for Trig {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
-            "{:04b}_{:04b}_{:04b}_{:04b} - {}",
-            (self.raw_trig_flags() >> 12) & 0b1111,
-            (self.raw_trig_flags() >> 8) & 0b1111,
-            (self.raw_trig_flags() >> 4) & 0b1111,
-            self.raw_trig_flags() & 0b1111,
-            format_trig_flags(self).join(", ")
-        )
-    }
-}
-
-impl std::fmt::Debug for Trig {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
-            "{:04b}_{:04b}_{:04b}_{:04b} - {}",
-            (self.raw_trig_flags() >> 12) & 0b1111,
-            (self.raw_trig_flags() >> 8) & 0b1111,
-            (self.raw_trig_flags() >> 4) & 0b1111,
-            self.raw_trig_flags() & 0b1111,
-            format_trig_flags(self).join(", ")
-        )
     }
 }
 

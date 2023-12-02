@@ -2,9 +2,9 @@ use rytm_sys::ar_plock_seq_t;
 
 #[derive(Clone, Copy, Debug)]
 pub struct PlockSeq {
-    plock_type: u8,
-    track_nr: u8,
-    data: [u8; 64],
+    pub plock_type: u8,
+    pub track_nr: u8,
+    pub data: [u8; 64],
 }
 
 impl Default for PlockSeq {
