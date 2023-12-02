@@ -1,0 +1,22 @@
+[package]
+name = "rytm-rs"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow = "1.0"
+# rytm-sys = "0.1"
+bitstream-io = "1.8"
+rytm-sys = { path = "../../rytm-sys" }
+thiserror = "1.0"
+rand = "0.8"
+rytm-rs-macro = { path = "../rytm-macro" }
+
+
+[dev-dependencies]
+# rytm-sys = "0.1"
+rytm-sys = { path = "../../rytm-sys" }
+midir = "0.9"
+clearscreen = "2"
+anyhow = "1.0"
+

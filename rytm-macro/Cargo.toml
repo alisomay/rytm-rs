@@ -1,0 +1,19 @@
+[package]
+name = "rytm-rs-macro"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "rytm_rs_macro"
+path = "src/lib.rs"
+proc-macro = true
+
+[dependencies]
+# https://github.com/dtolnay/proc-macro-workshop#debugging-tips
+syn = { version = "*", features = ["extra-traits"] }
+quote = "*"
+proc-macro2 = "*"
+r3bl_rs_utils = "*"
+
+
+
