@@ -14,7 +14,7 @@ use rytm_sys::{
 /// - `X1B2`: 1/2x
 /// - `X1B4`: 1/4x
 /// - `X1B8`: 1/8x
-#[derive(Clone, Copy, Debug, Default)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum Speed {
     #[default]
     /// 1x
@@ -68,7 +68,7 @@ impl TryFrom<u8> for Speed {
 }
 
 /// The time mode of a pattern.
-#[derive(Clone, Copy, Debug, Default)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum TimeMode {
     #[default]
     Normal,

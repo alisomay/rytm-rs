@@ -16,7 +16,7 @@ use rytm_sys::{
     AR_PADSCALE_WHOLE_TONE,
 };
 
-#[derive(Clone, Copy, Debug, Default)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum RootNote {
     #[default]
     C,
@@ -81,7 +81,7 @@ impl TryFrom<u8> for RootNote {
     }
 }
 
-#[derive(Clone, Copy, Debug, Default)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum PadScale {
     #[default]
     Chromatic,

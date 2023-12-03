@@ -1,5 +1,9 @@
 use super::ObjectQuery;
-use crate::util::SysexType;
+use crate::{
+    error::{ParameterError, RytmError},
+    sysex::SysexType,
+};
+use rytm_rs_macro::parameter_range;
 
 /// A query for a pattern object.
 pub struct PatternQuery {
@@ -10,25 +14,27 @@ pub struct PatternQuery {
 }
 
 impl PatternQuery {
-    pub fn new(pattern_index: usize) -> Self {
-        Self {
+    #[parameter_range(range = "pattern_index:0..=127")]
+    pub fn new(pattern_index: usize) -> Result<Self, RytmError> {
+        Ok(Self {
             object_number: pattern_index,
             r#type: SysexType::Pattern,
             device_id: 0,
-        }
+        })
     }
 
-    pub fn new_with_device_id(pattern_index: usize, device_id: u8) -> Self {
-        Self {
+    #[parameter_range(range = "pattern_index:0..=127")]
+    pub fn new_with_device_id(pattern_index: usize, device_id: u8) -> Result<Self, RytmError> {
+        Ok(Self {
             object_number: pattern_index,
             r#type: SysexType::Pattern,
             device_id,
-        }
+        })
     }
 
     pub fn new_targeting_work_buffer() -> Self {
         Self {
-            object_number: 0xFF,
+            object_number: 0b0000_0000_0000_0000_1000_0000_0000_0000,
             r#type: SysexType::Pattern,
             device_id: 0,
         }
@@ -36,7 +42,7 @@ impl PatternQuery {
 
     pub fn new_targeting_work_buffer_with_device_id(device_id: u8) -> Self {
         Self {
-            object_number: 0xFF,
+            object_number: 0b0000_0000_0000_0000_1000_0000_0000_0000,
             r#type: SysexType::Pattern,
             device_id,
         }

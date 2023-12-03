@@ -1,5 +1,5 @@
 use super::ObjectQuery;
-use crate::util::SysexType;
+use crate::sysex::SysexType;
 
 /// A query for the settings object.
 pub struct SettingsQuery {
@@ -44,6 +44,7 @@ impl ObjectQuery for SettingsQuery {
     }
 
     fn obj_nr(&self) -> u16 {
+        // Ignored for settings
         0x0000
     }
 }

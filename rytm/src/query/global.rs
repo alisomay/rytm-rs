@@ -1,5 +1,8 @@
 use super::ObjectQuery;
-use crate::util::SysexType;
+use crate::error::ParameterError;
+use crate::error::RytmError;
+use crate::sysex::SysexType;
+use rytm_rs_macro::parameter_range;
 
 /// A query for a global object.
 pub struct GlobalQuery {
@@ -10,25 +13,27 @@ pub struct GlobalQuery {
 }
 
 impl GlobalQuery {
-    pub fn new(global_slot: usize) -> Self {
-        Self {
+    #[parameter_range(range = "global_slot:0..=3")]
+    pub fn new(global_slot: usize) -> Result<Self, RytmError> {
+        Ok(Self {
             object_number: global_slot,
             r#type: SysexType::Global,
             device_id: 0,
-        }
+        })
     }
 
-    pub fn new_with_device_id(global_slot: usize, device_id: u8) -> Self {
-        Self {
+    #[parameter_range(range = "global_slot:0..=3")]
+    pub fn new_with_device_id(global_slot: usize, device_id: u8) -> Result<Self, RytmError> {
+        Ok(Self {
             object_number: global_slot,
             r#type: SysexType::Global,
             device_id,
-        }
+        })
     }
 
     pub fn new_targeting_work_buffer() -> Self {
         Self {
-            object_number: 0xFF,
+            object_number: 0b0000_0000_0000_0000_1000_0000_0000_0000,
             r#type: SysexType::Global,
             device_id: 0,
         }
@@ -36,7 +41,7 @@ impl GlobalQuery {
 
     pub fn new_targeting_work_buffer_with_device_id(device_id: u8) -> Self {
         Self {
-            object_number: 0xFF,
+            object_number: 0b0000_0000_0000_0000_1000_0000_0000_0000,
             r#type: SysexType::Global,
             device_id,
         }

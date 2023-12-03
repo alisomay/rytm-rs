@@ -11,6 +11,13 @@ pub enum ParameterError {
         value: String,
         parameter_name: String,
     },
+
+    #[error("Parameter error: {value} is not compatible with {parameter_name}. {reason:?}")]
+    Compatibility {
+        value: String,
+        parameter_name: String,
+        reason: Option<String>,
+    },
 }
 
 #[derive(thiserror::Error, Debug)]

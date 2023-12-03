@@ -53,17 +53,17 @@ pub struct Track {
 
     /// MSB of default_trig_note.
     ///
-    /// For now it is always 1.
+    /// For now it is always 0.
     ///
     /// Maybe it means something?
-    _maybe_useful_flag_from_default_trig_note: u8,
+    pub _maybe_useful_flag_from_default_trig_note: u8,
 
     /// Mid bits of flags_and_speed.
     ///
     /// For now they're always 0.
     ///
     /// Maybe they means something?
-    _maybe_useful_flags_from_flags_and_speed: u8,
+    pub _maybe_useful_flags_from_flags_and_speed: u8,
 }
 
 impl Default for Track {

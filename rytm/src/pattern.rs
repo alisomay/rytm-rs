@@ -11,7 +11,8 @@ use crate::error::SysexConversionError;
 use crate::pattern::plock_seq::PlockSeq;
 use crate::pattern::track::Track;
 use crate::sysex::SysexCompatible;
-use crate::util::SysexType;
+use crate::sysex::SysexMeta;
+use crate::sysex::SysexType;
 use rytm_rs_macro::parameter_range;
 
 use rytm_sys::ar_pattern_raw_to_syx;
@@ -23,7 +24,7 @@ pub use track::types::*;
 
 use super::{
     error::RytmError,
-    util::{from_s_u16_t, to_s_u16_t_union_b, SysexMeta},
+    util::{from_s_u16_t, to_s_u16_t_union_b},
 };
 
 /// # Pattern

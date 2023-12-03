@@ -2,19 +2,20 @@ mod global;
 mod pattern;
 mod raw;
 mod settings;
+mod sound;
 
 pub use global::GlobalQuery;
 pub use pattern::PatternQuery;
 pub use raw::RawQuery;
 pub use settings::SettingsQuery;
+pub use sound::SoundQuery;
 
 /// The size of the rytm sysex query in bytes.
 const RYTM_SYSEX_QUERY_SIZE: usize = 15;
 
-use super::{
-    error::{RytmError, SysexConversionError},
-    util::SysexMeta,
-};
+use crate::sysex::SysexMeta;
+
+use super::error::{RytmError, SysexConversionError};
 
 pub trait ObjectQuery
 where
@@ -39,7 +40,7 @@ where
     }
 
     fn is_targeting_work_buffer(&self) -> bool {
-        self.obj_nr() > 127
+        self.obj_nr() & 0b1000_0000_0000_0000 != 0
     }
 
     fn serialize_to_sysex(&self) -> Result<Vec<u8>, RytmError> {
