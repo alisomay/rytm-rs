@@ -151,10 +151,15 @@ impl From<&Pattern> for ar_pattern_t {
 impl Pattern {
     #[allow(clippy::too_many_arguments)]
     pub fn try_from_raw(
-        index: usize,
         sysex_meta: SysexMeta,
         raw_pattern: &ar_pattern_t,
     ) -> Result<Self, RytmError> {
+        let index = if sysex_meta.is_targeting_work_buffer() {
+            0
+        } else {
+            sysex_meta.obj_nr as usize
+        };
+
         let mut tracks: [Track; 13] = [Track::default(); 13];
         let mut plock_seqs: [PlockSeq; 72] = [PlockSeq::default(); 72];
 

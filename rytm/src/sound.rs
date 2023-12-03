@@ -251,7 +251,7 @@ impl Sound {
         let mut kit_number = None;
         let mut pool_index = None;
 
-        match sysex_meta.object_type() {
+        match sysex_meta.object_type()? {
             SysexType::Sound => {
                 if sysex_meta.is_targeting_work_buffer() {
                     index = (sysex_meta.obj_nr & 0b0111_1111) as usize;
@@ -272,7 +272,14 @@ impl Sound {
             }
             SysexType::Kit => {
                 // When this sound is part of a kit query...
-                // TODO:
+                if let Some((kit_n, assigned_t)) = kit_number_and_assigned_track {
+                    index = assigned_t;
+                    assigned_track = Some(assigned_t);
+                    kit_number = Some(kit_n);
+                } else {
+                    // TODO: Maybe better handle all these.
+                    todo!("Error here, this is not a sound query. Kit queries should provide the kit number and assigned track.")
+                }
             }
             _ => unreachable!(" TODO: This is not a sound or kit query handle error."),
         }

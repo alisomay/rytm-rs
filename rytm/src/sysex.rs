@@ -68,12 +68,55 @@ pub struct SysexMeta {
 }
 
 impl SysexMeta {
+    const SYSEX_META_CONTAINER_VERSION: u16 = 0x0101;
+
     pub fn is_targeting_work_buffer(&self) -> bool {
         self.obj_nr >= 128
     }
 
-    pub fn object_type(&self) -> SysexType {
-        self.obj_type.try_into().expect("TODO:")
+    pub fn object_type(&self) -> Result<SysexType, RytmError> {
+        let r#type: SysexType = self.obj_type.try_into()?;
+        Ok(r#type)
+    }
+
+    pub fn default_for_settings(dev_id: Option<usize>) -> Self {
+        Self {
+            container_version: SysexMeta::SYSEX_META_CONTAINER_VERSION,
+            dev_id: dev_id.unwrap_or(0) as u8,
+            obj_type: SysexType::Settings.into(),
+            obj_nr: 0b0000_0000,
+            // Calculated in libanalogrytm, they're dummy values here in this state.
+            chksum: 0,
+            data_size: 0,
+        }
+    }
+
+    #[parameter_range(range = "global_slot:0..=3")]
+    pub fn try_default_for_global(
+        global_slot: usize,
+        dev_id: Option<usize>,
+    ) -> Result<Self, RytmError> {
+        Ok(Self {
+            container_version: SysexMeta::SYSEX_META_CONTAINER_VERSION,
+            dev_id: dev_id.unwrap_or(0) as u8,
+            obj_type: SysexType::Global.into(),
+            obj_nr: global_slot as u16,
+            // Calculated in libanalogrytm, they're dummy values here in this state.
+            chksum: 0,
+            data_size: 0,
+        })
+    }
+
+    pub fn default_for_global_in_work_buffer(dev_id: Option<usize>) -> Self {
+        Self {
+            container_version: SysexMeta::SYSEX_META_CONTAINER_VERSION,
+            dev_id: dev_id.unwrap_or(0) as u8,
+            obj_type: SysexType::Global.into(),
+            obj_nr: 0b1000_0000,
+            // Calculated in libanalogrytm, they're dummy values here in this state.
+            chksum: 0,
+            data_size: 0,
+        }
     }
 
     #[parameter_range(range = "pattern_index:0..=127")]
@@ -82,7 +125,7 @@ impl SysexMeta {
         dev_id: Option<usize>,
     ) -> Result<Self, RytmError> {
         Ok(Self {
-            container_version: 0x0101,
+            container_version: SysexMeta::SYSEX_META_CONTAINER_VERSION,
             dev_id: dev_id.unwrap_or(0) as u8,
             obj_type: SysexType::Pattern.into(),
             obj_nr: pattern_index as u16,
@@ -94,7 +137,7 @@ impl SysexMeta {
 
     pub fn default_for_pattern_in_work_buffer(dev_id: Option<usize>) -> Self {
         Self {
-            container_version: 0x0101,
+            container_version: SysexMeta::SYSEX_META_CONTAINER_VERSION,
             dev_id: dev_id.unwrap_or(0) as u8,
             obj_type: SysexType::Pattern.into(),
             obj_nr: 0b1000_0000,
@@ -107,7 +150,7 @@ impl SysexMeta {
     #[parameter_range(range = "kit_index:0..=127")]
     pub fn try_default_for_kit(kit_index: usize, dev_id: Option<usize>) -> Result<Self, RytmError> {
         Ok(Self {
-            container_version: 0x0101,
+            container_version: SysexMeta::SYSEX_META_CONTAINER_VERSION,
             dev_id: dev_id.unwrap_or(0) as u8,
             obj_type: SysexType::Kit.into(),
             obj_nr: kit_index as u16,
@@ -119,7 +162,7 @@ impl SysexMeta {
 
     pub fn default_for_kit_in_work_buffer(dev_id: Option<usize>) -> Self {
         Self {
-            container_version: 0x0101,
+            container_version: SysexMeta::SYSEX_META_CONTAINER_VERSION,
             dev_id: dev_id.unwrap_or(0) as u8,
             obj_type: SysexType::Kit.into(),
             obj_nr: 0b1000_0000,
@@ -135,7 +178,7 @@ impl SysexMeta {
         dev_id: Option<usize>,
     ) -> Result<Self, RytmError> {
         Ok(Self {
-            container_version: 0x0101,
+            container_version: SysexMeta::SYSEX_META_CONTAINER_VERSION,
             dev_id: dev_id.unwrap_or(0) as u8,
             obj_type: SysexType::Sound.into(),
             obj_nr: sound_index as u16,
@@ -147,7 +190,7 @@ impl SysexMeta {
 
     pub fn default_for_sound_in_work_buffer(dev_id: Option<usize>) -> Self {
         Self {
-            container_version: 0x0101,
+            container_version: SysexMeta::SYSEX_META_CONTAINER_VERSION,
             dev_id: dev_id.unwrap_or(0) as u8,
             obj_type: SysexType::Sound.into(),
             obj_nr: 0b1000_0000,

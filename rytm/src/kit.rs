@@ -182,6 +182,8 @@ pub struct Kit {
     #[derivative(Debug = "ignore")]
     __unknown_arr1b: [u8; 0x2], /* @0x002c..0x002d */
 
+    // TODO:
+    #[derivative(Debug = "ignore")]
     sounds: [Sound; 12], /* @0x002E..0x07C5 (12*162=1944($798) bytes */
 
     #[derivative(Debug = "ignore")]
@@ -230,10 +232,13 @@ pub struct Kit {
     fx_lfo_depth_msb: u8,   /* @0x0812   */
     fx_lfo_depth_lsb: u8,   /* @0x0813   */
 
+    // TODO:
+    #[derivative(Debug = "ignore")]
     // @attention Will be ignored for now.
     perf_ctl: [u8; 48 * 4], /* @0x0842..0x0901 */
     #[derivative(Debug = "ignore")]
     __unknown_arr4: [u8; 0x15], /* @0x0902..0x0916 */
+    #[derivative(Debug = "ignore")]
     // @attention Will be ignored for now.
     scene_ctl: [u8; 48 * 4], /* @0x0917..0x09D6 */
 
@@ -355,7 +360,8 @@ impl Kit {
 
         let mut track_levels = [0; 12];
         for (i, track_level) in raw_kit.track_levels.iter().enumerate() {
-            track_levels[i] = unsafe { track_level.b.lo };
+            // Only the high byte is used for the levels.
+            track_levels[i] = unsafe { track_level.b.hi };
         }
 
         Ok(Self {
@@ -692,5 +698,13 @@ impl Kit {
             __unused_pad35: 0,
             __unused_pad36: 0,
         }
+    }
+
+    pub fn sounds(&self) -> &[Sound; 12] {
+        &self.sounds
+    }
+
+    pub fn sounds_mut(&mut self) -> &mut [Sound; 12] {
+        &mut self.sounds
     }
 }

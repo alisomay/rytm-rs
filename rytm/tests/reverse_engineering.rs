@@ -179,7 +179,8 @@ fn plock_seq() {
             return Ok(());
         }
 
-        rytm.update_pattern_from_sysex_response(response, 0)?;
+        rytm.update_from_sysex_response(response)?;
+
         let pattern = rytm.patterns()[0];
         let track = pattern.tracks()[0];
         let plock_seqs = pattern.plock_seqs();
@@ -286,7 +287,7 @@ fn sound() {
             return Ok(());
         }
 
-        rytm.update_sound_from_sysex_response(response, 0)?;
+        rytm.update_from_sysex_response(response)?;
         let sound = rytm.work_buffer_sounds()[0];
 
         clearscreen::clear().unwrap();
@@ -305,7 +306,7 @@ fn kit() {
     let conn_out = get_connection_to_rytm();
     let (_conn_in, rx) = make_input_message_forwarder();
 
-    let query = KitQuery::new(0).unwrap();
+    let query = KitQuery::new(18).unwrap();
     let query = KitQuery::new_targeting_work_buffer();
 
     let callback = |response: &[u8], rytm: &mut Rytm| -> Result<(), RytmError> {
@@ -314,12 +315,69 @@ fn kit() {
             return Ok(());
         }
 
-        rytm.update_kit_from_sysex_response(response, 0)?;
+        rytm.update_from_sysex_response(response)?;
+        let kit = rytm.kits()[18];
         let kit = rytm.work_buffer_kit();
 
         clearscreen::clear().unwrap();
 
-        dbg!(kit);
+        dbg!(kit.sounds()[6]);
+
+        Ok(())
+    };
+
+    poll_with_query_blocking(&mut rytm, query, conn_out, rx, 1000, callback).unwrap();
+}
+
+#[test]
+fn global_type() {
+    let mut rytm = Rytm::default();
+    let conn_out = get_connection_to_rytm();
+    let (_conn_in, rx) = make_input_message_forwarder();
+
+    let query = GlobalQuery::new(0).unwrap();
+    let query = GlobalQuery::new_targeting_work_buffer();
+
+    let callback = |response: &[u8], rytm: &mut Rytm| -> Result<(), RytmError> {
+        if !is_sysex(response) {
+            // Pass..
+            return Ok(());
+        }
+
+        rytm.update_from_sysex_response(response)?;
+        let global = rytm.globals()[0];
+        let global = rytm.work_buffer_global();
+
+        clearscreen::clear().unwrap();
+
+        dbg!(global);
+
+        Ok(())
+    };
+
+    poll_with_query_blocking(&mut rytm, query, conn_out, rx, 1000, callback).unwrap();
+}
+
+#[test]
+fn settings_type() {
+    let mut rytm = Rytm::default();
+    let conn_out = get_connection_to_rytm();
+    let (_conn_in, rx) = make_input_message_forwarder();
+
+    let query = SettingsQuery::new();
+
+    let callback = |response: &[u8], rytm: &mut Rytm| -> Result<(), RytmError> {
+        if !is_sysex(response) {
+            // Pass..
+            return Ok(());
+        }
+
+        rytm.update_from_sysex_response(response)?;
+        let settings = rytm.settings();
+
+        clearscreen::clear().unwrap();
+
+        dbg!(settings);
 
         Ok(())
     };
