@@ -13,6 +13,7 @@ use crate::pattern::track::Track;
 use crate::sysex::SysexCompatible;
 use crate::sysex::SysexMeta;
 use crate::sysex::SysexType;
+use derivative::Derivative;
 use rytm_rs_macro::parameter_range;
 
 use rytm_sys::ar_pattern_raw_to_syx;
@@ -32,13 +33,14 @@ use super::{
 /// This structure represents a pattern in the analog rytm.
 ///
 /// It does not map identically to the structure in the firmware.
-#[derive(Clone, Copy, Debug)]
+#[derive(Derivative, Clone, Copy)]
+#[derivative(Debug)]
 pub struct Pattern {
     sysex_meta: SysexMeta,
     /// Index of this pattern.
     ///
-    /// Range `0..=127` or 0xFF for the pattern at work buffer.
-    _index: usize,
+    /// Range `0..=127` or 0 for the pattern at work buffer.
+    index: usize,
     /// Version of the pattern structure.
     version: u32,
     /// Tracks
@@ -101,6 +103,8 @@ pub struct Pattern {
     ///
     /// Range `30.0..=300.0`
     bpm: f64,
+
+    #[derivative(Debug = "ignore")]
     /// Always 0x01, probably a marker for the end of pattern.
     _unknown_0x332c: u8,
 }
@@ -174,7 +178,7 @@ impl Pattern {
             ((raw_pattern.master_chg_msb as u16) << 8) | (raw_pattern.master_chg_lsb as u16);
 
         Ok(Self {
-            _index: index,
+            index,
             sysex_meta,
             version,
             tracks,
@@ -199,7 +203,7 @@ impl Pattern {
     pub fn try_default(index: usize) -> Result<Self, RytmError> {
         Ok(Self {
             sysex_meta: SysexMeta::try_default_for_pattern(index, None)?,
-            _index: index,
+            index,
             version: 0x0000_0001,
             tracks: [Track::default(); 13],
             plock_seqs: [PlockSeq::default(); 72],
@@ -218,7 +222,7 @@ impl Pattern {
     pub fn work_buffer_default() -> Self {
         Self {
             sysex_meta: SysexMeta::default_for_pattern_in_work_buffer(None),
-            _index: 0xFF,
+            index: 0,
             version: 0x0000_0001,
             tracks: [Track::default(); 13],
             plock_seqs: [PlockSeq::default(); 72],
@@ -414,12 +418,12 @@ impl Pattern {
 
     /// Returns the index of the pattern.
     pub fn index(&self) -> usize {
-        self._index
+        self.index
     }
 
     /// Checks if this pattern is the pattern at work buffer.
-    pub fn is_at_work_buffer(&self) -> bool {
-        self._index == 0xFF
+    pub fn is_work_buffer_pattern(&self) -> bool {
+        self.sysex_meta.is_targeting_work_buffer()
     }
 
     /// Returns the version of the pattern structure.

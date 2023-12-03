@@ -8,7 +8,7 @@ use rytm_rs_macro::parameter_range;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 /// A query for a sound object.
 pub struct SoundQuery {
-    /// Pattern index
+    /// Sound index or track index if targeting work buffer
     object_number: usize,
     r#type: SysexType,
     device_id: u8,
@@ -36,7 +36,7 @@ impl SoundQuery {
     #[parameter_range(range = "track_index:0..=11")]
     pub fn new_targeting_work_buffer(track_index: usize) -> Result<Self, RytmError> {
         Ok(Self {
-            object_number: track_index | 0b0000_0000_0000_0000_1000_0000_0000_0000,
+            object_number: track_index | 0b1000_0000,
             r#type: SysexType::Sound,
             device_id: 0,
         })
@@ -48,7 +48,7 @@ impl SoundQuery {
         device_id: u8,
     ) -> Result<Self, RytmError> {
         Ok(Self {
-            object_number: track_index | 0b0000_0000_0000_0000_1000_0000_0000_0000,
+            object_number: track_index | 0b1000_0000,
             r#type: SysexType::Sound,
             device_id,
         })

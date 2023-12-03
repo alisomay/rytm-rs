@@ -23,10 +23,30 @@ pub fn to_s_u16_t_union_b(value: u16) -> s_u16_t {
     }
 }
 
+pub fn to_s_u16_t_union_b_from_u8_as_msb(value: u8) -> s_u16_t {
+    s_u16_t {
+        b: s_u16_t__bindgen_ty_1 { hi: value, lo: 0 },
+    }
+}
+
+pub fn to_s_u16_t_union_b_from_u8_as_lsb(value: u8) -> s_u16_t {
+    s_u16_t {
+        b: s_u16_t__bindgen_ty_1 { hi: 0, lo: value },
+    }
+}
+
 pub unsafe fn from_s_u16_t(value: &s_u16_t) -> u16 {
     let msb = value.b.hi as u16;
     let lsb = value.b.lo as u16;
     (msb << 8) | lsb
+}
+
+pub unsafe fn lsb_from_s_u16_t(value: &s_u16_t) -> u8 {
+    value.b.lo as u8
+}
+
+pub unsafe fn msb_from_s_u16_t(value: &s_u16_t) -> u8 {
+    value.b.hi as u8
 }
 
 pub(crate) fn decode_micro_timing_byte(

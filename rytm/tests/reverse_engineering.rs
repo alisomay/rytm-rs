@@ -7,7 +7,7 @@
 mod common;
 use common::*;
 use rytm_rs::pattern::MicroTime;
-use rytm_rs::query::{GlobalQuery, PatternQuery, SettingsQuery, SoundQuery};
+use rytm_rs::query::{GlobalQuery, KitQuery, PatternQuery, SettingsQuery, SoundQuery};
 use rytm_rs::{error::RytmError, Rytm};
 
 #[test]
@@ -292,6 +292,34 @@ fn sound() {
         clearscreen::clear().unwrap();
 
         dbg!(sound);
+
+        Ok(())
+    };
+
+    poll_with_query_blocking(&mut rytm, query, conn_out, rx, 1000, callback).unwrap();
+}
+
+#[test]
+fn kit() {
+    let mut rytm = Rytm::default();
+    let conn_out = get_connection_to_rytm();
+    let (_conn_in, rx) = make_input_message_forwarder();
+
+    let query = KitQuery::new(0).unwrap();
+    let query = KitQuery::new_targeting_work_buffer();
+
+    let callback = |response: &[u8], rytm: &mut Rytm| -> Result<(), RytmError> {
+        if !is_sysex(response) {
+            // Pass..
+            return Ok(());
+        }
+
+        rytm.update_kit_from_sysex_response(response, 0)?;
+        let kit = rytm.work_buffer_kit();
+
+        clearscreen::clear().unwrap();
+
+        dbg!(kit);
 
         Ok(())
     };

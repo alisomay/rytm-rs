@@ -1,16 +1,19 @@
 pub mod error;
+pub mod kit;
+pub mod object;
 pub mod pattern;
 pub mod query;
 pub mod sound;
 pub(crate) mod sysex;
 pub(crate) mod util;
 
+use kit::Kit;
 use pattern::Pattern;
 use sound::{Sound, SoundType};
 
 use crate::error::ParameterError;
 use rytm_rs_macro::parameter_range;
-use rytm_sys::{ar_pattern_t, ar_sound_t};
+use rytm_sys::{ar_kit_t, ar_pattern_t, ar_sound_t};
 use sysex::{decode_sysex_response_to_raw, SysexCompatible};
 
 use self::error::RytmError;
@@ -22,7 +25,8 @@ pub struct Rytm {
     work_buffer_pattern: Pattern,
     pool_sounds: Vec<Sound>,
     work_buffer_sounds: Vec<Sound>,
-    // Kits
+    kits: Vec<Kit>,
+    work_buffer_kit: Kit,
     // Global
     // Settings
 }
@@ -41,11 +45,20 @@ impl Default for Rytm {
 
         let work_buffer_sounds = vec![Sound::work_buffer_default()];
 
+        let mut kits = vec![];
+        for i in 0..127 {
+            kits.push(Kit::try_default(i).unwrap());
+        }
+
+        let work_buffer_kit = Kit::work_buffer_default();
+
         Self {
             patterns,
             work_buffer_pattern: Pattern::work_buffer_default(),
             pool_sounds,
             work_buffer_sounds,
+            kits,
+            work_buffer_kit,
         }
     }
 }
@@ -95,6 +108,22 @@ impl Rytm {
         }
     }
 
+    pub fn update_kit_from_sysex_response(
+        &mut self,
+        response: &[u8],
+        kit_index: usize,
+    ) -> Result<(), RytmError> {
+        let (mut raw, meta) = decode_sysex_response_to_raw(response)?;
+
+        unsafe {
+            let raw_kit: &ar_kit_t = &*(raw.as_mut_ptr() as *const ar_kit_t);
+            let kit = Kit::try_from_raw(meta, raw_kit)?;
+
+            self.kits[kit_index] = kit;
+            Ok(())
+        }
+    }
+
     #[parameter_range(range = "pattern_index:0..=127")]
     pub fn encode_pattern_as_sysex_message(
         &self,
@@ -117,6 +146,22 @@ impl Rytm {
 
     pub fn work_buffer_pattern_mut(&mut self) -> &mut Pattern {
         &mut self.work_buffer_pattern
+    }
+
+    pub fn kits(&self) -> &[Kit] {
+        &self.kits
+    }
+
+    pub fn kits_mut(&mut self) -> &mut [Kit] {
+        &mut self.kits
+    }
+
+    pub fn work_buffer_kit(&self) -> &Kit {
+        &self.work_buffer_kit
+    }
+
+    pub fn work_buffer_kit_mut(&mut self) -> &mut Kit {
+        &mut self.work_buffer_kit
     }
 
     pub fn pool_sounds(&self) -> &[Sound] {

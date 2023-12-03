@@ -1,10 +1,12 @@
 mod global;
+mod kit;
 mod pattern;
 mod raw;
 mod settings;
 mod sound;
 
 pub use global::GlobalQuery;
+pub use kit::KitQuery;
 pub use pattern::PatternQuery;
 pub use raw::RawQuery;
 pub use settings::SettingsQuery;

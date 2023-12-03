@@ -34,7 +34,7 @@ impl PatternQuery {
 
     pub fn new_targeting_work_buffer() -> Self {
         Self {
-            object_number: 0b0000_0000_0000_0000_1000_0000_0000_0000,
+            object_number: 0b1000_0000,
             r#type: SysexType::Pattern,
             device_id: 0,
         }
@@ -42,7 +42,7 @@ impl PatternQuery {
 
     pub fn new_targeting_work_buffer_with_device_id(device_id: u8) -> Self {
         Self {
-            object_number: 0b0000_0000_0000_0000_1000_0000_0000_0000,
+            object_number: 0b1000_0000,
             r#type: SysexType::Pattern,
             device_id,
         }

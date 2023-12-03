@@ -11,6 +11,7 @@ rytm-sys = { path = "../../rytm-sys" }
 thiserror = "1.0"
 rand = "0.8"
 rytm-rs-macro = { path = "../rytm-macro" }
+derivative = "2"
 
 
 [dev-dependencies]

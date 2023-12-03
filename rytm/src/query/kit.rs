@@ -1,32 +1,33 @@
 use super::ObjectQuery;
-use crate::error::ParameterError;
-use crate::error::RytmError;
-use crate::sysex::SysexType;
+use crate::{
+    error::{ParameterError, RytmError},
+    sysex::SysexType,
+};
 use rytm_rs_macro::parameter_range;
 
-/// A query for a global object.
-pub struct GlobalQuery {
-    /// Global slot
+/// A query for a kit object.
+pub struct KitQuery {
+    /// Kit index
     object_number: usize,
     r#type: SysexType,
     device_id: u8,
 }
 
-impl GlobalQuery {
-    #[parameter_range(range = "global_slot:0..=3")]
-    pub fn new(global_slot: usize) -> Result<Self, RytmError> {
+impl KitQuery {
+    #[parameter_range(range = "kit_index:0..=127")]
+    pub fn new(kit_index: usize) -> Result<Self, RytmError> {
         Ok(Self {
-            object_number: global_slot,
-            r#type: SysexType::Global,
+            object_number: kit_index,
+            r#type: SysexType::Kit,
             device_id: 0,
         })
     }
 
-    #[parameter_range(range = "global_slot:0..=3")]
-    pub fn new_with_device_id(global_slot: usize, device_id: u8) -> Result<Self, RytmError> {
+    #[parameter_range(range = "kit_index:0..=127")]
+    pub fn new_with_device_id(kit_index: usize, device_id: u8) -> Result<Self, RytmError> {
         Ok(Self {
-            object_number: global_slot,
-            r#type: SysexType::Global,
+            object_number: kit_index,
+            r#type: SysexType::Kit,
             device_id,
         })
     }
@@ -34,7 +35,7 @@ impl GlobalQuery {
     pub fn new_targeting_work_buffer() -> Self {
         Self {
             object_number: 0b1000_0000,
-            r#type: SysexType::Global,
+            r#type: SysexType::Kit,
             device_id: 0,
         }
     }
@@ -42,7 +43,7 @@ impl GlobalQuery {
     pub fn new_targeting_work_buffer_with_device_id(device_id: u8) -> Self {
         Self {
             object_number: 0b1000_0000,
-            r#type: SysexType::Global,
+            r#type: SysexType::Kit,
             device_id,
         }
     }
@@ -60,7 +61,7 @@ impl GlobalQuery {
     }
 }
 
-impl ObjectQuery for GlobalQuery {
+impl ObjectQuery for KitQuery {
     type SysexTypeExpression = SysexType;
 
     fn r#type(&self) -> Self::SysexTypeExpression {
