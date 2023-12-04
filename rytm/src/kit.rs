@@ -175,20 +175,20 @@ pub struct Kit {
     name: ObjectName,
 
     #[derivative(Debug = "ignore")]
-    __pad_name: u8, /* @0x000C */
+    pub(crate) __pad_name: u8, /* @0x000C */
 
     track_levels: [u8; 12], /* @0x0014..0x002b   (note) LSB (track_levels[i].b.hi) is unused (always 0x00) */
 
     // 0..=127 device 0..=127
     #[derivative(Debug = "ignore")]
-    __unknown_arr1b: [u8; 0x2], /* @0x002c..0x002d */
+    pub(crate) __unknown_arr1b: [u8; 0x2], /* @0x002c..0x002d */
 
     // TODO:
     #[derivative(Debug = "ignore")]
     sounds: [Sound; 12], /* @0x002E..0x07C5 (12*162=1944($798) bytes */
 
     #[derivative(Debug = "ignore")]
-    __unknown_arr2: [u8; 0x4], /* @0x07C6..0x07C9 */
+    pub(crate) __unknown_arr2: [u8; 0x4], /* @0x07C6..0x07C9 */
 
     fx_delay_time: u8, /* @0x07CA   */
     // 0..=127 device (from 0-127 in order) 1/128 1/164 1/64 1/32 5 1/32. 7 1/16 9 10 11 1/16. 13 14 15 1/8 17..=23 1/8. 25..=31 1/4 33..=47 1/4. 49..=63 1/2 65..=79 1/2. 81..=95 1/2. 97..=127 1/1
@@ -273,98 +273,100 @@ pub struct Kit {
     // TODO:
     #[derivative(Debug = "ignore")]
     // @attention Will be ignored for now.
-    perf_ctl: [u8; 48 * 4], /* @0x0842..0x0901 */
+    pub(crate) perf_ctl: [u8; 48 * 4], /* @0x0842..0x0901 */
     #[derivative(Debug = "ignore")]
-    __unknown_arr4: [u8; 0x15], /* @0x0902..0x0916 */
+    pub(crate) __unknown_arr4: [u8; 0x15], /* @0x0902..0x0916 */
     #[derivative(Debug = "ignore")]
     // @attention Will be ignored for now.
-    scene_ctl: [u8; 48 * 4], /* @0x0917..0x09D6 */
+    pub(crate) scene_ctl: [u8; 48 * 4], /* @0x0917..0x09D6 */
 
-    __unknown_pad37: u8,  /* @0x09D7 (scene_id MSB?) */
-    current_scene_id: u8, /* @0x09D8 (0..11) */
+    pub(crate) __unknown_pad37: u8, /* @0x09D7 (scene_id MSB?) */
+    current_scene_id: u8,           /* @0x09D8 (0..11) */
 
     // 0..=11 device 0..=11
 
     // (note) 54 unknown bytes not present in v1 kit data
     #[derivative(Debug = "ignore")]
-    __unknown_arr5: [u8; 54], /* @0x09D9..0x0A0E */
+    pub(crate) __unknown_arr5: [u8; 54], /* @0x09D9..0x0A0E */
     #[derivative(Debug = "ignore")]
-    __unknown_arr6: [u8; 35], /* @0x0A0F..0x0A31 */
+    pub(crate) __unknown_arr6: [u8; 35], /* @0x0A0F..0x0A31 */
 
     #[derivative(Debug = "ignore")]
-    __unused_pad1: u8, /* @0x07CB   */
+    pub(crate) __unused_pad1: u8, /* @0x07CB   */
     #[derivative(Debug = "ignore")]
-    __unused_pad2: u8, /* @0x07CD   */
+    pub(crate) __unused_pad2: u8, /* @0x07CD   */
     #[derivative(Debug = "ignore")]
-    __unused_pad3: u8, /* @0x07CF   */
+    pub(crate) __unused_pad3: u8, /* @0x07CF   */
     #[derivative(Debug = "ignore")]
-    __unused_pad4: u8, /* @0x07D1   */
+    pub(crate) __unused_pad4: u8, /* @0x07D1   */
     #[derivative(Debug = "ignore")]
-    __unused_pad5: u8, /* @0x07D3   */
+    pub(crate) __unused_pad5: u8, /* @0x07D3   */
     #[derivative(Debug = "ignore")]
-    __unused_pad6: u8, /* @0x07D5   */
+    pub(crate) __unused_pad6: u8, /* @0x07D5   */
     #[derivative(Debug = "ignore")]
-    __unused_pad7: u8, /* @0x07D7   */
+    pub(crate) __unused_pad7: u8, /* @0x07D7   */
     #[derivative(Debug = "ignore")]
-    __unused_pad8: u8, /* @0x07D9   */
+    pub(crate) __unused_pad8: u8, /* @0x07D9   */
     #[derivative(Debug = "ignore")]
-    __unused_pad9: u8, /* @0x07DB ? */
+    pub(crate) __unused_pad9: u8, /* @0x07DB ? */
     #[derivative(Debug = "ignore")]
-    __unused_pad11: u8, /* @0x07DD ? */
+    pub(crate) __unused_pad11: u8, /* @0x07DD ? */
     #[derivative(Debug = "ignore")]
-    __unused_pad12: u8, /* @0x07DF   */
+    pub(crate) __unused_pad12: u8, /* @0x07DF   */
     #[derivative(Debug = "ignore")]
-    __unused_pad13: u8, /* @0x07E1   */
+    pub(crate) __unused_pad13: u8, /* @0x07E1   */
     #[derivative(Debug = "ignore")]
-    __unused_pad14: u8, /* @0x07E3   */
+    pub(crate) __unused_pad14: u8, /* @0x07E3   */
     #[derivative(Debug = "ignore")]
-    __unused_pad15: u8, /* @0x07E5   */
+    pub(crate) __unused_pad15: u8, /* @0x07E5   */
     #[derivative(Debug = "ignore")]
-    __unused_pad16: u8, /* @0x07E7   */
+    pub(crate) __unused_pad16: u8, /* @0x07E7   */
     #[derivative(Debug = "ignore")]
-    __unused_pad17: u8, /* @0x07E9   */
+    pub(crate) __unused_pad17: u8, /* @0x07E9   */
     #[derivative(Debug = "ignore")]
-    __unused_pad18: u8, /* @0x07EB   */
+    pub(crate) __unused_pad18: u8, /* @0x07EB   */
     #[derivative(Debug = "ignore")]
-    __unused_pad19: u8, /* @0x07ED   */
+    pub(crate) __unused_pad19: u8, /* @0x07ED   */
     #[derivative(Debug = "ignore")]
-    __unused_pad20: u8, /* @0x07EF   */
+    pub(crate) __unused_pad20: u8, /* @0x07EF   */
     #[derivative(Debug = "ignore")]
-    __unused_pad21: u8, /* @0x07F1   */
-
-    __unknown_fx_1: u8, /* @0x07F2   */
-    __unknown_fx_2: u8, /* @0x07F3   */
+    pub(crate) __unused_pad21: u8, /* @0x07F1   */
 
     #[derivative(Debug = "ignore")]
-    __unused_pad22: u8, /* @0x07F5   */
+    pub(crate) __unknown_fx_1: u8, /* @0x07F2   */
     #[derivative(Debug = "ignore")]
-    __unused_pad23: u8, /* @0x07F7   */
+    pub(crate) __unknown_fx_2: u8, /* @0x07F3   */
+
     #[derivative(Debug = "ignore")]
-    __unused_pad24: u8, /* @0x07F9   */
+    pub(crate) __unused_pad22: u8, /* @0x07F5   */
     #[derivative(Debug = "ignore")]
-    __unused_pad25: u8, /* @0x07FB   */
+    pub(crate) __unused_pad23: u8, /* @0x07F7   */
     #[derivative(Debug = "ignore")]
-    __unused_pad26: u8, /* @0x07FD   */
+    pub(crate) __unused_pad24: u8, /* @0x07F9   */
     #[derivative(Debug = "ignore")]
-    __unused_pad27: u8, /* @0x07FF   */
+    pub(crate) __unused_pad25: u8, /* @0x07FB   */
     #[derivative(Debug = "ignore")]
-    __unused_pad28: u8, /* @0x0801   */
+    pub(crate) __unused_pad26: u8, /* @0x07FD   */
     #[derivative(Debug = "ignore")]
-    __unused_pad29: u8, /* @0x0803   */
+    pub(crate) __unused_pad27: u8, /* @0x07FF   */
     #[derivative(Debug = "ignore")]
-    __unused_pad30: u8, /* @0x0805   */
+    pub(crate) __unused_pad28: u8, /* @0x0801   */
     #[derivative(Debug = "ignore")]
-    __unused_pad31: u8, /* @0x0807   */
+    pub(crate) __unused_pad29: u8, /* @0x0803   */
     #[derivative(Debug = "ignore")]
-    __unused_pad32: u8, /* @0x0809   */
+    pub(crate) __unused_pad30: u8, /* @0x0805   */
     #[derivative(Debug = "ignore")]
-    __unused_pad33: u8, /* @0x080B   */
+    pub(crate) __unused_pad31: u8, /* @0x0807   */
     #[derivative(Debug = "ignore")]
-    __unused_pad34: u8, /* @0x080D   */
+    pub(crate) __unused_pad32: u8, /* @0x0809   */
     #[derivative(Debug = "ignore")]
-    __unused_pad35: u8, /* @0x080F   */
+    pub(crate) __unused_pad33: u8, /* @0x080B   */
     #[derivative(Debug = "ignore")]
-    __unused_pad36: u8, /* @0x0811   */
+    pub(crate) __unused_pad34: u8, /* @0x080D   */
+    #[derivative(Debug = "ignore")]
+    pub(crate) __unused_pad35: u8, /* @0x080F   */
+    #[derivative(Debug = "ignore")]
+    pub(crate) __unused_pad36: u8, /* @0x0811   */
 }
 
 impl From<&Kit> for ar_kit_t {

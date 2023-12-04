@@ -228,6 +228,7 @@ impl From<&ar_sysex_meta_t> for SysexMeta {
     }
 }
 
+// TODO:
 pub fn decode_sysex_response_to_raw(response: &[u8]) -> Result<(Vec<u8>, SysexMeta), RytmError> {
     // This could be made smaller later, the largest reverse-engineered sysex response I've seen is 14988 bytes.
     // But for now I think it is a reasonable value.

@@ -351,8 +351,8 @@ fn global_type() {
 
         clearscreen::clear().unwrap();
 
-        println!("usb_out: {:08b}", global.routing_usb_out);
-        println!("other: {}", global.routing_usb_out >> 2);
+        // println!("usb_out: {:08b}", global.routing_usb_out);
+        // println!("other: {}", global.routing_usb_out >> 2);
         // println!("usb_out: {:08b}", global.routing_usb_out);
 
         Ok(())

@@ -12,6 +12,11 @@ use self::types::{
     SampleRecorderSource, SequencerMode,
 };
 
+/// # Settings
+///
+/// This structure represents settings in the analog rytm.
+///
+/// It does not map identically to the structure in the firmware.
 #[derive(Derivative, Clone, Copy)]
 #[derivative(Debug)]
 pub struct Settings {
@@ -42,26 +47,26 @@ pub struct Settings {
 
     // Always the duplicate of selected_track
     #[derivative(Debug = "ignore")]
-    __selected_track_duplicate: u8,
+    pub(crate) __selected_track_duplicate: u8,
     // Always 0x00
     #[derivative(Debug = "ignore")]
-    __unknown_0x000b: u8,
+    pub(crate) __unknown_0x000b: u8,
     // @0x000E..0x0014 All zeros.
     #[derivative(Debug = "ignore")]
-    __unknown0x000e_0x0014: [u8; 7],
+    pub(crate) __unknown0x000e_0x0014: [u8; 7],
     //  @0x0017..0x0019 All zeros.
     #[derivative(Debug = "ignore")]
-    __unknown0x0017_0x0019: [u8; 3],
+    pub(crate) __unknown0x0017_0x0019: [u8; 3],
     // The response continues with the repeating 16 byte pattern of 0xFF_FF_FF_FF 0x00_00_00_00 0x00_00_00_00 0x00_00_00_00
     // The repeating pattern repeats 128 times. Total length of 2048 bytes.
     #[derivative(Debug = "ignore")]
-    __unknown0x001f: [u8; 16 * 128],
+    pub(crate) __unknown0x001f: [u8; 16 * 128],
     // @0x081F Always 0x01
     #[derivative(Debug = "ignore")]
-    __unknown0x081f: u8,
+    pub(crate) __unknown0x081f: u8,
     // @0x0821..0x0826 All zeros.
     #[derivative(Debug = "ignore")]
-    __unknown0x0821_0x0826: [u8; 6],
+    pub(crate) __unknown0x0821_0x0826: [u8; 6],
 }
 
 impl From<&Settings> for ar_settings_t {

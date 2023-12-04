@@ -52,12 +52,12 @@ pub struct Sound {
     version: u32,
 
     #[derivative(Debug = "ignore")]
-    __unknown_arr1: [u8; 12], /* @0x0000 reads BE EF BA CE 00 00 00 04 00 00 00 00 */
+    pub(crate) __unknown_arr1: [u8; 12], /* @0x0000 reads BE EF BA CE 00 00 00 04 00 00 00 00 */
 
     name: ObjectName,
 
     #[derivative(Debug = "ignore")]
-    __pad_name: u8, /* @0x000C */
+    pub(crate) __pad_name: u8, /* @0x000C */
 
     // TODO: Complex lookup depending on machine type.
     synth_parameter: [SynthParameter; 8],
@@ -157,7 +157,7 @@ pub struct Sound {
     //                                    (note) not used in sound dump ? (only in kit?!!)
     //                                */
     #[derivative(Debug = "ignore")]
-    __unknown_006f: [u8; 0xd], /* @0x006f..0x007B   */
+    pub(crate) __unknown_006f: [u8; 0xd], /* @0x006f..0x007B   */
 
     // TODO: Not understood kit offsets?
     machine: Machine,
@@ -173,7 +173,7 @@ pub struct Sound {
                         //                                */
 
     #[derivative(Debug = "ignore")]
-    __unknown_007e: [u8; 16], /* @0x007E..0x008D */
+    pub(crate) __unknown_007e: [u8; 16], /* @0x007E..0x008D */
 
     // All amounts are TODO: Try interpreting them as i8,  device -128..=+127
     vel_amt_1: u8,    /* @0x008E VELOCITY MOD */
@@ -202,68 +202,68 @@ pub struct Sound {
     at_target_4: u8, /* @0x009D */
 
     #[derivative(Debug = "ignore")]
-    __unknown_009e: [u8; 4], /* @0x009E..0x00A1 */
+    pub(crate) __unknown_009e: [u8; 4], /* @0x009E..0x00A1 */
 
     #[derivative(Debug = "ignore")]
-    __unused_pad9: u8, /* @0x002d (lsb, always 0) */
+    pub(crate) __unused_pad9: u8, /* @0x002d (lsb, always 0) */
     #[derivative(Debug = "ignore")]
-    __unused_pad10: u8, /* @0x002f (lsb, always 0) */
+    pub(crate) __unused_pad10: u8, /* @0x002f (lsb, always 0) */
     #[derivative(Debug = "ignore")]
-    __unused_pad11: u8, /* @0x0031 (lsb, always 0) */
+    pub(crate) __unused_pad11: u8, /* @0x0031 (lsb, always 0) */
     #[derivative(Debug = "ignore")]
-    __unused_pad12: u8, /* @0x0033 (lsb, always 0) */
+    pub(crate) __unused_pad12: u8, /* @0x0033 (lsb, always 0) */
     #[derivative(Debug = "ignore")]
-    __unused_pad15: u8, /* @0x0039 */
+    pub(crate) __unused_pad15: u8, /* @0x0039 */
     #[derivative(Debug = "ignore")]
-    __unused_pad16: u8, /* @0x003b (lsb, always 0) */
+    pub(crate) __unused_pad16: u8, /* @0x003b (lsb, always 0) */
     #[derivative(Debug = "ignore")]
-    __unused_pad17: u8, /* @0x003d (lsb, always 0) */
+    pub(crate) __unused_pad17: u8, /* @0x003d (lsb, always 0) */
     #[derivative(Debug = "ignore")]
-    __unused_pad18: u8, /* @0x003f (lsb, always 0) */
+    pub(crate) __unused_pad18: u8, /* @0x003f (lsb, always 0) */
     #[derivative(Debug = "ignore")]
-    __unused_pad19: u8, /* @0x0041 (lsb, always 0) */
+    pub(crate) __unused_pad19: u8, /* @0x0041 (lsb, always 0) */
     #[derivative(Debug = "ignore")]
-    __unused_pad20: u8, /* @0x0043 (lsb, always 0) */
+    pub(crate) __unused_pad20: u8, /* @0x0043 (lsb, always 0) */
     #[derivative(Debug = "ignore")]
-    __unused_pad21: u8, /* @0x0045 (lsb, always 0) */
+    pub(crate) __unused_pad21: u8, /* @0x0045 (lsb, always 0) */
     #[derivative(Debug = "ignore")]
-    __unused_pad22: u8, /* @0x0047 (lsb, always 0) */
+    pub(crate) __unused_pad22: u8, /* @0x0047 (lsb, always 0) */
     #[derivative(Debug = "ignore")]
-    __unused_pad23: u8, /* @0x0049 (lsb, always 0) */
+    pub(crate) __unused_pad23: u8, /* @0x0049 (lsb, always 0) */
     #[derivative(Debug = "ignore")]
-    __unused_pad24: u8, /* @0x004b (lsb, always 0) */
+    pub(crate) __unused_pad24: u8, /* @0x004b (lsb, always 0) */
     #[derivative(Debug = "ignore")]
-    __unused_pad25: u8, /* @0x004d (lsb, always 0) */
+    pub(crate) __unused_pad25: u8, /* @0x004d (lsb, always 0) */
     #[derivative(Debug = "ignore")]
-    __unused_pad26: u8, /* @0x004f (lsb, always 0) */
+    pub(crate) __unused_pad26: u8, /* @0x004f (lsb, always 0) */
     #[derivative(Debug = "ignore")]
-    __unused_pad27: u8, /* @0x0051 (lsb, always 0) */
+    pub(crate) __unused_pad27: u8, /* @0x0051 (lsb, always 0) */
     #[derivative(Debug = "ignore")]
-    __unused_pad28: u8, /* @0x0053 (lsb, always 0) */
+    pub(crate) __unused_pad28: u8, /* @0x0053 (lsb, always 0) */
     #[derivative(Debug = "ignore")]
-    __unused_pad29: u8, /* @0x0055 (lsb, always 0) */
+    pub(crate) __unused_pad29: u8, /* @0x0055 (lsb, always 0) */
     #[derivative(Debug = "ignore")]
-    __unused_pad30: u8, /* @0x0057 (lsb, always 0) */
+    pub(crate) __unused_pad30: u8, /* @0x0057 (lsb, always 0) */
     #[derivative(Debug = "ignore")]
-    __unused_pad31: u8, /* @0x0059 (lsb, always 0) */
+    pub(crate) __unused_pad31: u8, /* @0x0059 (lsb, always 0) */
     #[derivative(Debug = "ignore")]
-    __unused_pad32: u8, /* @0x005b (lsb, always 0) */
+    pub(crate) __unused_pad32: u8, /* @0x005b (lsb, always 0) */
     #[derivative(Debug = "ignore")]
-    __unused005D: u8, /* @0x005d (lsb, always 0)         */
+    pub(crate) __unused005D: u8, /* @0x005d (lsb, always 0)         */
     #[derivative(Debug = "ignore")]
-    __unused_pad33: u8, /* @0x005f (lsb, always 0) */
+    pub(crate) __unused_pad33: u8, /* @0x005f (lsb, always 0) */
     #[derivative(Debug = "ignore")]
-    __unused_pad34: u8, /* @0x0061 (lsb, always 0) */
+    pub(crate) __unused_pad34: u8, /* @0x0061 (lsb, always 0) */
     #[derivative(Debug = "ignore")]
-    __unused_pad35: u8, /* @0x0063 (lsb, always 0) */
+    pub(crate) __unused_pad35: u8, /* @0x0063 (lsb, always 0) */
     #[derivative(Debug = "ignore")]
-    __unused_pad36: u8, /* @0x0065 (lsb, always 0) */
+    pub(crate) __unused_pad36: u8, /* @0x0065 (lsb, always 0) */
     #[derivative(Debug = "ignore")]
-    __unused_pad37: u8, /* @0x0067 (lsb, always 0) */
+    pub(crate) __unused_pad37: u8, /* @0x0067 (lsb, always 0) */
     #[derivative(Debug = "ignore")]
-    __unused_pad38: u8, /* @0x0069 (lsb, always 0) */
+    pub(crate) __unused_pad38: u8, /* @0x0069 (lsb, always 0) */
     #[derivative(Debug = "ignore")]
-    __unused_pad39: u8, /* @0x006b (lsb, always 0) */
+    pub(crate) __unused_pad39: u8, /* @0x006b (lsb, always 0) */
 }
 
 impl From<&Sound> for ar_sound_t {

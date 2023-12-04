@@ -106,7 +106,7 @@ pub struct Pattern {
 
     #[derivative(Debug = "ignore")]
     /// Always 0x01, probably a marker for the end of pattern.
-    _unknown_0x332c: u8,
+    pub(crate) _unknown_0x332c: u8,
 }
 
 impl From<&Pattern> for ar_pattern_t {

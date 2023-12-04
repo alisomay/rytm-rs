@@ -57,6 +57,7 @@ mod machines {
 
 use machines::*;
 
+/// The machine type of a sound.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum Machine {
     BdHard,

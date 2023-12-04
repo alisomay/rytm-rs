@@ -215,8 +215,6 @@ impl From<&MicroTime> for isize {
 }
 
 /// Length type which can be used for note lengths and retrig lengths.
-///
-/// Range is `0..=127`.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum Length {
     /// `1/128`
@@ -761,9 +759,6 @@ impl TryFrom<u8> for Length {
     }
 }
 
-// TODO: Changing the trig condition of step 1 updates 0x1c4
-// What is that?
-
 /// Retrig rate of a trig.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum RetrigRate {
@@ -806,8 +801,7 @@ pub enum RetrigRate {
 
 impl TryFrom<u8> for RetrigRate {
     type Error = ConversionError;
-    // Trig not enabled 174
-    // TODO: Can not change retrig stuff..
+
     fn try_from(rate: u8) -> Result<Self, Self::Error> {
         match rate {
             0 => Ok(RetrigRate::_1B1),
@@ -958,8 +952,6 @@ impl TryFrom<u8> for TrigCondition {
     type Error = ConversionError;
 
     fn try_from(value: u8) -> Result<Self, Self::Error> {
-        // dbg!(value);
-        // panic!();
         match value {
             0 => Ok(TrigCondition::P1),
             1 => Ok(TrigCondition::P3),

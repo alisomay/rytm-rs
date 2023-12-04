@@ -11,6 +11,7 @@ use crate::{
     util::from_s_u16_t,
 };
 use bitstream_io::{BigEndian, BitRead, BitReader, BitWrite, BitWriter};
+use derivative::Derivative;
 use rytm_rs_macro::parameter_range;
 use rytm_sys::ar_pattern_track_t;
 use std::io::Cursor;
@@ -26,7 +27,8 @@ use trig::Trig;
 //    sU8     retrig_rates[64];            /* ?@0x01B4..0x01F3   Retrig rates (0(=1/1)..16(=1/80))
 //                                          *                    Changing the trig condition of step 1 updates 0x1c4
 //                                          */
-#[derive(Clone, Copy, Debug)]
+#[derive(Derivative, Clone, Copy)]
+#[derivative(Debug)]
 pub struct Track {
     trigs: [Trig; 64],
 
@@ -56,14 +58,16 @@ pub struct Track {
     /// For now it is always 0.
     ///
     /// Maybe it means something?
-    pub _maybe_useful_flag_from_default_trig_note: u8,
+    #[derivative(Debug = "ignore")]
+    pub(crate) __maybe_useful_flag_from_default_trig_note: u8,
 
     /// Mid bits of flags_and_speed.
     ///
     /// For now they're always 0.
     ///
     /// Maybe they means something?
-    pub _maybe_useful_flags_from_flags_and_speed: u8,
+    #[derivative(Debug = "ignore")]
+    pub(crate) __maybe_useful_flags_from_flags_and_speed: u8,
 }
 
 impl Default for Track {
@@ -92,8 +96,8 @@ impl Default for Track {
             pad_scale: PadScale::default(),
             root_note: RootNote::default(),
 
-            _maybe_useful_flag_from_default_trig_note: 1,
-            _maybe_useful_flags_from_flags_and_speed: 0,
+            __maybe_useful_flag_from_default_trig_note: 1,
+            __maybe_useful_flags_from_flags_and_speed: 0,
         }
     }
 }
@@ -129,9 +133,9 @@ impl TryFrom<&ar_pattern_track_t> for Track {
         let speed: Speed = (raw_track.flags_and_speed & 0b0000_0111).try_into()?;
 
         // TODO: They always seem to be 0.
-        let _maybe_useful_flags_from_flags_and_speed = raw_track.flags_and_speed & 0b0111_1000;
+        let __maybe_useful_flags_from_flags_and_speed = raw_track.flags_and_speed & 0b0111_1000;
 
-        let _maybe_useful_flag_from_default_trig_note = raw_track.default_note & 0b1000_0000;
+        let __maybe_useful_flag_from_default_trig_note = raw_track.default_note & 0b1000_0000;
         let default_trig_note = raw_track.default_note & 0b0111_1111;
 
         Ok(Self {
@@ -158,8 +162,8 @@ impl TryFrom<&ar_pattern_track_t> for Track {
             pad_scale: raw_track.pad_scale.try_into()?,
             root_note: raw_track.root_note.try_into()?,
 
-            _maybe_useful_flag_from_default_trig_note,
-            _maybe_useful_flags_from_flags_and_speed,
+            __maybe_useful_flag_from_default_trig_note,
+            __maybe_useful_flags_from_flags_and_speed,
         })
     }
 }
@@ -199,14 +203,14 @@ impl From<&Track> for ar_pattern_track_t {
         let mut encoded_flags_and_speed: u8 = 0;
         encoded_flags_and_speed |= track.speed as u8;
         encoded_flags_and_speed |= if track.sends_midi { 0b1000_0000 } else { 0 };
-        encoded_flags_and_speed |= track._maybe_useful_flags_from_flags_and_speed;
+        encoded_flags_and_speed |= track.__maybe_useful_flags_from_flags_and_speed;
 
         // Encoded euclidean mode.
         let encoded_euc_mode = if track.euclidean_mode { 128 } else { 0 };
 
         // Compile note and unknown flag.
         let encoded_default_trig_note =
-            track.default_trig_note | track._maybe_useful_flag_from_default_trig_note;
+            track.default_trig_note | track.__maybe_useful_flag_from_default_trig_note;
 
         Self {
             trig_bits: encoded_trig_bits,
