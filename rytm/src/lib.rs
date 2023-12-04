@@ -23,23 +23,25 @@ use sysex::{decode_sysex_response_to_raw, SysexCompatible, SysexType};
 
 use self::error::RytmError;
 
-/// Rytm is the main struct that holds all the patterns.
+/// Rytm is the main struct that holds structures for projects.
 #[derive(Clone, Debug)]
 pub struct Rytm {
     patterns: Vec<Pattern>,
-    work_buffer_pattern: Pattern,
     pool_sounds: Vec<Sound>,
-    work_buffer_sounds: Vec<Sound>,
     kits: Vec<Kit>,
-    work_buffer_kit: Kit,
     globals: Vec<Global>,
+    // TODO: Songs?
+    work_buffer_pattern: Pattern,
+    work_buffer_sounds: Vec<Sound>,
+    work_buffer_kit: Kit,
     work_buffer_global: Global,
+    // TODO: Work buffer songs?
     settings: Settings,
-    // Songs
 }
 
 impl Default for Rytm {
     fn default() -> Self {
+        // TODO: Arrays or vectors?
         let mut patterns = vec![];
         for i in 0..127 {
             patterns.push(Pattern::try_default(i).unwrap());
@@ -81,7 +83,24 @@ impl Default for Rytm {
 }
 
 impl Rytm {
+    /// Updates the Rytm struct from a sysex response.
+    ///
+    /// All decoding is done in Rytm struct, so this is the only method that needs to be called to update the struct when a sysex response is received.
+    ///
+    /// # Important
+    ///
+    /// This method will act as a no-op if the given slice does not contain a valid sysex message.
+    ///
+    /// The check is performed by checking the first and last byte of the slice.
+    ///
+    /// This behaviour is preferred to returning an error, as it is expected to be called in a midi callback which receives all midi messages, not just sysex messages.
     pub fn update_from_sysex_response(&mut self, response: &[u8]) -> Result<(), RytmError> {
+        // Ignore non-sysex messages.
+        if !(response[0] == 0xF0 && response[response.len() - 1] == 0xF7) {
+            return Ok(());
+        }
+
+        // Invalid sysex messages for Rytm will return an error.
         let (mut raw, meta) = decode_sysex_response_to_raw(response)?;
 
         match meta.object_type()? {
@@ -161,6 +180,7 @@ impl Rytm {
         }
     }
 
+    /// Encodes the chosen pattern as a sysex message.
     #[parameter_range(range = "pattern_index:0..=127")]
     pub fn encode_pattern_as_sysex_message(
         &self,
@@ -169,79 +189,128 @@ impl Rytm {
         self.patterns[pattern_index].as_sysex_message()
     }
 
+    // TODO: Encode kit as a sysex message.
+    // TODO: Encode sound as a sysex message.
+    // TODO: Encode global as a sysex message.
+    // TODO: Encode settings as a sysex message.
+
     pub fn encode_work_buffer_pattern_as_sysex_message(&self) -> Result<Vec<u8>, RytmError> {
         self.work_buffer_pattern.as_sysex_message()
     }
 
+    // TODO: Encode work buffer kit as a sysex message.
+    // TODO: Encode work buffer sound as a sysex message.
+    // TODO: Encode work buffer global as a sysex message.
+
+    /// Get all patterns.
+    ///
+    /// Total of 128 patterns.
     pub fn patterns(&self) -> &[Pattern] {
         &self.patterns
     }
 
-    pub fn patterns_mut(&mut self) -> &mut [Pattern] {
-        &mut self.patterns
-    }
-
-    pub fn work_buffer_pattern(&self) -> &Pattern {
-        &self.work_buffer_pattern
-    }
-
-    pub fn work_buffer_pattern_mut(&mut self) -> &mut Pattern {
-        &mut self.work_buffer_pattern
-    }
-
+    /// Get all kits.
+    ///
+    /// Total of 128 kits.
     pub fn kits(&self) -> &[Kit] {
         &self.kits
     }
 
-    pub fn kits_mut(&mut self) -> &mut [Kit] {
-        &mut self.kits
-    }
-
-    pub fn work_buffer_kit(&self) -> &Kit {
-        &self.work_buffer_kit
-    }
-
-    pub fn work_buffer_kit_mut(&mut self) -> &mut Kit {
-        &mut self.work_buffer_kit
-    }
-
+    /// Get all sounds in the pool.
+    ///
+    /// Total of 128 sounds.
     pub fn pool_sounds(&self) -> &[Sound] {
         &self.pool_sounds
     }
 
-    pub fn pool_sounds_mut(&mut self) -> &mut [Sound] {
-        &mut self.pool_sounds
-    }
-
-    pub fn work_buffer_sounds(&self) -> &[Sound] {
-        &self.work_buffer_sounds
-    }
-
-    pub fn work_buffer_sounds_mut(&mut self) -> &mut [Sound] {
-        &mut self.work_buffer_sounds
-    }
-
+    /// Get all global slots.
+    ///
+    /// Total of 4 global slots.
     pub fn globals(&self) -> &[Global] {
         &self.globals
     }
 
-    pub fn globals_mut(&mut self) -> &mut [Global] {
-        &mut self.globals
-    }
-
-    pub fn work_buffer_global(&self) -> &Global {
-        &self.work_buffer_global
-    }
-
-    pub fn work_buffer_global_mut(&mut self) -> &mut Global {
-        &mut self.work_buffer_global
-    }
-
+    /// Get the settings.
     pub fn settings(&self) -> &Settings {
         &self.settings
     }
 
+    /// Get all patterns mutably.
+    ///
+    /// Total of 128 patterns.
+    pub fn patterns_mut(&mut self) -> &mut [Pattern] {
+        &mut self.patterns
+    }
+
+    /// Get all kits mutably.
+    ///
+    /// Total of 128 kits.
+    pub fn kits_mut(&mut self) -> &mut [Kit] {
+        &mut self.kits
+    }
+
+    /// Get all sounds in the pool mutably.
+    ///
+    /// Total of 128 sounds.
+    pub fn pool_sounds_mut(&mut self) -> &mut [Sound] {
+        &mut self.pool_sounds
+    }
+
+    /// Get all global slots mutably.
+    ///
+    /// Total of 4 global slots.
+    pub fn globals_mut(&mut self) -> &mut [Global] {
+        &mut self.globals
+    }
+
+    /// Get the settings mutably.
     pub fn settings_mut(&mut self) -> &mut Settings {
         &mut self.settings
+    }
+
+    // Work buffer
+
+    /// Get the pattern in the work buffer.
+    pub fn work_buffer_pattern(&self) -> &Pattern {
+        &self.work_buffer_pattern
+    }
+
+    /// Get the kit in the work buffer.
+    pub fn work_buffer_kit(&self) -> &Kit {
+        &self.work_buffer_kit
+    }
+
+    /// Get the sounds in the work buffer.
+    ///
+    /// Total of 12 sounds for 12 tracks.
+    pub fn work_buffer_sounds(&self) -> &[Sound] {
+        &self.work_buffer_sounds
+    }
+
+    /// Get the global in the work buffer.
+    pub fn work_buffer_global(&self) -> &Global {
+        &self.work_buffer_global
+    }
+
+    /// Get the pattern in the work buffer mutably.
+    pub fn work_buffer_pattern_mut(&mut self) -> &mut Pattern {
+        &mut self.work_buffer_pattern
+    }
+
+    /// Get the kit in the work buffer mutably.
+    pub fn work_buffer_kit_mut(&mut self) -> &mut Kit {
+        &mut self.work_buffer_kit
+    }
+
+    /// Get the sounds in the work buffer mutably.
+    ///
+    /// Total of 12 sounds for 12 tracks.
+    pub fn work_buffer_sounds_mut(&mut self) -> &mut [Sound] {
+        &mut self.work_buffer_sounds
+    }
+
+    /// Get the global in the work buffer mutably.
+    pub fn work_buffer_global_mut(&mut self) -> &mut Global {
+        &mut self.work_buffer_global
     }
 }
