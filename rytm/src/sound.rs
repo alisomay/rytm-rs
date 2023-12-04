@@ -59,11 +59,15 @@ pub struct Sound {
     #[derivative(Debug = "ignore")]
     __pad_name: u8, /* @0x000C */
 
+    // TODO: Complex lookup depending on machine type.
     synth_parameter: [SynthParameter; 8],
 
-    sample_tune: u8,      /* @0x002c  0x40=0, 0x41=+1, .. */
+    sample_tune: u8, /* @0x002c  0x40=0, 0x41=+1, .. */
+    // 40..=88 device -24..=24
     sample_fine_tune: u8, /* @0x002e  0x40=0, 0x41=+1, .. */
-    sample_number: u8,    /* @0x0030  0=off, 1..127 */
+    // 0..=127 device -64..=63
+    sample_number: u8, /* @0x0030  0=off, 1..127 */
+    // 0..=127 device 0..=127
     //                                           (note) changing the sample also changes:
     //                                                   smp OFF->6:
     //                                                    off=48 (0x30) a=0x00 b=0x06
@@ -80,67 +84,102 @@ pub struct Sound {
     //                                                    off=146 (0x92) a=0x00 b=0x12
     //                                                    off=147 (0x93) a=0x00 b=0x36
     //                               */
-    sample_br: u8,        /* @0x0032  sample bit reduction */
-    sample_start: u16,    /* @0x0034  STA (LSB used since v5/FW1.70) */
-    sample_end: u16,      /* @0x0036  END (LSB used since v5/FW1.70) */
+    sample_br: u8, /* @0x0032  sample bit reduction */
+    // 0..=127 device 0..=127
+    sample_start: u16, /* @0x0034  STA (LSB used since v5/FW1.70) */
+    // 0..=30720 device 0.0..=120.0
+    sample_end: u16, /* @0x0036  END (LSB used since v5/FW1.70) */
+    // 0..=30720 device 0.0..=120.0
     sample_loop_flag: u8, /* @0x0038  0=off, 1=on */
-    sample_volume: u8,    /* @0x003a */
+    // 0..=1 device 0..=1
+    sample_volume: u8, /* @0x003a */
 
-    flt_attack: u8,  /* @0x003c */
+    // 0..=127 device 0..=127
+    flt_attack: u8, /* @0x003c */
+    // 0..=127 device 0..=127
     flt_sustain: u8, /* @0x003e */
-    flt_decay: u8,   /* @0x0040 */
+    // 0..=127 device 0..=127
+    flt_decay: u8, /* @0x0040 */
+    // 0..=127 device 0..=127
     flt_release: u8, /* @0x0042 */
-    flt_cutoff: u8,  /* @0x0044 */
-    flt_res: u8,     /* @0x0046 */
-    flt_type: u8,    /* @0x0048 */
-    flt_env: u8,     /* @0x004a    64=0, 127=+63, 0=-64*/
+    // 0..=127 device 0..=127
+    flt_cutoff: u8, /* @0x0044 */
+    // 0..=127 device 0..=127
+    flt_res: u8, /* @0x0046 */
+    // 0..=127 device 0..=127
+    flt_type: u8, /* @0x0048 */
+    // 0..=6 device LP2, LP1, BP, HP1, HP2, BS, PK
+    flt_env: u8, /* @0x004a    64=0, 127=+63, 0=-64*/
 
-    amp_attack: u8,      /* @0x004c */
-    amp_hold: u8,        /* @0x004e */
-    amp_decay: u8,       /* @0x0050 */
-    amp_overdrive: u8,   /* @0x0052 */
-    amp_delay_send: u8,  /* @0x0054 */
+    // 0..=127 device -64..=63
+    amp_attack: u8, /* @0x004c */
+    // 0..=127 device 0..=127
+    amp_hold: u8, /* @0x004e */
+    // 0..=127 device 0..=127
+    amp_decay: u8, /* @0x0050 */
+    // 0..=127 device 0..=127, 127=INF
+    amp_overdrive: u8, /* @0x0052 */
+    // 0..=127 device 0..=127
+    amp_delay_send: u8, /* @0x0054 */
+    // 0..=127 device 0..=127
     amp_reverb_send: u8, /* @0x0056 */
-    amp_pan: u8,         /* @0x0058 */
-    amp_volume: u8,      /* @0x005a */
+    // 0..=127 device 0..=127
+    amp_pan: u8, /* @0x0058 */
+    // 0..=127 device 0..=127 middle point=64 L64=0, R63=127
+    amp_volume: u8, /* @0x005a */
 
+    // 0..=127 device 0..=127
     accent_level: u8, /* @0x005c accent level [FUNC+B/F] */
 
-    lfo_speed: u8,       /* @0x005e */
-    lfo_multiplier: u8,  /* @0x0060 */
-    lfo_fade: u8,        /* @0x0062  0x40=0 */
-    lfo_dest: u8,        /* @0x0064  see LFO_DEST_xxx */
-    lfo_wav: u8,         /* @0x0066 (0=tri,1=sin,2=sqr,3=saw,4=exp,5=rmp,6=rnd) */
+    // TODO:
+    lfo_speed: u8, /* @0x005e */
+    // 0..=127 device -64..=63
+    lfo_multiplier: u8, /* @0x0060 */
+    // 0..=23 device
+    // 0..=11
+    // x1, x2, x4, x8, x16, x32, x64, x128, x256, x512, x1k, x2k,
+    // 12..=23
+    //.1, .2, .4, .8, .16, .32, .64, .128, .256, .512, .1k, .2k
+    lfo_fade: u8, /* @0x0062  0x40=0 */
+    // 0..=127 device -64..=63
+    lfo_dest: u8, /* @0x0064  see LFO_DEST_xxx */
+    // TODO: double check LFO_DEST_xxx
+    lfo_wav: u8, /* @0x0066 (0=tri,1=sin,2=sqr,3=saw,4=exp,5=rmp,6=rnd) */
+    // 0..=6
     lfo_start_phase: u8, /* @0x0068 (note) FW1.70: used as slew when wav is set to 6=rnd */
-    lfo_mode: u8,        /* @0x006a (0=free,1=trg,2=hld,3=one,4=hlf) */
-    lfo_depth: u16,      /* @0x006c  */
+    // 0..=127 device 0..=127
+    lfo_mode: u8, /* @0x006a (0=free,1=trig,2=hold,3=one,4=half) */
+    // 0..=4
+    lfo_depth: u16, /* @0x006c  */
 
-    def_note: u8, /* @0x006e  0x3c=0, 0x3d=+1, 0x3b=-1 (initially 0x00 == +0 ?!)
-                  //                                    (note) not used in sound dump ? (only in kit?!!)
-                  //                                */
-
+    // 0..=32767 device -128.0..=127.99
+    def_note: u8, /* @0x006e  0x3c=0, 0x3d=+1, 0x3b=-1 (initially 0x00 == +0 ?!) // TODO: Don't know what this is yet */
+    //                                    (note) not used in sound dump ? (only in kit?!!)
+    //                                */
     #[derivative(Debug = "ignore")]
     __unknown_006f: [u8; 0xd], /* @0x006f..0x007B   */
 
     // TODO: Not understood kit offsets?
     machine: Machine,
 
-    mode_flags: u8, /* @0x007D bit 0  : ?
-                    //                                          bit 1  : env reset filter switch
-                    //                                          bit 2  : legacy fx send switch
-                    //                                          bit 3  : ?
-                    //                                          bit 4+5: chromatic mode  0=OFF, 1=SYNTH, 2=SAMPLE, 3=SYN+SMP
-                    //                                          bit 6  : velocity to vol switch
-                    //                                          bit 7  : ?
-                    //                                          (note) FW1.70: moved extra veltovol,legacyfx,envreset bytes to bit fields
-                    //                                */
+    pub mode_flags: u8, /* @0x007D bit 0  : ?
+                        //                                          bit 1  : env reset filter switch
+                        //                                          bit 2  : legacy fx send switch
+                        //                                          bit 3  : ?
+                        //                                          bit 4+5: chromatic mode  0=OFF, 1=SYNTH, 2=SAMPLE, 3=SYN+SMP
+                        //                                          bit 6  : velocity to vol switch
+                        //                                          bit 7  : ?
+                        //                                          (note) FW1.70: moved extra veltovol,legacyfx,envreset bytes to bit fields
+                        //                                */
 
     #[derivative(Debug = "ignore")]
     __unknown_007e: [u8; 16], /* @0x007E..0x008D */
 
+    // All amounts are TODO: Try interpreting them as i8,  device -128..=+127
     vel_amt_1: u8,    /* @0x008E VELOCITY MOD */
     vel_target_1: u8, /* @0x008F */
 
+    // Targets are enum style TODO: Check
     vel_amt_2: u8,    /* @0x0090 */
     vel_target_2: u8, /* @0x0091 */
 

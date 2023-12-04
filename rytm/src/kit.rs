@@ -179,6 +179,7 @@ pub struct Kit {
 
     track_levels: [u8; 12], /* @0x0014..0x002b   (note) LSB (track_levels[i].b.hi) is unused (always 0x00) */
 
+    // 0..=127 device 0..=127
     #[derivative(Debug = "ignore")]
     __unknown_arr1b: [u8; 0x2], /* @0x002c..0x002d */
 
@@ -189,43 +190,80 @@ pub struct Kit {
     #[derivative(Debug = "ignore")]
     __unknown_arr2: [u8; 0x4], /* @0x07C6..0x07C9 */
 
-    fx_delay_time: u8,         /* @0x07CA   */
+    fx_delay_time: u8, /* @0x07CA   */
+    // 0..=127 device (from 0-127 in order) 1/128 1/164 1/64 1/32 5 1/32. 7 1/16 9 10 11 1/16. 13 14 15 1/8 17..=23 1/8. 25..=31 1/4 33..=47 1/4. 49..=63 1/2 65..=79 1/2. 81..=95 1/2. 97..=127 1/1
     fx_delay_pingpong: u8,     /* @0x07CC  0=off, 1=on */
     fx_delay_stereo_width: u8, /* @0x07CE  0x40=+0 */
-    fx_delay_feedback: u8,     /* @0x07D0   */
-    fx_delay_hpf: u8,          /* @0x07D2   */
-    fx_delay_lpf: u8,          /* @0x07D4   */
-    fx_delay_reverb_send: u8,  /* @0x07D6   */
-    fx_delay_volume: u8,       /* @0x07D8   */
+    // 0..=127 device -64..=63
+    fx_delay_feedback: u8, /* @0x07D0   */
+    // 0..=127 device 0..=198
+    fx_delay_hpf: u8, /* @0x07D2   */
+    // 0..=127 device 0..=127
+    fx_delay_lpf: u8, /* @0x07D4   */
+    // 0..=127 device 0..=127
+    fx_delay_reverb_send: u8, /* @0x07D6   */
+    // 0..=127 device 0..=127
+    fx_delay_volume: u8, /* @0x07D8   */
 
-    fx_dist_reverb_send: u8,    /* @0x07DA ? */
+    // 0..=127 device 0..=127
+    fx_dist_reverb_send: u8, /* @0x07DA ? */
+    // 0..=127 device 0..=127 @attention Actually DOV (Delay overdrive) in device
     fx_dist_delay_pre_post: u8, /* @0x07DC ? */
 
-    fx_reverb_pre: u8,    /* @0x07DE   */
-    fx_reverb_decay: u8,  /* @0x07E0   */
-    fx_reverb_freq: u8,   /* @0x07E2   */
-    fx_reverb_gain: u8,   /* @0x07E4   */
-    fx_reverb_hpf: u8,    /* @0x07E6   */
-    fx_reverb_lpf: u8,    /* @0x07E8   */
+    // 0..=1 device PRE POST
+    fx_reverb_pre: u8, /* @0x07DE   */
+    // 0..=127 device 0..=127
+    fx_reverb_decay: u8, /* @0x07E0   */
+    // 0..=127 device 1..=126 127=INF
+    fx_reverb_freq: u8, /* @0x07E2   */
+    // 0..=127 device 0..=127
+    fx_reverb_gain: u8, /* @0x07E4   */
+    // 0..=127 device 0..=127
+    fx_reverb_hpf: u8, /* @0x07E6   */
+    // 0..=127 device 0..=127
+    fx_reverb_lpf: u8, /* @0x07E8   */
+    // 0..=127 device 0..=127
     fx_reverb_volume: u8, /* @0x07EA   */
 
+    // 0..=127 device 0..=127
     fx_dist_reverb_pre_post: u8, /* @0x07EC   */
-    fx_dist_amount: u8,          /* @0x07EE   */
-    fx_dist_sym: u8,             /* @0x07F0   */
+    // 0..=1 device PRE POST
+    fx_dist_amount: u8, /* @0x07EE   */
+    // 0..=127 device 0..=127
+    fx_dist_sym: u8, /* @0x07F0   */
 
+    // 0..=127 device -64..=63
     fx_comp_threshold: u8, /* @0x07F4   */
-    fx_comp_attack: u8,    /* @0x07F6   */
-    fx_comp_release: u8,   /* @0x07F8   */
-    fx_comp_ratio: u8,     /* @0x07FA   */
-    fx_comp_seq: u8,       /* @0x07FC (0=off,1=lpf,2=hpf,3=hit) */
-    fx_comp_gain: u8,      /* @0x07FE   */
-    fx_comp_mix: u8,       /* @0x0800   */
-    fx_comp_volume: u8,    /* @0x0802   */
+    // 0..=127 device 0..=127
+    fx_comp_attack: u8, /* @0x07F6   */
+    // 0..=6 device .03, .1, .3, 1, 3, 10, 30
+    fx_comp_release: u8, /* @0x07F8   */
+    // 0..=7 device .1, .2 .4, .6, 1, 2, A1, A2
+    fx_comp_ratio: u8, /* @0x07FA   */
+    // 0..=3 device 1:2, 1:4, 1:8, MAX
+    fx_comp_seq: u8, /* @0x07FC (0=off,1=lpf,2=hpf,3=hit) */
+    // 0..=3 device OFF LPF HPF HIT
+    fx_comp_gain: u8, /* @0x07FE   */
+    // 0..=127 device 0..=127
+    fx_comp_mix: u8, /* @0x0800   */
+    // 0..=127 device 0..=127
+    fx_comp_volume: u8, /* @0x0802   */
 
-    fx_lfo_speed: u8,       /* @0x0804   */
-    fx_lfo_multiplier: u8,  /* @0x0806   */
-    fx_lfo_fade: u8,        /* @0x0808   */
-    fx_lfo_dest: u8,        /* @0x080A (37/$25=off / "META:None") */
+    // 0..=127 device 0..=127
+    fx_lfo_speed: u8, /* @0x0804   */
+    // 0..=127 device -64..=63
+    fx_lfo_multiplier: u8, /* @0x0806   */
+    // 0..=23 device
+    // 0..=11
+    // x1, x2, x4, x8, x16, x32, x64, x128, x256, x512, x1k, x2k,
+    // 12..=23
+    //.1, .2, .4, .8, .16, .32, .64, .128, .256, .512, .1k, .2k
+    fx_lfo_fade: u8, /* @0x0808   */
+    // 0..=127 device -64..=63
+    fx_lfo_dest: u8, /* @0x080A (37/$25=off / "META:None") */
+    // TODO: double check LFO_DEST_xxx THIS ONE IS FOR FX THOUGH
+
+    // For ranges of these check sound structure they're the same.
     fx_lfo_wave: u8,        /* @0x080C   */
     fx_lfo_start_phase: u8, /* @0x080E   */
     fx_lfo_mode: u8,        /* @0x0810   */
@@ -244,6 +282,8 @@ pub struct Kit {
 
     __unknown_pad37: u8,  /* @0x09D7 (scene_id MSB?) */
     current_scene_id: u8, /* @0x09D8 (0..11) */
+
+    // 0..=11 device 0..=11
 
     // (note) 54 unknown bytes not present in v1 kit data
     #[derivative(Debug = "ignore")]

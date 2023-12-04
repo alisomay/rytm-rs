@@ -321,7 +321,8 @@ fn kit() {
 
         clearscreen::clear().unwrap();
 
-        dbg!(kit.sounds()[6]);
+        dbg!(kit);
+        println!("mode_flags: {:08b}", kit.sounds()[6].mode_flags);
 
         Ok(())
     };
@@ -350,7 +351,9 @@ fn global_type() {
 
         clearscreen::clear().unwrap();
 
-        dbg!(global);
+        println!("usb_out: {:08b}", global.routing_usb_out);
+        println!("other: {}", global.routing_usb_out >> 2);
+        // println!("usb_out: {:08b}", global.routing_usb_out);
 
         Ok(())
     };
@@ -377,7 +380,20 @@ fn settings_type() {
 
         clearscreen::clear().unwrap();
 
+        // let mute: u16 = ((settings.track_mute_msb as u16) << 8) | (settings.track_mute_lsb as u16);
+
+        // println!(
+        //     "{:04b}_{:04b}_{:04b}_{:04b} ",
+        //     (mute >> 12) & 0b1111,
+        //     (mute >> 8) & 0b1111,
+        //     (mute >> 4) & 0b1111,
+        //     mute & 0b1111,
+        // );
+
         dbg!(settings);
+
+        // println!("usb_out: {:08b}", global.routing_usb_out);
+        // println!("other: {}", global.routing_usb_out >> 2);
 
         Ok(())
     };
