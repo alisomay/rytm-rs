@@ -1,4 +1,8 @@
+pub mod menu;
+pub mod types;
+
 use derivative::Derivative;
+use menu::*;
 use rytm_rs_macro::parameter_range;
 use rytm_sys::ar_global_t;
 
@@ -74,44 +78,9 @@ pub struct Global {
     /// Version of the kit structure.
     version: u32,
 
-    click_active: u8, /* @0x04         0=OFF, 1=ON                                */
-    click_time_sig_num: u8, /* @0x05         range=0..15 maps to 1..16 on device        */
-    click_time_sig_den: u8, /* @0x06         0=1, 1=2, 2=4, 3=8, 4=16                   */
-    click_pre_roll: u8, /* @0x07         0=OFF, range=0..15 maps to 1..16 on device */
-    click_volume: u8, /* @0x08         range=0..127                               */
-
-    midi_channels_auto_channel: u8, /* @0x0B         255=OFF  range=0..15  */
-    midi_channels_track_channels: [u8; 12], /* @0x0C..0x17   255=OFF  range=0..15  */
-    midi_channels_track_fx_channel: u8, /* @0x18         255=OFF  range=0..15  */
-    midi_channels_prog_ch_in_channel: u8, /* @0x19         255=auto range=0..15  */
-    midi_channels_prog_ch_out_channel: u8, /* @0x1A         255=auto range=0..15  */
-    midi_channels_perf_channel: u8, /* @0x1B         255=OFF  range=0..15  */
-
-    midi_port_out_port_func: u8, /* @0x1C         0=MIDI, 1=DIN24, 2=DIN48               */
-    midi_port_thru_port_func: u8, /* @0x1D         0=MIDI, 1=DIN24, 2=DIN48               */
-    midi_port_input_from: u8,    /* @0x1E         0=DISABLED, 1=MIDI, 2=USB. 3=MIDI+USB  */
-    midi_port_output_to: u8,     /* @0x1F         0=DISABLED, 1=MIDI, 2=USB, 3=MIDI+USB  */
-    midi_port_param_output: u8,  /* @0x20         0=NRPN, 1=CC                           */
-    midi_port_receive_notes: u8, /* @0x27         0=OFF, 1=ON */
-    midi_port_receive_cc_nrpn: u8, /* @0x28         0=OFF, 1=ON */
-
-    midi_port_pad_dest: u8,      /* @0x2A         0=INT, 1=INT+EXT, 2=EXT */
-    midi_port_pressure_dest: u8, /* @0x2B         0=INT, 1=INT+EXT, 2=EXT */
-    midi_port_encoder_dest: u8,  /* @0x2C         0=INT, 1=INT+EXT        */
-    midi_port_mute_dest: u8,     /* @0x2D         0=INT, 1=INT+EXT, 2=EXT */
-    midi_port_ports_output_channel: u8, /* @0x2E         0=AUTO CH, 1=TRK_CH     */
-
-    midi_sync_clock_receive: u8,          /* @0x21         0=OFF, 1=ON */
-    midi_sync_clock_send: u8,             /* @0x22         0=OFF, 1=ON */
-    midi_sync_transport_receive: u8,      /* @0x23         0=OFF, 1=ON */
-    midi_sync_transport_send: u8,         /* @0x24         0=OFF, 1=ON */
-    midi_sync_program_change_receive: u8, /* @0x25         0=OFF, 1=ON */
-    midi_sync_program_change_send: u8,    /* @0x26         0=OFF, 1=ON */
-
-    // Sequencer Config Menu Part 1 */
-    sequencer_config_kit_reload_on_chg: u8, /* @0x2F         0=OFF, 1=ON */
-    sequencer_config_quantize_live_rec: u8, /* @0x30         0=OFF, 1=ON */
-    sequencer_config_auto_trk_switch: u8,   /* @0x46         0=OFF, 1=ON */
+    metronome_settings: MetronomeSettings,
+    midi_config: MidiConfig,
+    sequencer_config: SequencerConfig,
 
     routing_route_to_main_msb: u8, /* @?0x32        */
     routing_route_to_main_lsb: u8, /* @?0x33        */
@@ -123,10 +92,6 @@ pub struct Global {
 
     #[derivative(Debug = "ignore")]
     pub(crate) __unknown0x09_0x0a: [u8; 2], /* @?0x09..0x0A  Currently reads  0x40, 0x00 */
-    // I believe this is `TURBO SPEED` since it is the only one left in the menu. */
-    // But since I can not enable it without connecting a turbo speed capable MIDI interface I can not be sure.. */
-    #[derivative(Debug = "ignore")]
-    pub(crate) __unknown0x29: u8, /* ?@0x29        0=OFF, 1=ON */
     #[derivative(Debug = "ignore")]
     pub(crate) __unknown0x31: u8, /* ?@0x31        */
     #[derivative(Debug = "ignore")]
@@ -164,47 +129,16 @@ impl Global {
             sysex_meta.obj_nr as usize
         };
 
+        // click_time_sig_num: u8, /* @0x05         range=0..15 maps to 1..16 on device        */
+        // click_time_sig_den: u8, /* @0x06         0=1, 1=2, 2=4, 3=8, 4=16                   */
         Ok(Self {
             index: slot_number,
             sysex_meta,
             version,
 
-            click_active: raw_global.click_active,
-            click_time_sig_num: raw_global.click_time_sig_num,
-            click_time_sig_den: raw_global.click_time_sig_den,
-            click_pre_roll: raw_global.pre_roll,
-            click_volume: raw_global.volume,
-
-            midi_channels_auto_channel: raw_global.auto_channel,
-            midi_channels_track_channels: raw_global.track_channels,
-            midi_channels_track_fx_channel: raw_global.track_fx_channel,
-            midi_channels_prog_ch_in_channel: raw_global.prog_ch_in_channel,
-            midi_channels_prog_ch_out_channel: raw_global.prog_ch_out_channel,
-            midi_channels_perf_channel: raw_global.perf_channel,
-
-            midi_port_out_port_func: raw_global.out_port_func,
-            midi_port_thru_port_func: raw_global.thru_port_func,
-            midi_port_input_from: raw_global.input_from,
-            midi_port_output_to: raw_global.output_to,
-            midi_port_param_output: raw_global.param_output,
-            midi_port_receive_notes: raw_global.receive_notes,
-            midi_port_receive_cc_nrpn: raw_global.receive_cc_nrpn,
-            midi_port_pad_dest: raw_global.pad_dest,
-            midi_port_pressure_dest: raw_global.pressure_dest,
-            midi_port_encoder_dest: raw_global.encoder_dest,
-            midi_port_mute_dest: raw_global.mute_dest,
-            midi_port_ports_output_channel: raw_global.ports_output_channel,
-
-            midi_sync_clock_receive: raw_global.clock_receive,
-            midi_sync_clock_send: raw_global.clock_send,
-            midi_sync_transport_receive: raw_global.transport_receive,
-            midi_sync_transport_send: raw_global.transport_send,
-            midi_sync_program_change_receive: raw_global.program_change_receive,
-            midi_sync_program_change_send: raw_global.program_change_send,
-
-            sequencer_config_kit_reload_on_chg: raw_global.kit_reload_on_chg,
-            sequencer_config_quantize_live_rec: raw_global.quantize_live_rec,
-            sequencer_config_auto_trk_switch: raw_global.auto_trk_switch,
+            metronome_settings: raw_global.try_into()?,
+            midi_config: raw_global.try_into()?,
+            sequencer_config: raw_global.try_into()?,
 
             routing_route_to_main_msb: raw_global.route_to_main_msb,
             routing_route_to_main_lsb: raw_global.route_to_main_lsb,
@@ -215,7 +149,6 @@ impl Global {
             routing_usb_to_main_db: raw_global.usb_to_main_db,
 
             __unknown0x09_0x0a: raw_global.__unknown0x09_0x0A,
-            __unknown0x29: raw_global.__unknown0x29,
             __unknown0x31: raw_global.__unknown0x31,
             __unknown0x36_0x45: raw_global.__unknown0x36_0x45,
             __unknown0x50_0x4f: raw_global.__unknown0x50_0x4F,
@@ -229,42 +162,9 @@ impl Global {
             sysex_meta: SysexMeta::try_default_for_global(global_slot, None)?,
             version: 2,
 
-            click_active: 0,
-            click_time_sig_num: 0,
-            click_time_sig_den: 0,
-            click_pre_roll: 0,
-            click_volume: 0,
-
-            midi_channels_auto_channel: 0,
-            midi_channels_track_channels: [0; 12],
-            midi_channels_track_fx_channel: 0,
-            midi_channels_prog_ch_in_channel: 0,
-            midi_channels_prog_ch_out_channel: 0,
-            midi_channels_perf_channel: 0,
-
-            midi_port_out_port_func: 0,
-            midi_port_thru_port_func: 0,
-            midi_port_input_from: 0,
-            midi_port_output_to: 0,
-            midi_port_param_output: 0,
-            midi_port_receive_notes: 0,
-            midi_port_receive_cc_nrpn: 0,
-            midi_port_pad_dest: 0,
-            midi_port_pressure_dest: 0,
-            midi_port_encoder_dest: 0,
-            midi_port_mute_dest: 0,
-            midi_port_ports_output_channel: 0,
-
-            midi_sync_clock_receive: 0,
-            midi_sync_clock_send: 0,
-            midi_sync_transport_receive: 0,
-            midi_sync_transport_send: 0,
-            midi_sync_program_change_receive: 0,
-            midi_sync_program_change_send: 0,
-
-            sequencer_config_kit_reload_on_chg: 0,
-            sequencer_config_quantize_live_rec: 0,
-            sequencer_config_auto_trk_switch: 0,
+            metronome_settings: MetronomeSettings::default(),
+            midi_config: MidiConfig::default(),
+            sequencer_config: SequencerConfig::default(),
 
             routing_route_to_main_msb: 0,
             routing_route_to_main_lsb: 0,
@@ -275,7 +175,6 @@ impl Global {
             routing_usb_to_main_db: 0,
 
             __unknown0x09_0x0a: [0; 2],
-            __unknown0x29: 0,
             __unknown0x31: 0,
             __unknown0x36_0x45: [0; 16],
             __unknown0x50_0x4f: [0; 6],
@@ -288,42 +187,9 @@ impl Global {
             sysex_meta: SysexMeta::default_for_global_in_work_buffer(None),
             version: 2,
 
-            click_active: 0,
-            click_time_sig_num: 0,
-            click_time_sig_den: 0,
-            click_pre_roll: 0,
-            click_volume: 0,
-
-            midi_channels_auto_channel: 0,
-            midi_channels_track_channels: [0; 12],
-            midi_channels_track_fx_channel: 0,
-            midi_channels_prog_ch_in_channel: 0,
-            midi_channels_prog_ch_out_channel: 0,
-            midi_channels_perf_channel: 0,
-
-            midi_port_out_port_func: 0,
-            midi_port_thru_port_func: 0,
-            midi_port_input_from: 0,
-            midi_port_output_to: 0,
-            midi_port_param_output: 0,
-            midi_port_receive_notes: 0,
-            midi_port_receive_cc_nrpn: 0,
-            midi_port_pad_dest: 0,
-            midi_port_pressure_dest: 0,
-            midi_port_encoder_dest: 0,
-            midi_port_mute_dest: 0,
-            midi_port_ports_output_channel: 0,
-
-            midi_sync_clock_receive: 0,
-            midi_sync_clock_send: 0,
-            midi_sync_transport_receive: 0,
-            midi_sync_transport_send: 0,
-            midi_sync_program_change_receive: 0,
-            midi_sync_program_change_send: 0,
-
-            sequencer_config_kit_reload_on_chg: 0,
-            sequencer_config_quantize_live_rec: 0,
-            sequencer_config_auto_trk_switch: 0,
+            metronome_settings: MetronomeSettings::default(),
+            midi_config: MidiConfig::default(),
+            sequencer_config: SequencerConfig::default(),
 
             routing_route_to_main_msb: 0,
             routing_route_to_main_lsb: 0,
@@ -334,7 +200,6 @@ impl Global {
             routing_usb_to_main_db: 0,
 
             __unknown0x09_0x0a: [0; 2],
-            __unknown0x29: 0,
             __unknown0x31: 0,
             __unknown0x36_0x45: [0; 16],
             __unknown0x50_0x4f: [0; 6],
