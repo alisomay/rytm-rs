@@ -16,7 +16,7 @@ use self::types::{
 ///
 /// This structure represents settings in the analog rytm.
 ///
-/// It does not map identically to the structure in the firmware.
+/// It does not map identically to the relevant structure in the firmware.
 #[derive(Derivative, Clone, Copy)]
 #[derivative(Debug)]
 pub struct Settings {

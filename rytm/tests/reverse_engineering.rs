@@ -351,6 +351,25 @@ fn global_type() {
 
         clearscreen::clear().unwrap();
 
+        // let rt: u16 = ((global.routing_route_to_main_msb as u16) << 8)
+        //     | (global.routing_route_to_main_lsb as u16);
+
+        // println!(
+        //     "{:04b}_{:04b}_{:04b}_{:04b} ",
+        //     (rt >> 12) & 0b1111,
+        //     (rt >> 8) & 0b1111,
+        //     (rt >> 4) & 0b1111,
+        //     rt & 0b1111,
+        // );
+
+        // println!(
+        //     "{:03b}_{:03b}_{:02b}",
+        //     (global.routing_usb_in & 0b11100000) >> 5,
+        //     (global.routing_usb_in & 0b00011100) >> 2,
+        //     global.routing_usb_in & 0b00000011,
+        // );
+
+        // dbg!();
         // println!("usb_out: {:08b}", global.routing_usb_out);
         // println!("other: {}", global.routing_usb_out >> 2);
         // println!("usb_out: {:08b}", global.routing_usb_out);
