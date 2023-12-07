@@ -1,15 +1,28 @@
 pub mod menu;
 pub mod types;
+pub(crate) mod unknown;
 
+use crate::{
+    error::{ParameterError, RytmError, SysexConversionError},
+    impl_sysex_compatible,
+    sysex::{SysexCompatible, SysexMeta, SysexType, GLOBAL_SYSEX_SIZE},
+};
 use derivative::Derivative;
 use menu::*;
 use rytm_rs_macro::parameter_range;
-use rytm_sys::ar_global_t;
+use rytm_sys::{ar_global_raw_to_syx, ar_global_t, ar_sysex_meta_t};
 
-use crate::error::{ParameterError, RytmError};
-use crate::sysex::SysexMeta;
+use self::unknown::GlobalUnknown;
 
-/// # Settings
+impl_sysex_compatible!(
+    Global,
+    ar_global_t,
+    ar_global_raw_to_syx,
+    SysexType::Global,
+    GLOBAL_SYSEX_SIZE
+);
+
+/// # Global
 ///
 /// This structure represents a global slot in the analog rytm.
 ///
@@ -28,15 +41,7 @@ pub struct Global {
     routing: Routing,
 
     #[derivative(Debug = "ignore")]
-    pub(crate) __unknown0x09_0x0a: [u8; 2], /* @?0x09..0x0A  Currently reads  0x40, 0x00 */
-    #[derivative(Debug = "ignore")]
-    pub(crate) __unknown0x31: u8, /* ?@0x31        */
-    #[derivative(Debug = "ignore")]
-    // All zeros. It is suspicious since it is exactly 16 bytes long, maybe related to midi channels?
-    pub(crate) __unknown0x36_0x45: [u8; 16], /* @?0x36..0x45  */
-    #[derivative(Debug = "ignore")]
-    // All zeros.
-    pub(crate) __unknown0x50_0x4f: [u8; 6], /* @?0x50..0x4F  */
+    __unknown: GlobalUnknown,
 }
 
 impl From<&Global> for ar_global_t {
@@ -55,10 +60,7 @@ impl From<&Global> for ar_global_t {
         global.sequencer_config.apply_to_raw_global(&mut raw_global);
         global.routing.apply_to_raw_global(&mut raw_global);
 
-        raw_global.__unknown0x09_0x0A = global.__unknown0x09_0x0a;
-        raw_global.__unknown0x31 = global.__unknown0x31;
-        raw_global.__unknown0x36_0x45 = global.__unknown0x36_0x45;
-        raw_global.__unknown0x50_0x4F = global.__unknown0x50_0x4f;
+        global.__unknown.apply_to_raw_global(&mut raw_global);
 
         raw_global
     }
@@ -95,10 +97,7 @@ impl Global {
             sequencer_config: raw_global.try_into()?,
             routing: raw_global.try_into()?,
 
-            __unknown0x09_0x0a: raw_global.__unknown0x09_0x0A,
-            __unknown0x31: raw_global.__unknown0x31,
-            __unknown0x36_0x45: raw_global.__unknown0x36_0x45,
-            __unknown0x50_0x4f: raw_global.__unknown0x50_0x4F,
+            __unknown: raw_global.into(),
         })
     }
 
@@ -114,10 +113,7 @@ impl Global {
             sequencer_config: SequencerConfig::default(),
             routing: Routing::default(),
 
-            __unknown0x09_0x0a: [0; 2],
-            __unknown0x31: 0,
-            __unknown0x36_0x45: [0; 16],
-            __unknown0x50_0x4f: [0; 6],
+            __unknown: GlobalUnknown::default(),
         })
     }
 
@@ -132,10 +128,7 @@ impl Global {
             sequencer_config: SequencerConfig::default(),
             routing: Routing::default(),
 
-            __unknown0x09_0x0a: [0; 2],
-            __unknown0x31: 0,
-            __unknown0x36_0x45: [0; 16],
-            __unknown0x50_0x4f: [0; 6],
+            __unknown: GlobalUnknown::default(),
         }
     }
 }

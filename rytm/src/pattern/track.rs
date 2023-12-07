@@ -1,14 +1,15 @@
 pub(in crate::pattern) mod trig;
 pub(in crate::pattern) mod types;
 
-use self::trig::{HoldsTrigFlags, TrigFlags};
-use self::types::{PadScale, RootNote};
+use self::{
+    trig::{HoldsTrigFlags, TrigFlags},
+    types::{PadScale, RootNote},
+};
 use super::Length;
-use crate::util::to_s_u16_t_union_b;
 use crate::{
     error::{ParameterError, RytmError},
     pattern::types::Speed,
-    util::from_s_u16_t,
+    util::{from_s_u16_t, to_s_u16_t_union_b},
 };
 use bitstream_io::{BigEndian, BitRead, BitReader, BitWrite, BitWriter};
 use derivative::Derivative;

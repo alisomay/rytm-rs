@@ -51,6 +51,8 @@ pub enum SysexConversionError {
     NotAKit,
     #[error("Not a sound")]
     NotASound,
+    #[error("The type of the sysex message does not match the size of the message.")]
+    InvalidSize,
     #[error("Unknown error code: {0}")]
     Unknown(u8),
 }

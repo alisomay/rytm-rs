@@ -1,10 +1,9 @@
-use rytm_rs_macro::parameter_range;
-use rytm_sys::ar_sound_t;
-
 use crate::{
     error::{ConversionError, ParameterError, RytmError},
     sound::types::FilterType,
 };
+use rytm_rs_macro::parameter_range;
+use rytm_sys::ar_sound_t;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Filter {

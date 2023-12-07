@@ -1,12 +1,10 @@
-use rytm_rs_macro::parameter_range;
-use rytm_sys::ar_sound_t;
-
+use super::types::{Machine, SoundModTarget, SoundSettingsChromaticMode};
 use crate::{
     error::{ConversionError, ParameterError, RytmError},
     sound::types::FilterType,
 };
-
-use super::types::{Machine, SoundModTarget, SoundSettingsChromaticMode};
+use rytm_rs_macro::parameter_range;
+use rytm_sys::ar_sound_t;
 
 /// A sound's settings.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]

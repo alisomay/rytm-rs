@@ -2,7 +2,6 @@ use crate::{
     error::{ParameterError, RytmError},
     global::types::{RoutingUsbInOptions, RoutingUsbOutOptions, RoutingUsbToMainDb},
 };
-
 use rytm_rs_macro::parameter_range;
 use rytm_sys::ar_global_t;
 

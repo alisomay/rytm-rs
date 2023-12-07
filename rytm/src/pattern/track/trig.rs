@@ -3,21 +3,14 @@
 pub mod flags;
 pub(in crate::pattern) mod types;
 
-use std::ops::DerefMut;
-
-use rytm_rs_macro::parameter_range;
-
-use crate::error::ParameterError;
-use crate::error::RytmError;
-use crate::util::decode_micro_timing_byte;
-use std::ops::Deref;
-
-use self::types::Length;
-use self::types::MicroTime;
-use self::types::RetrigRate;
-use self::types::TrigCondition;
-
+use self::types::{Length, MicroTime, RetrigRate, TrigCondition};
+use crate::{
+    error::{ParameterError, RytmError},
+    util::decode_micro_timing_byte,
+};
 use flags::*;
+use rytm_rs_macro::parameter_range;
+use std::ops::{Deref, DerefMut};
 
 pub trait HoldsTrigFlags {
     /// Returns the raw flags value.

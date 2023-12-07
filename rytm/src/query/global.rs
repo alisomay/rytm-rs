@@ -1,7 +1,8 @@
 use super::ObjectQuery;
-use crate::error::ParameterError;
-use crate::error::RytmError;
-use crate::sysex::SysexType;
+use crate::{
+    error::{ParameterError, RytmError},
+    sysex::SysexType,
+};
 use rytm_rs_macro::parameter_range;
 
 /// A query for a global object.

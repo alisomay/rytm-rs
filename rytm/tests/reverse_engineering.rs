@@ -326,7 +326,6 @@ fn kit() {
 
         clearscreen::clear().unwrap();
 
-        dbg!(kit);
         // println!("mode_flags: {:08b}", kit.sounds()[6].mode_flags);
 
         Ok(())

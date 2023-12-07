@@ -7,7 +7,11 @@ impl ObjectName {
     }
 
     pub fn as_str(&self) -> &str {
-        std::str::from_utf8(&self.0).unwrap()
+        std::str::from_utf8(&self.0).unwrap().trim_end()
+    }
+
+    pub fn copy_inner(&self) -> [u8; 15] {
+        self.0
     }
 }
 

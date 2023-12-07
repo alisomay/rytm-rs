@@ -1,5 +1,4 @@
 use crate::error::ConversionError;
-
 use rytm_sys::{
     AR_SPEED_1B2X, AR_SPEED_1B4X, AR_SPEED_1B8X, AR_SPEED_1X, AR_SPEED_2X, AR_SPEED_3B2X,
     AR_SPEED_3B4X,

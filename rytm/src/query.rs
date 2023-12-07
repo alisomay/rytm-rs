@@ -15,9 +15,8 @@ pub use sound::SoundQuery;
 /// The size of the rytm sysex query in bytes.
 const RYTM_SYSEX_QUERY_SIZE: usize = 15;
 
-use crate::sysex::SysexMeta;
-
 use super::error::{RytmError, SysexConversionError};
+use crate::sysex::SysexMeta;
 
 pub trait ObjectQuery
 where

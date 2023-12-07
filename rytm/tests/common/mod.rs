@@ -4,15 +4,13 @@ pub(crate) mod port;
 pub(crate) mod util;
 
 use midir::{Ignore, MidiInputConnection, MidiOutputConnection};
-
 use rytm_rs::{
     error::{RytmError, SysexConversionError},
     query::ObjectQuery,
     Rytm,
 };
-use util::SysexMeta;
-
 use std::sync::{Arc, Mutex};
+use util::SysexMeta;
 
 pub fn get_connection_to_rytm() -> Arc<Mutex<MidiOutputConnection>> {
     let output = port::MidiOut::new("rytm_test_out").unwrap();

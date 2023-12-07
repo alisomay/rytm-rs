@@ -1,10 +1,9 @@
-use rytm_rs_macro::parameter_range;
-use rytm_sys::ar_sound_t;
-
 use crate::{
     error::{ConversionError, ParameterError, RytmError},
     util::{from_s_u16_t, to_s_u16_t_union_a},
 };
+use rytm_rs_macro::parameter_range;
+use rytm_sys::ar_sound_t;
 
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct Sample {

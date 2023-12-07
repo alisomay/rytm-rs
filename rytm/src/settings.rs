@@ -1,16 +1,27 @@
 pub mod types;
-
-use derivative::Derivative;
-use rytm_rs_macro::parameter_range;
-use rytm_sys::ar_settings_t;
-
-use crate::error::{ParameterError, RytmError};
-use crate::sysex::SysexMeta;
+pub(crate) mod unknown;
 
 use self::types::{
     FxParameterMenuItem, ParameterMenuItem, PatternMode, SampleRecorderRecordingLength,
     SampleRecorderSource, SequencerMode,
 };
+use crate::{
+    error::{ParameterError, RytmError, SysexConversionError},
+    impl_sysex_compatible,
+    sysex::{SysexCompatible, SysexMeta, SysexType, SETTINGS_SYSEX_SIZE},
+};
+use derivative::Derivative;
+use rytm_rs_macro::parameter_range;
+use rytm_sys::{ar_settings_raw_to_syx, ar_settings_t, ar_sysex_meta_t};
+use unknown::SettingsUnknown;
+
+impl_sysex_compatible!(
+    Settings,
+    ar_settings_t,
+    ar_settings_raw_to_syx,
+    SysexType::Settings,
+    SETTINGS_SYSEX_SIZE
+);
 
 /// # Settings
 ///
@@ -43,30 +54,8 @@ pub struct Settings {
     sample_recorder_monitor_enable: bool,
     sample_recorder_rlen: SampleRecorderRecordingLength,
 
-    // The rest is not figured out:
-
-    // Always the duplicate of selected_track
     #[derivative(Debug = "ignore")]
-    pub(crate) __selected_track_duplicate: u8,
-    // Always 0x00
-    #[derivative(Debug = "ignore")]
-    pub(crate) __unknown_0x000b: u8,
-    // @0x000E..0x0014 All zeros.
-    #[derivative(Debug = "ignore")]
-    pub(crate) __unknown0x000e_0x0014: [u8; 7],
-    //  @0x0017..0x0019 All zeros.
-    #[derivative(Debug = "ignore")]
-    pub(crate) __unknown0x0017_0x0019: [u8; 3],
-    // The response continues with the repeating 16 byte pattern of 0xFF_FF_FF_FF 0x00_00_00_00 0x00_00_00_00 0x00_00_00_00
-    // The repeating pattern repeats 128 times. Total length of 2048 bytes.
-    #[derivative(Debug = "ignore")]
-    pub(crate) __unknown0x001f: [u8; 16 * 128],
-    // @0x081F Always 0x01
-    #[derivative(Debug = "ignore")]
-    pub(crate) __unknown0x081f: u8,
-    // @0x0821..0x0826 All zeros.
-    #[derivative(Debug = "ignore")]
-    pub(crate) __unknown0x0821_0x0826: [u8; 6],
+    __unknown: SettingsUnknown,
 }
 
 impl From<&Settings> for ar_settings_t {
@@ -84,7 +73,7 @@ impl From<&Settings> for ar_settings_t {
         let track_mute_msb = (settings.mute_flags >> 8) as u8;
         let track_mute_lsb = settings.mute_flags as u8;
 
-        Self {
+        let mut raw_settings = Self {
             version,
             bpm_msb,
             bpm_lsb,
@@ -94,17 +83,11 @@ impl From<&Settings> for ar_settings_t {
             selected_fx_menu: settings.selected_fx_menu_item.into(),
             selected_page: settings.selected_page,
 
-            __unknown_0x000B: settings.__unknown_0x000b,
-
             track_mute_msb,
             track_mute_lsb,
 
-            __unknown0x000E_0x0014: settings.__unknown0x000e_0x0014,
-
             selected_mode: settings.selected_mode.into(),
             selected_pattern_transition_mode: settings.selected_pattern_mode.into(),
-
-            __unknown0x0017_0x0019: settings.__unknown0x0017_0x0019,
 
             fixed_velocity_enable: settings.fixed_velocity_enable.into(),
             fixed_velocity_amount: settings.fixed_velocity_amount,
@@ -113,13 +96,14 @@ impl From<&Settings> for ar_settings_t {
             sample_recorder_thr: settings.sample_recorder_thr,
             sample_recorder_monitor: settings.sample_recorder_monitor_enable.into(),
 
-            __unknown0x001F: settings.__unknown0x001f,
-            __unknown0x081F: settings.__unknown0x081f,
-
             sample_recorder_rlen: settings.sample_recorder_rlen.into(),
 
-            __unknown0x0821_0x0826: settings.__unknown0x0821_0x0826,
-        }
+            ..Default::default()
+        };
+
+        settings.__unknown.apply_to_raw_settings(&mut raw_settings);
+
+        raw_settings
     }
 }
 
@@ -130,25 +114,25 @@ impl Default for Settings {
             version: 3,
             bpm_project: 120.0,
             selected_track: 0,
-            __selected_track_duplicate: 0,
+
             selected_parameter_menu_item: ParameterMenuItem::default(),
             selected_fx_menu_item: FxParameterMenuItem::default(),
             selected_page: 0,
-            __unknown_0x000b: 0,
+
             mute_flags: 0,
-            __unknown0x000e_0x0014: [0; 7],
+
             selected_mode: SequencerMode::default(),
             selected_pattern_mode: PatternMode::default(),
-            __unknown0x0017_0x0019: [0; 3],
+
             fixed_velocity_enable: false,
             fixed_velocity_amount: 0,
             sample_recorder_src: SampleRecorderSource::default(),
             sample_recorder_thr: 0,
             sample_recorder_monitor_enable: false,
-            __unknown0x001f: [0; 16 * 128],
-            __unknown0x081f: 0,
+
             sample_recorder_rlen: SampleRecorderRecordingLength::default(),
-            __unknown0x0821_0x0826: [0; 6],
+
+            __unknown: SettingsUnknown::default(),
         }
     }
 }
@@ -178,23 +162,17 @@ impl Settings {
             version,
             bpm_project,
             selected_track: raw_settings.selected_track,
-            __selected_track_duplicate: raw_settings._selected_track_duplicate,
+
             selected_parameter_menu_item: raw_settings
                 .selected_trig_or_parameter_menu
                 .try_into()?,
             selected_fx_menu_item: raw_settings.selected_fx_menu.try_into()?,
             selected_page: raw_settings.selected_page,
 
-            __unknown_0x000b: raw_settings.__unknown_0x000B,
-
             mute_flags,
-
-            __unknown0x000e_0x0014: raw_settings.__unknown0x000E_0x0014,
 
             selected_mode: raw_settings.selected_mode.try_into()?,
             selected_pattern_mode: raw_settings.selected_pattern_transition_mode.try_into()?,
-
-            __unknown0x0017_0x0019: raw_settings.__unknown0x0017_0x0019,
 
             fixed_velocity_enable: raw_settings.fixed_velocity_enable != 0,
             fixed_velocity_amount: raw_settings.fixed_velocity_amount,
@@ -202,13 +180,9 @@ impl Settings {
             sample_recorder_src: raw_settings.sample_recorder_src.try_into()?,
             sample_recorder_thr: raw_settings.sample_recorder_thr,
             sample_recorder_monitor_enable: raw_settings.sample_recorder_monitor != 0,
-
-            __unknown0x001f: raw_settings.__unknown0x001F,
-            __unknown0x081f: raw_settings.__unknown0x081F,
-
             sample_recorder_rlen: raw_settings.sample_recorder_rlen.try_into()?,
 
-            __unknown0x0821_0x0826: raw_settings.__unknown0x0821_0x0826,
+            __unknown: raw_settings.into(),
         })
     }
 
@@ -309,9 +283,17 @@ impl Settings {
     ///
     /// Maximum range `0..=11`
     pub fn mute_range_of_sounds(&mut self, range: std::ops::Range<usize>) -> Result<(), RytmError> {
+        if range.end > 11 {
+            return Err(RytmError::Parameter(ParameterError::Range {
+                value: format!("{:?}", range),
+                parameter_name: "range".to_string(),
+            }));
+        }
+
         for sound_index in range {
             self.mute_sound(sound_index)?;
         }
+
         Ok(())
     }
 

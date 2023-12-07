@@ -1,47 +1,38 @@
+#![allow(unused)]
+
+use rytm_rs::{pattern::MicroTime, sound::types::Machine};
+use rytm_sys::{s_u16_t, s_u16_t__bindgen_ty_1};
+
+use rytm_rs::error::{ConversionError, ParameterError, RytmError, SysexConversionError};
 use rytm_rs_macro::parameter_range;
 use rytm_sys::{
     ar_sysex_id_t_AR_TYPE_GLOBAL, ar_sysex_id_t_AR_TYPE_KIT, ar_sysex_id_t_AR_TYPE_PATTERN,
     ar_sysex_id_t_AR_TYPE_SETTINGS, ar_sysex_id_t_AR_TYPE_SONG, ar_sysex_id_t_AR_TYPE_SOUND,
+    ar_sysex_meta_t,
 };
-use rytm_sys::{ar_sysex_meta_t, s_u16_t, s_u16_t__bindgen_ty_1};
 
-use rytm_rs::error::ParameterError;
-use rytm_rs::error::RytmError;
-use rytm_rs::error::{ConversionError, SysexConversionError};
-use rytm_rs::pattern::MicroTime;
+/// Pattern sysex response size for FW 1.70.
+pub(crate) const PATTERN_SYSEX_SIZE: usize = 2998;
+/// Kit sysex response size for FW 1.70.
+pub(crate) const KIT_SYSEX_SIZE: usize = 14988;
+/// Sound sysex response size for FW 1.70.
+pub(crate) const SOUND_SYSEX_SIZE: usize = 201;
+/// Settings sysex response size for FW 1.70.
+pub(crate) const SETTINGS_SYSEX_SIZE: usize = 2401;
+/// Global sysex response size for FW 1.70.
+pub(crate) const GLOBAL_SYSEX_SIZE: usize = 107;
+/// Song sysex response size for FW 1.70.
+pub(crate) const SONG_SYSEX_SIZE: usize = 1506;
 
-#[allow(unused)]
-pub fn to_s_u16_t_union_a(value: u16) -> s_u16_t {
-    let msb = (value >> 8) as u8;
-    let lsb = (value & 0xFF) as u8;
-    s_u16_t { a: [msb, lsb] }
-}
+const SYSEX_MESSAGE_TYPE_BYTE_INDEX: usize = 7;
 
-#[allow(unused)]
-pub fn to_s_u16_t_union_v(value: u16) -> s_u16_t {
-    s_u16_t { v: value }
-}
-
-pub fn to_s_u16_t_union_b(value: u16) -> s_u16_t {
-    let msb = (value >> 8) as u8;
-    let lsb = (value & 0xFF) as u8;
-    s_u16_t {
-        b: s_u16_t__bindgen_ty_1 { hi: msb, lo: lsb },
-    }
-}
-
-pub unsafe fn from_s_u16_t(value: &s_u16_t) -> u16 {
-    let msb = value.b.hi as u16;
-    let lsb = value.b.lo as u16;
-    (msb << 8) | lsb
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum SysexType {
     Pattern,
     Kit,
     Sound,
     Song,
+    #[default]
     Settings,
     Global,
 }
@@ -61,6 +52,25 @@ impl From<SysexType> for u8 {
     }
 }
 
+#[allow(non_upper_case_globals)]
+impl TryFrom<u8> for SysexType {
+    type Error = ConversionError;
+    fn try_from(sysex_type: u8) -> Result<Self, Self::Error> {
+        match sysex_type as u32 {
+            ar_sysex_id_t_AR_TYPE_PATTERN => Ok(SysexType::Pattern),
+            ar_sysex_id_t_AR_TYPE_KIT => Ok(SysexType::Kit),
+            ar_sysex_id_t_AR_TYPE_SOUND => Ok(SysexType::Sound),
+            ar_sysex_id_t_AR_TYPE_SONG => Ok(SysexType::Song),
+            ar_sysex_id_t_AR_TYPE_SETTINGS => Ok(SysexType::Settings),
+            ar_sysex_id_t_AR_TYPE_GLOBAL => Ok(SysexType::Global),
+            _ => Err(ConversionError::Range {
+                value: sysex_type.to_string(),
+                type_name: "SysexType".into(),
+            }),
+        }
+    }
+}
+
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct SysexMeta {
     pub container_version: u16,
@@ -72,16 +82,67 @@ pub struct SysexMeta {
 }
 
 impl SysexMeta {
-    #[parameter_range(range = "object_index:0..=127")]
-    pub fn try_default_for_pattern(
-        object_index: usize,
+    const SYSEX_META_CONTAINER_VERSION: u16 = 0x0101;
+
+    pub fn is_targeting_work_buffer(&self) -> bool {
+        self.obj_nr >= 128
+    }
+
+    pub fn object_type(&self) -> Result<SysexType, RytmError> {
+        let r#type: SysexType = self.obj_type.try_into()?;
+        Ok(r#type)
+    }
+
+    pub fn default_for_settings(dev_id: Option<usize>) -> Self {
+        Self {
+            container_version: SysexMeta::SYSEX_META_CONTAINER_VERSION,
+            dev_id: dev_id.unwrap_or(0) as u8,
+            obj_type: SysexType::Settings.into(),
+            obj_nr: 0b0000_0000,
+            // Calculated in libanalogrytm, they're dummy values here in this state.
+            chksum: 0,
+            data_size: 0,
+        }
+    }
+
+    #[parameter_range(range = "global_slot:0..=3")]
+    pub fn try_default_for_global(
+        global_slot: usize,
         dev_id: Option<usize>,
     ) -> Result<Self, RytmError> {
         Ok(Self {
-            container_version: 0x0101,
+            container_version: SysexMeta::SYSEX_META_CONTAINER_VERSION,
+            dev_id: dev_id.unwrap_or(0) as u8,
+            obj_type: SysexType::Global.into(),
+            obj_nr: global_slot as u16,
+            // Calculated in libanalogrytm, they're dummy values here in this state.
+            chksum: 0,
+            data_size: 0,
+        })
+    }
+
+    pub fn default_for_global_in_work_buffer(dev_id: Option<usize>) -> Self {
+        Self {
+            container_version: SysexMeta::SYSEX_META_CONTAINER_VERSION,
+            dev_id: dev_id.unwrap_or(0) as u8,
+            obj_type: SysexType::Global.into(),
+            obj_nr: 0b1000_0000,
+            // Calculated in libanalogrytm, they're dummy values here in this state.
+            chksum: 0,
+            data_size: 0,
+        }
+    }
+
+    #[parameter_range(range = "pattern_index:0..=127")]
+    pub fn try_default_for_pattern(
+        pattern_index: usize,
+        dev_id: Option<usize>,
+    ) -> Result<Self, RytmError> {
+        Ok(Self {
+            container_version: SysexMeta::SYSEX_META_CONTAINER_VERSION,
             dev_id: dev_id.unwrap_or(0) as u8,
             obj_type: SysexType::Pattern.into(),
-            obj_nr: object_index as u16,
+            obj_nr: pattern_index as u16,
             // Calculated in libanalogrytm, they're dummy values here in this state.
             chksum: 0,
             data_size: 0,
@@ -90,27 +151,51 @@ impl SysexMeta {
 
     pub fn default_for_pattern_in_work_buffer(dev_id: Option<usize>) -> Self {
         Self {
-            container_version: 0x0101,
+            container_version: SysexMeta::SYSEX_META_CONTAINER_VERSION,
             dev_id: dev_id.unwrap_or(0) as u8,
             obj_type: SysexType::Pattern.into(),
-            obj_nr: 0xFF,
+            obj_nr: 0b1000_0000,
             // Calculated in libanalogrytm, they're dummy values here in this state.
             chksum: 0,
             data_size: 0,
         }
     }
 
-    // TODO: Find the right range.
-    #[parameter_range(range = "object_index:0..=127")]
+    #[parameter_range(range = "kit_index:0..=127")]
+    pub fn try_default_for_kit(kit_index: usize, dev_id: Option<usize>) -> Result<Self, RytmError> {
+        Ok(Self {
+            container_version: SysexMeta::SYSEX_META_CONTAINER_VERSION,
+            dev_id: dev_id.unwrap_or(0) as u8,
+            obj_type: SysexType::Kit.into(),
+            obj_nr: kit_index as u16,
+            // Calculated in libanalogrytm, they're dummy values here in this state.
+            chksum: 0,
+            data_size: 0,
+        })
+    }
+
+    pub fn default_for_kit_in_work_buffer(dev_id: Option<usize>) -> Self {
+        Self {
+            container_version: SysexMeta::SYSEX_META_CONTAINER_VERSION,
+            dev_id: dev_id.unwrap_or(0) as u8,
+            obj_type: SysexType::Kit.into(),
+            obj_nr: 0b1000_0000,
+            // Calculated in libanalogrytm, they're dummy values here in this state.
+            chksum: 0,
+            data_size: 0,
+        }
+    }
+
+    #[parameter_range(range = "sound_index:0..=127")]
     pub fn try_default_for_sound(
-        object_index: usize,
+        sound_index: usize,
         dev_id: Option<usize>,
     ) -> Result<Self, RytmError> {
         Ok(Self {
-            container_version: 0x0101,
+            container_version: SysexMeta::SYSEX_META_CONTAINER_VERSION,
             dev_id: dev_id.unwrap_or(0) as u8,
             obj_type: SysexType::Sound.into(),
-            obj_nr: object_index as u16,
+            obj_nr: sound_index as u16,
             // Calculated in libanalogrytm, they're dummy values here in this state.
             chksum: 0,
             data_size: 0,
@@ -119,11 +204,10 @@ impl SysexMeta {
 
     pub fn default_for_sound_in_work_buffer(dev_id: Option<usize>) -> Self {
         Self {
-            container_version: 0x0101,
+            container_version: SysexMeta::SYSEX_META_CONTAINER_VERSION,
             dev_id: dev_id.unwrap_or(0) as u8,
             obj_type: SysexType::Sound.into(),
-            // TODO: Double check this.
-            obj_nr: 0xFF,
+            obj_nr: 0b1000_0000,
             // Calculated in libanalogrytm, they're dummy values here in this state.
             chksum: 0,
             data_size: 0,
@@ -158,16 +242,26 @@ impl From<&ar_sysex_meta_t> for SysexMeta {
     }
 }
 
+/// This function assumes that the response is a valid sysex response.
+///
+/// It should be used in a context where this case is true and validity check is not necessary.
 pub fn decode_sysex_response_to_raw(response: &[u8]) -> Result<(Vec<u8>, SysexMeta), RytmError> {
-    // This could be made smaller later, the largest reverse-engineered sysex response I've seen is 14988 bytes.
-    // But for now I think it is a reasonable value.
-    // It can be optimized if we know which response we're expecting if necessary.
-    const LARGE_SYSEX_GUESSED_SIZE: usize = 4096 * 4;
+    let response_type: SysexType = response[SYSEX_MESSAGE_TYPE_BYTE_INDEX].try_into()?;
+    let response_size = match response_type {
+        SysexType::Pattern => PATTERN_SYSEX_SIZE,
+        SysexType::Kit => KIT_SYSEX_SIZE,
+        SysexType::Sound => SOUND_SYSEX_SIZE,
+        SysexType::Settings => SETTINGS_SYSEX_SIZE,
+        SysexType::Global => GLOBAL_SYSEX_SIZE,
+        SysexType::Song => SONG_SYSEX_SIZE,
+    };
 
+    // Make a default meta struct to fill.
     let meta = SysexMeta::default();
     let mut meta: rytm_sys::ar_sysex_meta_t = meta.into();
     let meta_p = &mut meta as *mut rytm_sys::ar_sysex_meta_t;
 
+    // The response buffer.
     let mut src_buf = response.as_ptr();
     let src_buf_p = &mut src_buf as *mut *const u8;
     let mut src_buf_size = response.len() as u32;
@@ -177,7 +271,8 @@ pub fn decode_sysex_response_to_raw(response: &[u8]) -> Result<(Vec<u8>, SysexMe
     let dst_buf_size = 0; // Big enough for the largest sysex message probably.
     let dest_buf_size_p = dst_buf_size as *mut u32;
 
-    let mut dst_buf = vec![0_u8; LARGE_SYSEX_GUESSED_SIZE];
+    // The destination buffer, raw buffer.
+    let mut dst_buf = vec![0_u8; response_size];
     let dst_buf_p = dst_buf.as_mut_slice().as_mut_ptr();
 
     unsafe {
@@ -199,9 +294,45 @@ pub fn decode_sysex_response_to_raw(response: &[u8]) -> Result<(Vec<u8>, SysexMe
     Ok((dst_buf, SysexMeta::from(&meta)))
 }
 
-pub(crate) fn decode_micro_timing_byte(
-    micro_timing_value: i8,
-) -> Result<MicroTime, ConversionError> {
+#[allow(unused)]
+pub fn to_s_u16_t_union_a(value: u16) -> s_u16_t {
+    let msb = (value >> 8) as u8;
+    let lsb = (value & 0xFF) as u8;
+    s_u16_t { a: [msb, lsb] }
+}
+
+#[allow(unused)]
+pub fn to_s_u16_t_union_v(value: u16) -> s_u16_t {
+    s_u16_t { v: value }
+}
+
+pub fn to_s_u16_t_union_b(value: u16) -> s_u16_t {
+    let msb = (value >> 8) as u8;
+    let lsb = (value & 0xFF) as u8;
+    s_u16_t {
+        b: s_u16_t__bindgen_ty_1 { hi: msb, lo: lsb },
+    }
+}
+
+pub fn to_s_u16_t_union_b_from_u8_as_msb(value: u8) -> s_u16_t {
+    s_u16_t {
+        b: s_u16_t__bindgen_ty_1 { hi: value, lo: 0 },
+    }
+}
+
+pub fn to_s_u16_t_union_b_from_u8_as_lsb(value: u8) -> s_u16_t {
+    s_u16_t {
+        b: s_u16_t__bindgen_ty_1 { hi: 0, lo: value },
+    }
+}
+
+pub unsafe fn from_s_u16_t(value: &s_u16_t) -> u16 {
+    let msb = value.b.hi as u16;
+    let lsb = value.b.lo as u16;
+    (msb << 8) | lsb
+}
+
+pub fn decode_micro_timing_byte(micro_timing_value: i8) -> Result<MicroTime, ConversionError> {
     match micro_timing_value {
         -92 => Ok(MicroTime::N23B384),
         -88 => Ok(MicroTime::N11B192),
@@ -257,7 +388,7 @@ pub(crate) fn decode_micro_timing_byte(
     }
 }
 
-pub(crate) fn encode_micro_timing_byte(micro_timing: &MicroTime) -> i8 {
+pub fn encode_micro_timing_byte(micro_timing: &MicroTime) -> i8 {
     match micro_timing {
         MicroTime::N23B384 => -92,
         MicroTime::N11B192 => -88,
@@ -307,4 +438,33 @@ pub(crate) fn encode_micro_timing_byte(micro_timing: &MicroTime) -> i8 {
         MicroTime::P11B192 => 88,
         MicroTime::P23B384 => 92,
     }
+}
+
+/// Checks if the given machine is compatible for the given track.
+pub fn is_machine_compatible_for_track(track_index: usize, machine: Machine) -> bool {
+    let compatible_machines = unsafe { rytm_sys::ar_sound_compatible_machines };
+    let compatible_machines_for_track = compatible_machines[track_index];
+
+    let mut compatible_machines_for_track_size = 0;
+    loop {
+        unsafe {
+            let return_id = rytm_sys::ar_sound_get_machine_id_by_track_and_list_idx(
+                track_index as u32,
+                compatible_machines_for_track_size,
+            );
+            if return_id == -1 {
+                break;
+            }
+            compatible_machines_for_track_size += 1;
+        }
+    }
+
+    let compatible_machines_for_track_slice = unsafe {
+        std::slice::from_raw_parts(
+            compatible_machines_for_track,
+            compatible_machines_for_track_size as usize,
+        )
+    };
+
+    compatible_machines_for_track_slice.contains(&((machine as u8) as i32))
 }

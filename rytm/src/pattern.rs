@@ -4,29 +4,34 @@ pub mod plock_seq;
 pub mod track;
 pub mod types;
 
-use self::types::Speed;
-use self::types::TimeMode;
-use crate::error::ParameterError;
-use crate::error::SysexConversionError;
-use crate::pattern::plock_seq::PlockSeq;
-use crate::pattern::track::Track;
-use crate::sysex::SysexCompatible;
-use crate::sysex::SysexMeta;
-use crate::sysex::SysexType;
-use derivative::Derivative;
-use rytm_rs_macro::parameter_range;
-
-use rytm_sys::ar_pattern_raw_to_syx;
-use rytm_sys::{ar_pattern_t, ar_pattern_track_t, ar_plock_seq_t, ar_sysex_meta_t};
-
-pub use track::trig::types::*;
-pub use track::trig::Trig;
-pub use track::types::*;
-
+use self::types::{Speed, TimeMode};
 use super::{
     error::RytmError,
     util::{from_s_u16_t, to_s_u16_t_union_b},
 };
+use crate::{
+    error::{ParameterError, SysexConversionError},
+    impl_sysex_compatible,
+    pattern::{plock_seq::PlockSeq, track::Track},
+    sysex::{SysexCompatible, SysexMeta, SysexType, PATTERN_SYSEX_SIZE},
+};
+use derivative::Derivative;
+use rytm_rs_macro::parameter_range;
+use rytm_sys::{
+    ar_pattern_raw_to_syx, ar_pattern_t, ar_pattern_track_t, ar_plock_seq_t, ar_sysex_meta_t,
+};
+pub use track::{
+    trig::{types::*, Trig},
+    types::*,
+};
+
+impl_sysex_compatible!(
+    Pattern,
+    ar_pattern_t,
+    ar_pattern_raw_to_syx,
+    SysexType::Pattern,
+    PATTERN_SYSEX_SIZE
+);
 
 /// # Pattern
 ///
@@ -434,52 +439,5 @@ impl Pattern {
     /// Returns the version of the pattern structure.
     pub fn structure_version(&self) -> u32 {
         self.version
-    }
-}
-
-impl SysexCompatible for Pattern {
-    // TODO: Better implementation here..
-    fn as_sysex_message(&self) -> Result<Vec<u8>, RytmError> {
-        let (sysex_meta, raw_pattern) = self.to_raw_parts();
-
-        let size_raw_pattern = std::mem::size_of::<ar_pattern_t>();
-        let mut raw_buffer: Vec<u8> = Vec::with_capacity(size_raw_pattern);
-
-        unsafe {
-            let raw: *const u8 = &raw_pattern as *const rytm_sys::ar_pattern_t as *const u8;
-            for i in 0..size_raw_pattern {
-                raw_buffer.push(*raw.add(i));
-            }
-        }
-
-        let encoded_buffer_length: u32 = 0;
-        let size_guess_encoded_pattern =
-            (size_raw_pattern as f64 * (14988.0 / 13101.0)).ceil() as usize;
-        let mut encoded_buf = vec![0; size_guess_encoded_pattern];
-
-        let mut meta = sysex_meta.into();
-        let meta_ptr = &mut meta as *mut ar_sysex_meta_t;
-
-        unsafe {
-            let return_code = ar_pattern_raw_to_syx(
-                encoded_buf.as_mut_ptr(),
-                raw_buffer.as_ptr(),
-                std::mem::size_of::<ar_pattern_t>() as u32,
-                encoded_buffer_length as *mut u32,
-                meta_ptr,
-            ) as u8;
-
-            if return_code != 0 {
-                return Err(SysexConversionError::from(return_code).into());
-            }
-
-            encoded_buf.shrink_to_fit();
-
-            Ok(encoded_buf)
-        }
-    }
-
-    fn r#type(&self) -> SysexType {
-        SysexType::Pattern
     }
 }

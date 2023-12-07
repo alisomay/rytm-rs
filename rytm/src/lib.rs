@@ -10,18 +10,16 @@ pub mod sound;
 pub(crate) mod sysex;
 pub(crate) mod util;
 
+use self::error::RytmError;
+use crate::error::ParameterError;
 use global::Global;
 use kit::Kit;
 use pattern::Pattern;
-use settings::Settings;
-use sound::{Sound, SoundType};
-
-use crate::error::ParameterError;
 use rytm_rs_macro::parameter_range;
 use rytm_sys::{ar_global_t, ar_kit_t, ar_pattern_t, ar_settings_t, ar_sound_t};
+use settings::Settings;
+use sound::{Sound, SoundType};
 use sysex::{decode_sysex_response_to_raw, SysexCompatible, SysexType};
-
-use self::error::RytmError;
 
 /// Rytm is the main struct that holds structures for projects.
 #[derive(Clone, Debug)]
@@ -196,18 +194,52 @@ impl Rytm {
         self.patterns[pattern_index].as_sysex_message()
     }
 
-    // TODO: Encode kit as a sysex message.
-    // TODO: Encode sound as a sysex message.
-    // TODO: Encode global as a sysex message.
-    // TODO: Encode settings as a sysex message.
+    // Encode kit as a sysex message.
+    #[parameter_range(range = "kit_index:0..=127")]
+    pub fn encode_kit_as_sysex_message(&self, kit_index: usize) -> Result<Vec<u8>, RytmError> {
+        self.kits[kit_index].as_sysex_message()
+    }
 
+    // Encode sound as a sysex message.
+    #[parameter_range(range = "sound_index:0..=127")]
+    pub fn encode_sound_as_sysex_message(&self, sound_index: usize) -> Result<Vec<u8>, RytmError> {
+        self.pool_sounds[sound_index].as_sysex_message()
+    }
+
+    // Encode global as a sysex message.
+    #[parameter_range(range = "global_slot:0..=3")]
+    pub fn encode_global_as_sysex_message(&self, global_slot: usize) -> Result<Vec<u8>, RytmError> {
+        self.globals[global_slot].as_sysex_message()
+    }
+
+    // Encode settings as a sysex message.
+    pub fn encode_settings_as_sysex_message(&self) -> Result<Vec<u8>, RytmError> {
+        self.settings.as_sysex_message()
+    }
+
+    /// Encode work buffer pattern as a sysex message.
     pub fn encode_work_buffer_pattern_as_sysex_message(&self) -> Result<Vec<u8>, RytmError> {
         self.work_buffer_pattern.as_sysex_message()
     }
 
-    // TODO: Encode work buffer kit as a sysex message.
-    // TODO: Encode work buffer sound as a sysex message.
-    // TODO: Encode work buffer global as a sysex message.
+    /// Encode work buffer kit as a sysex message.
+    pub fn encode_work_buffer_kit_as_sysex_message(&self) -> Result<Vec<u8>, RytmError> {
+        self.work_buffer_kit.as_sysex_message()
+    }
+
+    /// Encode work buffer sound as a sysex message.
+    #[parameter_range(range = "track_index:0..=11")]
+    pub fn encode_work_buffer_sound_as_sysex_message(
+        &self,
+        track_index: usize,
+    ) -> Result<Vec<u8>, RytmError> {
+        self.work_buffer_sounds[track_index].as_sysex_message()
+    }
+
+    /// Encode work buffer global as a sysex message.
+    pub fn encode_work_buffer_global_as_sysex_message(&self) -> Result<Vec<u8>, RytmError> {
+        self.work_buffer_global.as_sysex_message()
+    }
 
     /// Get all patterns.
     ///

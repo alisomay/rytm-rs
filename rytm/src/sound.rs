@@ -1,4 +1,5 @@
-// TODO: Not understood kit offsets?
+// TODO:
+// - Not understood kit offsets is it relevant?
 
 pub mod machine;
 pub mod page;
@@ -6,31 +7,49 @@ pub mod settings;
 pub mod types;
 pub(crate) mod unknown;
 
+use self::{
+    page::{Amplitude, Filter, Lfo, Sample},
+    settings::SoundSettings,
+    types::Machine,
+    unknown::SoundUnknown,
+};
+use crate::{
+    error::{RytmError, SysexConversionError},
+    impl_sysex_compatible,
+    object::ObjectName,
+    sound::types::SynthParameter,
+    sysex::{SysexCompatible, SysexMeta, SysexType, SOUND_SYSEX_SIZE},
+    util::from_s_u16_t,
+    ParameterError,
+};
 use derivative::Derivative;
 use rytm_rs_macro::parameter_range;
-use rytm_sys::ar_sound_t;
+use rytm_sys::{ar_sound_raw_to_syx, ar_sound_t, ar_sysex_meta_t};
 
-use self::page::{Amplitude, Filter, Lfo, Sample};
-use self::settings::SoundSettings;
-use self::types::{Machine, SoundModTarget};
-use self::unknown::SoundUnknown;
-use crate::error::RytmError;
-use crate::object::ObjectName;
-use crate::sound::types::SynthParameter;
-use crate::sysex::{SysexMeta, SysexType};
-use crate::util::from_s_u16_t;
-use crate::ParameterError;
+// Internal type to understand where the sound comes from.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub enum SoundType {
+pub(crate) enum SoundType {
     Pool,
     #[default]
     WorkBuffer,
     KitQuery,
 }
 
+impl_sysex_compatible!(
+    Sound,
+    ar_sound_t,
+    ar_sound_raw_to_syx,
+    SysexType::Sound,
+    SOUND_SYSEX_SIZE
+);
+
 #[derive(Derivative, Clone, Copy)]
 #[derivative(Debug)]
 pub struct Sound {
+    /// Version of the sound structure.
+    version: u32,
+    sysex_meta: SysexMeta,
+
     /// Index of the sound.
     ///
     /// This can mean various things depending on the context
@@ -38,24 +57,15 @@ pub struct Sound {
     /// - If this sound is retrieved from the sound pool, this is the index of the sound in the pool.
     /// - If this sound is retrieved from a track from the work buffer or a kit query, this is the index of the track.
     index: usize,
-
     /// Index of the sound if it was retrieved from the sound pool.
     pool_index: Option<usize>,
-
     /// Kit number if this sound is retrieved from a kit query
     kit_number: Option<usize>,
-
     /// Index of the sound if it was retrieved from a track from the work buffer.
     assigned_track: Option<usize>,
 
-    sysex_meta: SysexMeta,
-
-    /// Version of the sound structure.
-    version: u32,
-
     /// Name of the sound.
     name: ObjectName,
-
     // TODO: Complex lookup depending on machine type.
     synth_parameter: [SynthParameter; 8],
 
@@ -77,18 +87,34 @@ pub struct Sound {
 
 impl From<&Sound> for ar_sound_t {
     fn from(sound: &Sound) -> Self {
-        todo!("Conversion to ar_sound_t is not implemented yet.")
+        // TODO: Synth parameters omitted. Don't forget to implement them.
+
+        let mut raw_sound = rytm_sys::ar_sound_t {
+            name: sound.name.copy_inner(),
+            machine_type: sound.machine.into(),
+            accent_level: sound.accent_level,
+            def_note: sound.def_note,
+            ..Default::default()
+        };
+
+        sound.sample().apply_to_raw_sound(&mut raw_sound);
+        sound.filter().apply_to_raw_sound(&mut raw_sound);
+        sound.amplitude().apply_to_raw_sound(&mut raw_sound);
+        sound.lfo().apply_to_raw_sound(&mut raw_sound);
+        sound.settings().apply_to_raw_sound(&mut raw_sound);
+
+        sound.__unknown.apply_to_raw_sound(&mut raw_sound);
+
+        raw_sound
     }
 }
 
 impl Sound {
-    pub fn try_from_raw(
+    pub(crate) fn try_from_raw(
         sysex_meta: SysexMeta,
         raw_sound: &ar_sound_t,
         kit_number_and_assigned_track: Option<(usize, usize)>,
     ) -> Result<Self, RytmError> {
-        let machine: Machine = raw_sound.machine_type.try_into()?;
-
         let version = ((raw_sound.__unknown_arr1[4] as u32) << 24)
             | ((raw_sound.__unknown_arr1[5] as u32) << 16)
             | ((raw_sound.__unknown_arr1[6] as u32) << 8)
@@ -153,7 +179,7 @@ impl Sound {
                 SynthParameter::new(unsafe { from_s_u16_t(&raw_sound.synth_param_8) }),
             ],
 
-            machine,
+            machine: raw_sound.machine_type.try_into()?,
             sample: raw_sound.try_into()?,
             filter: raw_sound.try_into()?,
             amplitude: raw_sound.try_into()?,
@@ -167,38 +193,58 @@ impl Sound {
         })
     }
 
-    /// Checks if the given machine is compatible for the given track.
-    fn is_machine_compatible_for_track(track_index: usize, machine: Machine) -> bool {
-        let compatible_machines = unsafe { rytm_sys::ar_sound_compatible_machines };
-        let compatible_machines_for_track = compatible_machines[track_index];
-
-        let mut compatible_machines_for_track_size = 0;
-        loop {
-            unsafe {
-                let return_id = rytm_sys::ar_sound_get_machine_id_by_track_and_list_idx(
-                    track_index as u32,
-                    compatible_machines_for_track_size,
-                );
-                if return_id == -1 {
-                    break;
-                }
-                compatible_machines_for_track_size += 1;
-            }
-        }
-
-        let compatible_machines_for_track_slice = unsafe {
-            std::slice::from_raw_parts(
-                compatible_machines_for_track,
-                compatible_machines_for_track_size as usize,
-            )
-        };
-
-        compatible_machines_for_track_slice.contains(&((machine as u8) as i32))
+    pub(crate) fn to_raw_parts(&self) -> (SysexMeta, ar_sound_t) {
+        (self.sysex_meta, self.into())
     }
 
+    pub(crate) fn sound_type(&self) -> SoundType {
+        if self.is_pool_sound() {
+            SoundType::Pool
+        } else if self.is_work_buffer_sound() {
+            SoundType::WorkBuffer
+        } else {
+            SoundType::KitQuery
+        }
+    }
+
+    /// Returns if the sound is coming from the sound pool.
+    pub fn is_pool_sound(&self) -> bool {
+        self.pool_index.is_some()
+    }
+
+    /// Returns if the sound is coming from the work buffer and assigned to a track.
+    pub fn is_work_buffer_sound(&self) -> bool {
+        self.assigned_track().is_some() && self.kit_number.is_none()
+    }
+
+    /// Returns if the sound is coming from a kit query and loaded as a part of a kit.
+    pub fn is_part_of_a_kit_query(&self) -> bool {
+        self.kit_number.is_some()
+    }
+
+    /// Sets the name of the sound.
+    ///
+    /// The name must be ASCII and have a length of 15 characters or less.
+    pub fn set_name(&mut self, name: &str) -> Result<(), RytmError> {
+        if !name.is_ascii() || name.len() > 15 {
+            return Err(ParameterError::Compatibility {
+                value: name.to_string(),
+                parameter_name: "Name".to_string(),
+                reason: Some(
+                    "Name must be ASCII and have a length of 15 characters or less.".to_owned(),
+                ),
+            }
+            .into());
+        }
+
+        self.name = ObjectName::from_u8_array(name.as_bytes().try_into().unwrap());
+        Ok(())
+    }
+
+    /// Sets the machine of the sound.
     pub fn set_machine(&mut self, machine: Machine) -> Result<(), RytmError> {
         if let Some(assigned_track) = self.assigned_track() {
-            if !Sound::is_machine_compatible_for_track(assigned_track, machine) {
+            if !crate::util::is_machine_compatible_for_track(assigned_track, machine) {
                 return Err(ParameterError::Compatibility {
                     value: machine.to_string(),
                     parameter_name: "Machine".to_string(),
@@ -224,35 +270,6 @@ impl Sound {
         Ok(())
     }
 
-    /// Returns the accent level of the sound.
-    ///
-    /// Range: `0..=127`
-    pub fn accent_level(&self) -> usize {
-        self.accent_level as usize
-    }
-
-    pub fn sound_type(&self) -> SoundType {
-        if self.is_pool_sound() {
-            SoundType::Pool
-        } else if self.is_work_buffer_sound() {
-            SoundType::WorkBuffer
-        } else {
-            SoundType::KitQuery
-        }
-    }
-
-    pub fn is_pool_sound(&self) -> bool {
-        self.pool_index.is_some()
-    }
-
-    pub fn is_work_buffer_sound(&self) -> bool {
-        self.assigned_track().is_some() && self.kit_number.is_none()
-    }
-
-    pub fn is_part_of_a_kit_query(&self) -> bool {
-        self.kit_number.is_some()
-    }
-
     /// Returns the assigned track if this is a track sound.
     ///
     /// Returns `None` if this is not a track sound.
@@ -260,8 +277,66 @@ impl Sound {
         self.assigned_track
     }
 
-    pub fn to_raw_parts(&self) -> (SysexMeta, ar_sound_t) {
-        (self.sysex_meta, self.into())
+    /// Returns the accent level of the sound.
+    ///
+    /// Range: `0..=127`
+    pub fn accent_level(&self) -> usize {
+        self.accent_level as usize
+    }
+
+    /// Returns the name of the sound.
+    pub fn name(&self) -> &str {
+        self.name.as_str()
+    }
+
+    /// Returns the sample page parameters of the sound.
+    pub fn sample(&self) -> &Sample {
+        &self.sample
+    }
+
+    /// Returns the filter page parameters of the sound.
+    pub fn filter(&self) -> &Filter {
+        &self.filter
+    }
+
+    /// Returns the amplitude page parameters of the sound.
+    pub fn amplitude(&self) -> &Amplitude {
+        &self.amplitude
+    }
+
+    /// Returns the LFO page parameters of the sound.
+    pub fn lfo(&self) -> &Lfo {
+        &self.lfo
+    }
+
+    /// Returns sound settings of the sound.
+    pub fn settings(&self) -> &SoundSettings {
+        &self.settings
+    }
+
+    /// Returns the sample page parameters of the sound mutably.
+    pub fn sample_mut(&mut self) -> &mut Sample {
+        &mut self.sample
+    }
+
+    /// Returns the filter page parameters of the sound mutably.
+    pub fn filter_mut(&mut self) -> &mut Filter {
+        &mut self.filter
+    }
+
+    /// Returns the amplitude page parameters of the sound mutably.
+    pub fn amplitude_mut(&mut self) -> &mut Amplitude {
+        &mut self.amplitude
+    }
+
+    /// Returns the LFO page parameters of the sound mutably.
+    pub fn lfo_mut(&mut self) -> &mut Lfo {
+        &mut self.lfo
+    }
+
+    /// Returns sound settings of the sound mutably.
+    pub fn settings_mut(&mut self) -> &mut SoundSettings {
+        &mut self.settings
     }
 
     #[parameter_range(range = "sound_index:0..=127")]

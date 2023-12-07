@@ -1,30 +1,30 @@
+use super::types::FxLfoDestination;
 use crate::{
     error::{ConversionError, ParameterError, RytmError},
-    sound::types::{FilterType, LfoDestination, LfoMode, LfoMultiplier, LfoWaveform},
-    util::{from_s_u16_t, to_s_u16_t_union_a},
+    sound::types::{LfoMode, LfoMultiplier, LfoWaveform},
 };
 use rytm_rs_macro::parameter_range;
-use rytm_sys::ar_sound_t;
+use rytm_sys::ar_kit_t;
 
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
-pub struct Lfo {
+pub struct FxLfo {
     speed: i8,
     multiplier: LfoMultiplier,
     fade: i8,
-    destination: LfoDestination,
+    destination: FxLfoDestination,
     waveform: LfoWaveform,
     start_phase_or_slew: u8,
     mode: LfoMode,
     depth: f64,
 }
 
-impl Default for Lfo {
+impl Default for FxLfo {
     fn default() -> Self {
         Self {
             speed: 0,
             multiplier: LfoMultiplier::default(),
             fade: 0,
-            destination: LfoDestination::default(),
+            destination: FxLfoDestination::default(),
             waveform: LfoWaveform::default(),
             start_phase_or_slew: 0,
             mode: LfoMode::default(),
@@ -33,37 +33,39 @@ impl Default for Lfo {
     }
 }
 
-impl TryFrom<&ar_sound_t> for Lfo {
+impl TryFrom<&ar_kit_t> for FxLfo {
     type Error = ConversionError;
-    fn try_from(raw_sound: &ar_sound_t) -> Result<Self, Self::Error> {
+    fn try_from(raw_kit: &ar_kit_t) -> Result<Self, Self::Error> {
         // map range of 0..=32767 to -128.0..=127.99
-        let depth = unsafe { from_s_u16_t(&raw_sound.lfo_depth) } as f64 / 256.0 - 128.0;
+        let depth_u16 = ((raw_kit.fx_lfo_depth_msb as u16) << 8) + raw_kit.fx_lfo_depth_lsb as u16;
+        let depth = depth_u16 as f64 / 256.0 - 128.0;
         Ok(Self {
-            speed: raw_sound.lfo_speed as i8 - 64,
-            multiplier: raw_sound.lfo_multiplier.try_into()?,
-            fade: raw_sound.lfo_fade as i8 - 64,
-            destination: raw_sound.lfo_dest.try_into()?,
-            waveform: raw_sound.lfo_wav.try_into()?,
-            start_phase_or_slew: raw_sound.lfo_start_phase,
-            mode: raw_sound.lfo_mode.try_into()?,
+            speed: raw_kit.fx_lfo_speed as i8 - 64,
+            multiplier: raw_kit.fx_lfo_multiplier.try_into()?,
+            fade: raw_kit.fx_lfo_fade as i8 - 64,
+            destination: raw_kit.fx_lfo_dest.try_into()?,
+            waveform: raw_kit.fx_lfo_wave.try_into()?,
+            start_phase_or_slew: raw_kit.fx_lfo_start_phase,
+            mode: raw_kit.fx_lfo_mode.try_into()?,
             depth,
         })
     }
 }
 
-impl Lfo {
-    pub(crate) fn apply_to_raw_sound(&self, raw_sound: &mut ar_sound_t) {
+impl FxLfo {
+    pub(crate) fn apply_to_raw_kit(&self, raw_kit: &mut ar_kit_t) {
         // map range of -128.0..=127.99 to 0..=32767
-        let depth = (self.depth + 128.0) * 256.0;
+        let depth = ((self.depth + 128.0) * 256.0) as u16;
 
-        raw_sound.lfo_speed = self.speed as u8 + 64;
-        raw_sound.lfo_multiplier = self.multiplier.into();
-        raw_sound.lfo_fade = self.fade as u8 + 64;
-        raw_sound.lfo_dest = self.destination.into();
-        raw_sound.lfo_wav = self.waveform.into();
-        raw_sound.lfo_start_phase = self.start_phase_or_slew;
-        raw_sound.lfo_mode = self.mode.into();
-        raw_sound.lfo_depth = to_s_u16_t_union_a(depth as u16);
+        raw_kit.fx_lfo_speed = self.speed as u8 + 64;
+        raw_kit.fx_lfo_multiplier = self.multiplier.into();
+        raw_kit.fx_lfo_fade = self.fade as u8 + 64;
+        raw_kit.fx_lfo_dest = self.destination.into();
+        raw_kit.fx_lfo_wave = self.waveform.into();
+        raw_kit.fx_lfo_start_phase = self.start_phase_or_slew;
+        raw_kit.fx_lfo_mode = self.mode.into();
+        raw_kit.fx_lfo_depth_msb = ((depth & 0xFF00) >> 8) as u8;
+        raw_kit.fx_lfo_depth_lsb = depth as u8;
     }
 
     /// Sets the speed of the LFO.
@@ -91,7 +93,7 @@ impl Lfo {
     }
 
     /// Sets the destination of the LFO.
-    pub fn set_destination(&mut self, destination: LfoDestination) -> Result<(), RytmError> {
+    pub fn set_destination(&mut self, destination: FxLfoDestination) -> Result<(), RytmError> {
         self.destination = destination;
         Ok(())
     }
@@ -133,7 +135,7 @@ impl Lfo {
     }
 
     /// Returns the destination of the LFO.
-    pub fn destination(&self) -> &LfoDestination {
+    pub fn destination(&self) -> &FxLfoDestination {
         &self.destination
     }
 
