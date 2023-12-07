@@ -1,3 +1,4 @@
+use derivative::Derivative;
 use rytm_sys::ar_plock_seq_t;
 
 #[derive(Clone, Copy, Debug)]
@@ -34,5 +35,32 @@ impl From<&PlockSeq> for ar_plock_seq_t {
             track_nr: plock_seq.track_nr,
             data: plock_seq.data,
         }
+    }
+}
+
+#[derive(Derivative, Clone, Copy)]
+#[derivative(Debug)]
+pub struct PlockSeqCollection {
+    #[derivative(Debug = "ignore")]
+    inner: [rytm_sys::ar_plock_seq_t; 72],
+}
+
+impl Default for PlockSeqCollection {
+    fn default() -> Self {
+        Self {
+            inner: [rytm_sys::ar_plock_seq_t::default(); 72],
+        }
+    }
+}
+
+impl From<[rytm_sys::ar_plock_seq_t; 72]> for PlockSeqCollection {
+    fn from(raws: [rytm_sys::ar_plock_seq_t; 72]) -> Self {
+        Self { inner: raws }
+    }
+}
+
+impl From<PlockSeqCollection> for [rytm_sys::ar_plock_seq_t; 72] {
+    fn from(plock_seq_collection: PlockSeqCollection) -> Self {
+        plock_seq_collection.inner
     }
 }

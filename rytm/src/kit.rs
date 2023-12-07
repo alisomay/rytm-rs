@@ -1,3 +1,5 @@
+pub(crate) mod unknown;
+
 use derivative::Derivative;
 use rytm_rs_macro::parameter_range;
 use rytm_sys::ar_kit_t;
@@ -6,6 +8,8 @@ use crate::error::{ParameterError, RytmError};
 use crate::object::ObjectName;
 use crate::sysex::SysexMeta;
 use crate::Sound;
+
+use self::unknown::KitUnknown;
 
 // /*
 //  *
@@ -174,21 +178,12 @@ pub struct Kit {
     version: u32,
     name: ObjectName,
 
-    #[derivative(Debug = "ignore")]
-    pub(crate) __pad_name: u8, /* @0x000C */
-
-    track_levels: [u8; 12], /* @0x0014..0x002b   (note) LSB (track_levels[i].b.hi) is unused (always 0x00) */
-
     // 0..=127 device 0..=127
-    #[derivative(Debug = "ignore")]
-    pub(crate) __unknown_arr1b: [u8; 0x2], /* @0x002c..0x002d */
+    track_levels: [u8; 12], /* @0x0014..0x002b   (note) LSB (track_levels[i].b.hi) is unused (always 0x00) */
 
     // TODO:
     #[derivative(Debug = "ignore")]
     sounds: [Sound; 12], /* @0x002E..0x07C5 (12*162=1944($798) bytes */
-
-    #[derivative(Debug = "ignore")]
-    pub(crate) __unknown_arr2: [u8; 0x4], /* @0x07C6..0x07C9 */
 
     fx_delay_time: u8, /* @0x07CA   */
     // 0..=127 device (from 0-127 in order) 1/128 1/164 1/64 1/32 5 1/32. 7 1/16 9 10 11 1/16. 13 14 15 1/8 17..=23 1/8. 25..=31 1/4 33..=47 1/4. 49..=63 1/2 65..=79 1/2. 81..=95 1/2. 97..=127 1/1
@@ -275,98 +270,15 @@ pub struct Kit {
     // @attention Will be ignored for now.
     pub(crate) perf_ctl: [u8; 48 * 4], /* @0x0842..0x0901 */
     #[derivative(Debug = "ignore")]
-    pub(crate) __unknown_arr4: [u8; 0x15], /* @0x0902..0x0916 */
-    #[derivative(Debug = "ignore")]
     // @attention Will be ignored for now.
     pub(crate) scene_ctl: [u8; 48 * 4], /* @0x0917..0x09D6 */
 
-    pub(crate) __unknown_pad37: u8, /* @0x09D7 (scene_id MSB?) */
-    current_scene_id: u8,           /* @0x09D8 (0..11) */
-
     // 0..=11 device 0..=11
+    current_scene_id: u8, /* @0x09D8 (0..11) */
 
     // (note) 54 unknown bytes not present in v1 kit data
     #[derivative(Debug = "ignore")]
-    pub(crate) __unknown_arr5: [u8; 54], /* @0x09D9..0x0A0E */
-    #[derivative(Debug = "ignore")]
-    pub(crate) __unknown_arr6: [u8; 35], /* @0x0A0F..0x0A31 */
-
-    #[derivative(Debug = "ignore")]
-    pub(crate) __unused_pad1: u8, /* @0x07CB   */
-    #[derivative(Debug = "ignore")]
-    pub(crate) __unused_pad2: u8, /* @0x07CD   */
-    #[derivative(Debug = "ignore")]
-    pub(crate) __unused_pad3: u8, /* @0x07CF   */
-    #[derivative(Debug = "ignore")]
-    pub(crate) __unused_pad4: u8, /* @0x07D1   */
-    #[derivative(Debug = "ignore")]
-    pub(crate) __unused_pad5: u8, /* @0x07D3   */
-    #[derivative(Debug = "ignore")]
-    pub(crate) __unused_pad6: u8, /* @0x07D5   */
-    #[derivative(Debug = "ignore")]
-    pub(crate) __unused_pad7: u8, /* @0x07D7   */
-    #[derivative(Debug = "ignore")]
-    pub(crate) __unused_pad8: u8, /* @0x07D9   */
-    #[derivative(Debug = "ignore")]
-    pub(crate) __unused_pad9: u8, /* @0x07DB ? */
-    #[derivative(Debug = "ignore")]
-    pub(crate) __unused_pad11: u8, /* @0x07DD ? */
-    #[derivative(Debug = "ignore")]
-    pub(crate) __unused_pad12: u8, /* @0x07DF   */
-    #[derivative(Debug = "ignore")]
-    pub(crate) __unused_pad13: u8, /* @0x07E1   */
-    #[derivative(Debug = "ignore")]
-    pub(crate) __unused_pad14: u8, /* @0x07E3   */
-    #[derivative(Debug = "ignore")]
-    pub(crate) __unused_pad15: u8, /* @0x07E5   */
-    #[derivative(Debug = "ignore")]
-    pub(crate) __unused_pad16: u8, /* @0x07E7   */
-    #[derivative(Debug = "ignore")]
-    pub(crate) __unused_pad17: u8, /* @0x07E9   */
-    #[derivative(Debug = "ignore")]
-    pub(crate) __unused_pad18: u8, /* @0x07EB   */
-    #[derivative(Debug = "ignore")]
-    pub(crate) __unused_pad19: u8, /* @0x07ED   */
-    #[derivative(Debug = "ignore")]
-    pub(crate) __unused_pad20: u8, /* @0x07EF   */
-    #[derivative(Debug = "ignore")]
-    pub(crate) __unused_pad21: u8, /* @0x07F1   */
-
-    #[derivative(Debug = "ignore")]
-    pub(crate) __unknown_fx_1: u8, /* @0x07F2   */
-    #[derivative(Debug = "ignore")]
-    pub(crate) __unknown_fx_2: u8, /* @0x07F3   */
-
-    #[derivative(Debug = "ignore")]
-    pub(crate) __unused_pad22: u8, /* @0x07F5   */
-    #[derivative(Debug = "ignore")]
-    pub(crate) __unused_pad23: u8, /* @0x07F7   */
-    #[derivative(Debug = "ignore")]
-    pub(crate) __unused_pad24: u8, /* @0x07F9   */
-    #[derivative(Debug = "ignore")]
-    pub(crate) __unused_pad25: u8, /* @0x07FB   */
-    #[derivative(Debug = "ignore")]
-    pub(crate) __unused_pad26: u8, /* @0x07FD   */
-    #[derivative(Debug = "ignore")]
-    pub(crate) __unused_pad27: u8, /* @0x07FF   */
-    #[derivative(Debug = "ignore")]
-    pub(crate) __unused_pad28: u8, /* @0x0801   */
-    #[derivative(Debug = "ignore")]
-    pub(crate) __unused_pad29: u8, /* @0x0803   */
-    #[derivative(Debug = "ignore")]
-    pub(crate) __unused_pad30: u8, /* @0x0805   */
-    #[derivative(Debug = "ignore")]
-    pub(crate) __unused_pad31: u8, /* @0x0807   */
-    #[derivative(Debug = "ignore")]
-    pub(crate) __unused_pad32: u8, /* @0x0809   */
-    #[derivative(Debug = "ignore")]
-    pub(crate) __unused_pad33: u8, /* @0x080B   */
-    #[derivative(Debug = "ignore")]
-    pub(crate) __unused_pad34: u8, /* @0x080D   */
-    #[derivative(Debug = "ignore")]
-    pub(crate) __unused_pad35: u8, /* @0x080F   */
-    #[derivative(Debug = "ignore")]
-    pub(crate) __unused_pad36: u8, /* @0x0811   */
+    __unknown: KitUnknown,
 }
 
 impl From<&Kit> for ar_kit_t {
@@ -412,7 +324,6 @@ impl Kit {
             version,
 
             name,
-            __pad_name: raw_kit.__pad_name,
 
             track_levels,
             sounds,
@@ -463,55 +374,9 @@ impl Kit {
             perf_ctl: raw_kit.perf_ctl,
             scene_ctl: raw_kit.scene_ctl,
 
-            __unknown_pad37: raw_kit.__unknown_pad37,
-
             current_scene_id: raw_kit.current_scene_id,
 
-            __unknown_arr1b: raw_kit.__unknown_arr1b,
-            __unknown_arr2: raw_kit.__unknown_arr2,
-            __unknown_arr4: raw_kit.__unknown_arr4,
-            __unknown_arr5: raw_kit.__unknown_arr5,
-            __unknown_arr6: raw_kit.__unknown_arr6,
-
-            __unused_pad1: raw_kit.__unused_pad1,
-            __unused_pad2: raw_kit.__unused_pad2,
-            __unused_pad3: raw_kit.__unused_pad3,
-            __unused_pad4: raw_kit.__unused_pad4,
-            __unused_pad5: raw_kit.__unused_pad5,
-            __unused_pad6: raw_kit.__unused_pad6,
-            __unused_pad7: raw_kit.__unused_pad7,
-            __unused_pad8: raw_kit.__unused_pad8,
-            __unused_pad9: raw_kit.__unused_pad9,
-            __unused_pad11: raw_kit.__unused_pad11,
-            __unused_pad12: raw_kit.__unused_pad12,
-            __unused_pad13: raw_kit.__unused_pad13,
-            __unused_pad14: raw_kit.__unused_pad14,
-            __unused_pad15: raw_kit.__unused_pad15,
-            __unused_pad16: raw_kit.__unused_pad16,
-            __unused_pad17: raw_kit.__unused_pad17,
-            __unused_pad18: raw_kit.__unused_pad18,
-            __unused_pad19: raw_kit.__unused_pad19,
-            __unused_pad20: raw_kit.__unused_pad20,
-            __unused_pad21: raw_kit.__unused_pad21,
-
-            __unknown_fx_1: raw_kit.__unknown_fx_1,
-            __unknown_fx_2: raw_kit.__unknown_fx_2,
-
-            __unused_pad22: raw_kit.__unused_pad22,
-            __unused_pad23: raw_kit.__unused_pad23,
-            __unused_pad24: raw_kit.__unused_pad24,
-            __unused_pad25: raw_kit.__unused_pad25,
-            __unused_pad26: raw_kit.__unused_pad26,
-            __unused_pad27: raw_kit.__unused_pad27,
-            __unused_pad28: raw_kit.__unused_pad28,
-            __unused_pad29: raw_kit.__unused_pad29,
-            __unused_pad30: raw_kit.__unused_pad30,
-            __unused_pad31: raw_kit.__unused_pad31,
-            __unused_pad32: raw_kit.__unused_pad32,
-            __unused_pad33: raw_kit.__unused_pad33,
-            __unused_pad34: raw_kit.__unused_pad34,
-            __unused_pad35: raw_kit.__unused_pad35,
-            __unused_pad36: raw_kit.__unused_pad36,
+            __unknown: raw_kit.into(),
         })
     }
 
@@ -523,7 +388,6 @@ impl Kit {
             version: 6,
 
             name: ObjectName::from_u8_array([0_u8; 15]),
-            __pad_name: 0,
 
             track_levels: [0; 12],
 
@@ -577,55 +441,9 @@ impl Kit {
             perf_ctl: [0; 48 * 4],
             scene_ctl: [0; 48 * 4],
 
-            __unknown_pad37: 0,
-
             current_scene_id: 0,
 
-            __unknown_arr1b: [0; 0x2],
-            __unknown_arr2: [0; 0x4],
-            __unknown_arr4: [0; 0x15],
-            __unknown_arr5: [0; 54],
-            __unknown_arr6: [0; 35],
-
-            __unused_pad1: 0,
-            __unused_pad2: 0,
-            __unused_pad3: 0,
-            __unused_pad4: 0,
-            __unused_pad5: 0,
-            __unused_pad6: 0,
-            __unused_pad7: 0,
-            __unused_pad8: 0,
-            __unused_pad9: 0,
-            __unused_pad11: 0,
-            __unused_pad12: 0,
-            __unused_pad13: 0,
-            __unused_pad14: 0,
-            __unused_pad15: 0,
-            __unused_pad16: 0,
-            __unused_pad17: 0,
-            __unused_pad18: 0,
-            __unused_pad19: 0,
-            __unused_pad20: 0,
-            __unused_pad21: 0,
-
-            __unknown_fx_1: 0,
-            __unknown_fx_2: 0,
-
-            __unused_pad22: 0,
-            __unused_pad23: 0,
-            __unused_pad24: 0,
-            __unused_pad25: 0,
-            __unused_pad26: 0,
-            __unused_pad27: 0,
-            __unused_pad28: 0,
-            __unused_pad29: 0,
-            __unused_pad30: 0,
-            __unused_pad31: 0,
-            __unused_pad32: 0,
-            __unused_pad33: 0,
-            __unused_pad34: 0,
-            __unused_pad35: 0,
-            __unused_pad36: 0,
+            __unknown: KitUnknown::default(),
         })
     }
 
@@ -636,7 +454,6 @@ impl Kit {
             version: 6,
 
             name: ObjectName::from_u8_array([0_u8; 15]),
-            __pad_name: 0,
 
             track_levels: [0; 12],
 
@@ -690,55 +507,9 @@ impl Kit {
             perf_ctl: [0; 48 * 4],
             scene_ctl: [0; 48 * 4],
 
-            __unknown_pad37: 0,
-
             current_scene_id: 0,
 
-            __unknown_arr1b: [0; 0x2],
-            __unknown_arr2: [0; 0x4],
-            __unknown_arr4: [0; 0x15],
-            __unknown_arr5: [0; 54],
-            __unknown_arr6: [0; 35],
-
-            __unused_pad1: 0,
-            __unused_pad2: 0,
-            __unused_pad3: 0,
-            __unused_pad4: 0,
-            __unused_pad5: 0,
-            __unused_pad6: 0,
-            __unused_pad7: 0,
-            __unused_pad8: 0,
-            __unused_pad9: 0,
-            __unused_pad11: 0,
-            __unused_pad12: 0,
-            __unused_pad13: 0,
-            __unused_pad14: 0,
-            __unused_pad15: 0,
-            __unused_pad16: 0,
-            __unused_pad17: 0,
-            __unused_pad18: 0,
-            __unused_pad19: 0,
-            __unused_pad20: 0,
-            __unused_pad21: 0,
-
-            __unknown_fx_1: 0,
-            __unknown_fx_2: 0,
-
-            __unused_pad22: 0,
-            __unused_pad23: 0,
-            __unused_pad24: 0,
-            __unused_pad25: 0,
-            __unused_pad26: 0,
-            __unused_pad27: 0,
-            __unused_pad28: 0,
-            __unused_pad29: 0,
-            __unused_pad30: 0,
-            __unused_pad31: 0,
-            __unused_pad32: 0,
-            __unused_pad33: 0,
-            __unused_pad34: 0,
-            __unused_pad35: 0,
-            __unused_pad36: 0,
+            __unknown: KitUnknown::default(),
         }
     }
 

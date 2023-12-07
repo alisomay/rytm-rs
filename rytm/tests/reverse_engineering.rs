@@ -10,6 +10,8 @@ use rytm_rs::pattern::MicroTime;
 use rytm_rs::query::{GlobalQuery, KitQuery, PatternQuery, SettingsQuery, SoundQuery};
 use rytm_rs::{error::RytmError, Rytm};
 
+use crate::common::util::decode_sysex_response_to_raw;
+
 #[test]
 fn settings() {
     let mut rytm = Rytm::default();
@@ -179,6 +181,9 @@ fn plock_seq() {
             return Ok(());
         }
 
+        let r = decode_sysex_response_to_raw(response)?;
+        std::fs::write("pattern.raw", r.0).unwrap();
+
         rytm.update_from_sysex_response(response)?;
 
         let pattern = rytm.patterns()[0];
@@ -322,7 +327,7 @@ fn kit() {
         clearscreen::clear().unwrap();
 
         dbg!(kit);
-        println!("mode_flags: {:08b}", kit.sounds()[6].mode_flags);
+        // println!("mode_flags: {:08b}", kit.sounds()[6].mode_flags);
 
         Ok(())
     };

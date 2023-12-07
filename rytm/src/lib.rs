@@ -52,7 +52,10 @@ impl Default for Rytm {
             pool_sounds.push(Sound::try_default(i).unwrap());
         }
 
-        let work_buffer_sounds = vec![Sound::work_buffer_default()];
+        let mut work_buffer_sounds = vec![];
+        for _ in 0..=11 {
+            work_buffer_sounds.push(Sound::work_buffer_default());
+        }
 
         let mut kits = vec![];
         for i in 0..127 {
@@ -114,7 +117,9 @@ impl Rytm {
                     self.work_buffer_pattern = pattern;
                     return Ok(());
                 }
-                self.patterns[meta.obj_nr as usize] = pattern;
+
+                let index = (meta.obj_nr & 0b0111_1111) as usize;
+                self.patterns[index] = pattern;
                 Ok(())
             }
 
@@ -135,12 +140,13 @@ impl Rytm {
                 let raw_sound: &ar_sound_t = unsafe { &*(raw.as_mut_ptr() as *const ar_sound_t) };
                 let sound = Sound::try_from_raw(meta, raw_sound, None)?;
 
+                let index = (meta.obj_nr & 0b0111_1111) as usize;
                 match sound.sound_type() {
                     SoundType::Pool => {
-                        self.pool_sounds[meta.obj_nr as usize] = sound;
+                        self.pool_sounds[index] = sound;
                     }
                     SoundType::WorkBuffer => {
-                        self.work_buffer_sounds[meta.obj_nr as usize] = sound;
+                        self.work_buffer_sounds[index] = sound;
                     }
                     SoundType::KitQuery => {
                         todo!("Then it is not a sound query. Handle properly?")
@@ -161,7 +167,8 @@ impl Rytm {
                     return Ok(());
                 }
 
-                self.globals[meta.obj_nr as usize] = global;
+                let index = (meta.obj_nr & 0b0000_0011) as usize;
+                self.globals[index] = global;
                 Ok(())
             }
 

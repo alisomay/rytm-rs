@@ -13,6 +13,7 @@ use syn::{
 struct RangeArg {
     param_name: String,
     range_expr: String,
+    param_type: Option<String>,
 }
 
 impl Parse for RangeArg {
@@ -25,15 +26,25 @@ impl Parse for RangeArg {
                         if let Lit::Str(lit) = &expr_lit.lit {
                             let value = lit.value();
                             let parts: Vec<_> = value.split(':').collect();
-                            if parts.len() != 2 {
+
+                            // Check for two or three parts
+                            if parts.len() < 2 || parts.len() > 3 {
                                 return Err(SynError::new_spanned(
                                     lit,
-                                    "Expected format: `param_name:range`",
+                                    "Expected format: `param_name:range` or `param_name:range:type`",
                                 ));
                             }
+
+                            let param_type = if parts.len() == 3 {
+                                Some(parts[2].trim().to_string())
+                            } else {
+                                None
+                            };
+
                             Ok(RangeArg {
                                 param_name: parts[0].trim().to_string(),
                                 range_expr: parts[1].trim().to_string(),
+                                param_type,
                             })
                         } else {
                             Err(SynError::new_spanned(
@@ -85,10 +96,18 @@ pub fn parameter_range(args: TokenStream, input: TokenStream) -> TokenStream {
         let start = range_parts[0];
         let end = range_parts[1];
 
+        let type_annotation = arg.param_type.map_or_else(
+            || quote! { _ },
+            |ty| {
+                let ty = syn::parse_str::<syn::Type>(&ty).expect("Invalid type annotation");
+                quote! { #ty }
+            },
+        );
+
         let range_check = if is_inclusive {
             quote! {
-                let start: _ = #start.parse().expect("Invalid range start");
-                let end: _ = #end.parse().expect("Invalid range end");
+                let start: #type_annotation = #start.parse().expect("Invalid range start");
+                let end: #type_annotation = #end.parse().expect("Invalid range end");
 
                 if !(start..=end).contains(&#param_name_ident) {
                     return Err(RytmError::Parameter(ParameterError::Range {
@@ -99,8 +118,8 @@ pub fn parameter_range(args: TokenStream, input: TokenStream) -> TokenStream {
             }
         } else {
             quote! {
-                let start: _ = #start.parse().expect("Invalid range start");
-                let end: _ = #end.parse().expect("Invalid range end");
+                let start: #type_annotation = #start.parse().expect("Invalid range start");
+                let end: #type_annotation = #end.parse().expect("Invalid range end");
 
                 if !(start..end).contains(&#param_name_ident) {
                     return Err(RytmError::Parameter(ParameterError::Range {
