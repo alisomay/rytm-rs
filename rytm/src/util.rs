@@ -1,6 +1,9 @@
 #![allow(unused)]
 
-use crate::{error::ConversionError, pattern::MicroTime, sound::types::Machine};
+use crate::{
+    error::ConversionError,
+    object::{pattern::MicroTime, sound::types::Machine},
+};
 use rytm_sys::{s_u16_t, s_u16_t__bindgen_ty_1};
 
 #[allow(unused)]

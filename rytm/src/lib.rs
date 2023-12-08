@@ -1,23 +1,20 @@
 pub mod error;
-pub mod global;
-pub mod kit;
 pub mod object;
-pub mod pattern;
 pub mod query;
-pub mod settings;
-pub mod sound;
 pub(crate) mod sysex;
 pub mod util;
 
 use self::error::RytmError;
 use crate::error::ParameterError;
-use global::Global;
-use kit::Kit;
-use pattern::Pattern;
+use object::{
+    global::Global,
+    kit::Kit,
+    pattern::Pattern,
+    settings::Settings,
+    sound::{Sound, SoundType},
+};
 use rytm_rs_macro::parameter_range;
 use rytm_sys::{ar_global_t, ar_kit_t, ar_pattern_t, ar_settings_t, ar_sound_t};
-use settings::Settings;
-use sound::{Sound, SoundType};
 use sysex::{decode_sysex_response_to_raw, SysexCompatible, SysexType};
 
 /// Rytm is the main struct that holds structures for projects.
