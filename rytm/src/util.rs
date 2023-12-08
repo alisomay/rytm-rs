@@ -41,6 +41,35 @@ pub(crate) unsafe fn from_s_u16_t(value: &s_u16_t) -> u16 {
     (msb << 8) | lsb
 }
 
+/// Checks if the given machine is compatible for the given track.
+pub fn is_machine_compatible_for_track(track_index: usize, machine: Machine) -> bool {
+    let compatible_machines = unsafe { rytm_sys::ar_sound_compatible_machines };
+    let compatible_machines_for_track = compatible_machines[track_index];
+
+    let mut compatible_machines_for_track_size = 0;
+    loop {
+        unsafe {
+            let return_id = rytm_sys::ar_sound_get_machine_id_by_track_and_list_idx(
+                track_index as u32,
+                compatible_machines_for_track_size,
+            );
+            if return_id == -1 {
+                break;
+            }
+            compatible_machines_for_track_size += 1;
+        }
+    }
+
+    let compatible_machines_for_track_slice = unsafe {
+        std::slice::from_raw_parts(
+            compatible_machines_for_track,
+            compatible_machines_for_track_size as usize,
+        )
+    };
+
+    compatible_machines_for_track_slice.contains(&((machine as u8) as i32))
+}
+
 pub(crate) fn decode_micro_timing_byte(
     micro_timing_value: i8,
 ) -> Result<MicroTime, ConversionError> {
@@ -149,33 +178,4 @@ pub(crate) fn encode_micro_timing_byte(micro_timing: &MicroTime) -> i8 {
         MicroTime::P11B192 => 88,
         MicroTime::P23B384 => 92,
     }
-}
-
-/// Checks if the given machine is compatible for the given track.
-pub(crate) fn is_machine_compatible_for_track(track_index: usize, machine: Machine) -> bool {
-    let compatible_machines = unsafe { rytm_sys::ar_sound_compatible_machines };
-    let compatible_machines_for_track = compatible_machines[track_index];
-
-    let mut compatible_machines_for_track_size = 0;
-    loop {
-        unsafe {
-            let return_id = rytm_sys::ar_sound_get_machine_id_by_track_and_list_idx(
-                track_index as u32,
-                compatible_machines_for_track_size,
-            );
-            if return_id == -1 {
-                break;
-            }
-            compatible_machines_for_track_size += 1;
-        }
-    }
-
-    let compatible_machines_for_track_slice = unsafe {
-        std::slice::from_raw_parts(
-            compatible_machines_for_track,
-            compatible_machines_for_track_size as usize,
-        )
-    };
-
-    compatible_machines_for_track_slice.contains(&((machine as u8) as i32))
 }

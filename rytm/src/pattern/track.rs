@@ -18,16 +18,7 @@ use rytm_sys::ar_pattern_track_t;
 use std::io::Cursor;
 use trig::Trig;
 
-// TODO: Check for these.
-//    sU8     notes[64];                   /* @0x0074..0x00B3   0xFF=unset, MIDI note otherwise (lower 7 bits)
-//                                          *                    (default is C-4 == 0x3C, 0x3B="-1", 0x3D="+1")
-//                                          *                   bit7: 1=no trig condition, 0=have trig condition
-//                                          *                          ==> 0x7F = default note with trig cond
-//                                          *                          ==> 0xFF = default note without trig cond
-//                                          */
-//    sU8     retrig_rates[64];            /* ?@0x01B4..0x01F3   Retrig rates (0(=1/1)..16(=1/80))
-//                                          *                    Changing the trig condition of step 1 updates 0x1c4
-//                                          */
+/// A track in a pattern.
 #[derive(Derivative, Clone, Copy)]
 #[derivative(Debug)]
 pub struct Track {

@@ -31,6 +31,7 @@ impl_sysex_compatible!(
 #[derive(Derivative, Clone, Copy)]
 #[derivative(Debug)]
 pub struct Settings {
+    #[derivative(Debug = "ignore")]
     sysex_meta: SysexMeta,
     /// Version of the kit structure.
     version: u32,
@@ -138,7 +139,7 @@ impl Default for Settings {
 }
 
 impl Settings {
-    pub fn to_raw_parts(&self) -> (SysexMeta, ar_settings_t) {
+    pub(crate) fn as_raw_parts(&self) -> (SysexMeta, ar_settings_t) {
         (self.sysex_meta, self.into())
     }
 

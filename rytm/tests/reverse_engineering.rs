@@ -5,12 +5,13 @@
 //! The tests are not expected to be stable, and may change at any time.
 
 mod common;
-use common::*;
-use rytm_rs::pattern::MicroTime;
-use rytm_rs::query::{GlobalQuery, KitQuery, PatternQuery, SettingsQuery, SoundQuery};
-use rytm_rs::{error::RytmError, Rytm};
-
 use crate::common::util::decode_sysex_response_to_raw;
+use common::*;
+use rytm_rs::{
+    error::RytmError,
+    query::{GlobalQuery, KitQuery, PatternQuery, SettingsQuery, SoundQuery},
+    Rytm,
+};
 
 #[test]
 fn settings() {

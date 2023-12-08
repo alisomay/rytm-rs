@@ -1,6 +1,6 @@
 use crate::{
     error::{ConversionError, ParameterError, RytmError},
-    sound::types::{FilterType, LfoDestination, LfoMode, LfoMultiplier, LfoWaveform},
+    sound::types::{LfoDestination, LfoMode, LfoMultiplier, LfoWaveform},
     util::{from_s_u16_t, to_s_u16_t_union_a},
 };
 use rytm_rs_macro::parameter_range;

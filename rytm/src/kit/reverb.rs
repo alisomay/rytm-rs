@@ -1,8 +1,4 @@
-use super::types::{FxDelayTimeOnTheGrid, FxLfoDestination};
-use crate::{
-    error::{ConversionError, ParameterError, RytmError},
-    sound::types::{LfoMode, LfoMultiplier, LfoWaveform},
-};
+use crate::error::{ConversionError, ParameterError, RytmError};
 use rytm_rs_macro::parameter_range;
 use rytm_sys::ar_kit_t;
 

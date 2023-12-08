@@ -6,9 +6,8 @@ pub mod pattern;
 pub mod query;
 pub mod settings;
 pub mod sound;
-
 pub(crate) mod sysex;
-pub(crate) mod util;
+pub mod util;
 
 use self::error::RytmError;
 use crate::error::ParameterError;

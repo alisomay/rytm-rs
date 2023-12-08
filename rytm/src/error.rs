@@ -1,10 +1,12 @@
 #[derive(thiserror::Error, Debug)]
+#[non_exhaustive]
 pub enum ConversionError {
     #[error("Conversion error: {value} is out of range for {type_name}")]
     Range { value: String, type_name: String },
 }
 
 #[derive(thiserror::Error, Debug)]
+#[non_exhaustive]
 pub enum ParameterError {
     #[error("Parameter error: {value} is out of range for {parameter_name}")]
     Range {
@@ -82,7 +84,6 @@ impl From<u8> for SysexConversionError {
 #[derive(thiserror::Error, Debug)]
 #[non_exhaustive]
 pub enum RytmError {
-    // Extend with error types and from implementations as needed..
     #[error("{0}")]
     Custom(String),
     #[error("{0}")]

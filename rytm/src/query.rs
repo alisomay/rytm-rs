@@ -3,6 +3,7 @@ mod kit;
 mod pattern;
 mod raw;
 mod settings;
+mod song;
 mod sound;
 
 pub use global::GlobalQuery;
@@ -10,6 +11,7 @@ pub use kit::KitQuery;
 pub use pattern::PatternQuery;
 pub use raw::RawQuery;
 pub use settings::SettingsQuery;
+pub use song::SongQuery;
 pub use sound::SoundQuery;
 
 /// The size of the rytm sysex query in bytes.
@@ -41,7 +43,7 @@ where
     }
 
     fn is_targeting_work_buffer(&self) -> bool {
-        self.obj_nr() & 0b1000_0000_0000_0000 != 0
+        self.obj_nr() >= 128
     }
 
     fn serialize_to_sysex(&self) -> Result<Vec<u8>, RytmError> {

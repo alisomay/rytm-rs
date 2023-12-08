@@ -1,14 +1,15 @@
 #![allow(unused)]
 
-use rytm_rs::{pattern::MicroTime, sound::types::Machine};
-use rytm_sys::{s_u16_t, s_u16_t__bindgen_ty_1};
-
-use rytm_rs::error::{ConversionError, ParameterError, RytmError, SysexConversionError};
+use rytm_rs::{
+    error::{ConversionError, ParameterError, RytmError, SysexConversionError},
+    pattern::MicroTime,
+    sound::types::Machine,
+};
 use rytm_rs_macro::parameter_range;
 use rytm_sys::{
     ar_sysex_id_t_AR_TYPE_GLOBAL, ar_sysex_id_t_AR_TYPE_KIT, ar_sysex_id_t_AR_TYPE_PATTERN,
     ar_sysex_id_t_AR_TYPE_SETTINGS, ar_sysex_id_t_AR_TYPE_SONG, ar_sysex_id_t_AR_TYPE_SOUND,
-    ar_sysex_meta_t,
+    ar_sysex_meta_t, s_u16_t, s_u16_t__bindgen_ty_1,
 };
 
 /// Pattern sysex response size for FW 1.70.

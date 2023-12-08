@@ -33,11 +33,12 @@ impl_sysex_compatible!(
 #[derive(Derivative, Clone, Copy)]
 #[derivative(Debug)]
 pub struct Kit {
-    index: usize,
+    #[derivative(Debug = "ignore")]
     sysex_meta: SysexMeta,
-
     /// Version of the kit structure.
     version: u32,
+
+    index: usize,
 
     /// Name of the kit.
     name: ObjectName,
@@ -97,7 +98,7 @@ impl From<&Kit> for ar_kit_t {
 }
 
 impl Kit {
-    pub fn to_raw_parts(&self) -> (SysexMeta, ar_kit_t) {
+    pub(crate) fn as_raw_parts(&self) -> (SysexMeta, ar_kit_t) {
         (self.sysex_meta, self.into())
     }
 

@@ -2,6 +2,7 @@ pub mod menu;
 pub mod types;
 pub(crate) mod unknown;
 
+use self::unknown::GlobalUnknown;
 use crate::{
     error::{ParameterError, RytmError, SysexConversionError},
     impl_sysex_compatible,
@@ -11,8 +12,6 @@ use derivative::Derivative;
 use menu::*;
 use rytm_rs_macro::parameter_range;
 use rytm_sys::{ar_global_raw_to_syx, ar_global_t, ar_sysex_meta_t};
-
-use self::unknown::GlobalUnknown;
 
 impl_sysex_compatible!(
     Global,
@@ -30,10 +29,12 @@ impl_sysex_compatible!(
 #[derive(Derivative, Clone, Copy)]
 #[derivative(Debug)]
 pub struct Global {
-    index: usize,
+    #[derivative(Debug = "ignore")]
     sysex_meta: SysexMeta,
-    /// Version of the kit structure.
+    /// Version of the global structure.
     version: u32,
+
+    index: usize,
 
     metronome_settings: MetronomeSettings,
     midi_config: MidiConfig,
@@ -67,7 +68,7 @@ impl From<&Global> for ar_global_t {
 }
 
 impl Global {
-    pub fn to_raw_parts(&self) -> (SysexMeta, ar_global_t) {
+    pub(crate) fn as_raw_parts(&self) -> (SysexMeta, ar_global_t) {
         (self.sysex_meta, self.into())
     }
 

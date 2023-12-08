@@ -1,7 +1,4 @@
-use crate::{
-    error::{ConversionError, ParameterError, RytmError},
-    sound::types::FilterType,
-};
+use crate::error::{ConversionError, ParameterError, RytmError};
 use rytm_rs_macro::parameter_range;
 use rytm_sys::ar_sound_t;
 

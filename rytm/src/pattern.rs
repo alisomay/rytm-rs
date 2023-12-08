@@ -205,7 +205,7 @@ impl Pattern {
         })
     }
 
-    pub fn to_raw_parts(&self) -> (SysexMeta, ar_pattern_t) {
+    pub(crate) fn as_raw_parts(&self) -> (SysexMeta, ar_pattern_t) {
         (self.sysex_meta, self.into())
     }
 

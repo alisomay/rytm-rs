@@ -46,9 +46,10 @@ impl_sysex_compatible!(
 #[derive(Derivative, Clone, Copy)]
 #[derivative(Debug)]
 pub struct Sound {
+    #[derivative(Debug = "ignore")]
+    sysex_meta: SysexMeta,
     /// Version of the sound structure.
     version: u32,
-    sysex_meta: SysexMeta,
 
     /// Index of the sound.
     ///
@@ -193,7 +194,7 @@ impl Sound {
         })
     }
 
-    pub(crate) fn to_raw_parts(&self) -> (SysexMeta, ar_sound_t) {
+    pub(crate) fn as_raw_parts(&self) -> (SysexMeta, ar_sound_t) {
         (self.sysex_meta, self.into())
     }
 

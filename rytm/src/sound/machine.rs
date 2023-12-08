@@ -1,17 +1,6 @@
 use crate::error::{ParameterError, RytmError};
 use rytm_rs_macro::parameter_range;
 
-//    pub enum BdHardSynthParameter {
-//     Lev,
-//     Tun, // (64=+0)
-//     Dec,
-//     Hld,
-//     Swt,
-//     Snp,
-//     Wav,
-//     Tic,
-// }
-
 pub struct BdHard {
     lev: u16,
     tun: u16,
