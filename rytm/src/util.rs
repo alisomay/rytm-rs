@@ -2,9 +2,13 @@
 
 use crate::{
     error::ConversionError,
-    object::{pattern::MicroTime, sound::types::Machine},
+    object::{pattern::MicroTime, sound::types::MachineType},
 };
 use rytm_sys::{s_u16_t, s_u16_t__bindgen_ty_1};
+use std::{
+    convert::From,
+    ops::{Add, Div, Mul, Sub},
+};
 
 #[allow(unused)]
 pub(crate) fn to_s_u16_t_union_a(value: u16) -> s_u16_t {
@@ -45,7 +49,7 @@ pub(crate) unsafe fn from_s_u16_t(value: &s_u16_t) -> u16 {
 }
 
 /// Checks if the given machine is compatible for the given track.
-pub fn is_machine_compatible_for_track(track_index: usize, machine: Machine) -> bool {
+pub fn is_machine_compatible_for_track(track_index: usize, machine: MachineType) -> bool {
     let compatible_machines = unsafe { rytm_sys::ar_sound_compatible_machines };
     let compatible_machines_for_track = compatible_machines[track_index];
 
@@ -181,4 +185,55 @@ pub(crate) fn encode_micro_timing_byte(micro_timing: &MicroTime) -> i8 {
         MicroTime::P11B192 => 88,
         MicroTime::P23B384 => 92,
     }
+}
+
+pub fn scale_generic<T, S, F>(
+    input: T,
+    input_min: T,
+    input_max: T,
+    output_min: S,
+    output_max: S,
+    convert: F,
+) -> S
+where
+    T: Copy + PartialOrd + Sub<Output = T> + Div<Output = T>,
+    S: Copy + Add<Output = S> + Sub<Output = S> + Mul<Output = S> + Div<Output = S>,
+    F: Fn(T) -> S,
+{
+    let input_range = convert(input_max) - convert(input_min);
+    let output_range = output_max - output_min;
+    let scale_factor = output_range / input_range;
+
+    let normalized_input = convert(input) - convert(input_min);
+    normalized_input * scale_factor + output_min
+}
+
+// Helper function to decode synth parameter float minus plus scaling.
+pub fn get_u16_min_max_from_float_range(min: f32, max: f32) -> (u16, u16) {
+    // Given example ranges
+    let example_float_min = -32.0;
+    let example_float_max = 32.0;
+    let example_u16_min = 8192u16;
+    let example_u16_max = 24576u16;
+
+    // Calculate the scale factor based on the example
+    let example_float_range = example_float_max - example_float_min;
+    let example_u16_range = example_u16_max as f32 - example_u16_min as f32;
+    let scale_factor = example_u16_range / example_float_range;
+
+    // Apply the scale factor to the given range
+    let scaled_min = ((min - example_float_min) * scale_factor) as u16 + example_u16_min;
+    let scaled_max = ((max - example_float_min) * scale_factor) as u16 + example_u16_min;
+
+    (scaled_min, scaled_max)
+}
+
+pub fn u8_to_i8_midpoint_of_u8_input_range(value: u8, range_start: u8, range_end: u8) -> i8 {
+    let midpoint = ((range_start as i16 + range_end as i16 + 1) / 2);
+    (value as i16 - midpoint) as i8
+}
+
+pub fn i8_to_u8_midpoint_of_u8_input_range(value: i8, range_start: u8, range_end: u8) -> u8 {
+    let midpoint = ((range_start as i16 + range_end as i16 + 1) / 2);
+    (value as i16 + midpoint) as u8
 }

@@ -36,7 +36,7 @@ pub struct Settings {
     /// Version of the kit structure.
     version: u32,
 
-    bpm_project: f64,
+    bpm_project: f32,
 
     selected_track: u8,
     selected_parameter_menu_item: ParameterMenuItem,
@@ -153,7 +153,7 @@ impl Settings {
             | (raw_settings.version[3] as u32);
 
         let bpm_project = (raw_settings.bpm_msb as u16) << 8 | raw_settings.bpm_lsb as u16;
-        let bpm_project = bpm_project as f64 / 120.0;
+        let bpm_project = bpm_project as f32 / 120.0;
 
         let mute_flags =
             (raw_settings.track_mute_msb as u16) << 8 | raw_settings.track_mute_lsb as u16;
@@ -193,7 +193,7 @@ impl Settings {
     ///
     /// This is only effective when project level bpm is enabled.
     #[parameter_range(range = "bpm:30.0..=300.0")]
-    pub fn set_bpm(&mut self, bpm: f64) -> Result<(), RytmError> {
+    pub fn set_bpm(&mut self, bpm: f32) -> Result<(), RytmError> {
         self.bpm_project = bpm;
         Ok(())
     }
@@ -376,7 +376,7 @@ impl Settings {
     /// Range `30.0..=300.0`
     ///
     /// This is only effective when project level bpm is enabled.
-    pub fn bpm(&self) -> f64 {
+    pub fn bpm(&self) -> f32 {
         self.bpm_project
     }
 

@@ -22,14 +22,16 @@ pub fn get_connection_to_rytm() -> Arc<Mutex<MidiOutputConnection>> {
     ))
 }
 
-pub fn make_input_message_forwarder(
-) -> (MidiInputConnection<()>, std::sync::mpsc::Receiver<Vec<u8>>) {
+pub fn make_input_message_forwarder() -> (
+    MidiInputConnection<()>,
+    std::sync::mpsc::Receiver<(Vec<u8>, u64)>,
+) {
     let mut input = crate::port::MidiIn::new("rytm_test_in").unwrap();
     input.ignore(Ignore::None);
     let rytm_in_identifier = "Elektron Analog Rytm MKII";
     let rytm_input_port = input.find_input_port(rytm_in_identifier).unwrap();
 
-    let (tx, rx) = std::sync::mpsc::channel::<Vec<u8>>();
+    let (tx, rx) = std::sync::mpsc::channel::<(Vec<u8>, u64)>();
 
     let conn_in: midir::MidiInputConnection<()> = input
         .into_inner()
@@ -38,7 +40,7 @@ pub fn make_input_message_forwarder(
             "rytm_test_in",
             move |_stamp, message, _| {
                 // Forward ro the receiver for continuous monitoring.
-                tx.send(message.to_vec()).unwrap();
+                tx.send((message.to_vec(), _stamp)).unwrap();
             },
             (),
         )
@@ -51,9 +53,9 @@ pub fn poll_with_query_blocking(
     rytm: &mut Rytm,
     query: impl ObjectQuery,
     conn_out: Arc<Mutex<MidiOutputConnection>>,
-    rx: std::sync::mpsc::Receiver<Vec<u8>>,
+    rx: std::sync::mpsc::Receiver<(Vec<u8>, u64)>,
     interval_in_millis: u64,
-    mut callback: impl FnMut(&[u8], &mut Rytm) -> Result<(), RytmError>,
+    mut callback: impl FnMut(&[u8], &mut Rytm, u64) -> Result<(), RytmError>,
 ) -> Result<(), RytmError> {
     loop {
         conn_out
@@ -61,10 +63,20 @@ pub fn poll_with_query_blocking(
             .unwrap()
             .send(&query.serialize_to_sysex().unwrap())
             .unwrap();
+        // Timestamp
+        let query_start = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap()
+            .as_millis() as u64;
 
         match rx.recv() {
-            Ok(message) => {
-                callback(&message, rytm)?;
+            Ok((message, _stamp)) => {
+                let response_received = std::time::SystemTime::now()
+                    .duration_since(std::time::UNIX_EPOCH)
+                    .unwrap()
+                    .as_millis() as u64;
+                let elapsed = response_received - query_start;
+                callback(&message, rytm, elapsed)?;
             }
             Err(err) => {
                 println!("Error: {:?}", err);

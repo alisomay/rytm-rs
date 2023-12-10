@@ -374,10 +374,10 @@ pub enum SdAcousticSynthParameter {
 // Sy Raw
 pub enum SyRawSynthParameter {
     Lev,
-    Tun, // (64=+0) (uses LSB)
-    Dcy, // (0..126,127=inf)
-    Det, // (64=+0) (uses LSB)
-    Nol,
+    Tun,  // (64=+0) (uses LSB)
+    Dec2, // (0..126,127=inf)
+    Det,  // (64=+0) (uses LSB)
+    Nlev,
     Wav1, // (0=sin,1=asin,2=tri,3=ssaw,4=asaw,5=saw,6=ring)
     Wav2, // (0=sineA,1=ssawA,2=sineB,3=ssawB)
     Bal,  // (64=+0)

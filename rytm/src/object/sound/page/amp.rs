@@ -1,4 +1,7 @@
-use crate::error::{ConversionError, ParameterError, RytmError};
+use crate::{
+    error::{ConversionError, ParameterError, RytmError},
+    util::{i8_to_u8_midpoint_of_u8_input_range, u8_to_i8_midpoint_of_u8_input_range},
+};
 use rytm_rs_macro::parameter_range;
 use rytm_sys::ar_sound_t;
 
@@ -40,7 +43,7 @@ impl TryFrom<&ar_sound_t> for Amplitude {
             overdrive: raw_sound.amp_overdrive,
             delay_send: raw_sound.amp_delay_send,
             reverb_send: raw_sound.amp_reverb_send,
-            pan: raw_sound.amp_pan as i8 - 64,
+            pan: u8_to_i8_midpoint_of_u8_input_range(raw_sound.amp_pan, 0, 127),
             volume: raw_sound.amp_volume,
         })
     }
@@ -54,7 +57,7 @@ impl Amplitude {
         raw_sound.amp_overdrive = self.overdrive;
         raw_sound.amp_delay_send = self.delay_send;
         raw_sound.amp_reverb_send = self.reverb_send;
-        raw_sound.amp_pan = self.pan as u8 + 64;
+        raw_sound.amp_pan = i8_to_u8_midpoint_of_u8_input_range(self.pan, 0, 127);
         raw_sound.amp_volume = self.volume;
     }
 

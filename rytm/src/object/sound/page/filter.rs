@@ -1,6 +1,7 @@
 use crate::{
     error::{ConversionError, ParameterError, RytmError},
     object::sound::types::FilterType,
+    util::{i8_to_u8_midpoint_of_u8_input_range, u8_to_i8_midpoint_of_u8_input_range},
 };
 use rytm_rs_macro::parameter_range;
 use rytm_sys::ar_sound_t;
@@ -45,7 +46,7 @@ impl TryFrom<&ar_sound_t> for Filter {
             cutoff: raw_sound.flt_cutoff,
             resonance: raw_sound.flt_res,
             filter_type: raw_sound.flt_type.try_into()?,
-            envelope_amount: raw_sound.flt_env as i8 - 64,
+            envelope_amount: u8_to_i8_midpoint_of_u8_input_range(raw_sound.flt_env, 0, 127),
         })
     }
 }
@@ -59,7 +60,7 @@ impl Filter {
         raw_sound.flt_cutoff = self.cutoff;
         raw_sound.flt_res = self.resonance;
         raw_sound.flt_type = self.filter_type.into();
-        raw_sound.flt_env = self.envelope_amount as u8 + 64;
+        raw_sound.flt_env = i8_to_u8_midpoint_of_u8_input_range(self.envelope_amount, 0, 127);
     }
 
     /// Sets the attack of the filter envelope.

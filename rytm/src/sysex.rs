@@ -1,12 +1,13 @@
 pub mod types;
 
 use crate::error::{RytmError, SysexConversionError};
+use rytm_sys::{ar_global_t, ar_kit_t, ar_pattern_t, ar_settings_t, ar_sound_t};
 pub use types::*;
 
 /// Pattern sysex response size for FW 1.70.
-pub const PATTERN_SYSEX_SIZE: usize = 2998;
+pub const PATTERN_SYSEX_SIZE: usize = 14988;
 /// Kit sysex response size for FW 1.70.
-pub const KIT_SYSEX_SIZE: usize = 14988;
+pub const KIT_SYSEX_SIZE: usize = 2998;
 /// Sound sysex response size for FW 1.70.
 pub const SOUND_SYSEX_SIZE: usize = 201;
 /// Settings sysex response size for FW 1.70.
@@ -16,7 +17,14 @@ pub const GLOBAL_SYSEX_SIZE: usize = 107;
 /// Song sysex response size for FW 1.70.
 pub const SONG_SYSEX_SIZE: usize = 1506;
 
-const SYSEX_MESSAGE_TYPE_BYTE_INDEX: usize = 5;
+// TODO: Debug this carefully..
+const SYSEX_MESSAGE_TYPE_BYTE_INDEX: usize = 7;
+
+pub const PATTERN_RAW_SIZE: usize = std::mem::size_of::<ar_pattern_t>();
+pub const KIT_RAW_SIZE: usize = std::mem::size_of::<ar_kit_t>();
+pub const SOUND_RAW_SIZE: usize = std::mem::size_of::<ar_sound_t>();
+pub const SETTINGS_RAW_SIZE: usize = std::mem::size_of::<ar_settings_t>();
+pub const GLOBAL_RAW_SIZE: usize = std::mem::size_of::<ar_global_t>();
 
 pub trait SysexCompatible {
     fn r#type(&self) -> SysexType;
@@ -75,17 +83,21 @@ macro_rules! impl_sysex_compatible {
 /// It should be used in a context where this case is true and validity check is not necessary.
 pub fn decode_sysex_response_to_raw(response: &[u8]) -> Result<(Vec<u8>, SysexMeta), RytmError> {
     let response_type: SysexType = response[SYSEX_MESSAGE_TYPE_BYTE_INDEX].try_into()?;
-    let response_size = match response_type {
-        SysexType::Pattern => PATTERN_SYSEX_SIZE,
-        SysexType::Kit => KIT_SYSEX_SIZE,
-        SysexType::Sound => SOUND_SYSEX_SIZE,
-        SysexType::Settings => SETTINGS_SYSEX_SIZE,
-        SysexType::Global => GLOBAL_SYSEX_SIZE,
-        SysexType::Song => SONG_SYSEX_SIZE,
+    dbg!(response_type);
+    let (expected_response_size, expected_raw_size) = match response_type {
+        SysexType::Pattern => (PATTERN_SYSEX_SIZE, PATTERN_RAW_SIZE),
+        SysexType::Kit => (KIT_SYSEX_SIZE, KIT_RAW_SIZE),
+        SysexType::Sound => (SOUND_SYSEX_SIZE, SOUND_RAW_SIZE),
+        SysexType::Settings => (SETTINGS_SYSEX_SIZE, SETTINGS_RAW_SIZE),
+        SysexType::Global => (GLOBAL_SYSEX_SIZE, GLOBAL_RAW_SIZE),
+        // Song raw size is guessed for now.
+        SysexType::Song => (SONG_SYSEX_SIZE, 1024 * 16),
     };
 
-    if response.len() != response_size {
-        return Err(SysexConversionError::InvalidSize.into());
+    if response.len() != expected_response_size {
+        return Err(
+            SysexConversionError::InvalidSize(expected_response_size, response.len()).into(),
+        );
     }
 
     // Make a default meta struct to fill.
@@ -104,7 +116,7 @@ pub fn decode_sysex_response_to_raw(response: &[u8]) -> Result<(Vec<u8>, SysexMe
     let dest_buf_size_p = dst_buf_size as *mut u32;
 
     // The destination buffer, raw buffer.
-    let mut dst_buf = vec![0_u8; response_size];
+    let mut dst_buf = vec![0_u8; expected_raw_size];
     let dst_buf_p = dst_buf.as_mut_slice().as_mut_ptr();
 
     unsafe {

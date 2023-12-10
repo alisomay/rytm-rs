@@ -1,7 +1,10 @@
 use crate::{
     error::{ConversionError, ParameterError, RytmError},
     object::sound::types::{LfoDestination, LfoMode, LfoMultiplier, LfoWaveform},
-    util::{from_s_u16_t, to_s_u16_t_union_a},
+    util::{
+        from_s_u16_t, i8_to_u8_midpoint_of_u8_input_range, to_s_u16_t_union_a,
+        u8_to_i8_midpoint_of_u8_input_range,
+    },
 };
 use rytm_rs_macro::parameter_range;
 use rytm_sys::ar_sound_t;
@@ -16,7 +19,7 @@ pub struct Lfo {
     waveform: LfoWaveform,
     start_phase_or_slew: u8,
     mode: LfoMode,
-    depth: f64,
+    depth: f32,
 }
 
 impl Default for Lfo {
@@ -38,11 +41,11 @@ impl TryFrom<&ar_sound_t> for Lfo {
     type Error = ConversionError;
     fn try_from(raw_sound: &ar_sound_t) -> Result<Self, Self::Error> {
         // map range of 0..=32767 to -128.0..=127.99
-        let depth = unsafe { from_s_u16_t(&raw_sound.lfo_depth) } as f64 / 256.0 - 128.0;
+        let depth = unsafe { from_s_u16_t(&raw_sound.lfo_depth) } as f32 / 256.0 - 128.0;
         Ok(Self {
-            speed: raw_sound.lfo_speed as i8 - 64,
+            speed: u8_to_i8_midpoint_of_u8_input_range(raw_sound.lfo_speed, 0, 127),
             multiplier: raw_sound.lfo_multiplier.try_into()?,
-            fade: raw_sound.lfo_fade as i8 - 64,
+            fade: u8_to_i8_midpoint_of_u8_input_range(raw_sound.lfo_fade, 0, 127),
             destination: raw_sound.lfo_dest.try_into()?,
             waveform: raw_sound.lfo_wav.try_into()?,
             start_phase_or_slew: raw_sound.lfo_start_phase,
@@ -57,9 +60,9 @@ impl Lfo {
         // map range of -128.0..=127.99 to 0..=32767
         let depth = (self.depth + 128.0) * 256.0;
 
-        raw_sound.lfo_speed = self.speed as u8 + 64;
+        raw_sound.lfo_speed = i8_to_u8_midpoint_of_u8_input_range(self.speed, 0, 127);
         raw_sound.lfo_multiplier = self.multiplier.into();
-        raw_sound.lfo_fade = self.fade as u8 + 64;
+        raw_sound.lfo_fade = i8_to_u8_midpoint_of_u8_input_range(self.fade, 0, 127);
         raw_sound.lfo_dest = self.destination.into();
         raw_sound.lfo_wav = self.waveform.into();
         raw_sound.lfo_start_phase = self.start_phase_or_slew;
@@ -154,7 +157,7 @@ impl Lfo {
     }
 
     /// Returns the depth of the LFO.
-    pub fn depth(&self) -> f64 {
+    pub fn depth(&self) -> f32 {
         self.depth
     }
 }

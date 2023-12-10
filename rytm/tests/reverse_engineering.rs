@@ -20,7 +20,7 @@ fn settings() {
     let (_conn_in, rx) = make_input_message_forwarder();
 
     let query = SettingsQuery::new();
-    let callback = |response: &[u8], rytm: &mut Rytm| -> Result<(), RytmError> {
+    let callback = |response: &[u8], rytm: &mut Rytm, elapsed: u64| -> Result<(), RytmError> {
         if !is_sysex(response) {
             // Pass..
             return Ok(());
@@ -82,7 +82,7 @@ fn global() {
     let (_conn_in, rx) = make_input_message_forwarder();
 
     let query = GlobalQuery::new(0).unwrap();
-    let callback = |response: &[u8], rytm: &mut Rytm| -> Result<(), RytmError> {
+    let callback = |response: &[u8], rytm: &mut Rytm, elapsed: u64| -> Result<(), RytmError> {
         if !is_sysex(response) {
             // Pass..
             return Ok(());
@@ -176,7 +176,7 @@ fn plock_seq() {
     let query = PatternQuery::new(0).unwrap();
 
     let mut found_types = Vec::new();
-    let callback = |response: &[u8], rytm: &mut Rytm| -> Result<(), RytmError> {
+    let callback = |response: &[u8], rytm: &mut Rytm, elapsed: u64| -> Result<(), RytmError> {
         if !is_sysex(response) {
             // Pass..
             return Ok(());
@@ -287,7 +287,7 @@ fn sound() {
     let query = SoundQuery::new(0).unwrap();
     let query = SoundQuery::new_targeting_work_buffer(0).unwrap();
 
-    let callback = |response: &[u8], rytm: &mut Rytm| -> Result<(), RytmError> {
+    let callback = |response: &[u8], rytm: &mut Rytm, elapsed: u64| -> Result<(), RytmError> {
         if !is_sysex(response) {
             // Pass..
             return Ok(());
@@ -296,14 +296,18 @@ fn sound() {
         rytm.update_from_sysex_response(response)?;
         let sound = rytm.work_buffer_sounds()[0];
 
-        clearscreen::clear().unwrap();
+        // clearscreen::clear().unwrap();
 
-        dbg!(sound);
+        // convert unix epoch to human readable milliseconds
+        // let response_time = elapsed / 1_000_000;
+
+        dbg!(elapsed);
+        dbg!(sound.machine_parameters());
 
         Ok(())
     };
 
-    poll_with_query_blocking(&mut rytm, query, conn_out, rx, 1000, callback).unwrap();
+    poll_with_query_blocking(&mut rytm, query, conn_out, rx, 2000, callback).unwrap();
 }
 
 #[test]
@@ -315,7 +319,7 @@ fn kit() {
     let query = KitQuery::new(18).unwrap();
     let query = KitQuery::new_targeting_work_buffer();
 
-    let callback = |response: &[u8], rytm: &mut Rytm| -> Result<(), RytmError> {
+    let callback = |response: &[u8], rytm: &mut Rytm, elapsed: u64| -> Result<(), RytmError> {
         if !is_sysex(response) {
             // Pass..
             return Ok(());
@@ -344,7 +348,7 @@ fn global_type() {
     let query = GlobalQuery::new(0).unwrap();
     let query = GlobalQuery::new_targeting_work_buffer();
 
-    let callback = |response: &[u8], rytm: &mut Rytm| -> Result<(), RytmError> {
+    let callback = |response: &[u8], rytm: &mut Rytm, elapsed: u64| -> Result<(), RytmError> {
         if !is_sysex(response) {
             // Pass..
             return Ok(());
@@ -382,7 +386,7 @@ fn global_type() {
         Ok(())
     };
 
-    poll_with_query_blocking(&mut rytm, query, conn_out, rx, 1000, callback).unwrap();
+    poll_with_query_blocking(&mut rytm, query, conn_out, rx, 200, callback).unwrap();
 }
 
 #[test]
@@ -393,7 +397,7 @@ fn settings_type() {
 
     let query = SettingsQuery::new();
 
-    let callback = |response: &[u8], rytm: &mut Rytm| -> Result<(), RytmError> {
+    let callback = |response: &[u8], rytm: &mut Rytm, elapsed: u64| -> Result<(), RytmError> {
         if !is_sysex(response) {
             // Pass..
             return Ok(());

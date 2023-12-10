@@ -3,7 +3,7 @@
 use rytm_rs::{
     error::{ConversionError, ParameterError, RytmError, SysexConversionError},
     object::pattern::MicroTime,
-    object::sound::types::Machine,
+    object::sound::types::MachineType,
 };
 use rytm_rs_macro::parameter_range;
 use rytm_sys::{
@@ -442,7 +442,7 @@ pub fn encode_micro_timing_byte(micro_timing: &MicroTime) -> i8 {
 }
 
 /// Checks if the given machine is compatible for the given track.
-pub fn is_machine_compatible_for_track(track_index: usize, machine: Machine) -> bool {
+pub fn is_machine_compatible_for_track(track_index: usize, machine: MachineType) -> bool {
     let compatible_machines = unsafe { rytm_sys::ar_sound_compatible_machines };
     let compatible_machines_for_track = compatible_machines[track_index];
 

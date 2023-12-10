@@ -2,6 +2,7 @@ use super::types::FxLfoDestination;
 use crate::{
     error::{ConversionError, ParameterError, RytmError},
     object::sound::types::{LfoMode, LfoMultiplier, LfoWaveform},
+    util::{i8_to_u8_midpoint_of_u8_input_range, u8_to_i8_midpoint_of_u8_input_range},
 };
 use rytm_rs_macro::parameter_range;
 use rytm_sys::ar_kit_t;
@@ -16,7 +17,7 @@ pub struct FxLfo {
     waveform: LfoWaveform,
     start_phase_or_slew: u8,
     mode: LfoMode,
-    depth: f64,
+    depth: f32,
 }
 
 impl Default for FxLfo {
@@ -39,11 +40,11 @@ impl TryFrom<&ar_kit_t> for FxLfo {
     fn try_from(raw_kit: &ar_kit_t) -> Result<Self, Self::Error> {
         // map range of 0..=32767 to -128.0..=127.99
         let depth_u16 = ((raw_kit.fx_lfo_depth_msb as u16) << 8) + raw_kit.fx_lfo_depth_lsb as u16;
-        let depth = depth_u16 as f64 / 256.0 - 128.0;
+        let depth = depth_u16 as f32 / 256.0 - 128.0;
         Ok(Self {
-            speed: raw_kit.fx_lfo_speed as i8 - 64,
+            speed: u8_to_i8_midpoint_of_u8_input_range(raw_kit.fx_lfo_speed, 0, 127),
             multiplier: raw_kit.fx_lfo_multiplier.try_into()?,
-            fade: raw_kit.fx_lfo_fade as i8 - 64,
+            fade: u8_to_i8_midpoint_of_u8_input_range(raw_kit.fx_lfo_fade, 0, 127),
             destination: raw_kit.fx_lfo_dest.try_into()?,
             waveform: raw_kit.fx_lfo_wave.try_into()?,
             start_phase_or_slew: raw_kit.fx_lfo_start_phase,
@@ -58,9 +59,9 @@ impl FxLfo {
         // map range of -128.0..=127.99 to 0..=32767
         let depth = ((self.depth + 128.0) * 256.0) as u16;
 
-        raw_kit.fx_lfo_speed = self.speed as u8 + 64;
+        raw_kit.fx_lfo_speed = i8_to_u8_midpoint_of_u8_input_range(self.speed, 0, 127);
         raw_kit.fx_lfo_multiplier = self.multiplier.into();
-        raw_kit.fx_lfo_fade = self.fade as u8 + 64;
+        raw_kit.fx_lfo_fade = i8_to_u8_midpoint_of_u8_input_range(self.fade, 0, 127);
         raw_kit.fx_lfo_dest = self.destination.into();
         raw_kit.fx_lfo_wave = self.waveform.into();
         raw_kit.fx_lfo_start_phase = self.start_phase_or_slew;
@@ -156,7 +157,7 @@ impl FxLfo {
     }
 
     /// Returns the depth of the LFO.
-    pub fn depth(&self) -> f64 {
+    pub fn depth(&self) -> f32 {
         self.depth
     }
 }

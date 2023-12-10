@@ -1,5 +1,8 @@
-use super::types::{Machine, SoundModTarget, SoundSettingsChromaticMode};
-use crate::error::{ConversionError, ParameterError, RytmError};
+use super::types::{MachineType, SoundModTarget, SoundSettingsChromaticMode};
+use crate::{
+    error::{ConversionError, ParameterError, RytmError},
+    util::{i8_to_u8_midpoint_of_u8_input_range, u8_to_i8_midpoint_of_u8_input_range},
+};
 use rytm_rs_macro::parameter_range;
 use rytm_sys::ar_sound_t;
 
@@ -7,7 +10,7 @@ use rytm_sys::ar_sound_t;
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 
 pub struct SoundSettings {
-    machine: Machine,
+    machine_type: MachineType,
     chromatic_mode: SoundSettingsChromaticMode,
     env_reset_filter: bool,
     velocity_to_volume: bool,
@@ -35,7 +38,7 @@ pub struct SoundSettings {
 impl Default for SoundSettings {
     fn default() -> Self {
         Self {
-            machine: Machine::default(),
+            machine_type: MachineType::default(),
             chromatic_mode: SoundSettingsChromaticMode::default(),
             env_reset_filter: false,
             velocity_to_volume: false,
@@ -76,28 +79,60 @@ impl TryFrom<&ar_sound_t> for SoundSettings {
         let chromatic_mode_number = (raw_mode_flags & 0b0011_0000) >> 4;
 
         Ok(Self {
-            machine: raw_sound.machine_type.try_into()?,
+            machine_type: raw_sound.machine_type.try_into()?,
             chromatic_mode: chromatic_mode_number.try_into()?,
             env_reset_filter: raw_mode_flags & 0b0000_0010 != 0,
             velocity_to_volume: raw_mode_flags & 0b0100_0000 != 0,
             legacy_fx_send: raw_mode_flags & 0b0000_0100 != 0,
 
-            velocity_modulation_amt_1: raw_sound.vel_amt_1 as i8 - 64,
+            velocity_modulation_amt_1: u8_to_i8_midpoint_of_u8_input_range(
+                raw_sound.vel_amt_1,
+                0,
+                127,
+            ),
             velocity_modulation_target_1: raw_sound.vel_target_1.try_into()?,
-            velocity_modulation_amt_2: raw_sound.vel_amt_2 as i8 - 64,
+            velocity_modulation_amt_2: u8_to_i8_midpoint_of_u8_input_range(
+                raw_sound.vel_amt_2,
+                0,
+                127,
+            ),
             velocity_modulation_target_2: raw_sound.vel_target_2.try_into()?,
-            velocity_modulation_amt_3: raw_sound.vel_amt_3 as i8 - 64,
+            velocity_modulation_amt_3: u8_to_i8_midpoint_of_u8_input_range(
+                raw_sound.vel_amt_3,
+                0,
+                127,
+            ),
             velocity_modulation_target_3: raw_sound.vel_target_3.try_into()?,
-            velocity_modulation_amt_4: raw_sound.vel_amt_4 as i8 - 64,
+            velocity_modulation_amt_4: u8_to_i8_midpoint_of_u8_input_range(
+                raw_sound.vel_amt_4,
+                0,
+                127,
+            ),
             velocity_modulation_target_4: raw_sound.vel_target_4.try_into()?,
 
-            after_touch_modulation_amt_1: raw_sound.at_amt_1 as i8 - 64,
+            after_touch_modulation_amt_1: u8_to_i8_midpoint_of_u8_input_range(
+                raw_sound.at_amt_1,
+                0,
+                127,
+            ),
             after_touch_modulation_target_1: raw_sound.at_target_1.try_into()?,
-            after_touch_modulation_amt_2: raw_sound.at_amt_2 as i8 - 64,
+            after_touch_modulation_amt_2: u8_to_i8_midpoint_of_u8_input_range(
+                raw_sound.at_amt_2,
+                0,
+                127,
+            ),
             after_touch_modulation_target_2: raw_sound.at_target_2.try_into()?,
-            after_touch_modulation_amt_3: raw_sound.at_amt_3 as i8 - 64,
+            after_touch_modulation_amt_3: u8_to_i8_midpoint_of_u8_input_range(
+                raw_sound.at_amt_3,
+                0,
+                127,
+            ),
             after_touch_modulation_target_3: raw_sound.at_target_3.try_into()?,
-            after_touch_modulation_amt_4: raw_sound.at_amt_4 as i8 - 64,
+            after_touch_modulation_amt_4: u8_to_i8_midpoint_of_u8_input_range(
+                raw_sound.at_amt_4,
+                0,
+                127,
+            ),
             after_touch_modulation_target_4: raw_sound.at_target_4.try_into()?,
         })
     }
@@ -105,7 +140,7 @@ impl TryFrom<&ar_sound_t> for SoundSettings {
 
 impl SoundSettings {
     pub(crate) fn apply_to_raw_sound(&self, raw_sound: &mut ar_sound_t) {
-        raw_sound.machine_type = self.machine.into();
+        raw_sound.machine_type = self.machine_type.into();
 
         let chromatic_mode_number: u8 = self.chromatic_mode.into();
         raw_sound.mode_flags = chromatic_mode_number << 4;
@@ -114,29 +149,53 @@ impl SoundSettings {
         raw_sound.mode_flags |= (self.velocity_to_volume as u8) << 6;
 
         // All amounts are TODO: Try interpreting them as i8,  device -128..=+127
-        raw_sound.vel_amt_1 = self.velocity_modulation_amt_1 as u8 + 64;
+        raw_sound.vel_amt_1 =
+            i8_to_u8_midpoint_of_u8_input_range(self.velocity_modulation_amt_1, 0, 127);
         raw_sound.vel_target_1 = self.velocity_modulation_target_1.into();
-        raw_sound.vel_amt_2 = self.velocity_modulation_amt_2 as u8 + 64;
+        raw_sound.vel_amt_2 =
+            i8_to_u8_midpoint_of_u8_input_range(self.velocity_modulation_amt_2, 0, 127);
         raw_sound.vel_target_2 = self.velocity_modulation_target_2.into();
-        raw_sound.vel_amt_3 = self.velocity_modulation_amt_3 as u8 + 64;
+        raw_sound.vel_amt_3 =
+            i8_to_u8_midpoint_of_u8_input_range(self.velocity_modulation_amt_3, 0, 127);
         raw_sound.vel_target_3 = self.velocity_modulation_target_3.into();
-        raw_sound.vel_amt_4 = self.velocity_modulation_amt_4 as u8 + 64;
+        raw_sound.vel_amt_4 =
+            i8_to_u8_midpoint_of_u8_input_range(self.velocity_modulation_amt_4, 0, 127);
         raw_sound.vel_target_4 = self.velocity_modulation_target_4.into();
 
-        raw_sound.at_amt_1 = self.after_touch_modulation_amt_1 as u8 + 64;
+        raw_sound.at_amt_1 =
+            i8_to_u8_midpoint_of_u8_input_range(self.after_touch_modulation_amt_1, 0, 127);
         raw_sound.at_target_1 = self.after_touch_modulation_target_1.into();
-        raw_sound.at_amt_2 = self.after_touch_modulation_amt_2 as u8 + 64;
+        raw_sound.at_amt_2 =
+            i8_to_u8_midpoint_of_u8_input_range(self.after_touch_modulation_amt_2, 0, 127);
         raw_sound.at_target_2 = self.after_touch_modulation_target_2.into();
-        raw_sound.at_amt_3 = self.after_touch_modulation_amt_3 as u8 + 64;
+        raw_sound.at_amt_3 =
+            i8_to_u8_midpoint_of_u8_input_range(self.after_touch_modulation_amt_3, 0, 127);
         raw_sound.at_target_3 = self.after_touch_modulation_target_3.into();
-        raw_sound.at_amt_4 = self.after_touch_modulation_amt_4 as u8 + 64;
+        raw_sound.at_amt_4 =
+            i8_to_u8_midpoint_of_u8_input_range(self.after_touch_modulation_amt_4, 0, 127);
         raw_sound.at_target_4 = self.after_touch_modulation_target_4.into();
     }
 
-    /// Sets the machine type of the sound.
-    pub(crate) fn set_machine(&mut self, machine: Machine) {
-        self.machine = machine;
-    }
+    // TODO:
+    //     /// Sets the machine of the sound.
+    // pub fn set_machine(&mut self, machine: Machine) -> Result<(), RytmError> {
+    //     if let Some(assigned_track) = self.assigned_track() {
+    //         if !crate::util::is_machine_compatible_for_track(assigned_track, machine) {
+    //             return Err(ParameterError::Compatibility {
+    //                 value: machine.to_string(),
+    //                 parameter_name: "Machine".to_string(),
+    //                 reason: Some(format!(
+    //                     "Given machine {} is not compatible for track {}",
+    //                     machine, self.index
+    //                 )),
+    //             }
+    //             .into());
+    //         }
+    //     }
+
+    //     self.machine = machine;
+    //     Ok(())
+    // }
 
     /// Sets the chromatic mode of the sound.
     pub fn set_chromatic_mode(&mut self, chromatic_mode: SoundSettingsChromaticMode) {
@@ -321,8 +380,8 @@ impl SoundSettings {
     }
 
     /// Returns the machine type of the sound.
-    pub fn machine(&self) -> Machine {
-        self.machine
+    pub fn machine(&self) -> MachineType {
+        self.machine_type
     }
 
     /// Returns the chromatic mode of the sound.

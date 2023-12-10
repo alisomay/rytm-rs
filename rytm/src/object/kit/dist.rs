@@ -1,4 +1,7 @@
-use crate::error::{ConversionError, ParameterError, RytmError};
+use crate::{
+    error::{ConversionError, ParameterError, RytmError},
+    util::{i8_to_u8_midpoint_of_u8_input_range, u8_to_i8_midpoint_of_u8_input_range},
+};
 use rytm_rs_macro::parameter_range;
 use rytm_sys::ar_kit_t;
 
@@ -33,7 +36,7 @@ impl TryFrom<&ar_kit_t> for FxDistortion {
             delay_overdrive: raw_kit.fx_dist_delay_pre_post,
             reverb_post: raw_kit.fx_dist_reverb_pre_post != 0,
             amount: raw_kit.fx_dist_amount,
-            symmetry: raw_kit.fx_dist_sym as i8 - 64,
+            symmetry: u8_to_i8_midpoint_of_u8_input_range(raw_kit.fx_dist_sym, 0, 127),
         })
     }
 }
@@ -44,7 +47,7 @@ impl FxDistortion {
         raw_kit.fx_dist_delay_pre_post = self.delay_overdrive;
         raw_kit.fx_dist_reverb_pre_post = self.reverb_post as u8;
         raw_kit.fx_dist_amount = self.amount;
-        raw_kit.fx_dist_sym = self.symmetry as u8 + 64;
+        raw_kit.fx_dist_sym = i8_to_u8_midpoint_of_u8_input_range(self.symmetry, 0, 127);
     }
 
     /// Sets the reverb send of the distortion.

@@ -1,5 +1,8 @@
 use super::types::FxDelayTimeOnTheGrid;
-use crate::error::{ConversionError, ParameterError, RytmError};
+use crate::{
+    error::{ConversionError, ParameterError, RytmError},
+    util::{i8_to_u8_midpoint_of_u8_input_range, u8_to_i8_midpoint_of_u8_input_range},
+};
 use rytm_rs_macro::parameter_range;
 use rytm_sys::ar_kit_t;
 
@@ -35,12 +38,16 @@ impl TryFrom<&ar_kit_t> for FxDelay {
     type Error = ConversionError;
     fn try_from(raw_kit: &ar_kit_t) -> Result<Self, Self::Error> {
         // map 0..=127 to 0..=198
-        let feedback = (raw_kit.fx_delay_feedback as f64 / 127.0 * 198.0) as u8;
+        let feedback = (raw_kit.fx_delay_feedback as f32 / 127.0 * 198.0) as u8;
 
         Ok(Self {
             time: raw_kit.fx_delay_time,
             ping_pong: raw_kit.fx_delay_pingpong != 0,
-            stereo_width: raw_kit.fx_delay_stereo_width as i8 - 64,
+            stereo_width: u8_to_i8_midpoint_of_u8_input_range(
+                raw_kit.fx_delay_stereo_width,
+                0,
+                127,
+            ),
             feedback,
             hpf: raw_kit.fx_delay_hpf,
             lpf: raw_kit.fx_delay_lpf,
@@ -53,11 +60,12 @@ impl TryFrom<&ar_kit_t> for FxDelay {
 impl FxDelay {
     pub(crate) fn apply_to_raw_kit(&self, raw_kit: &mut ar_kit_t) {
         // map 0..=198 to 0..=127
-        let feedback = (self.feedback as f64 / 198.0 * 127.0) as u8;
+        let feedback = (self.feedback as f32 / 198.0 * 127.0) as u8;
 
         raw_kit.fx_delay_time = self.time;
         raw_kit.fx_delay_pingpong = self.ping_pong as u8;
-        raw_kit.fx_delay_stereo_width = self.stereo_width as u8 + 64;
+        raw_kit.fx_delay_stereo_width =
+            i8_to_u8_midpoint_of_u8_input_range(self.stereo_width, 0, 127);
         raw_kit.fx_delay_feedback = feedback;
         raw_kit.fx_delay_hpf = self.hpf;
         raw_kit.fx_delay_lpf = self.lpf;

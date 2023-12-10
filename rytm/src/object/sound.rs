@@ -8,17 +8,16 @@ pub mod types;
 pub(crate) mod unknown;
 
 use self::{
+    machine::MachineParameters,
     page::{Amplitude, Filter, Lfo, Sample},
     settings::SoundSettings,
-    types::Machine,
     unknown::SoundUnknown,
 };
 use crate::{
     error::{RytmError, SysexConversionError},
     impl_sysex_compatible,
-    object::{sound::types::SynthParameter, types::ObjectName},
+    object::types::ObjectName,
     sysex::{SysexCompatible, SysexMeta, SysexType, SOUND_SYSEX_SIZE},
-    util::from_s_u16_t,
     ParameterError,
 };
 use derivative::Derivative;
@@ -66,10 +65,9 @@ pub struct Sound {
 
     /// Name of the sound.
     name: ObjectName,
-    // TODO: Complex lookup depending on machine type.
-    synth_parameter: [SynthParameter; 8],
 
-    machine: Machine,
+    machine_parameters: MachineParameters,
+
     sample: Sample,
     filter: Filter,
     amplitude: Amplitude,
@@ -91,17 +89,17 @@ impl From<&Sound> for ar_sound_t {
 
         let mut raw_sound = rytm_sys::ar_sound_t {
             name: sound.name.copy_inner(),
-            machine_type: sound.machine.into(),
             accent_level: sound.accent_level,
             def_note: sound.def_note,
             ..Default::default()
         };
 
-        sound.sample().apply_to_raw_sound(&mut raw_sound);
-        sound.filter().apply_to_raw_sound(&mut raw_sound);
-        sound.amplitude().apply_to_raw_sound(&mut raw_sound);
-        sound.lfo().apply_to_raw_sound(&mut raw_sound);
-        sound.settings().apply_to_raw_sound(&mut raw_sound);
+        sound.sample.apply_to_raw_sound(&mut raw_sound);
+        sound.filter.apply_to_raw_sound(&mut raw_sound);
+        sound.amplitude.apply_to_raw_sound(&mut raw_sound);
+        sound.lfo.apply_to_raw_sound(&mut raw_sound);
+        sound.settings.apply_to_raw_sound(&mut raw_sound);
+        sound.machine_parameters.apply_to_raw_sound(&mut raw_sound);
 
         sound.__unknown.apply_to_raw_sound(&mut raw_sound);
 
@@ -168,23 +166,12 @@ impl Sound {
 
             name: ObjectName::from_u8_array(raw_sound.name),
 
-            synth_parameter: [
-                SynthParameter::new(unsafe { from_s_u16_t(&raw_sound.synth_param_1) }),
-                SynthParameter::new(unsafe { from_s_u16_t(&raw_sound.synth_param_2) }),
-                SynthParameter::new(unsafe { from_s_u16_t(&raw_sound.synth_param_3) }),
-                SynthParameter::new(unsafe { from_s_u16_t(&raw_sound.synth_param_4) }),
-                SynthParameter::new(unsafe { from_s_u16_t(&raw_sound.synth_param_5) }),
-                SynthParameter::new(unsafe { from_s_u16_t(&raw_sound.synth_param_6) }),
-                SynthParameter::new(unsafe { from_s_u16_t(&raw_sound.synth_param_7) }),
-                SynthParameter::new(unsafe { from_s_u16_t(&raw_sound.synth_param_8) }),
-            ],
-
-            machine: raw_sound.machine_type.try_into()?,
             sample: raw_sound.try_into()?,
             filter: raw_sound.try_into()?,
             amplitude: raw_sound.try_into()?,
             lfo: raw_sound.try_into()?,
             settings: raw_sound.try_into()?,
+            machine_parameters: raw_sound.try_into()?,
 
             accent_level: raw_sound.accent_level,
             def_note: raw_sound.def_note,
@@ -238,26 +225,6 @@ impl Sound {
         }
 
         self.name = ObjectName::from_u8_array(name.as_bytes().try_into().unwrap());
-        Ok(())
-    }
-
-    /// Sets the machine of the sound.
-    pub fn set_machine(&mut self, machine: Machine) -> Result<(), RytmError> {
-        if let Some(assigned_track) = self.assigned_track() {
-            if !crate::util::is_machine_compatible_for_track(assigned_track, machine) {
-                return Err(ParameterError::Compatibility {
-                    value: machine.to_string(),
-                    parameter_name: "Machine".to_string(),
-                    reason: Some(format!(
-                        "Given machine {} is not compatible for track {}",
-                        machine, self.index
-                    )),
-                }
-                .into());
-            }
-        }
-
-        self.machine = machine;
         Ok(())
     }
 
@@ -339,6 +306,16 @@ impl Sound {
         &mut self.settings
     }
 
+    /// Returns the machine parameters of the sound.
+    pub fn machine_parameters(&self) -> &MachineParameters {
+        &self.machine_parameters
+    }
+
+    /// Returns the machine parameters of the sound mutably.
+    pub fn machine_parameters_mut(&mut self) -> &mut MachineParameters {
+        &mut self.machine_parameters
+    }
+
     #[parameter_range(range = "sound_index:0..=127")]
     pub fn try_default(sound_index: usize) -> Result<Self, RytmError> {
         Ok(Self {
@@ -352,23 +329,12 @@ impl Sound {
 
             name: ObjectName::from_u8_array([0; 15]),
 
-            synth_parameter: [
-                SynthParameter::new(0),
-                SynthParameter::new(0),
-                SynthParameter::new(0),
-                SynthParameter::new(0),
-                SynthParameter::new(0),
-                SynthParameter::new(0),
-                SynthParameter::new(0),
-                SynthParameter::new(0),
-            ],
-
-            machine: Machine::default(),
             sample: Sample::default(),
             lfo: Lfo::default(),
             filter: Filter::default(),
             amplitude: Amplitude::default(),
             settings: SoundSettings::default(),
+            machine_parameters: MachineParameters::default(),
 
             accent_level: 0,
             def_note: 0,
@@ -389,24 +355,12 @@ impl Sound {
 
             name: ObjectName::from_u8_array([0; 15]),
 
-            synth_parameter: [
-                SynthParameter::new(0),
-                SynthParameter::new(0),
-                SynthParameter::new(0),
-                SynthParameter::new(0),
-                SynthParameter::new(0),
-                SynthParameter::new(0),
-                SynthParameter::new(0),
-                SynthParameter::new(0),
-            ],
-
-            // TODO: Default for track?
-            machine: Machine::default(),
             sample: Sample::default(),
             filter: Filter::default(),
             amplitude: Amplitude::default(),
             lfo: Lfo::default(),
             settings: SoundSettings::default(),
+            machine_parameters: MachineParameters::default(),
 
             accent_level: 0,
             def_note: 0,

@@ -104,7 +104,7 @@ pub struct Pattern {
     /// Pattern BPM
     ///
     /// Range `30.0..=300.0`
-    bpm: f64,
+    bpm: f32,
 
     #[derivative(Debug = "ignore")]
     /// Always 0x01, probably a marker for the end of pattern.
@@ -179,7 +179,7 @@ impl Pattern {
             | (raw_pattern.magic[3] as u32);
 
         let bpm = ((raw_pattern.bpm_msb as u16) << 8) | (raw_pattern.bpm_lsb as u16);
-        let bpm = bpm as f64 / 120.0;
+        let bpm = bpm as f32 / 120.0;
 
         let master_change =
             ((raw_pattern.master_chg_msb as u16) << 8) | (raw_pattern.master_chg_lsb as u16);
@@ -335,7 +335,7 @@ impl Pattern {
     ///
     /// This is only effective when pattern level bpm is enabled.
     #[parameter_range(range = "bpm:30.0..=300.0")]
-    pub fn set_bpm(&mut self, bpm: f64) -> Result<(), RytmError> {
+    pub fn set_bpm(&mut self, bpm: f32) -> Result<(), RytmError> {
         self.bpm = bpm;
         Ok(())
     }
@@ -419,7 +419,7 @@ impl Pattern {
     /// Range `30.0..=300.0`
     ///
     /// This is only effective when pattern level bpm is enabled.
-    pub fn bpm(&self) -> f64 {
+    pub fn bpm(&self) -> f32 {
         self.bpm
     }
 

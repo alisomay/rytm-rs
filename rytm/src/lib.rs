@@ -134,12 +134,13 @@ impl Rytm {
                 let raw_sound: &ar_sound_t = unsafe { &*(raw.as_mut_ptr() as *const ar_sound_t) };
                 let sound = Sound::try_from_raw(meta, raw_sound, None)?;
 
-                let index = (meta.obj_nr & 0b0111_1111) as usize;
                 match sound.sound_type() {
                     SoundType::Pool => {
+                        let index = (meta.obj_nr & 0b0111_1111) as usize;
                         self.pool_sounds[index] = sound;
                     }
                     SoundType::WorkBuffer => {
+                        let index = (meta.obj_nr - 128) as usize;
                         self.work_buffer_sounds[index] = sound;
                     }
                     SoundType::KitQuery => {
@@ -161,6 +162,7 @@ impl Rytm {
                     return Ok(());
                 }
 
+                // TODO:
                 let index = (meta.obj_nr & 0b0000_0011) as usize;
                 self.globals[index] = global;
                 Ok(())

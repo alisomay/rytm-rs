@@ -1,6 +1,9 @@
 use crate::{
     error::{ConversionError, ParameterError, RytmError},
-    util::{from_s_u16_t, to_s_u16_t_union_a},
+    util::{
+        from_s_u16_t, i8_to_u8_midpoint_of_u8_input_range, to_s_u16_t_union_a,
+        u8_to_i8_midpoint_of_u8_input_range,
+    },
 };
 use rytm_rs_macro::parameter_range;
 use rytm_sys::ar_sound_t;
@@ -12,8 +15,8 @@ pub struct Sample {
     fine_tune: i8,
     number: u8,
     bit_reduction: u8,
-    start: f64,
-    end: f64,
+    start: f32,
+    end: f32,
     loop_flag: bool,
     volume: u8,
 }
@@ -37,14 +40,12 @@ impl TryFrom<&ar_sound_t> for Sample {
     type Error = ConversionError;
     fn try_from(raw_sound: &ar_sound_t) -> Result<Self, Self::Error> {
         // // map range of u16 0..=30720 to 0.0..=120.0
-        let start = (unsafe { from_s_u16_t(&raw_sound.sample_start) } as f64 / 30720.0) * 120.0;
-        let end = (unsafe { from_s_u16_t(&raw_sound.sample_end) } as f64 / 30720.0) * 120.0;
+        let start = (unsafe { from_s_u16_t(&raw_sound.sample_start) } as f32 / 30720.0) * 120.0;
+        let end = (unsafe { from_s_u16_t(&raw_sound.sample_end) } as f32 / 30720.0) * 120.0;
 
         Ok(Self {
-            // 40..=88 device -24..=24
-            // TODO: Double check
-            tune: raw_sound.sample_tune as i8 - 64,
-            fine_tune: raw_sound.sample_fine_tune as i8 - 64,
+            tune: u8_to_i8_midpoint_of_u8_input_range(raw_sound.sample_tune, 127, 0),
+            fine_tune: u8_to_i8_midpoint_of_u8_input_range(raw_sound.sample_fine_tune, 127, 0),
             number: raw_sound.sample_nr,
             bit_reduction: raw_sound.sample_br,
             start,
@@ -57,8 +58,8 @@ impl TryFrom<&ar_sound_t> for Sample {
 
 impl Sample {
     pub(crate) fn apply_to_raw_sound(&self, raw_sound: &mut ar_sound_t) {
-        raw_sound.sample_tune = self.tune as u8 + 64;
-        raw_sound.sample_fine_tune = self.fine_tune as u8 + 64;
+        raw_sound.sample_tune = i8_to_u8_midpoint_of_u8_input_range(self.tune, 127, 0);
+        raw_sound.sample_fine_tune = i8_to_u8_midpoint_of_u8_input_range(self.fine_tune, 127, 0);
         raw_sound.sample_nr = self.number;
         raw_sound.sample_br = self.bit_reduction;
         // // map range of 0.0..=120.0 to u16 0..=30720
@@ -113,8 +114,8 @@ impl Sample {
     /// Sets the start of the sample.
     ///
     /// Range: `0.0..=120.0`
-    #[parameter_range(range = "start:0.0..=120.0:f64")]
-    pub fn set_start(&mut self, start: f64) -> Result<(), RytmError> {
+    #[parameter_range(range = "start:0.0..=120.0:f32")]
+    pub fn set_start(&mut self, start: f32) -> Result<(), RytmError> {
         self.start = start;
         Ok(())
     }
@@ -122,8 +123,8 @@ impl Sample {
     /// Sets the end of the sample.
     ///
     /// Range: `0.0..=120.0`
-    #[parameter_range(range = "end:0.0..=120.0:f64")]
-    pub fn set_end(&mut self, end: f64) -> Result<(), RytmError> {
+    #[parameter_range(range = "end:0.0..=120.0:f32")]
+    pub fn set_end(&mut self, end: f32) -> Result<(), RytmError> {
         self.end = end;
         Ok(())
     }
@@ -162,12 +163,12 @@ impl Sample {
     }
 
     // Returns the start of the sample.
-    pub fn start(&self) -> f64 {
+    pub fn start(&self) -> f32 {
         self.start
     }
 
     // Returns the end of the sample.
-    pub fn end(&self) -> f64 {
+    pub fn end(&self) -> f32 {
         self.end
     }
 

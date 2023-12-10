@@ -167,7 +167,7 @@ mod sound_mod_target {
 
 /// The machine type of a sound.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub enum Machine {
+pub enum MachineType {
     BdHard,
     BdClassic,
     SdHard,
@@ -206,7 +206,7 @@ pub enum Machine {
     Unset,
 }
 
-impl std::fmt::Display for Machine {
+impl std::fmt::Display for MachineType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let machine = match self {
             Self::BdHard => "BD_HARD",
@@ -249,7 +249,7 @@ impl std::fmt::Display for Machine {
     }
 }
 
-impl TryFrom<u8> for Machine {
+impl TryFrom<u8> for MachineType {
     type Error = ConversionError;
     fn try_from(value: u8) -> Result<Self, Self::Error> {
         use machines::*;
@@ -297,45 +297,45 @@ impl TryFrom<u8> for Machine {
     }
 }
 
-impl From<Machine> for u8 {
-    fn from(value: Machine) -> Self {
+impl From<MachineType> for u8 {
+    fn from(value: MachineType) -> Self {
         use machines::*;
         match value {
-            Machine::BdHard => BD_HARD,
-            Machine::BdClassic => BD_CLASSIC,
-            Machine::SdHard => SD_HARD,
-            Machine::SdClassic => SD_CLASSIC,
-            Machine::RsHard => RS_HARD,
-            Machine::RsClassic => RS_CLASSIC,
-            Machine::CpClassic => CP_CLASSIC,
-            Machine::BtClassic => BT_CLASSIC,
-            Machine::XtClassic => XT_CLASSIC,
-            Machine::ChClassic => CH_CLASSIC,
-            Machine::OhClassic => OH_CLASSIC,
-            Machine::CyClassic => CY_CLASSIC,
-            Machine::CbClassic => CB_CLASSIC,
-            Machine::BdFm => BD_FM,
-            Machine::SdFm => SD_FM,
-            Machine::UtNoise => UT_NOISE,
-            Machine::UtImpulse => UT_IMPULSE,
-            Machine::ChMetallic => CH_METALLIC,
-            Machine::OhMetallic => OH_METALLIC,
-            Machine::CyMetallic => CY_METALLIC,
-            Machine::CbMetallic => CB_METALLIC,
-            Machine::BdPlastic => BD_PLASTIC,
-            Machine::BdSilky => BD_SILKY,
-            Machine::SdNatural => SD_NATURAL,
-            Machine::HhBasic => HH_BASIC,
-            Machine::CyRide => CY_RIDE,
-            Machine::BdSharp => BD_SHARP,
-            Machine::Disable => DISABLE,
-            Machine::SyDualVco => SY_DUAL_VCO,
-            Machine::SyChip => SY_CHIP,
-            Machine::BdAcoustic => BD_ACOUSTIC,
-            Machine::SdAcoustic => SD_ACOUSTIC,
-            Machine::SyRaw => SY_RAW,
-            Machine::HhLab => HH_LAB,
-            Machine::Unset => UNSET,
+            MachineType::BdHard => BD_HARD,
+            MachineType::BdClassic => BD_CLASSIC,
+            MachineType::SdHard => SD_HARD,
+            MachineType::SdClassic => SD_CLASSIC,
+            MachineType::RsHard => RS_HARD,
+            MachineType::RsClassic => RS_CLASSIC,
+            MachineType::CpClassic => CP_CLASSIC,
+            MachineType::BtClassic => BT_CLASSIC,
+            MachineType::XtClassic => XT_CLASSIC,
+            MachineType::ChClassic => CH_CLASSIC,
+            MachineType::OhClassic => OH_CLASSIC,
+            MachineType::CyClassic => CY_CLASSIC,
+            MachineType::CbClassic => CB_CLASSIC,
+            MachineType::BdFm => BD_FM,
+            MachineType::SdFm => SD_FM,
+            MachineType::UtNoise => UT_NOISE,
+            MachineType::UtImpulse => UT_IMPULSE,
+            MachineType::ChMetallic => CH_METALLIC,
+            MachineType::OhMetallic => OH_METALLIC,
+            MachineType::CyMetallic => CY_METALLIC,
+            MachineType::CbMetallic => CB_METALLIC,
+            MachineType::BdPlastic => BD_PLASTIC,
+            MachineType::BdSilky => BD_SILKY,
+            MachineType::SdNatural => SD_NATURAL,
+            MachineType::HhBasic => HH_BASIC,
+            MachineType::CyRide => CY_RIDE,
+            MachineType::BdSharp => BD_SHARP,
+            MachineType::Disable => DISABLE,
+            MachineType::SyDualVco => SY_DUAL_VCO,
+            MachineType::SyChip => SY_CHIP,
+            MachineType::BdAcoustic => BD_ACOUSTIC,
+            MachineType::SdAcoustic => SD_ACOUSTIC,
+            MachineType::SyRaw => SY_RAW,
+            MachineType::HhLab => HH_LAB,
+            MachineType::Unset => UNSET,
         }
     }
 }
@@ -650,18 +650,6 @@ impl From<SoundModTarget> for u8 {
             SoundModTarget::AmpDelaySend => AMP_DLY,
             SoundModTarget::AmpReverbSend => AMP_REV,
         }
-    }
-}
-
-// TODO:
-#[derive(Clone, Copy, Debug)]
-pub struct SynthParameter {
-    inner: u16,
-}
-
-impl SynthParameter {
-    pub fn new(inner: u16) -> Self {
-        Self { inner }
     }
 }
 
