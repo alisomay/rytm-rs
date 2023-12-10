@@ -204,7 +204,19 @@ impl MachineParameters {
             MachineParameters::OhMetallic(oh_metallic) => oh_metallic.apply_to_raw_sound(raw_sound),
             MachineParameters::RsClassic(rs_classic) => rs_classic.apply_to_raw_sound(raw_sound),
             MachineParameters::RsHard(rs_hard) => rs_hard.apply_to_raw_sound(raw_sound),
-            MachineParameters::Disable => todo!(),
+            MachineParameters::Disable => {
+                // Empirical knowledge:
+                //
+                // These are the parameters which are sent from the rytm when a sound is queried and the machine is disabled.
+                raw_sound.synth_param_1 = crate::util::to_s_u16_t_union_a(16384);
+                raw_sound.synth_param_2 = crate::util::to_s_u16_t_union_a(0);
+                raw_sound.synth_param_3 = crate::util::to_s_u16_t_union_a(6400);
+                raw_sound.synth_param_4 = crate::util::to_s_u16_t_union_a(6400);
+                raw_sound.synth_param_5 = crate::util::to_s_u16_t_union_a(0);
+                raw_sound.synth_param_6 = crate::util::to_s_u16_t_union_a(12800);
+                raw_sound.synth_param_7 = crate::util::to_s_u16_t_union_a(0);
+                raw_sound.synth_param_8 = crate::util::to_s_u16_t_union_a(0);
+            }
             MachineParameters::SdAcoustic(sd_acoustic) => sd_acoustic.apply_to_raw_sound(raw_sound),
             MachineParameters::SdClassic(sd_classic) => sd_classic.apply_to_raw_sound(raw_sound),
             MachineParameters::SdFm(sd_fm) => sd_fm.apply_to_raw_sound(raw_sound),
@@ -216,7 +228,7 @@ impl MachineParameters {
             MachineParameters::UtImpulse(ut_impulse) => ut_impulse.apply_to_raw_sound(raw_sound),
             MachineParameters::UtNoise(ut_noise) => ut_noise.apply_to_raw_sound(raw_sound),
             MachineParameters::XtClassic(xt_classic) => xt_classic.apply_to_raw_sound(raw_sound),
-            MachineParameters::Unset => todo!(),
+            MachineParameters::Unset => unreachable!("If you encounter this error, please report it to the maintainer. It means a machine can be unset."),
         }
     }
 
@@ -256,8 +268,8 @@ impl MachineParameters {
             MachineParameters::UtImpulse(_) => 16,
             MachineParameters::UtNoise(_) => 15,
             MachineParameters::XtClassic(_) => 8,
-            // TODO: Double check
-            MachineParameters::Unset => 255,
+            // TODO: Double check probably this never comes.
+            MachineParameters::Unset => 0xFF,
         }
 
         // TODO: Write enum getter also

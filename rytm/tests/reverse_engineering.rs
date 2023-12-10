@@ -285,7 +285,7 @@ fn sound() {
     let conn_out = get_connection_to_rytm();
     let (_conn_in, rx) = make_input_message_forwarder();
 
-    let track_index = 11;
+    let track_index = 0;
 
     let query = SoundQuery::new(0).unwrap();
     let query = SoundQuery::new_targeting_work_buffer(track_index).unwrap();

@@ -45,7 +45,6 @@ pub struct Kit {
 
     track_levels: [u8; 12],
 
-    #[derivative(Debug = "ignore")]
     sounds: [Sound; 12],
 
     fx_delay: FxDelay,
@@ -119,18 +118,18 @@ impl Kit {
         let name = ObjectName::from_u8_array(raw_kit.name);
 
         let mut sounds = [
-            Sound::try_work_buffer_default(0)?,
-            Sound::try_work_buffer_default(1)?,
-            Sound::try_work_buffer_default(2)?,
-            Sound::try_work_buffer_default(3)?,
-            Sound::try_work_buffer_default(4)?,
-            Sound::try_work_buffer_default(5)?,
-            Sound::try_work_buffer_default(6)?,
-            Sound::try_work_buffer_default(7)?,
-            Sound::try_work_buffer_default(8)?,
-            Sound::try_work_buffer_default(9)?,
-            Sound::try_work_buffer_default(10)?,
-            Sound::try_work_buffer_default(11)?,
+            Sound::try_kit_default(0, kit_number, sysex_meta)?,
+            Sound::try_kit_default(1, kit_number, sysex_meta)?,
+            Sound::try_kit_default(2, kit_number, sysex_meta)?,
+            Sound::try_kit_default(3, kit_number, sysex_meta)?,
+            Sound::try_kit_default(4, kit_number, sysex_meta)?,
+            Sound::try_kit_default(5, kit_number, sysex_meta)?,
+            Sound::try_kit_default(6, kit_number, sysex_meta)?,
+            Sound::try_kit_default(7, kit_number, sysex_meta)?,
+            Sound::try_kit_default(8, kit_number, sysex_meta)?,
+            Sound::try_kit_default(9, kit_number, sysex_meta)?,
+            Sound::try_kit_default(10, kit_number, sysex_meta)?,
+            Sound::try_kit_default(11, kit_number, sysex_meta)?,
         ];
 
         for (i, sound) in raw_kit.tracks.iter().enumerate() {
@@ -168,46 +167,31 @@ impl Kit {
 
     #[parameter_range(range = "kit_index:0..=127")]
     pub fn try_default(kit_index: usize) -> Result<Self, RytmError> {
+        let meta = SysexMeta::try_default_for_kit(kit_index, None)?;
         Ok(Self {
             index: kit_index,
-            sysex_meta: SysexMeta::try_default_for_kit(kit_index, None)?,
+            sysex_meta: meta,
             version: 6,
 
             name: format!("KIT {}", kit_index).try_into()?,
 
             track_levels: [100; 12],
 
-            // TODO: Currently relevant indexes are omitted.
-            // This array is not valid, it is temporary.
             sounds: [
-                Sound::try_default(0)?,
-                Sound::try_default(1)?,
-                Sound::try_default(2)?,
-                Sound::try_default(3)?,
-                Sound::try_default(4)?,
-                Sound::try_default(5)?,
-                Sound::try_default(6)?,
-                Sound::try_default(7)?,
-                Sound::try_default(8)?,
-                Sound::try_default(9)?,
-                Sound::try_default(10)?,
-                Sound::try_default(11)?,
+                Sound::try_kit_default(0, kit_index, meta)?,
+                Sound::try_kit_default(1, kit_index, meta)?,
+                Sound::try_kit_default(2, kit_index, meta)?,
+                Sound::try_kit_default(3, kit_index, meta)?,
+                Sound::try_kit_default(4, kit_index, meta)?,
+                Sound::try_kit_default(5, kit_index, meta)?,
+                Sound::try_kit_default(6, kit_index, meta)?,
+                Sound::try_kit_default(7, kit_index, meta)?,
+                Sound::try_kit_default(8, kit_index, meta)?,
+                Sound::try_kit_default(9, kit_index, meta)?,
+                Sound::try_kit_default(10, kit_index, meta)?,
+                Sound::try_kit_default(11, kit_index, meta)?,
             ],
-            // TODO: Replace with this
-            // sounds: [
-            //     Sound::try_kit_default(0, kit_index)?,
-            //     Sound::try_kit_default(1, kit_index)?,
-            //     Sound::try_kit_default(2, kit_index)?,
-            //     Sound::try_kit_default(3, kit_index)?,
-            //     Sound::try_kit_default(4, kit_index)?,
-            //     Sound::try_kit_default(5, kit_index)?,
-            //     Sound::try_kit_default(6, kit_index)?,
-            //     Sound::try_kit_default(7, kit_index)?,
-            //     Sound::try_kit_default(8, kit_index)?,
-            //     Sound::try_kit_default(9, kit_index)?,
-            //     Sound::try_kit_default(10, kit_index)?,
-            //     Sound::try_kit_default(11, kit_index)?,
-            // ],
+
             fx_delay: FxDelay::default(),
             fx_distortion: FxDistortion::default(),
             fx_reverb: FxReverb::default(),
@@ -231,8 +215,7 @@ impl Kit {
 
             track_levels: [100; 12],
 
-            // TODO: Currently relevant indexes are omitted.
-            // This array is not valid, it is temporary.
+            // TODO: I don't know if we choose wb defaults or kit defaults for sounds here..
             sounds: [
                 Sound::try_work_buffer_default(0).unwrap(),
                 Sound::try_work_buffer_default(1).unwrap(),
