@@ -49,7 +49,7 @@ pub struct Track {
     ///
     /// For now it is always 0.
     ///
-    /// Maybe it means something?
+    /// Maybe it mean something?
     #[derivative(Debug = "ignore")]
     pub(crate) __maybe_useful_flag_from_default_trig_note: u8,
 
@@ -57,7 +57,7 @@ pub struct Track {
     ///
     /// For now they're always 0.
     ///
-    /// Maybe they means something?
+    /// Maybe they mean something?
     #[derivative(Debug = "ignore")]
     pub(crate) __maybe_useful_flags_from_flags_and_speed: u8,
 }
@@ -65,15 +65,15 @@ pub struct Track {
 impl Default for Track {
     fn default() -> Self {
         Self {
-            trigs: [Trig::default(); 64],
+            trigs: Trig::default_trig_array(),
 
             default_trig_flags: TrigFlags::default(),
-            default_trig_note: 0,
-            default_trig_velocity: 0,
+            default_trig_note: 60,
+            default_trig_velocity: 100,
             default_trig_note_length: Length::default(),
-            default_trig_probability: 0,
+            default_trig_probability: 100,
 
-            number_of_steps: 0,
+            number_of_steps: 16,
             quantize_amount: 0,
             sends_midi: false,
             speed: Speed::default(),
@@ -81,14 +81,14 @@ impl Default for Track {
             euclidean_mode: false,
             euclidean_pl1: 0,
             euclidean_pl2: 0,
-            euclidean_ro1: 0,
-            euclidean_ro2: 0,
-            euclidean_tro: 0,
+            euclidean_ro1: 63,
+            euclidean_ro2: 63,
+            euclidean_tro: 63,
 
             pad_scale: PadScale::default(),
             root_note: RootNote::default(),
 
-            __maybe_useful_flag_from_default_trig_note: 1,
+            __maybe_useful_flag_from_default_trig_note: 0,
             __maybe_useful_flags_from_flags_and_speed: 0,
         }
     }
@@ -98,7 +98,7 @@ impl TryFrom<&ar_pattern_track_t> for Track {
     type Error = RytmError;
 
     fn try_from(raw_track: &ar_pattern_track_t) -> Result<Self, RytmError> {
-        let mut trigs: [Trig; 64] = [Trig::default(); 64];
+        let mut trigs: [Trig; 64] = Trig::default_trig_array();
 
         let trig_cursor = Cursor::new(raw_track.trig_bits);
         let mut bit_reader = BitReader::endian(trig_cursor, BigEndian);

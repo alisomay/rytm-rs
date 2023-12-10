@@ -1,13 +1,44 @@
 use crate::{
-    error::{ConversionError, ParameterError, RytmError},
+    error::{ConversionError, ParameterError, RytmError, SysexConversionError},
     util::{from_s_u16_t, to_s_u16_t_union_b},
 };
 use rytm_rs_macro::parameter_range;
-use rytm_sys::{
-    ar_sysex_id_t_AR_TYPE_GLOBAL, ar_sysex_id_t_AR_TYPE_KIT, ar_sysex_id_t_AR_TYPE_PATTERN,
-    ar_sysex_id_t_AR_TYPE_SETTINGS, ar_sysex_id_t_AR_TYPE_SONG, ar_sysex_id_t_AR_TYPE_SOUND,
-    ar_sysex_meta_t,
-};
+use rytm_sys::ar_sysex_meta_t;
+
+mod sysex_id {
+    use rytm_sys::{
+        ar_sysex_dump_id_t_AR_SYSEX_DUMPX_ID_GLOBAL, ar_sysex_dump_id_t_AR_SYSEX_DUMPX_ID_KIT,
+        ar_sysex_dump_id_t_AR_SYSEX_DUMPX_ID_PATTERN,
+        ar_sysex_dump_id_t_AR_SYSEX_DUMPX_ID_SETTINGS, ar_sysex_dump_id_t_AR_SYSEX_DUMPX_ID_SONG,
+        ar_sysex_dump_id_t_AR_SYSEX_DUMPX_ID_SOUND, ar_sysex_dump_id_t_AR_SYSEX_DUMP_ID_GLOBAL,
+        ar_sysex_dump_id_t_AR_SYSEX_DUMP_ID_KIT, ar_sysex_dump_id_t_AR_SYSEX_DUMP_ID_PATTERN,
+        ar_sysex_dump_id_t_AR_SYSEX_DUMP_ID_SETTINGS, ar_sysex_dump_id_t_AR_SYSEX_DUMP_ID_SONG,
+        ar_sysex_dump_id_t_AR_SYSEX_DUMP_ID_SOUND, ar_sysex_id_t_AR_TYPE_GLOBAL,
+        ar_sysex_id_t_AR_TYPE_KIT, ar_sysex_id_t_AR_TYPE_PATTERN, ar_sysex_id_t_AR_TYPE_SETTINGS,
+        ar_sysex_id_t_AR_TYPE_SONG, ar_sysex_id_t_AR_TYPE_SOUND,
+    };
+
+    pub const DUMP_ID_PATTERN: u8 = ar_sysex_dump_id_t_AR_SYSEX_DUMP_ID_PATTERN as u8;
+    pub const DUMP_ID_KIT: u8 = ar_sysex_dump_id_t_AR_SYSEX_DUMP_ID_KIT as u8;
+    pub const DUMP_ID_SOUND: u8 = ar_sysex_dump_id_t_AR_SYSEX_DUMP_ID_SOUND as u8;
+    pub const DUMP_ID_SONG: u8 = ar_sysex_dump_id_t_AR_SYSEX_DUMP_ID_SONG as u8;
+    pub const DUMP_ID_SETTINGS: u8 = ar_sysex_dump_id_t_AR_SYSEX_DUMP_ID_SETTINGS as u8;
+    pub const DUMP_ID_GLOBAL: u8 = ar_sysex_dump_id_t_AR_SYSEX_DUMP_ID_GLOBAL as u8;
+
+    pub const DUMPX_ID_PATTERN: u8 = ar_sysex_dump_id_t_AR_SYSEX_DUMPX_ID_PATTERN as u8;
+    pub const DUMPX_ID_KIT: u8 = ar_sysex_dump_id_t_AR_SYSEX_DUMPX_ID_KIT as u8;
+    pub const DUMPX_ID_SOUND: u8 = ar_sysex_dump_id_t_AR_SYSEX_DUMPX_ID_SOUND as u8;
+    pub const DUMPX_ID_SONG: u8 = ar_sysex_dump_id_t_AR_SYSEX_DUMPX_ID_SONG as u8;
+    pub const DUMPX_ID_SETTINGS: u8 = ar_sysex_dump_id_t_AR_SYSEX_DUMPX_ID_SETTINGS as u8;
+    pub const DUMPX_ID_GLOBAL: u8 = ar_sysex_dump_id_t_AR_SYSEX_DUMPX_ID_GLOBAL as u8;
+
+    pub const ID_PATTERN: u8 = ar_sysex_id_t_AR_TYPE_PATTERN as u8;
+    pub const ID_KIT: u8 = ar_sysex_id_t_AR_TYPE_KIT as u8;
+    pub const ID_SOUND: u8 = ar_sysex_id_t_AR_TYPE_SOUND as u8;
+    pub const ID_SONG: u8 = ar_sysex_id_t_AR_TYPE_SONG as u8;
+    pub const ID_SETTINGS: u8 = ar_sysex_id_t_AR_TYPE_SETTINGS as u8;
+    pub const ID_GLOBAL: u8 = ar_sysex_id_t_AR_TYPE_GLOBAL as u8;
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum SysexType {
@@ -20,18 +51,32 @@ pub enum SysexType {
     Global,
 }
 
+impl SysexType {
+    pub fn try_from_dump_id(dump_id: u8) -> Result<Self, RytmError> {
+        use sysex_id::*;
+        match dump_id {
+            DUMP_ID_PATTERN | DUMPX_ID_PATTERN => Ok(SysexType::Pattern),
+            DUMP_ID_KIT | DUMPX_ID_KIT => Ok(SysexType::Kit),
+            DUMP_ID_SOUND | DUMPX_ID_SOUND => Ok(SysexType::Sound),
+            DUMP_ID_SONG | DUMPX_ID_SONG => Ok(SysexType::Song),
+            DUMP_ID_SETTINGS | DUMPX_ID_SETTINGS => Ok(SysexType::Settings),
+            DUMP_ID_GLOBAL | DUMPX_ID_GLOBAL => Ok(SysexType::Global),
+            _ => Err(SysexConversionError::InvalidDumpMsgId.into()),
+        }
+    }
+}
+
 impl From<SysexType> for u8 {
     fn from(sysex_type: SysexType) -> Self {
-        let sysex_type = match sysex_type {
-            SysexType::Pattern => ar_sysex_id_t_AR_TYPE_PATTERN,
-            SysexType::Kit => ar_sysex_id_t_AR_TYPE_KIT,
-            SysexType::Sound => ar_sysex_id_t_AR_TYPE_SOUND,
-            SysexType::Song => ar_sysex_id_t_AR_TYPE_SONG,
-            SysexType::Settings => ar_sysex_id_t_AR_TYPE_SETTINGS,
-            SysexType::Global => ar_sysex_id_t_AR_TYPE_GLOBAL,
-        };
-
-        sysex_type as u8
+        use sysex_id::*;
+        match sysex_type {
+            SysexType::Pattern => ID_PATTERN,
+            SysexType::Kit => ID_KIT,
+            SysexType::Sound => ID_SOUND,
+            SysexType::Song => ID_SONG,
+            SysexType::Settings => ID_SETTINGS,
+            SysexType::Global => ID_GLOBAL,
+        }
     }
 }
 
@@ -39,13 +84,14 @@ impl From<SysexType> for u8 {
 impl TryFrom<u8> for SysexType {
     type Error = ConversionError;
     fn try_from(sysex_type: u8) -> Result<Self, Self::Error> {
-        match sysex_type as u32 {
-            ar_sysex_id_t_AR_TYPE_PATTERN => Ok(SysexType::Pattern),
-            ar_sysex_id_t_AR_TYPE_KIT => Ok(SysexType::Kit),
-            ar_sysex_id_t_AR_TYPE_SOUND => Ok(SysexType::Sound),
-            ar_sysex_id_t_AR_TYPE_SONG => Ok(SysexType::Song),
-            ar_sysex_id_t_AR_TYPE_SETTINGS => Ok(SysexType::Settings),
-            ar_sysex_id_t_AR_TYPE_GLOBAL => Ok(SysexType::Global),
+        use sysex_id::*;
+        match sysex_type {
+            ID_PATTERN => Ok(SysexType::Pattern),
+            ID_KIT => Ok(SysexType::Kit),
+            ID_SOUND => Ok(SysexType::Sound),
+            ID_SONG => Ok(SysexType::Song),
+            ID_SETTINGS => Ok(SysexType::Settings),
+            ID_GLOBAL => Ok(SysexType::Global),
             _ => Err(ConversionError::Range {
                 value: sysex_type.to_string(),
                 type_name: "SysexType".into(),

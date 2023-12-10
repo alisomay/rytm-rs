@@ -17,8 +17,7 @@ pub const GLOBAL_SYSEX_SIZE: usize = 107;
 /// Song sysex response size for FW 1.70.
 pub const SONG_SYSEX_SIZE: usize = 1506;
 
-// TODO: Debug this carefully..
-const SYSEX_MESSAGE_TYPE_BYTE_INDEX: usize = 7;
+const SYSEX_MESSAGE_TYPE_BYTE_INDEX: usize = 6;
 
 pub const PATTERN_RAW_SIZE: usize = std::mem::size_of::<ar_pattern_t>();
 pub const KIT_RAW_SIZE: usize = std::mem::size_of::<ar_kit_t>();
@@ -82,8 +81,12 @@ macro_rules! impl_sysex_compatible {
 ///
 /// It should be used in a context where this case is true and validity check is not necessary.
 pub fn decode_sysex_response_to_raw(response: &[u8]) -> Result<(Vec<u8>, SysexMeta), RytmError> {
-    let response_type: SysexType = response[SYSEX_MESSAGE_TYPE_BYTE_INDEX].try_into()?;
-    dbg!(response_type);
+    if response.get(SYSEX_MESSAGE_TYPE_BYTE_INDEX).is_none() {
+        // Message is too short, rytm sometimes sends incomplete sysex messages especially in the initial parts of the transmission.
+        // One can check for this error and ignore it.
+        return Err(SysexConversionError::ShortRead.into());
+    }
+    let response_type = SysexType::try_from_dump_id(response[SYSEX_MESSAGE_TYPE_BYTE_INDEX])?;
     let (expected_response_size, expected_raw_size) = match response_type {
         SysexType::Pattern => (PATTERN_SYSEX_SIZE, PATTERN_RAW_SIZE),
         SysexType::Kit => (KIT_SYSEX_SIZE, KIT_RAW_SIZE),
@@ -94,6 +97,7 @@ pub fn decode_sysex_response_to_raw(response: &[u8]) -> Result<(Vec<u8>, SysexMe
         SysexType::Song => (SONG_SYSEX_SIZE, 1024 * 16),
     };
 
+    // Check for completeness.
     if response.len() != expected_response_size {
         return Err(
             SysexConversionError::InvalidSize(expected_response_size, response.len()).into(),

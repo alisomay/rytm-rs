@@ -237,9 +237,16 @@ pub trait HoldsTrigFlags {
     }
 }
 
-#[derive(Clone, Copy, Default)]
+#[derive(Clone, Copy)]
 /// A struct that holds the trig flags.
 pub struct TrigFlags(u16);
+
+impl Default for TrigFlags {
+    fn default() -> Self {
+        // SYN_PL_SW, SMP_PL_SW, ENV_PL_SW,
+        Self(0b0000_0011_1000_0000)
+    }
+}
 
 impl DerefMut for TrigFlags {
     fn deref_mut(&mut self) -> &mut Self::Target {
@@ -289,7 +296,7 @@ impl HoldsTrigFlags for TrigFlags {
     }
 }
 
-#[derive(Clone, Copy, Default, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct Trig {
     index: usize,
     /// The raw flags value.
@@ -323,6 +330,31 @@ pub struct Trig {
 
 // TODO: Maybe builder..
 impl Trig {
+    #[parameter_range(range = "trig_index:0..=63")]
+    pub fn try_default(trig_index: usize) -> Result<Self, RytmError> {
+        let flags: u16 = if trig_index % 2 == 0 {
+            // No flags
+            0b0000_0000_0000_0000
+        } else {
+            // SWING
+            0b0000_0000_0001_0000
+        };
+
+        Ok(Self {
+            index: trig_index,
+            flags: flags.into(),
+            note: 127,
+            trig_condition: TrigCondition::default(),
+            velocity: 0xFF,
+            note_length: Length::Unset,
+            micro_timing: MicroTime::default(),
+            retrig_rate: RetrigRate::default(),
+            retrig_length: Length::Quarter,
+            retrig_velocity_offset: 0,
+            sound_lock: 0xFF,
+        })
+    }
+
     #[allow(clippy::too_many_arguments)]
     pub fn new(
         index: usize,
@@ -682,4 +714,75 @@ fn format_trig_flags(trig: &impl HoldsTrigFlags) -> Vec<&str> {
     }
 
     flags
+}
+
+impl Trig {
+    pub(crate) fn default_trig_array() -> [Trig; 64] {
+        [
+            Trig::try_default(0).unwrap(),
+            Trig::try_default(1).unwrap(),
+            Trig::try_default(2).unwrap(),
+            Trig::try_default(3).unwrap(),
+            Trig::try_default(4).unwrap(),
+            Trig::try_default(5).unwrap(),
+            Trig::try_default(6).unwrap(),
+            Trig::try_default(7).unwrap(),
+            Trig::try_default(8).unwrap(),
+            Trig::try_default(9).unwrap(),
+            Trig::try_default(10).unwrap(),
+            Trig::try_default(11).unwrap(),
+            Trig::try_default(12).unwrap(),
+            Trig::try_default(13).unwrap(),
+            Trig::try_default(14).unwrap(),
+            Trig::try_default(15).unwrap(),
+            Trig::try_default(16).unwrap(),
+            Trig::try_default(17).unwrap(),
+            Trig::try_default(18).unwrap(),
+            Trig::try_default(19).unwrap(),
+            Trig::try_default(20).unwrap(),
+            Trig::try_default(21).unwrap(),
+            Trig::try_default(22).unwrap(),
+            Trig::try_default(23).unwrap(),
+            Trig::try_default(24).unwrap(),
+            Trig::try_default(25).unwrap(),
+            Trig::try_default(26).unwrap(),
+            Trig::try_default(27).unwrap(),
+            Trig::try_default(28).unwrap(),
+            Trig::try_default(29).unwrap(),
+            Trig::try_default(30).unwrap(),
+            Trig::try_default(31).unwrap(),
+            Trig::try_default(32).unwrap(),
+            Trig::try_default(33).unwrap(),
+            Trig::try_default(34).unwrap(),
+            Trig::try_default(35).unwrap(),
+            Trig::try_default(36).unwrap(),
+            Trig::try_default(37).unwrap(),
+            Trig::try_default(38).unwrap(),
+            Trig::try_default(39).unwrap(),
+            Trig::try_default(40).unwrap(),
+            Trig::try_default(41).unwrap(),
+            Trig::try_default(42).unwrap(),
+            Trig::try_default(43).unwrap(),
+            Trig::try_default(44).unwrap(),
+            Trig::try_default(45).unwrap(),
+            Trig::try_default(46).unwrap(),
+            Trig::try_default(47).unwrap(),
+            Trig::try_default(48).unwrap(),
+            Trig::try_default(49).unwrap(),
+            Trig::try_default(50).unwrap(),
+            Trig::try_default(51).unwrap(),
+            Trig::try_default(52).unwrap(),
+            Trig::try_default(53).unwrap(),
+            Trig::try_default(54).unwrap(),
+            Trig::try_default(55).unwrap(),
+            Trig::try_default(56).unwrap(),
+            Trig::try_default(57).unwrap(),
+            Trig::try_default(58).unwrap(),
+            Trig::try_default(59).unwrap(),
+            Trig::try_default(60).unwrap(),
+            Trig::try_default(61).unwrap(),
+            Trig::try_default(62).unwrap(),
+            Trig::try_default(63).unwrap(),
+        ]
+    }
 }

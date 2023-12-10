@@ -38,6 +38,7 @@ impl_sysex_compatible!(
 #[derive(Derivative, Clone, Copy)]
 #[derivative(Debug)]
 pub struct Pattern {
+    #[derivative(Debug = "ignore")]
     sysex_meta: SysexMeta,
     /// Index of this pattern.
     ///
@@ -51,6 +52,8 @@ pub struct Pattern {
     ///
     /// Fx track is the 13th track.
     tracks: [Track; 13],
+
+    #[derivative(Debug = "ignore")]
     /// TODO: I don't know what these are yet.
     plock_seqs: [PlockSeq; 72],
     /// Master Length
@@ -211,10 +214,10 @@ impl Pattern {
         Ok(Self {
             sysex_meta: SysexMeta::try_default_for_pattern(index, None)?,
             index,
-            version: 0x0000_0001,
+            version: 5,
             tracks: [Track::default(); 13],
             plock_seqs: [PlockSeq::default(); 72],
-            master_length: 1,
+            master_length: 16,
             master_change: 1,
             kit_number: 0,
             swing_amount: 0,
@@ -230,10 +233,10 @@ impl Pattern {
         Self {
             sysex_meta: SysexMeta::default_for_pattern_in_work_buffer(None),
             index: 0,
-            version: 0x0000_0001,
+            version: 5,
             tracks: [Track::default(); 13],
             plock_seqs: [PlockSeq::default(); 72],
-            master_length: 1,
+            master_length: 16,
             master_change: 1,
             kit_number: 0,
             swing_amount: 0,

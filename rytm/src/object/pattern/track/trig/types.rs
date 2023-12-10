@@ -245,6 +245,7 @@ pub enum Length {
     _D875,
     /// `.938`
     _D938,
+    #[default]
     /// `1/16`
     _16th,
     /// `1.06`
@@ -309,7 +310,6 @@ pub enum Length {
     _3D75,
     /// `3.88`
     _3D88,
-    #[default]
     /// `1/4`
     Quarter,
     /// `4.25`
@@ -620,7 +620,6 @@ impl TryFrom<u8> for Length {
     type Error = ConversionError;
 
     fn try_from(value: u8) -> Result<Self, Self::Error> {
-        dbg!(value);
         match value {
             0 => Ok(Length::_128th),
             1 => Ok(Length::_D188),

@@ -9,6 +9,7 @@ use crate::common::util::decode_sysex_response_to_raw;
 use common::*;
 use rytm_rs::{
     error::RytmError,
+    object::pattern::Pattern,
     query::{GlobalQuery, KitQuery, PatternQuery, SettingsQuery, SoundQuery},
     Rytm,
 };
@@ -284,7 +285,7 @@ fn sound() {
     let conn_out = get_connection_to_rytm();
     let (_conn_in, rx) = make_input_message_forwarder();
 
-    let track_index = 7;
+    let track_index = 11;
 
     let query = SoundQuery::new(0).unwrap();
     let query = SoundQuery::new_targeting_work_buffer(track_index).unwrap();
@@ -303,8 +304,9 @@ fn sound() {
         // convert unix epoch to human readable milliseconds
         // let response_time = elapsed / 1_000_000;
 
-        dbg!(elapsed);
-        dbg!(sound[track_index].machine_parameters());
+        // dbg!(elapsed);
+        // dbg!(sound[track_index].machine_parameters());
+        dbg!(sound);
 
         Ok(())
     };
@@ -421,6 +423,46 @@ fn settings_type() {
         // );
 
         dbg!(settings);
+
+        // println!("usb_out: {:08b}", global.routing_usb_out);
+        // println!("other: {}", global.routing_usb_out >> 2);
+
+        Ok(())
+    };
+
+    poll_with_query_blocking(&mut rytm, query, conn_out, rx, 1000, callback).unwrap();
+}
+
+#[test]
+fn pattern_type() {
+    let mut rytm = Rytm::default();
+    let conn_out = get_connection_to_rytm();
+    let (_conn_in, rx) = make_input_message_forwarder();
+
+    let query = PatternQuery::new_targeting_work_buffer();
+
+    let callback = |response: &[u8], rytm: &mut Rytm, elapsed: u64| -> Result<(), RytmError> {
+        if !is_sysex(response) {
+            // Pass..
+            return Ok(());
+        }
+
+        rytm.update_from_sysex_response(response)?;
+        let pattern = rytm.work_buffer_pattern();
+
+        // clearscreen::clear().unwrap();
+
+        // let mute: u16 = ((settings.track_mute_msb as u16) << 8) | (settings.track_mute_lsb as u16);
+
+        // println!(
+        //     "{:04b}_{:04b}_{:04b}_{:04b} ",
+        //     (mute >> 12) & 0b1111,
+        //     (mute >> 8) & 0b1111,
+        //     (mute >> 4) & 0b1111,
+        //     mute & 0b1111,
+        // );
+
+        dbg!(pattern.tracks()[0]);
 
         // println!("usb_out: {:08b}", global.routing_usb_out);
         // println!("other: {}", global.routing_usb_out >> 2);
