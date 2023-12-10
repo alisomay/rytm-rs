@@ -10,12 +10,11 @@ pub struct SequencerConfig {
 }
 
 impl Default for SequencerConfig {
-    // TODO: Double check default values
     fn default() -> Self {
         Self {
             kit_reload_on_chg: false,
             quantize_live_rec: false,
-            auto_trk_switch: false,
+            auto_trk_switch: true,
         }
     }
 }

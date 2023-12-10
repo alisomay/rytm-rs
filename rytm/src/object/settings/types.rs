@@ -307,11 +307,11 @@ pub enum SampleRecorderRecordingLength {
     _2Steps,
     _4Steps,
     _8Steps,
-    #[default]
     _16Steps,
     _32Steps,
     _64Steps,
     _128Steps,
+    #[default]
     Max,
 }
 

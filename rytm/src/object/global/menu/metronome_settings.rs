@@ -18,7 +18,7 @@ impl Default for MetronomeSettings {
             active: false,
             time_signature: TimeSignature::default(),
             pre_roll_bars: 0,
-            volume: 100,
+            volume: 64,
         }
     }
 }

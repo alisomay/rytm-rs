@@ -476,8 +476,8 @@ impl From<MidiTransportLayer> for u8 {
 /// - Internal and external means that the parameter value is sent to both the internal and external world.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum ParameterDestination {
-    #[default]
     Internal,
+    #[default]
     InternalAndExternal,
     External,
 }

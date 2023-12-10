@@ -18,8 +18,8 @@ pub struct Routing {
 impl Default for Routing {
     fn default() -> Self {
         Self {
-            route_to_main_flags: 0x0FFF,
-            send_to_fx_flags: 0x0FFF,
+            route_to_main_flags: 0b0000_1111_1111_1111,
+            send_to_fx_flags: 0b0000_1111_1111_1111,
             usb_in: RoutingUsbInOptions::default(),
             usb_out: RoutingUsbOutOptions::default(),
             usb_to_main_db: RoutingUsbToMainDb::default(),

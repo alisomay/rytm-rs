@@ -126,7 +126,7 @@ impl Default for Settings {
             selected_pattern_mode: PatternMode::default(),
 
             fixed_velocity_enable: false,
-            fixed_velocity_amount: 0,
+            fixed_velocity_amount: 100,
             sample_recorder_src: SampleRecorderSource::default(),
             sample_recorder_thr: 0,
             sample_recorder_monitor_enable: false,

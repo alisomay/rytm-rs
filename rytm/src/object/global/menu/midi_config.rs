@@ -81,12 +81,12 @@ pub struct Sync {
 impl Default for Sync {
     fn default() -> Self {
         Self {
-            clock_receive: false,
-            clock_send: true,
-            transport_receive: false,
-            transport_send: true,
+            clock_receive: true,
+            clock_send: false,
+            transport_receive: true,
+            transport_send: false,
             program_change_receive: false,
-            program_change_send: true,
+            program_change_send: false,
         }
     }
 }
@@ -199,7 +199,6 @@ pub struct PortConfig {
 }
 
 impl Default for PortConfig {
-    // TODO: Double check these defaults.
     fn default() -> Self {
         Self {
             out_port_func: MidiPortFunction::default(),
@@ -211,9 +210,9 @@ impl Default for PortConfig {
             receive_cc_nrpn: true,
             pad_dest: ParameterDestination::default(),
             pressure_dest: ParameterDestination::default(),
-            encoder_dest: ParameterDestination::default(),
+            encoder_dest: ParameterDestination::Internal,
             mute_dest: ParameterDestination::default(),
-            ports_output_channel: MidiPortsOutputChannel::AutoChannel,
+            ports_output_channel: MidiPortsOutputChannel::default(),
             __unknown0x29: 0,
         }
     }
