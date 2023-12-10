@@ -108,10 +108,10 @@ pub fn parameter_range(args: TokenStream, input: TokenStream) -> TokenStream {
 
         let range_check = if is_inclusive {
             quote! {
-                let start: #type_annotation = #start.parse().expect("Invalid range start");
-                let end: #type_annotation = #end.parse().expect("Invalid range end");
+                let ___start: #type_annotation = #start.parse().expect("Invalid range start");
+                let ___end: #type_annotation = #end.parse().expect("Invalid range end");
 
-                if !(start..=end).contains(&#param_name_ident) {
+                if !(___start..=___end).contains(&#param_name_ident) {
                     return Err(RytmError::Parameter(ParameterError::Range {
                         value: #param_name_ident.to_string(),
                         parameter_name: stringify!(#param_name_ident).to_string(),
@@ -120,10 +120,10 @@ pub fn parameter_range(args: TokenStream, input: TokenStream) -> TokenStream {
             }
         } else {
             quote! {
-                let start: #type_annotation = #start.parse().expect("Invalid range start");
-                let end: #type_annotation = #end.parse().expect("Invalid range end");
+                let ___start: #type_annotation = #start.parse().expect("Invalid range start");
+                let ___end: #type_annotation = #end.parse().expect("Invalid range end");
 
-                if !(start..end).contains(&#param_name_ident) {
+                if !(___start..___end).contains(&#param_name_ident) {
                     return Err(RytmError::Parameter(ParameterError::Range {
                         value: #param_name_ident.to_string(),
                         parameter_name: stringify!(#param_name_ident).to_string(),

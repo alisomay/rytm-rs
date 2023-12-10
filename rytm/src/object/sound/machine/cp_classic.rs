@@ -29,6 +29,21 @@ pub struct CpClassicParameters {
     cpt: u8,
 }
 
+impl Default for CpClassicParameters {
+    fn default() -> Self {
+        Self {
+            lev: 115,
+            ton: 64,
+            nod: 55,
+            num: 2,
+            rat: 85,
+            nol: 90,
+            rnd: 32,
+            cpt: 90,
+        }
+    }
+}
+
 impl CpClassicParameters {
     pub(crate) fn apply_to_raw_sound(&self, raw_sound: &mut ar_sound_t) {
         self.apply_to_raw_sound_values(raw_sound);

@@ -32,6 +32,21 @@ pub struct RsClassicParameters {
     tic: u8,
 }
 
+impl Default for RsClassicParameters {
+    fn default() -> Self {
+        Self {
+            lev: 100,
+            t1: 0.0,
+            dec: 64,
+            bal: 0,
+            t2: 0.0,
+            sym: 0,
+            nol: 16,
+            tic: 64,
+        }
+    }
+}
+
 impl RsClassicParameters {
     pub(crate) fn apply_to_raw_sound(&self, raw_sound: &mut ar_sound_t) {
         self.apply_to_raw_sound_values(raw_sound);

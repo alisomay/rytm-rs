@@ -29,6 +29,19 @@ pub struct CbClassicParameters {
     pw2: i8,
 }
 
+impl Default for CbClassicParameters {
+    fn default() -> Self {
+        Self {
+            lev: 100,
+            tun: 1,
+            dec: 20,
+            det: 64,
+            pw1: 0,
+            pw2: 0,
+        }
+    }
+}
+
 impl CbClassicParameters {
     pub(crate) fn apply_to_raw_sound(&self, raw_sound: &mut ar_sound_t) {
         self.apply_to_raw_sound_values(raw_sound);

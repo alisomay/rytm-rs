@@ -28,6 +28,21 @@ pub struct BdFmParameters {
     fmt: f32,
 }
 
+impl Default for BdFmParameters {
+    fn default() -> Self {
+        Self {
+            lev: 100,
+            tun: -6.0,
+            dec: 32,
+            fma: 32,
+            swt: 48,
+            fms: 32,
+            fmd: 48,
+            fmt: -16.0,
+        }
+    }
+}
+
 impl BdFmParameters {
     pub(crate) fn apply_to_raw_sound(&self, raw_sound: &mut ar_sound_t) {
         self.apply_to_raw_sound_values(raw_sound);

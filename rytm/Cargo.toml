@@ -6,7 +6,7 @@ edition = "2021"
 [dependencies]
 anyhow = "1.0"
 # rytm-sys = "0.1"
-bitstream-io = "1.8"
+bitstream-io = "2"
 rytm-sys = { path = "../../rytm-sys" }
 thiserror = "1.0"
 rand = "0.8"

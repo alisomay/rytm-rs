@@ -47,8 +47,8 @@ impl Default for Rytm {
         }
 
         let mut work_buffer_sounds = vec![];
-        for _ in 0..=11 {
-            work_buffer_sounds.push(Sound::work_buffer_default());
+        for i in 0..=11 {
+            work_buffer_sounds.push(Sound::try_work_buffer_default(i).unwrap());
         }
 
         let mut kits = vec![];

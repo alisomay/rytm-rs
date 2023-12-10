@@ -18,6 +18,21 @@ pub struct HhLabParameters {
     osc6: u16,
 }
 
+impl Default for HhLabParameters {
+    fn default() -> Self {
+        Self {
+            lev: 110,
+            osc1: 512,
+            dec: 29,
+            osc2: 768,
+            osc3: 1024,
+            osc4: 1280,
+            osc5: 1536,
+            osc6: 1792,
+        }
+    }
+}
+
 impl HhLabParameters {
     pub(crate) fn apply_to_raw_sound(&self, raw_sound: &mut ar_sound_t) {
         raw_sound.synth_param_1 = to_s_u16_t_union_a((self.lev as u16) << 8);

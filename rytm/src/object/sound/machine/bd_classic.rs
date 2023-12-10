@@ -28,6 +28,21 @@ pub struct BdClassicParameters {
     tra: u8,
 }
 
+impl Default for BdClassicParameters {
+    fn default() -> Self {
+        Self {
+            lev: 100,
+            tun: -6.0,
+            dec: 32,
+            hld: 32,
+            swt: 64,
+            swd: 42,
+            wav: 1,
+            tra: 17,
+        }
+    }
+}
+
 impl BdClassicParameters {
     pub(crate) fn apply_to_raw_sound(&self, raw_sound: &mut ar_sound_t) {
         self.apply_to_raw_sound_values(raw_sound);

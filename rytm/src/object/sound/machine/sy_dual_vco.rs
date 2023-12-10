@@ -31,6 +31,21 @@ pub struct SyDualVcoParameters {
     cfg: u8,
 }
 
+impl Default for SyDualVcoParameters {
+    fn default() -> Self {
+        Self {
+            lev: 100,
+            tun: 0.0,
+            dec1: 70,
+            det: 0.0,
+            dec2: 70,
+            bal: 0,
+            bnd: 0,
+            cfg: 16,
+        }
+    }
+}
+
 impl SyDualVcoParameters {
     pub(crate) fn apply_to_raw_sound(&self, raw_sound: &mut ar_sound_t) {
         self.apply_to_raw_sound_values(raw_sound);

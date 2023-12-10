@@ -29,6 +29,21 @@ pub struct RsHardParameters {
     swt: u8,
 }
 
+impl Default for RsHardParameters {
+    fn default() -> Self {
+        Self {
+            lev: 100,
+            tun: 0.0,
+            dec: 52,
+            swd: 127,
+            tic: 48,
+            nol: 8,
+            syn: 64,
+            swt: 34,
+        }
+    }
+}
+
 impl RsHardParameters {
     pub(crate) fn apply_to_raw_sound(&self, raw_sound: &mut ar_sound_t) {
         self.apply_to_raw_sound_values(raw_sound);

@@ -22,13 +22,13 @@ impl Default for Amplitude {
     fn default() -> Self {
         Self {
             attack: 0,
-            hold: 64,
-            decay: 0,
+            hold: 0,
+            decay: 127,
             overdrive: 0,
             delay_send: 0,
             reverb_send: 0,
             pan: 0,
-            volume: 100,
+            volume: 110,
         }
     }
 }

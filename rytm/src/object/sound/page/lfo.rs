@@ -2,7 +2,7 @@ use crate::{
     error::{ConversionError, ParameterError, RytmError},
     object::sound::types::{LfoDestination, LfoMode, LfoMultiplier, LfoWaveform},
     util::{
-        from_s_u16_t, i8_to_u8_midpoint_of_u8_input_range, to_s_u16_t_union_a,
+        from_s_u16_t, i8_to_u8_midpoint_of_u8_input_range, scale_generic, to_s_u16_t_union_a,
         u8_to_i8_midpoint_of_u8_input_range,
     },
 };
@@ -25,7 +25,7 @@ pub struct Lfo {
 impl Default for Lfo {
     fn default() -> Self {
         Self {
-            speed: 0,
+            speed: 48,
             multiplier: LfoMultiplier::default(),
             fade: 0,
             destination: LfoDestination::default(),
@@ -41,7 +41,16 @@ impl TryFrom<&ar_sound_t> for Lfo {
     type Error = ConversionError;
     fn try_from(raw_sound: &ar_sound_t) -> Result<Self, Self::Error> {
         // map range of 0..=32767 to -128.0..=127.99
-        let depth = unsafe { from_s_u16_t(&raw_sound.lfo_depth) } as f32 / 256.0 - 128.0;
+
+        let depth = scale_generic(
+            unsafe { from_s_u16_t(&raw_sound.lfo_depth) },
+            0u16,
+            32767u16,
+            -128f32,
+            127.99f32,
+            |x| x as f32,
+        );
+
         Ok(Self {
             speed: u8_to_i8_midpoint_of_u8_input_range(raw_sound.lfo_speed, 0, 127),
             multiplier: raw_sound.lfo_multiplier.try_into()?,
@@ -58,7 +67,14 @@ impl TryFrom<&ar_sound_t> for Lfo {
 impl Lfo {
     pub(crate) fn apply_to_raw_sound(&self, raw_sound: &mut ar_sound_t) {
         // map range of -128.0..=127.99 to 0..=32767
-        let depth = (self.depth + 128.0) * 256.0;
+        let depth = to_s_u16_t_union_a(scale_generic(
+            self.depth,
+            -128f32,
+            127.99f32,
+            0u16,
+            32767u16,
+            |x| x.round() as u16,
+        ));
 
         raw_sound.lfo_speed = i8_to_u8_midpoint_of_u8_input_range(self.speed, 0, 127);
         raw_sound.lfo_multiplier = self.multiplier.into();
@@ -67,7 +83,7 @@ impl Lfo {
         raw_sound.lfo_wav = self.waveform.into();
         raw_sound.lfo_start_phase = self.start_phase_or_slew;
         raw_sound.lfo_mode = self.mode.into();
-        raw_sound.lfo_depth = to_s_u16_t_union_a(depth as u16);
+        raw_sound.lfo_depth = depth;
     }
 
     /// Sets the speed of the LFO.

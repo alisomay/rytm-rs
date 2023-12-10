@@ -29,6 +29,21 @@ pub struct SdAcousticParameters {
     imp: u8,
 }
 
+impl Default for SdAcousticParameters {
+    fn default() -> Self {
+        Self {
+            lev: 100,
+            tun: 6.0,
+            bdy: 64,
+            nod: 64,
+            nol: 64,
+            hld: 64,
+            swd: 32,
+            imp: 64,
+        }
+    }
+}
+
 impl SdAcousticParameters {
     pub(crate) fn apply_to_raw_sound(&self, raw_sound: &mut ar_sound_t) {
         self.apply_to_raw_sound_values(raw_sound);

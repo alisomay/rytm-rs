@@ -24,9 +24,9 @@ impl Default for Filter {
     fn default() -> Self {
         Self {
             attack: 0,
-            sustain: 127,
-            decay: 0,
-            release: 0,
+            sustain: 0,
+            decay: 64,
+            release: 64,
             cutoff: 127,
             resonance: 0,
             filter_type: FilterType::default(),

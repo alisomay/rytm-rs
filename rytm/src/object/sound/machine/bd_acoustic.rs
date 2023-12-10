@@ -5,8 +5,9 @@ use crate::{
 use rytm_rs_macro::machine_parameters;
 use rytm_sys::ar_sound_t;
 
-#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
+#[derive(Debug, Default, Clone, Copy, PartialEq, PartialOrd)]
 pub enum BdAcousticWaveform {
+    #[default]
     SinA,
     SinB,
     AsinA,
@@ -81,6 +82,21 @@ pub struct BdAcousticParameters {
     swd: u8,
     wav: BdAcousticWaveform,
     imp: u8,
+}
+
+impl Default for BdAcousticParameters {
+    fn default() -> Self {
+        Self {
+            lev: 100,
+            tun: -3.0,
+            dec: 64,
+            hld: 64,
+            swt: 80,
+            swd: 92,
+            wav: BdAcousticWaveform::default(),
+            imp: 64,
+        }
+    }
 }
 
 impl BdAcousticParameters {

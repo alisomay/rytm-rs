@@ -326,46 +326,54 @@ impl Sound {
             assigned_track: None,
 
             version: 4,
-
-            name: ObjectName::from_u8_array([0; 15]),
+            // TODO: Decide default name.
+            name: ObjectName::try_from(format!("POOL_SOUND {}", sound_index))?,
+            accent_level: 32,
 
             sample: Sample::default(),
-            lfo: Lfo::default(),
             filter: Filter::default(),
             amplitude: Amplitude::default(),
+            lfo: Lfo::default(),
             settings: SoundSettings::default(),
             machine_parameters: MachineParameters::default(),
 
-            accent_level: 0,
+            // Don't know what this is still..
             def_note: 0,
 
             __unknown: SoundUnknown::default(),
         })
     }
 
-    pub fn work_buffer_default() -> Self {
-        Self {
+    pub fn try_kit_default(track_index: usize, kit_index: usize) -> Result<Self, RytmError> {
+        let index = track_index | 0b1000_0000;
+        todo!()
+    }
+
+    #[parameter_range(range = "track_index:0..=11")]
+    pub fn try_work_buffer_default(track_index: usize) -> Result<Self, RytmError> {
+        let index = track_index | 0b1000_0000;
+        Ok(Self {
             sysex_meta: SysexMeta::default_for_sound_in_work_buffer(None),
-            index: 0b1000_0000,
+            index,
             pool_index: None,
             kit_number: None,
             assigned_track: Some(0),
 
             version: 4,
-
-            name: ObjectName::from_u8_array([0; 15]),
+            name: ObjectName::try_from(format!("SOUND {}", track_index))?,
+            accent_level: 32,
 
             sample: Sample::default(),
             filter: Filter::default(),
             amplitude: Amplitude::default(),
             lfo: Lfo::default(),
-            settings: SoundSettings::default(),
-            machine_parameters: MachineParameters::default(),
+            settings: SoundSettings::try_default_for_track(track_index)?,
+            machine_parameters: MachineParameters::try_default_for_track(track_index)?,
 
-            accent_level: 0,
+            // Don't know what this is still..
             def_note: 0,
 
             __unknown: SoundUnknown::default(),
-        }
+        })
     }
 }

@@ -33,7 +33,7 @@ mod ut_noise;
 mod xt_classic;
 
 use super::types::MachineType;
-use crate::error::RytmError;
+use crate::error::{ParameterError, RytmError};
 pub use bd_acoustic::*;
 pub use bd_classic::*;
 pub use bd_fm::*;
@@ -56,6 +56,7 @@ pub use oh_classic::*;
 pub use oh_metallic::*;
 pub use rs_classic::*;
 pub use rs_hard::*;
+use rytm_rs_macro::parameter_range;
 use rytm_sys::ar_sound_t;
 pub use sd_acoustic::*;
 pub use sd_classic::*;
@@ -111,8 +112,7 @@ pub enum MachineParameters {
 
 impl Default for MachineParameters {
     fn default() -> Self {
-        // TODO: Change to BdHard
-        Self::Unset
+        Self::BdHard(BdHardParameters::default())
     }
 }
 
@@ -120,7 +120,6 @@ impl TryFrom<&ar_sound_t> for MachineParameters {
     type Error = RytmError;
     fn try_from(value: &ar_sound_t) -> Result<Self, Self::Error> {
         let machine_type: MachineType = value.machine_type.try_into()?;
-        dbg!(machine_type);
         match machine_type {
             MachineType::BdHard => Ok(Self::BdHard(value.into())),
             MachineType::BdClassic => Ok(Self::BdClassic(value.into())),
@@ -156,12 +155,31 @@ impl TryFrom<&ar_sound_t> for MachineParameters {
             MachineType::UtImpulse => Ok(Self::UtImpulse(value.into())),
             MachineType::UtNoise => Ok(Self::UtNoise(value.into())),
             MachineType::XtClassic => Ok(Self::XtClassic(value.into())),
-            _ => todo!(),
+            _ => todo!("Conversion error"),
         }
     }
 }
 
 impl MachineParameters {
+    #[parameter_range(range = "track_index:0..=11")]
+    pub fn try_default_for_track(track_index: usize) -> Result<Self, RytmError> {
+        Ok(match track_index {
+            0 => MachineParameters::BdHard(BdHardParameters::default()),
+            1 => MachineParameters::SdHard(SdHardParameters::default()),
+            2 => MachineParameters::RsHard(RsHardParameters::default()),
+            3 => MachineParameters::CpClassic(CpClassicParameters::default()),
+            4 => MachineParameters::BtClassic(BtClassicParameters::default()),
+            5 => MachineParameters::XtClassic(XtClassicParameters::default_for_lt()),
+            6 => MachineParameters::XtClassic(XtClassicParameters::default_for_mt()),
+            7 => MachineParameters::XtClassic(XtClassicParameters::default_for_ht()),
+            8 => MachineParameters::ChClassic(ChClassicParameters::default()),
+            9 => MachineParameters::OhClassic(OhClassicParameters::default()),
+            10 => MachineParameters::CyClassic(CyClassicParameters::default()),
+            11 => MachineParameters::CbClassic(CbClassicParameters::default()),
+            _ => unreachable!(),
+        })
+    }
+
     pub(crate) fn apply_to_raw_sound(&self, raw_sound: &mut ar_sound_t) {
         match self {
             MachineParameters::BdHard(bd_hard) => bd_hard.apply_to_raw_sound(raw_sound),
@@ -198,11 +216,10 @@ impl MachineParameters {
             MachineParameters::UtImpulse(ut_impulse) => ut_impulse.apply_to_raw_sound(raw_sound),
             MachineParameters::UtNoise(ut_noise) => ut_noise.apply_to_raw_sound(raw_sound),
             MachineParameters::XtClassic(xt_classic) => xt_classic.apply_to_raw_sound(raw_sound),
-            _ => todo!(),
+            MachineParameters::Unset => todo!(),
         }
     }
 
-    // TODO: I think this is unnecessary..
     pub(crate) fn internal_machine_type_as_u8(&self) -> u8 {
         match self {
             MachineParameters::BdHard(_) => 0,

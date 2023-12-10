@@ -31,6 +31,21 @@ pub struct CyRideParameters {
     c3: u8,
 }
 
+impl Default for CyRideParameters {
+    fn default() -> Self {
+        Self {
+            lev: 100,
+            tun: 0,
+            dec: 64,
+            typ: 0,
+            hit: 64,
+            c1: 64,
+            c2: 64,
+            c3: 32,
+        }
+    }
+}
+
 impl CyRideParameters {
     pub(crate) fn apply_to_raw_sound(&self, raw_sound: &mut ar_sound_t) {
         self.apply_to_raw_sound_values(raw_sound);

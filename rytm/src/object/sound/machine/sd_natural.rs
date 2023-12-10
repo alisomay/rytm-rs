@@ -28,6 +28,21 @@ pub struct SdNaturalParameters {
     res: u8,
 }
 
+impl Default for SdNaturalParameters {
+    fn default() -> Self {
+        Self {
+            lev: 100,
+            tun: 6.0,
+            bdy: 90,
+            dec: 32,
+            bal: 64,
+            lpf: 90,
+            hpf: 32,
+            res: 32,
+        }
+    }
+}
+
 impl SdNaturalParameters {
     pub(crate) fn apply_to_raw_sound(&self, raw_sound: &mut ar_sound_t) {
         self.apply_to_raw_sound_values(raw_sound);

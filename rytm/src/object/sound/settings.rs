@@ -1,8 +1,5 @@
 use super::types::{MachineType, SoundModTarget, SoundSettingsChromaticMode};
-use crate::{
-    error::{ConversionError, ParameterError, RytmError},
-    util::{i8_to_u8_midpoint_of_u8_input_range, u8_to_i8_midpoint_of_u8_input_range},
-};
+use crate::error::{ConversionError, ParameterError, RytmError};
 use rytm_rs_macro::parameter_range;
 use rytm_sys::ar_sound_t;
 
@@ -35,36 +32,6 @@ pub struct SoundSettings {
     after_touch_modulation_target_4: SoundModTarget,
 }
 
-impl Default for SoundSettings {
-    fn default() -> Self {
-        Self {
-            machine_type: MachineType::default(),
-            chromatic_mode: SoundSettingsChromaticMode::default(),
-            env_reset_filter: false,
-            velocity_to_volume: false,
-            legacy_fx_send: false,
-
-            velocity_modulation_amt_1: 0,
-            velocity_modulation_target_1: SoundModTarget::default(),
-            velocity_modulation_amt_2: 0,
-            velocity_modulation_target_2: SoundModTarget::default(),
-            velocity_modulation_amt_3: 0,
-            velocity_modulation_target_3: SoundModTarget::default(),
-            velocity_modulation_amt_4: 0,
-            velocity_modulation_target_4: SoundModTarget::default(),
-
-            after_touch_modulation_amt_1: 0,
-            after_touch_modulation_target_1: SoundModTarget::default(),
-            after_touch_modulation_amt_2: 0,
-            after_touch_modulation_target_2: SoundModTarget::default(),
-            after_touch_modulation_amt_3: 0,
-            after_touch_modulation_target_3: SoundModTarget::default(),
-            after_touch_modulation_amt_4: 0,
-            after_touch_modulation_target_4: SoundModTarget::default(),
-        }
-    }
-}
-
 impl TryFrom<&ar_sound_t> for SoundSettings {
     type Error = ConversionError;
     fn try_from(raw_sound: &ar_sound_t) -> Result<Self, Self::Error> {
@@ -85,54 +52,22 @@ impl TryFrom<&ar_sound_t> for SoundSettings {
             velocity_to_volume: raw_mode_flags & 0b0100_0000 != 0,
             legacy_fx_send: raw_mode_flags & 0b0000_0100 != 0,
 
-            velocity_modulation_amt_1: u8_to_i8_midpoint_of_u8_input_range(
-                raw_sound.vel_amt_1,
-                0,
-                127,
-            ),
+            velocity_modulation_amt_1: raw_sound.vel_amt_1 as i8,
             velocity_modulation_target_1: raw_sound.vel_target_1.try_into()?,
-            velocity_modulation_amt_2: u8_to_i8_midpoint_of_u8_input_range(
-                raw_sound.vel_amt_2,
-                0,
-                127,
-            ),
+            velocity_modulation_amt_2: raw_sound.vel_amt_2 as i8,
             velocity_modulation_target_2: raw_sound.vel_target_2.try_into()?,
-            velocity_modulation_amt_3: u8_to_i8_midpoint_of_u8_input_range(
-                raw_sound.vel_amt_3,
-                0,
-                127,
-            ),
+            velocity_modulation_amt_3: raw_sound.vel_amt_3 as i8,
             velocity_modulation_target_3: raw_sound.vel_target_3.try_into()?,
-            velocity_modulation_amt_4: u8_to_i8_midpoint_of_u8_input_range(
-                raw_sound.vel_amt_4,
-                0,
-                127,
-            ),
+            velocity_modulation_amt_4: raw_sound.vel_amt_4 as i8,
             velocity_modulation_target_4: raw_sound.vel_target_4.try_into()?,
 
-            after_touch_modulation_amt_1: u8_to_i8_midpoint_of_u8_input_range(
-                raw_sound.at_amt_1,
-                0,
-                127,
-            ),
+            after_touch_modulation_amt_1: raw_sound.at_amt_1 as i8,
             after_touch_modulation_target_1: raw_sound.at_target_1.try_into()?,
-            after_touch_modulation_amt_2: u8_to_i8_midpoint_of_u8_input_range(
-                raw_sound.at_amt_2,
-                0,
-                127,
-            ),
+            after_touch_modulation_amt_2: raw_sound.at_amt_2 as i8,
             after_touch_modulation_target_2: raw_sound.at_target_2.try_into()?,
-            after_touch_modulation_amt_3: u8_to_i8_midpoint_of_u8_input_range(
-                raw_sound.at_amt_3,
-                0,
-                127,
-            ),
+            after_touch_modulation_amt_3: raw_sound.at_amt_3 as i8,
             after_touch_modulation_target_3: raw_sound.at_target_3.try_into()?,
-            after_touch_modulation_amt_4: u8_to_i8_midpoint_of_u8_input_range(
-                raw_sound.at_amt_4,
-                0,
-                127,
-            ),
+            after_touch_modulation_amt_4: raw_sound.at_amt_4 as i8,
             after_touch_modulation_target_4: raw_sound.at_target_4.try_into()?,
         })
     }
@@ -148,31 +83,22 @@ impl SoundSettings {
         raw_sound.mode_flags |= (self.legacy_fx_send as u8) << 2;
         raw_sound.mode_flags |= (self.velocity_to_volume as u8) << 6;
 
-        // All amounts are TODO: Try interpreting them as i8,  device -128..=+127
-        raw_sound.vel_amt_1 =
-            i8_to_u8_midpoint_of_u8_input_range(self.velocity_modulation_amt_1, 0, 127);
+        raw_sound.vel_amt_1 = self.velocity_modulation_amt_1 as u8;
         raw_sound.vel_target_1 = self.velocity_modulation_target_1.into();
-        raw_sound.vel_amt_2 =
-            i8_to_u8_midpoint_of_u8_input_range(self.velocity_modulation_amt_2, 0, 127);
+        raw_sound.vel_amt_2 = self.velocity_modulation_amt_2 as u8;
         raw_sound.vel_target_2 = self.velocity_modulation_target_2.into();
-        raw_sound.vel_amt_3 =
-            i8_to_u8_midpoint_of_u8_input_range(self.velocity_modulation_amt_3, 0, 127);
+        raw_sound.vel_amt_3 = self.velocity_modulation_amt_3 as u8;
         raw_sound.vel_target_3 = self.velocity_modulation_target_3.into();
-        raw_sound.vel_amt_4 =
-            i8_to_u8_midpoint_of_u8_input_range(self.velocity_modulation_amt_4, 0, 127);
+        raw_sound.vel_amt_4 = self.velocity_modulation_amt_4 as u8;
         raw_sound.vel_target_4 = self.velocity_modulation_target_4.into();
 
-        raw_sound.at_amt_1 =
-            i8_to_u8_midpoint_of_u8_input_range(self.after_touch_modulation_amt_1, 0, 127);
+        raw_sound.at_amt_1 = self.after_touch_modulation_amt_1 as u8;
         raw_sound.at_target_1 = self.after_touch_modulation_target_1.into();
-        raw_sound.at_amt_2 =
-            i8_to_u8_midpoint_of_u8_input_range(self.after_touch_modulation_amt_2, 0, 127);
+        raw_sound.at_amt_2 = self.after_touch_modulation_amt_2 as u8;
         raw_sound.at_target_2 = self.after_touch_modulation_target_2.into();
-        raw_sound.at_amt_3 =
-            i8_to_u8_midpoint_of_u8_input_range(self.after_touch_modulation_amt_3, 0, 127);
+        raw_sound.at_amt_3 = self.after_touch_modulation_amt_3 as u8;
         raw_sound.at_target_3 = self.after_touch_modulation_target_3.into();
-        raw_sound.at_amt_4 =
-            i8_to_u8_midpoint_of_u8_input_range(self.after_touch_modulation_amt_4, 0, 127);
+        raw_sound.at_amt_4 = self.after_touch_modulation_amt_4 as u8;
         raw_sound.at_target_4 = self.after_touch_modulation_target_4.into();
     }
 
@@ -499,5 +425,78 @@ impl SoundSettings {
     /// Returns the after touch modulation target 4 of the sound.
     pub fn after_touch_modulation_target_4(&self) -> SoundModTarget {
         self.after_touch_modulation_target_4
+    }
+
+    #[parameter_range(range = "track_index:0..=11")]
+    pub fn try_default_for_track(track_index: usize) -> Result<Self, RytmError> {
+        Ok(Self {
+            machine_type: match track_index {
+                0 => MachineType::BdHard,
+                1 => MachineType::SdHard,
+                2 => MachineType::RsHard,
+                3 => MachineType::CpClassic,
+                4 => MachineType::BtClassic,
+                5 => MachineType::XtClassic,
+                6 => MachineType::XtClassic,
+                7 => MachineType::XtClassic,
+                8 => MachineType::ChClassic,
+                9 => MachineType::OhClassic,
+                10 => MachineType::CyClassic,
+                11 => MachineType::CbClassic,
+                _ => unreachable!(),
+            },
+            chromatic_mode: SoundSettingsChromaticMode::default(),
+            env_reset_filter: true,
+            velocity_to_volume: true,
+            legacy_fx_send: false,
+
+            velocity_modulation_amt_1: 0,
+            velocity_modulation_target_1: SoundModTarget::default(),
+            velocity_modulation_amt_2: 0,
+            velocity_modulation_target_2: SoundModTarget::FilterFrequency,
+            velocity_modulation_amt_3: 0,
+            velocity_modulation_target_3: SoundModTarget::FilterResonance,
+            velocity_modulation_amt_4: 0,
+            velocity_modulation_target_4: SoundModTarget::default(),
+
+            after_touch_modulation_amt_1: 16,
+            after_touch_modulation_target_1: SoundModTarget::FilterFrequency,
+            after_touch_modulation_amt_2: 0,
+            after_touch_modulation_target_2: SoundModTarget::default(),
+            after_touch_modulation_amt_3: 0,
+            after_touch_modulation_target_3: SoundModTarget::default(),
+            after_touch_modulation_amt_4: 0,
+            after_touch_modulation_target_4: SoundModTarget::default(),
+        })
+    }
+}
+
+impl Default for SoundSettings {
+    fn default() -> Self {
+        Self {
+            machine_type: MachineType::default(),
+            chromatic_mode: SoundSettingsChromaticMode::default(),
+            env_reset_filter: true,
+            velocity_to_volume: true,
+            legacy_fx_send: false,
+
+            velocity_modulation_amt_1: 0,
+            velocity_modulation_target_1: SoundModTarget::default(),
+            velocity_modulation_amt_2: 0,
+            velocity_modulation_target_2: SoundModTarget::FilterFrequency,
+            velocity_modulation_amt_3: 0,
+            velocity_modulation_target_3: SoundModTarget::FilterResonance,
+            velocity_modulation_amt_4: 0,
+            velocity_modulation_target_4: SoundModTarget::default(),
+
+            after_touch_modulation_amt_1: 16,
+            after_touch_modulation_target_1: SoundModTarget::FilterFrequency,
+            after_touch_modulation_amt_2: 0,
+            after_touch_modulation_target_2: SoundModTarget::default(),
+            after_touch_modulation_amt_3: 0,
+            after_touch_modulation_target_3: SoundModTarget::default(),
+            after_touch_modulation_amt_4: 0,
+            after_touch_modulation_target_4: SoundModTarget::default(),
+        }
     }
 }

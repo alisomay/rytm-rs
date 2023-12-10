@@ -26,6 +26,16 @@ pub struct ChMetallicParameters {
     dec: u8,
 }
 
+impl Default for ChMetallicParameters {
+    fn default() -> Self {
+        Self {
+            lev: 100,
+            tun: 0,
+            dec: 40,
+        }
+    }
+}
+
 impl ChMetallicParameters {
     pub(crate) fn apply_to_raw_sound(&self, raw_sound: &mut ar_sound_t) {
         self.apply_to_raw_sound_values(raw_sound);

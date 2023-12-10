@@ -284,8 +284,10 @@ fn sound() {
     let conn_out = get_connection_to_rytm();
     let (_conn_in, rx) = make_input_message_forwarder();
 
+    let track_index = 7;
+
     let query = SoundQuery::new(0).unwrap();
-    let query = SoundQuery::new_targeting_work_buffer(0).unwrap();
+    let query = SoundQuery::new_targeting_work_buffer(track_index).unwrap();
 
     let callback = |response: &[u8], rytm: &mut Rytm, elapsed: u64| -> Result<(), RytmError> {
         if !is_sysex(response) {
@@ -294,15 +296,15 @@ fn sound() {
         }
 
         rytm.update_from_sysex_response(response)?;
-        let sound = rytm.work_buffer_sounds()[0];
+        let sound = rytm.work_buffer_sounds();
 
-        // clearscreen::clear().unwrap();
+        clearscreen::clear().unwrap();
 
         // convert unix epoch to human readable milliseconds
         // let response_time = elapsed / 1_000_000;
 
         dbg!(elapsed);
-        dbg!(sound.machine_parameters());
+        dbg!(sound[track_index].machine_parameters());
 
         Ok(())
     };

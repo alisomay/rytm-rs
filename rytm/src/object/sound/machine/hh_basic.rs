@@ -29,6 +29,19 @@ pub struct HhBasicParameters {
     rst: bool,
 }
 
+impl Default for HhBasicParameters {
+    fn default() -> Self {
+        Self {
+            lev: 110,
+            tun: 0,
+            dec: 29,
+            ton: 0,
+            trd: 68,
+            rst: false,
+        }
+    }
+}
+
 impl HhBasicParameters {
     pub(crate) fn apply_to_raw_sound(&self, raw_sound: &mut ar_sound_t) {
         self.apply_to_raw_sound_values(raw_sound);

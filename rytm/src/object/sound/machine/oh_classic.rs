@@ -27,6 +27,17 @@ pub struct OhClassicParameters {
     col: i8,
 }
 
+impl Default for OhClassicParameters {
+    fn default() -> Self {
+        Self {
+            lev: 100,
+            tun: 0,
+            dec: 32,
+            col: 0,
+        }
+    }
+}
+
 impl OhClassicParameters {
     pub(crate) fn apply_to_raw_sound(&self, raw_sound: &mut ar_sound_t) {
         self.apply_to_raw_sound_values(raw_sound);

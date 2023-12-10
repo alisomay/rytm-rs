@@ -29,6 +29,19 @@ pub struct CbMetallicParameters {
     pw2: i8,
 }
 
+impl Default for CbMetallicParameters {
+    fn default() -> Self {
+        Self {
+            lev: 100,
+            tun: 23,
+            dec: 50,
+            det: 64,
+            pw1: 0,
+            pw2: 0,
+        }
+    }
+}
+
 impl CbMetallicParameters {
     pub(crate) fn apply_to_raw_sound(&self, raw_sound: &mut ar_sound_t) {
         self.apply_to_raw_sound_values(raw_sound);

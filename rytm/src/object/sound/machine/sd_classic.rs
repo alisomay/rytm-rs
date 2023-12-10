@@ -32,6 +32,21 @@ pub struct SdClassicParameters {
     bal: i8,
 }
 
+impl Default for SdClassicParameters {
+    fn default() -> Self {
+        Self {
+            lev: 100,
+            tun: -6.0,
+            dec: 48,
+            det: 52.0,
+            snp: 64,
+            nod: 64,
+            nol: 64,
+            bal: -32,
+        }
+    }
+}
+
 impl SdClassicParameters {
     pub(crate) fn apply_to_raw_sound(&self, raw_sound: &mut ar_sound_t) {
         self.apply_to_raw_sound_values(raw_sound);

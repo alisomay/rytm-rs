@@ -28,6 +28,18 @@ pub struct CyClassicParameters {
     ton: i8,
 }
 
+impl Default for CyClassicParameters {
+    fn default() -> Self {
+        Self {
+            lev: 127,
+            tun: 0,
+            dec: 64,
+            col: 0,
+            ton: 0,
+        }
+    }
+}
+
 impl CyClassicParameters {
     pub(crate) fn apply_to_raw_sound(&self, raw_sound: &mut ar_sound_t) {
         self.apply_to_raw_sound_values(raw_sound);

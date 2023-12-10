@@ -29,6 +29,21 @@ pub struct BdHardParameters {
     tic: u8,
 }
 
+impl Default for BdHardParameters {
+    fn default() -> Self {
+        Self {
+            lev: 100,
+            tun: -3.0,
+            dec: 47,
+            hld: 40,
+            swt: 90,
+            snp: 6,
+            wav: 0,
+            tic: 64,
+        }
+    }
+}
+
 impl BdHardParameters {
     pub(crate) fn apply_to_raw_sound(&self, raw_sound: &mut ar_sound_t) {
         self.apply_to_raw_sound_values(raw_sound);

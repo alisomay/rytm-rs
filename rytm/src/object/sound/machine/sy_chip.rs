@@ -31,6 +31,21 @@ pub struct SyChipParameters {
     spd: SyChipSpeed,
 }
 
+impl Default for SyChipParameters {
+    fn default() -> Self {
+        Self {
+            lev: 100,
+            tun: 12.0,
+            dec: 42,
+            of2: 3,
+            of3: 7,
+            of4: 10,
+            wav: SyChipWaveform::default(),
+            spd: SyChipSpeed::default(),
+        }
+    }
+}
+
 impl SyChipParameters {
     pub(crate) fn apply_to_raw_sound(&self, raw_sound: &mut ar_sound_t) {
         self.apply_to_raw_sound_values(raw_sound);
@@ -108,10 +123,11 @@ impl From<&ar_sound_t> for SyChipParameters {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
+#[derive(Debug, Default, Clone, Copy, PartialEq, PartialOrd)]
 pub enum SyChipWaveform {
     Sin,
     Asin,
+    #[default]
     Tri,
     Ssaw,
     Saw,
@@ -218,7 +234,7 @@ impl From<SyChipWaveform> for u8 {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
+#[derive(Debug, Default, Clone, Copy, PartialEq, PartialOrd)]
 pub enum SyChipSpeed {
     _128T,
     _128,
@@ -261,6 +277,7 @@ pub enum SyChipSpeed {
     _25Hz,
     _30Hz,
     _40Hz,
+    #[default]
     _50Hz,
     _60Hz,
     _75Hz,

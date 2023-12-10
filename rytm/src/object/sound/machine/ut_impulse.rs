@@ -24,6 +24,17 @@ pub struct UtImpulseParameters {
     pol: u8,
 }
 
+impl Default for UtImpulseParameters {
+    fn default() -> Self {
+        Self {
+            lev: 64,
+            atk: 0,
+            dec: 25,
+            pol: 0,
+        }
+    }
+}
+
 impl UtImpulseParameters {
     pub(crate) fn apply_to_raw_sound(&self, raw_sound: &mut ar_sound_t) {
         self.apply_to_raw_sound_values(raw_sound);

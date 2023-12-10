@@ -31,7 +31,62 @@ pub struct XtClassicParameters {
     ton: i8,
 }
 
+impl Default for XtClassicParameters {
+    // Used by BT
+    fn default() -> Self {
+        Self {
+            lev: 100,
+            tun: 34,
+            dec: 52,
+            swd: 36,
+            swt: 34,
+            nod: 5,
+            nol: 85,
+            ton: 0,
+        }
+    }
+}
+
 impl XtClassicParameters {
+    pub fn default_for_lt() -> Self {
+        Self {
+            lev: 100,
+            tun: 34,
+            dec: 52,
+            swd: 36,
+            swt: 34,
+            nod: 5,
+            nol: 85,
+            ton: 0,
+        }
+    }
+
+    pub fn default_for_mt() -> Self {
+        Self {
+            lev: 100,
+            tun: 44,
+            dec: 70,
+            swd: 42,
+            swt: 29,
+            nod: 5,
+            nol: 100,
+            ton: 0,
+        }
+    }
+
+    pub fn default_for_ht() -> Self {
+        Self {
+            lev: 100,
+            tun: 50,
+            dec: 89,
+            swd: 50,
+            swt: 27,
+            nod: 5,
+            nol: 100,
+            ton: 0,
+        }
+    }
+
     pub(crate) fn apply_to_raw_sound(&self, raw_sound: &mut ar_sound_t) {
         self.apply_to_raw_sound_values(raw_sound);
     }

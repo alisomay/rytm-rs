@@ -28,6 +28,21 @@ pub struct SdFmParameters {
     fma: u8,
 }
 
+impl Default for SdFmParameters {
+    fn default() -> Self {
+        Self {
+            lev: 100,
+            tun: -6.0,
+            dec: 64,
+            fmt: 12.0,
+            fmd: 64,
+            nod: 32,
+            nol: 64,
+            fma: 127,
+        }
+    }
+}
+
 impl SdFmParameters {
     pub(crate) fn apply_to_raw_sound(&self, raw_sound: &mut ar_sound_t) {
         self.apply_to_raw_sound_values(raw_sound);

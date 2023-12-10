@@ -117,7 +117,21 @@ impl Kit {
 
         let name = ObjectName::from_u8_array(raw_kit.name);
 
-        let mut sounds = [Sound::work_buffer_default(); 12];
+        let mut sounds = [
+            Sound::try_work_buffer_default(0)?,
+            Sound::try_work_buffer_default(1)?,
+            Sound::try_work_buffer_default(2)?,
+            Sound::try_work_buffer_default(3)?,
+            Sound::try_work_buffer_default(4)?,
+            Sound::try_work_buffer_default(5)?,
+            Sound::try_work_buffer_default(6)?,
+            Sound::try_work_buffer_default(7)?,
+            Sound::try_work_buffer_default(8)?,
+            Sound::try_work_buffer_default(9)?,
+            Sound::try_work_buffer_default(10)?,
+            Sound::try_work_buffer_default(11)?,
+        ];
+
         for (i, sound) in raw_kit.tracks.iter().enumerate() {
             sounds[i] = Sound::try_from_raw(sysex_meta, sound, Some((kit_number, i)))?;
         }
@@ -164,8 +178,35 @@ impl Kit {
 
             // TODO: Currently relevant indexes are omitted.
             // This array is not valid, it is temporary.
-            sounds: [Sound::work_buffer_default(); 12],
-
+            sounds: [
+                Sound::try_default(0)?,
+                Sound::try_default(1)?,
+                Sound::try_default(2)?,
+                Sound::try_default(3)?,
+                Sound::try_default(4)?,
+                Sound::try_default(5)?,
+                Sound::try_default(6)?,
+                Sound::try_default(7)?,
+                Sound::try_default(8)?,
+                Sound::try_default(9)?,
+                Sound::try_default(10)?,
+                Sound::try_default(11)?,
+            ],
+            // TODO: Replace with this
+            // sounds: [
+            //     Sound::try_kit_default(0, kit_index)?,
+            //     Sound::try_kit_default(1, kit_index)?,
+            //     Sound::try_kit_default(2, kit_index)?,
+            //     Sound::try_kit_default(3, kit_index)?,
+            //     Sound::try_kit_default(4, kit_index)?,
+            //     Sound::try_kit_default(5, kit_index)?,
+            //     Sound::try_kit_default(6, kit_index)?,
+            //     Sound::try_kit_default(7, kit_index)?,
+            //     Sound::try_kit_default(8, kit_index)?,
+            //     Sound::try_kit_default(9, kit_index)?,
+            //     Sound::try_kit_default(10, kit_index)?,
+            //     Sound::try_kit_default(11, kit_index)?,
+            // ],
             fx_delay: FxDelay::default(),
             fx_distortion: FxDistortion::default(),
             fx_reverb: FxReverb::default(),
@@ -191,7 +232,20 @@ impl Kit {
 
             // TODO: Currently relevant indexes are omitted.
             // This array is not valid, it is temporary.
-            sounds: [Sound::work_buffer_default(); 12],
+            sounds: [
+                Sound::try_work_buffer_default(0).unwrap(),
+                Sound::try_work_buffer_default(1).unwrap(),
+                Sound::try_work_buffer_default(2).unwrap(),
+                Sound::try_work_buffer_default(3).unwrap(),
+                Sound::try_work_buffer_default(4).unwrap(),
+                Sound::try_work_buffer_default(5).unwrap(),
+                Sound::try_work_buffer_default(6).unwrap(),
+                Sound::try_work_buffer_default(7).unwrap(),
+                Sound::try_work_buffer_default(8).unwrap(),
+                Sound::try_work_buffer_default(9).unwrap(),
+                Sound::try_work_buffer_default(10).unwrap(),
+                Sound::try_work_buffer_default(11).unwrap(),
+            ],
 
             fx_delay: FxDelay::default(),
             fx_distortion: FxDistortion::default(),

@@ -1,3 +1,5 @@
+use crate::error::ConversionError;
+
 #[derive(Clone, Copy)]
 pub struct ObjectName([u8; 15]);
 
@@ -12,6 +14,28 @@ impl ObjectName {
 
     pub fn copy_inner(&self) -> [u8; 15] {
         self.0
+    }
+}
+
+impl TryFrom<&str> for ObjectName {
+    type Error = ConversionError;
+    fn try_from(s: &str) -> Result<Self, Self::Error> {
+        if !s.is_ascii() {
+            return Err(ConversionError::ObjectNameNotAscii(s.to_string()));
+        }
+        if s.len() > 15 {
+            return Err(ConversionError::ObjectNameTooLong(s.to_owned(), s.len()));
+        }
+        let mut raw_sound_name = [0u8; 15];
+        raw_sound_name[..s.len()].copy_from_slice(s.as_bytes());
+        Ok(Self(raw_sound_name))
+    }
+}
+
+impl TryFrom<String> for ObjectName {
+    type Error = ConversionError;
+    fn try_from(s: String) -> Result<Self, Self::Error> {
+        Self::try_from(s.as_str())
     }
 }
 

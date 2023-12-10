@@ -8,12 +8,13 @@ use crate::{
 use rytm_rs_macro::machine_parameters;
 use rytm_sys::ar_sound_t;
 
-#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
+#[derive(Debug, Default, Clone, Copy, PartialEq, PartialOrd)]
 pub enum SyRawWaveform1 {
     Sin,
     Asin,
     Tri,
     Ssaw,
+    #[default]
     Asaw,
     Saw,
     Ring,
@@ -48,8 +49,9 @@ impl From<SyRawWaveform1> for u8 {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
+#[derive(Debug, Default, Clone, Copy, PartialEq, PartialOrd)]
 pub enum SyRawWaveform2 {
+    #[default]
     SineA,
     SsawA,
     SineB,
@@ -100,6 +102,21 @@ pub struct SyRawParameters {
     wav1: SyRawWaveform1,
     wav2: SyRawWaveform2,
     bal: i8,
+}
+
+impl Default for SyRawParameters {
+    fn default() -> Self {
+        Self {
+            lev: 100,
+            tun: 0.0,
+            dec2: 127,
+            det: -12.0,
+            nlev: 15,
+            wav1: SyRawWaveform1::default(),
+            wav2: SyRawWaveform2::default(),
+            bal: 0,
+        }
+    }
 }
 
 impl SyRawParameters {

@@ -3,6 +3,10 @@
 pub enum ConversionError {
     #[error("Conversion error: {value} is out of range for {type_name}")]
     Range { value: String, type_name: String },
+    #[error("Conversion error: The object name you have provided \"{0}\" is {1} characters and too long. The maximum length is 15 characters.")]
+    ObjectNameTooLong(String, usize),
+    #[error("Conversion error: The object name you have provided \"{0}\" contains non-ascii characters.")]
+    ObjectNameNotAscii(String),
 }
 
 #[derive(thiserror::Error, Debug)]

@@ -31,6 +31,21 @@ pub struct UtNoiseParameters {
     swd: i8,
 }
 
+impl Default for UtNoiseParameters {
+    fn default() -> Self {
+        Self {
+            lev: 100,
+            lpf: 127,
+            dec: 40,
+            hpf: 0,
+            lpq: 0,
+            atk: 0,
+            swt: 64,
+            swd: 0,
+        }
+    }
+}
+
 impl UtNoiseParameters {
     pub(crate) fn apply_to_raw_sound(&self, raw_sound: &mut ar_sound_t) {
         self.apply_to_raw_sound_values(raw_sound);

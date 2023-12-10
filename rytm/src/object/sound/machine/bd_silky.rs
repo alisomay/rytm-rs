@@ -29,6 +29,21 @@ pub struct BdSilkyParameters {
     clk: u8,
 }
 
+impl Default for BdSilkyParameters {
+    fn default() -> Self {
+        Self {
+            lev: 100,
+            tun: -6.0,
+            dec: 64,
+            hld: 32,
+            swt: 64,
+            swd: 64,
+            dus: 64,
+            clk: 100,
+        }
+    }
+}
+
 impl BdSilkyParameters {
     pub(crate) fn apply_to_raw_sound(&self, raw_sound: &mut ar_sound_t) {
         self.apply_to_raw_sound_values(raw_sound);
