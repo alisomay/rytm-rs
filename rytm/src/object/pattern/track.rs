@@ -165,7 +165,7 @@ impl From<&Track> for ar_pattern_track_t {
         let mut notes: [u8; 64] = [0; 64];
         let mut velocities: [u8; 64] = [0; 64];
         let mut note_lengths: [u8; 64] = [0; 64];
-        let mut micro_timings: [i8; 64] = [0; 64];
+        let mut micro_timings: [u8; 64] = [0; 64];
         let mut retrig_lengths: [u8; 64] = [0; 64];
         let mut retrig_rates: [u8; 64] = [0; 64];
         let mut retrig_velocity_offsets: [i8; 64] = [0; 64];

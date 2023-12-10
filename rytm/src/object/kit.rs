@@ -2,6 +2,7 @@ pub mod comp;
 pub mod delay;
 pub mod dist;
 pub mod lfo;
+pub mod retrig;
 pub mod reverb;
 pub mod types;
 pub(crate) mod unknown;
@@ -43,7 +44,8 @@ pub struct Kit {
     /// Name of the kit.
     name: ObjectName,
 
-    track_levels: [u8; 12],
+    track_levels: [u8; 13],
+    track_retrig_settings: [retrig::TrackRetrigMenu; 13],
 
     sounds: [Sound; 12],
 
@@ -93,6 +95,12 @@ impl From<&Kit> for ar_kit_t {
         kit.fx_compressor.apply_to_raw_kit(&mut raw_kit);
         kit.fx_lfo.apply_to_raw_kit(&mut raw_kit);
 
+        for retrig_settings in kit.track_retrig_settings.iter() {
+            retrig_settings.apply_to_raw_kit(&mut raw_kit);
+        }
+
+        kit.__unknown.apply_to_raw_kit(&mut raw_kit);
+
         raw_kit
     }
 }
@@ -136,7 +144,7 @@ impl Kit {
             sounds[i] = Sound::try_from_raw(sysex_meta, sound, Some((kit_number, i)))?;
         }
 
-        let mut track_levels = [0; 12];
+        let mut track_levels = [0; 13];
         for (i, track_level) in raw_kit.track_levels.iter().enumerate() {
             // Only the high byte is used for the levels.
             track_levels[i] = unsafe { track_level.b.hi };
@@ -150,6 +158,7 @@ impl Kit {
             name,
 
             track_levels,
+            track_retrig_settings: retrig::TrackRetrigMenu::get_default_for_13_tracks(),
             sounds,
 
             fx_delay: raw_kit.try_into()?,
@@ -175,7 +184,8 @@ impl Kit {
 
             name: format!("KIT {}", kit_index).try_into()?,
 
-            track_levels: [100; 12],
+            track_levels: [100; 13],
+            track_retrig_settings: retrig::TrackRetrigMenu::get_default_for_13_tracks(),
 
             sounds: [
                 Sound::try_kit_default(0, kit_index, meta)?,
@@ -213,7 +223,8 @@ impl Kit {
 
             name: "WB_KIT".try_into().unwrap(),
 
-            track_levels: [100; 12],
+            track_levels: [100; 13],
+            track_retrig_settings: retrig::TrackRetrigMenu::get_default_for_13_tracks(),
 
             // TODO: I don't know if we choose wb defaults or kit defaults for sounds here..
             sounds: [

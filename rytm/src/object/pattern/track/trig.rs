@@ -362,7 +362,7 @@ impl Trig {
         note: u8,
         note_length: u8,
         velocity: u8,
-        micro_timing: i8,
+        micro_timing: u8,
         retrig_rate: u8,
         retrig_length: u8,
         retrig_velocity_offset: i8,
@@ -395,7 +395,7 @@ impl Trig {
             trig_condition: trig_condition_value.try_into()?,
             velocity,
             note_length: note_length.try_into()?,
-            micro_timing: decode_micro_timing_byte(micro_timing)?,
+            micro_timing: decode_micro_timing_byte(micro_timing as i8)?,
             retrig_rate: retrig_rate.try_into()?,
             retrig_length: retrig_length.try_into()?,
             retrig_velocity_offset,
@@ -408,14 +408,14 @@ impl Trig {
     }
 
     #[allow(overflowing_literals)]
-    pub(crate) fn encode_micro_timing(&self) -> i8 {
+    pub(crate) fn encode_micro_timing(&self) -> u8 {
         let encoded_byte = crate::util::encode_micro_timing_byte(&self.micro_timing);
         // Shift the micro timing 2 bits to the right to leave space for 2 bits which is a part of encoded trig condition.
         // Then fill those two bits with the trig condition's most significant mid bits.
         //
         // Since we're just setting bits, fabricating values and not doing any arithmetic we can use the literal values.
         // Overflowing literals are safe in this case.
-        (encoded_byte >> 2) | (((self.trig_condition as i8) & 0b0110_0000) << 1)
+        ((encoded_byte >> 2) | (((self.trig_condition as i8) & 0b0110_0000) << 1)) as u8
     }
 
     pub(crate) fn encode_retrig_length(&self) -> u8 {
