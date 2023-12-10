@@ -20,7 +20,7 @@ impl Default for FxDistortion {
         Self {
             reverb_send: 0,
             delay_overdrive: 0,
-            reverb_post: false,
+            reverb_post: true,
             amount: 0,
             symmetry: 0,
         }

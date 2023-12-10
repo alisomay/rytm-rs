@@ -22,14 +22,14 @@ pub struct FxDelay {
 impl Default for FxDelay {
     fn default() -> Self {
         Self {
-            time: 0,
+            time: 23,
             ping_pong: false,
             stereo_width: 0,
-            feedback: 0,
-            hpf: 0,
-            lpf: 0,
+            feedback: 49,
+            hpf: 32,
+            lpf: 96,
             reverb_send: 0,
-            volume: 0,
+            volume: 110,
         }
     }
 }

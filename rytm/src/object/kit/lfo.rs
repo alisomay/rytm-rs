@@ -2,7 +2,9 @@ use super::types::FxLfoDestination;
 use crate::{
     error::{ConversionError, ParameterError, RytmError},
     object::sound::types::{LfoMode, LfoMultiplier, LfoWaveform},
-    util::{i8_to_u8_midpoint_of_u8_input_range, u8_to_i8_midpoint_of_u8_input_range},
+    util::{
+        i8_to_u8_midpoint_of_u8_input_range, scale_generic, u8_to_i8_midpoint_of_u8_input_range,
+    },
 };
 use rytm_rs_macro::parameter_range;
 use rytm_sys::ar_kit_t;
@@ -23,7 +25,7 @@ pub struct FxLfo {
 impl Default for FxLfo {
     fn default() -> Self {
         Self {
-            speed: 0,
+            speed: 48,
             multiplier: LfoMultiplier::default(),
             fade: 0,
             destination: FxLfoDestination::default(),
@@ -40,7 +42,8 @@ impl TryFrom<&ar_kit_t> for FxLfo {
     fn try_from(raw_kit: &ar_kit_t) -> Result<Self, Self::Error> {
         // map range of 0..=32767 to -128.0..=127.99
         let depth_u16 = ((raw_kit.fx_lfo_depth_msb as u16) << 8) + raw_kit.fx_lfo_depth_lsb as u16;
-        let depth = depth_u16 as f32 / 256.0 - 128.0;
+        let depth = scale_generic(depth_u16, 0u16, 32767u16, -128f32, 127.99f32, |x| x as f32);
+
         Ok(Self {
             speed: u8_to_i8_midpoint_of_u8_input_range(raw_kit.fx_lfo_speed, 0, 127),
             multiplier: raw_kit.fx_lfo_multiplier.try_into()?,
@@ -57,7 +60,9 @@ impl TryFrom<&ar_kit_t> for FxLfo {
 impl FxLfo {
     pub(crate) fn apply_to_raw_kit(&self, raw_kit: &mut ar_kit_t) {
         // map range of -128.0..=127.99 to 0..=32767
-        let depth = ((self.depth + 128.0) * 256.0) as u16;
+        let depth = scale_generic(self.depth, -128f32, 127.99f32, 0u16, 32767u16, |x| {
+            x.round() as u16
+        });
 
         raw_kit.fx_lfo_speed = i8_to_u8_midpoint_of_u8_input_range(self.speed, 0, 127);
         raw_kit.fx_lfo_multiplier = self.multiplier.into();

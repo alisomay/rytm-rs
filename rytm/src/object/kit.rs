@@ -45,6 +45,7 @@ pub struct Kit {
 
     track_levels: [u8; 12],
 
+    #[derivative(Debug = "ignore")]
     sounds: [Sound; 12],
 
     fx_delay: FxDelay,
@@ -172,7 +173,7 @@ impl Kit {
             sysex_meta: SysexMeta::try_default_for_kit(kit_index, None)?,
             version: 6,
 
-            name: ObjectName::from_u8_array([0_u8; 15]),
+            name: format!("KIT {}", kit_index).try_into()?,
 
             track_levels: [100; 12],
 
@@ -226,7 +227,7 @@ impl Kit {
             sysex_meta: SysexMeta::default_for_kit_in_work_buffer(None),
             version: 6,
 
-            name: ObjectName::from_u8_array([0_u8; 15]),
+            name: "WB_KIT".try_into().unwrap(),
 
             track_levels: [100; 12],
 

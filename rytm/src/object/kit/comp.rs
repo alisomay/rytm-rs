@@ -19,14 +19,14 @@ pub struct FxCompressor {
 impl Default for FxCompressor {
     fn default() -> Self {
         Self {
-            threshold: 0,
+            threshold: 96,
             attack: FxCompAttack::default(),
             release: FxCompRelease::default(),
             ratio: FxCompRatio::default(),
             seq: FxCompSideChainEq::default(),
             gain: 0,
             mix: 0,
-            volume: 0,
+            volume: 64,
         }
     }
 }

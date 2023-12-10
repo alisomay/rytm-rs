@@ -17,13 +17,13 @@ pub struct FxReverb {
 impl Default for FxReverb {
     fn default() -> Self {
         Self {
-            pre_delay: 0,
-            decay: 0,
-            freq: 0,
-            gain: 0,
-            hpf: 0,
-            lpf: 0,
-            volume: 0,
+            pre_delay: 8,
+            decay: 40,
+            freq: 64,
+            gain: 32,
+            hpf: 32,
+            lpf: 96,
+            volume: 110,
         }
     }
 }

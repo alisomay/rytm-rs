@@ -320,7 +320,7 @@ fn kit() {
     let conn_out = get_connection_to_rytm();
     let (_conn_in, rx) = make_input_message_forwarder();
 
-    let query = KitQuery::new(18).unwrap();
+    let query = KitQuery::new(0).unwrap();
     let query = KitQuery::new_targeting_work_buffer();
 
     let callback = |response: &[u8], rytm: &mut Rytm, elapsed: u64| -> Result<(), RytmError> {
@@ -330,10 +330,12 @@ fn kit() {
         }
 
         rytm.update_from_sysex_response(response)?;
-        let kit = rytm.kits()[18];
+        let kit = rytm.kits()[0];
         let kit = rytm.work_buffer_kit();
 
         clearscreen::clear().unwrap();
+
+        dbg!(kit);
 
         // println!("mode_flags: {:08b}", kit.sounds()[6].mode_flags);
 

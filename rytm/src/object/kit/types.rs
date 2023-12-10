@@ -207,11 +207,11 @@ impl TryFrom<u8> for FxCompAttack {
 /// Compressor release type
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum FxCompRelease {
-    #[default]
     /// 0.1
     _0_1,
     /// 0.2
     _0_2,
+    #[default]
     /// 0.4
     _0_4,
     /// 0.6
@@ -305,8 +305,8 @@ impl TryFrom<u8> for FxCompRatio {
 /// Compressor side chain eq type
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum FxCompSideChainEq {
-    #[default]
     Off,
+    #[default]
     Lpf,
     Hpf,
     Hit,
