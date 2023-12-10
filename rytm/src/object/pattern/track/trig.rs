@@ -6,11 +6,18 @@ pub mod types;
 use self::types::{Length, MicroTime, RetrigRate, TrigCondition};
 use crate::{
     error::{ParameterError, RytmError},
+    object::pattern::parameter_lock::{self, ParameterLockPool},
     util::decode_micro_timing_byte,
+    RytmError::OrphanTrig,
 };
+use derivative::Derivative;
 use flags::*;
 use rytm_rs_macro::parameter_range;
-use std::ops::{Deref, DerefMut};
+use std::{
+    cell::RefCell,
+    ops::{Deref, DerefMut},
+    rc::Rc,
+};
 
 pub trait HoldsTrigFlags {
     /// Returns the raw flags value.
@@ -296,8 +303,10 @@ impl HoldsTrigFlags for TrigFlags {
     }
 }
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Derivative, Clone)]
+#[derivative(Debug)]
 pub struct Trig {
+    track_index: usize,
     index: usize,
     /// The raw flags value.
     ///
@@ -326,12 +335,15 @@ pub struct Trig {
     retrig_velocity_offset: i8,
 
     sound_lock: u8,
+
+    #[derivative(Debug = "ignore")]
+    parameter_lock_pool: Option<Rc<RefCell<ParameterLockPool>>>,
 }
 
 // TODO: Maybe builder..
 impl Trig {
-    #[parameter_range(range = "trig_index:0..=63")]
-    pub fn try_default(trig_index: usize) -> Result<Self, RytmError> {
+    #[parameter_range(range = "trig_index:0..=63", range = "track_index:0..=12")]
+    pub fn try_default(trig_index: usize, track_index: usize) -> Result<Self, RytmError> {
         let flags: u16 = if trig_index % 2 == 0 {
             // No flags
             0b0000_0000_0000_0000
@@ -341,6 +353,7 @@ impl Trig {
         };
 
         Ok(Self {
+            track_index,
             index: trig_index,
             flags: flags.into(),
             note: 127,
@@ -352,12 +365,15 @@ impl Trig {
             retrig_length: Length::Quarter,
             retrig_velocity_offset: 0,
             sound_lock: 0xFF,
+            // Inefficient but it will be dropped as soon as the trig is created so it sh
+            parameter_lock_pool: None,
         })
     }
 
     #[allow(clippy::too_many_arguments)]
     pub fn new(
         index: usize,
+        track_index: usize,
         flags: u16,
         note: u8,
         note_length: u8,
@@ -367,11 +383,12 @@ impl Trig {
         retrig_length: u8,
         retrig_velocity_offset: i8,
         sound_lock: u8,
+        parameter_lock_pool: Rc<RefCell<ParameterLockPool>>,
     ) -> Result<Self, RytmError> {
         let trig_condition_msb = note & 0b1000_0000;
         let note = note & 0b0111_1111;
 
-        let trig_condition_most_significant_mid_bits = (micro_timing as u8) & 0b1100_0000;
+        let trig_condition_most_significant_mid_bits = micro_timing & 0b1100_0000;
         // Shift the micro timing 2 bits to the right so it reads as a relevant signed value. -92..=92 for every value increments and decrements by 4.
         let micro_timing = (micro_timing & 0b0011_1111) << 2;
 
@@ -389,6 +406,7 @@ impl Trig {
             | (trig_condition_least_significant_3_bits >> 5);
 
         Ok(Self {
+            track_index,
             index,
             flags: flags.into(),
             note,
@@ -400,6 +418,7 @@ impl Trig {
             retrig_length: retrig_length.try_into()?,
             retrig_velocity_offset,
             sound_lock,
+            parameter_lock_pool: Some(parameter_lock_pool),
         })
     }
 
@@ -614,6 +633,23 @@ impl Trig {
     pub fn sound_lock(&self) -> usize {
         self.sound_lock as usize
     }
+
+    /********* Parameter Lock Setters *********/
+
+    #[parameter_range(range = "filter_attack:0..=127")]
+    pub fn p_lock_set_filter_attack(&self, filter_attack: usize) -> Result<(), RytmError> {
+        if let Some(ref pool) = self.parameter_lock_pool {
+            pool.borrow_mut().set_basic_plock(
+                self.index,
+                self.track_index as u8,
+                rytm_sys::AR_PLOCK_TYPE_FLT_ATTACK as u8,
+                filter_attack as u8,
+            )?;
+
+            return Ok(());
+        }
+        Err(OrphanTrig)
+    }
 }
 
 impl HoldsTrigFlags for Trig {
@@ -717,72 +753,72 @@ fn format_trig_flags(trig: &impl HoldsTrigFlags) -> Vec<&str> {
 }
 
 impl Trig {
-    pub(crate) fn default_trig_array() -> [Trig; 64] {
+    pub(crate) fn default_trig_array(track_index: usize) -> [Trig; 64] {
         [
-            Trig::try_default(0).unwrap(),
-            Trig::try_default(1).unwrap(),
-            Trig::try_default(2).unwrap(),
-            Trig::try_default(3).unwrap(),
-            Trig::try_default(4).unwrap(),
-            Trig::try_default(5).unwrap(),
-            Trig::try_default(6).unwrap(),
-            Trig::try_default(7).unwrap(),
-            Trig::try_default(8).unwrap(),
-            Trig::try_default(9).unwrap(),
-            Trig::try_default(10).unwrap(),
-            Trig::try_default(11).unwrap(),
-            Trig::try_default(12).unwrap(),
-            Trig::try_default(13).unwrap(),
-            Trig::try_default(14).unwrap(),
-            Trig::try_default(15).unwrap(),
-            Trig::try_default(16).unwrap(),
-            Trig::try_default(17).unwrap(),
-            Trig::try_default(18).unwrap(),
-            Trig::try_default(19).unwrap(),
-            Trig::try_default(20).unwrap(),
-            Trig::try_default(21).unwrap(),
-            Trig::try_default(22).unwrap(),
-            Trig::try_default(23).unwrap(),
-            Trig::try_default(24).unwrap(),
-            Trig::try_default(25).unwrap(),
-            Trig::try_default(26).unwrap(),
-            Trig::try_default(27).unwrap(),
-            Trig::try_default(28).unwrap(),
-            Trig::try_default(29).unwrap(),
-            Trig::try_default(30).unwrap(),
-            Trig::try_default(31).unwrap(),
-            Trig::try_default(32).unwrap(),
-            Trig::try_default(33).unwrap(),
-            Trig::try_default(34).unwrap(),
-            Trig::try_default(35).unwrap(),
-            Trig::try_default(36).unwrap(),
-            Trig::try_default(37).unwrap(),
-            Trig::try_default(38).unwrap(),
-            Trig::try_default(39).unwrap(),
-            Trig::try_default(40).unwrap(),
-            Trig::try_default(41).unwrap(),
-            Trig::try_default(42).unwrap(),
-            Trig::try_default(43).unwrap(),
-            Trig::try_default(44).unwrap(),
-            Trig::try_default(45).unwrap(),
-            Trig::try_default(46).unwrap(),
-            Trig::try_default(47).unwrap(),
-            Trig::try_default(48).unwrap(),
-            Trig::try_default(49).unwrap(),
-            Trig::try_default(50).unwrap(),
-            Trig::try_default(51).unwrap(),
-            Trig::try_default(52).unwrap(),
-            Trig::try_default(53).unwrap(),
-            Trig::try_default(54).unwrap(),
-            Trig::try_default(55).unwrap(),
-            Trig::try_default(56).unwrap(),
-            Trig::try_default(57).unwrap(),
-            Trig::try_default(58).unwrap(),
-            Trig::try_default(59).unwrap(),
-            Trig::try_default(60).unwrap(),
-            Trig::try_default(61).unwrap(),
-            Trig::try_default(62).unwrap(),
-            Trig::try_default(63).unwrap(),
+            Trig::try_default(0, track_index).unwrap(),
+            Trig::try_default(1, track_index).unwrap(),
+            Trig::try_default(2, track_index).unwrap(),
+            Trig::try_default(3, track_index).unwrap(),
+            Trig::try_default(4, track_index).unwrap(),
+            Trig::try_default(5, track_index).unwrap(),
+            Trig::try_default(6, track_index).unwrap(),
+            Trig::try_default(7, track_index).unwrap(),
+            Trig::try_default(8, track_index).unwrap(),
+            Trig::try_default(9, track_index).unwrap(),
+            Trig::try_default(10, track_index).unwrap(),
+            Trig::try_default(11, track_index).unwrap(),
+            Trig::try_default(12, track_index).unwrap(),
+            Trig::try_default(13, track_index).unwrap(),
+            Trig::try_default(14, track_index).unwrap(),
+            Trig::try_default(15, track_index).unwrap(),
+            Trig::try_default(16, track_index).unwrap(),
+            Trig::try_default(17, track_index).unwrap(),
+            Trig::try_default(18, track_index).unwrap(),
+            Trig::try_default(19, track_index).unwrap(),
+            Trig::try_default(20, track_index).unwrap(),
+            Trig::try_default(21, track_index).unwrap(),
+            Trig::try_default(22, track_index).unwrap(),
+            Trig::try_default(23, track_index).unwrap(),
+            Trig::try_default(24, track_index).unwrap(),
+            Trig::try_default(25, track_index).unwrap(),
+            Trig::try_default(26, track_index).unwrap(),
+            Trig::try_default(27, track_index).unwrap(),
+            Trig::try_default(28, track_index).unwrap(),
+            Trig::try_default(29, track_index).unwrap(),
+            Trig::try_default(30, track_index).unwrap(),
+            Trig::try_default(31, track_index).unwrap(),
+            Trig::try_default(32, track_index).unwrap(),
+            Trig::try_default(33, track_index).unwrap(),
+            Trig::try_default(34, track_index).unwrap(),
+            Trig::try_default(35, track_index).unwrap(),
+            Trig::try_default(36, track_index).unwrap(),
+            Trig::try_default(37, track_index).unwrap(),
+            Trig::try_default(38, track_index).unwrap(),
+            Trig::try_default(39, track_index).unwrap(),
+            Trig::try_default(40, track_index).unwrap(),
+            Trig::try_default(41, track_index).unwrap(),
+            Trig::try_default(42, track_index).unwrap(),
+            Trig::try_default(43, track_index).unwrap(),
+            Trig::try_default(44, track_index).unwrap(),
+            Trig::try_default(45, track_index).unwrap(),
+            Trig::try_default(46, track_index).unwrap(),
+            Trig::try_default(47, track_index).unwrap(),
+            Trig::try_default(48, track_index).unwrap(),
+            Trig::try_default(49, track_index).unwrap(),
+            Trig::try_default(50, track_index).unwrap(),
+            Trig::try_default(51, track_index).unwrap(),
+            Trig::try_default(52, track_index).unwrap(),
+            Trig::try_default(53, track_index).unwrap(),
+            Trig::try_default(54, track_index).unwrap(),
+            Trig::try_default(55, track_index).unwrap(),
+            Trig::try_default(56, track_index).unwrap(),
+            Trig::try_default(57, track_index).unwrap(),
+            Trig::try_default(58, track_index).unwrap(),
+            Trig::try_default(59, track_index).unwrap(),
+            Trig::try_default(60, track_index).unwrap(),
+            Trig::try_default(61, track_index).unwrap(),
+            Trig::try_default(62, track_index).unwrap(),
+            Trig::try_default(63, track_index).unwrap(),
         ]
     }
 }

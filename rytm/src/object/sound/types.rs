@@ -105,7 +105,7 @@ mod lfo_destination {
     pub const AMP_REV: u8 = AR_SOUND_LFO_DEST_AMP_REV as u8;
 }
 
-mod sound_mod_target {
+pub(crate) mod sound_mod_target {
     use rytm_sys::{
         AR_SOUND_MOD_DEST_AMP_ACC, AR_SOUND_MOD_DEST_AMP_ATK, AR_SOUND_MOD_DEST_AMP_DEC,
         AR_SOUND_MOD_DEST_AMP_DLY, AR_SOUND_MOD_DEST_AMP_HLD, AR_SOUND_MOD_DEST_AMP_OVR,

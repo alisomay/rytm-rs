@@ -96,4 +96,9 @@ pub enum RytmError {
     Parameter(#[from] ParameterError),
     #[error("{0}")]
     SysexConversion(#[from] SysexConversionError),
+
+    #[error("Parameter lock memory full.")]
+    ParameterLockMemoryFull,
+    #[error("Parameter lock pool is not set for this trig thus it is not connected to a pattern and orphan. This function can not be called on an orphan trig.")]
+    OrphanTrig,
 }

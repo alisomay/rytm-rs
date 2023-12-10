@@ -1,14 +1,18 @@
 // TODO: Correctly represent unset values in pattern, trig, track.
 
-pub mod plock_seq;
+// pub mod plock_seq;
+pub mod parameter_lock;
 pub mod track;
 pub mod types;
 
-use self::types::{Speed, TimeMode};
+use self::{
+    parameter_lock::ParameterLockPool,
+    types::{Speed, TimeMode},
+};
 use crate::{
     error::{ParameterError, RytmError, SysexConversionError},
     impl_sysex_compatible,
-    object::pattern::{plock_seq::PlockSeq, track::Track},
+    object::pattern::track::Track,
     sysex::{SysexCompatible, SysexMeta, SysexType, PATTERN_SYSEX_SIZE},
     util::{from_s_u16_t, to_s_u16_t_union_b},
 };
@@ -17,6 +21,7 @@ use rytm_rs_macro::parameter_range;
 use rytm_sys::{
     ar_pattern_raw_to_syx, ar_pattern_t, ar_pattern_track_t, ar_plock_seq_t, ar_sysex_meta_t,
 };
+use std::{cell::RefCell, rc::Rc};
 pub use track::{
     trig::{types::*, Trig},
     types::*,
@@ -35,7 +40,7 @@ impl_sysex_compatible!(
 /// This structure represents a pattern in the analog rytm.
 ///
 /// It does not map identically to the structure in the firmware.
-#[derive(Derivative, Clone, Copy)]
+#[derive(Derivative, Clone)]
 #[derivative(Debug)]
 pub struct Pattern {
     #[derivative(Debug = "ignore")]
@@ -54,8 +59,8 @@ pub struct Pattern {
     tracks: [Track; 13],
 
     #[derivative(Debug = "ignore")]
-    /// TODO: I don't know what these are yet.
-    plock_seqs: [PlockSeq; 72],
+    parameter_lock_pool: Rc<RefCell<ParameterLockPool>>,
+
     /// Master Length
     ///
     /// Range `1..=1024`
@@ -123,10 +128,6 @@ impl From<&Pattern> for ar_pattern_t {
             tracks[i] = track.into();
         }
 
-        for (i, plock_seq) in pattern.plock_seqs.iter().enumerate() {
-            plock_seqs[i] = plock_seq.into();
-        }
-
         let mut header = [0; 4];
         header[0] = (pattern.version >> 24) as u8;
         header[1] = (pattern.version >> 16) as u8;
@@ -137,7 +138,7 @@ impl From<&Pattern> for ar_pattern_t {
         Self {
             magic: header,
             tracks,
-            plock_seqs,
+            plock_seqs: pattern.parameter_lock_pool.borrow().to_raw(),
             master_length: to_s_u16_t_union_b(pattern.master_length),
             master_chg_msb: (pattern.master_change >> 8) as u8,
             master_chg_lsb: pattern.master_change as u8,
@@ -165,15 +166,30 @@ impl Pattern {
             sysex_meta.obj_nr as usize
         };
 
-        let mut tracks: [Track; 13] = [Track::default(); 13];
-        let mut plock_seqs: [PlockSeq; 72] = [PlockSeq::default(); 72];
+        let mut tracks: [Track; 13] = [
+            Track::try_default(0).unwrap(),
+            Track::try_default(1).unwrap(),
+            Track::try_default(2).unwrap(),
+            Track::try_default(3).unwrap(),
+            Track::try_default(4).unwrap(),
+            Track::try_default(5).unwrap(),
+            Track::try_default(6).unwrap(),
+            Track::try_default(7).unwrap(),
+            Track::try_default(8).unwrap(),
+            Track::try_default(9).unwrap(),
+            Track::try_default(10).unwrap(),
+            Track::try_default(11).unwrap(),
+            // Fx Track
+            Track::try_default(12).unwrap(),
+        ];
+
+        let parameter_lock_pool = Rc::new(RefCell::new(ParameterLockPool::from_raw(
+            raw_pattern.plock_seqs,
+        )));
 
         for (i, track) in raw_pattern.tracks.iter().enumerate() {
-            tracks[i] = Track::try_from(track)?;
-        }
-
-        for (i, plock_seq) in raw_pattern.plock_seqs.iter().enumerate() {
-            plock_seqs[i] = PlockSeq::from(plock_seq);
+            let parameter_lock_pool_ref = Rc::clone(&parameter_lock_pool);
+            tracks[i] = Track::try_from_raw(i, track, parameter_lock_pool_ref)?;
         }
 
         let version = ((raw_pattern.magic[0] as u32) << 24)
@@ -192,7 +208,7 @@ impl Pattern {
             sysex_meta,
             version,
             tracks,
-            plock_seqs,
+            parameter_lock_pool,
             master_length: unsafe { from_s_u16_t(&raw_pattern.master_length) },
             master_change,
             kit_number: raw_pattern.kit_number,
@@ -215,8 +231,23 @@ impl Pattern {
             sysex_meta: SysexMeta::try_default_for_pattern(index, None)?,
             index,
             version: 5,
-            tracks: [Track::default(); 13],
-            plock_seqs: [PlockSeq::default(); 72],
+            tracks: [
+                Track::try_default(0).unwrap(),
+                Track::try_default(1).unwrap(),
+                Track::try_default(2).unwrap(),
+                Track::try_default(3).unwrap(),
+                Track::try_default(4).unwrap(),
+                Track::try_default(5).unwrap(),
+                Track::try_default(6).unwrap(),
+                Track::try_default(7).unwrap(),
+                Track::try_default(8).unwrap(),
+                Track::try_default(9).unwrap(),
+                Track::try_default(10).unwrap(),
+                Track::try_default(11).unwrap(),
+                // Fx Track
+                Track::try_default(12).unwrap(),
+            ],
+            parameter_lock_pool: Rc::new(RefCell::new(ParameterLockPool::default())),
             master_length: 16,
             master_change: 1,
             kit_number: 0,
@@ -234,8 +265,23 @@ impl Pattern {
             sysex_meta: SysexMeta::default_for_pattern_in_work_buffer(None),
             index: 0,
             version: 5,
-            tracks: [Track::default(); 13],
-            plock_seqs: [PlockSeq::default(); 72],
+            tracks: [
+                Track::try_default(0).unwrap(),
+                Track::try_default(1).unwrap(),
+                Track::try_default(2).unwrap(),
+                Track::try_default(3).unwrap(),
+                Track::try_default(4).unwrap(),
+                Track::try_default(5).unwrap(),
+                Track::try_default(6).unwrap(),
+                Track::try_default(7).unwrap(),
+                Track::try_default(8).unwrap(),
+                Track::try_default(9).unwrap(),
+                Track::try_default(10).unwrap(),
+                Track::try_default(11).unwrap(),
+                // Fx Track
+                Track::try_default(12).unwrap(),
+            ],
+            parameter_lock_pool: Rc::new(RefCell::new(ParameterLockPool::default())),
             master_length: 16,
             master_change: 1,
             kit_number: 0,
@@ -253,11 +299,6 @@ impl Pattern {
     /// 13th element is the FX track.
     pub fn tracks_mut(&mut self) -> &mut [Track] {
         &mut self.tracks
-    }
-
-    /// Returns a mutable reference to the plock sequences which this pattern contains.
-    pub fn plock_seqs_mut(&mut self) -> &mut [PlockSeq] {
-        &mut self.plock_seqs
     }
 
     /// Sets master length for the pattern.
@@ -348,11 +389,6 @@ impl Pattern {
     /// 13th element is the FX track.
     pub fn tracks(&self) -> &[Track] {
         &self.tracks
-    }
-
-    /// Returns a reference to the plock sequences which this pattern contains.
-    pub fn plock_seqs(&self) -> &[PlockSeq] {
-        &self.plock_seqs
     }
 
     /// Returns the master length for the pattern.

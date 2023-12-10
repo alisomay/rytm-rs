@@ -15,6 +15,7 @@ use object::{
 };
 use rytm_rs_macro::parameter_range;
 use rytm_sys::{ar_global_t, ar_kit_t, ar_pattern_t, ar_settings_t, ar_sound_t};
+use std::{cell::RefCell, rc::Rc};
 use sysex::{decode_sysex_response_to_raw, SysexCompatible, SysexType};
 
 /// Rytm is the main struct that holds structures for projects.

@@ -1,4 +1,159 @@
-use crate::error::ConversionError;
+use crate::{error::ConversionError, object::sound::types::sound_mod_target};
+
+/// Targets for modulation comes from control in.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub enum ControlInModTarget {
+    /// No target.
+    #[default]
+    Unset,
+    /// LFO multiplier.
+    LfoMultiplier,
+    /// LFO waveform.
+    LfoWaveform,
+    /// LFO trigger mode.
+    LfoTrigMode,
+    /// LFO speed.
+    LfoSpeed,
+    /// LFO fade.
+    LfoFade,
+    /// LFO phase.
+    LfoPhase,
+    /// LFO depth.
+    LfoDepth,
+    /// Sample tune.
+    SampleTune,
+    /// Sample fine tune.
+    SampleFineTune,
+    /// Sample slice.
+    SampleSlice,
+    /// Sample bit reduction.
+    SampleBitReduction,
+    /// Sample start.
+    SampleStart,
+    /// Sample end.
+    SampleEnd,
+    /// Sample loop.
+    SampleLoop,
+    /// Sample level.
+    SampleLevel,
+    /// Filter envelope.
+    FilterEnvelope,
+    /// Filter attack.
+    FilterAttack,
+    /// Filter decay.
+    FilterDecay,
+    /// Filter sustain.
+    FilterSustain,
+    /// Filter release.
+    FilterRelease,
+    /// Filter frequency.
+    FilterFrequency,
+    /// Filter resonance.
+    FilterResonance,
+    /// Amp attack.
+    AmpAttack,
+    /// Amp hold.
+    AmpHold,
+    /// Amp decay.
+    AmpDecay,
+    /// Amp overdrive.
+    AmpOverdrive,
+    /// Amp volume.
+    AmpVolume,
+    /// Amp pan.
+    AmpPan,
+    /// Amp accent.
+    AmpAccent,
+    /// Amp delay send.
+    AmpDelaySend,
+    /// Amp reverb send.
+    AmpReverbSend,
+}
+
+impl TryFrom<u8> for ControlInModTarget {
+    type Error = ConversionError;
+    fn try_from(value: u8) -> Result<Self, Self::Error> {
+        use sound_mod_target::*;
+        match value {
+            NONE => Ok(Self::Unset),
+            LFO_MULTIPLIER => Ok(Self::LfoMultiplier),
+            LFO_WAVEFORM => Ok(Self::LfoWaveform),
+            LFO_TRIGMODE => Ok(Self::LfoTrigMode),
+            LFO_SPEED => Ok(Self::LfoSpeed),
+            LFO_FADE => Ok(Self::LfoFade),
+            LFO_PHASE => Ok(Self::LfoPhase),
+            LFO_DEPTH => Ok(Self::LfoDepth),
+            SMP_TUN => Ok(Self::SampleTune),
+            SMP_FIN => Ok(Self::SampleFineTune),
+            SMP_SMP => Ok(Self::SampleSlice),
+            SMP_BR => Ok(Self::SampleBitReduction),
+            SMP_STA => Ok(Self::SampleStart),
+            SMP_END => Ok(Self::SampleEnd),
+            SMP_LOP => Ok(Self::SampleLoop),
+            SMP_LEV => Ok(Self::SampleLevel),
+            FLT_ENV => Ok(Self::FilterEnvelope),
+            FLT_ATK => Ok(Self::FilterAttack),
+            FLT_DEC => Ok(Self::FilterDecay),
+            FLT_SUS => Ok(Self::FilterSustain),
+            FLT_REL => Ok(Self::FilterRelease),
+            FLT_FRQ => Ok(Self::FilterFrequency),
+            FLT_RES => Ok(Self::FilterResonance),
+            AMP_ATK => Ok(Self::AmpAttack),
+            AMP_HLD => Ok(Self::AmpHold),
+            AMP_DEC => Ok(Self::AmpDecay),
+            AMP_OVR => Ok(Self::AmpOverdrive),
+            AMP_VOL => Ok(Self::AmpVolume),
+            AMP_PAN => Ok(Self::AmpPan),
+            AMP_ACC => Ok(Self::AmpAccent),
+            AMP_DLY => Ok(Self::AmpDelaySend),
+            AMP_REV => Ok(Self::AmpReverbSend),
+            _ => Err(ConversionError::Range {
+                value: value.to_string(),
+                type_name: "ControlInModTarget".to_string(),
+            }),
+        }
+    }
+}
+
+impl From<ControlInModTarget> for u8 {
+    fn from(value: ControlInModTarget) -> Self {
+        use sound_mod_target::*;
+        match value {
+            ControlInModTarget::Unset => NONE,
+            ControlInModTarget::LfoMultiplier => LFO_MULTIPLIER,
+            ControlInModTarget::LfoWaveform => LFO_WAVEFORM,
+            ControlInModTarget::LfoTrigMode => LFO_TRIGMODE,
+            ControlInModTarget::LfoSpeed => LFO_SPEED,
+            ControlInModTarget::LfoFade => LFO_FADE,
+            ControlInModTarget::LfoPhase => LFO_PHASE,
+            ControlInModTarget::LfoDepth => LFO_DEPTH,
+            ControlInModTarget::SampleTune => SMP_TUN,
+            ControlInModTarget::SampleFineTune => SMP_FIN,
+            ControlInModTarget::SampleSlice => SMP_SMP,
+            ControlInModTarget::SampleBitReduction => SMP_BR,
+            ControlInModTarget::SampleStart => SMP_STA,
+            ControlInModTarget::SampleEnd => SMP_END,
+            ControlInModTarget::SampleLoop => SMP_LOP,
+            ControlInModTarget::SampleLevel => SMP_LEV,
+            ControlInModTarget::FilterEnvelope => FLT_ENV,
+            ControlInModTarget::FilterAttack => FLT_ATK,
+            ControlInModTarget::FilterDecay => FLT_DEC,
+            ControlInModTarget::FilterSustain => FLT_SUS,
+            ControlInModTarget::FilterRelease => FLT_REL,
+            ControlInModTarget::FilterFrequency => FLT_FRQ,
+            ControlInModTarget::FilterResonance => FLT_RES,
+            ControlInModTarget::AmpAttack => AMP_ATK,
+            ControlInModTarget::AmpHold => AMP_HLD,
+            ControlInModTarget::AmpDecay => AMP_DEC,
+            ControlInModTarget::AmpOverdrive => AMP_OVR,
+            ControlInModTarget::AmpVolume => AMP_VOL,
+            ControlInModTarget::AmpPan => AMP_PAN,
+            ControlInModTarget::AmpAccent => AMP_ACC,
+            ControlInModTarget::AmpDelaySend => AMP_DLY,
+            ControlInModTarget::AmpReverbSend => AMP_REV,
+        }
+    }
+}
 
 /// Destination of an LFO.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]

@@ -1537,6 +1537,7 @@ dependencies = [
  "clearscreen",
  "derivative",
  "midir",
+ "num-traits",
  "rand",
  "rytm-rs-macro",
  "rytm-sys",

@@ -237,3 +237,43 @@ pub fn i8_to_u8_midpoint_of_u8_input_range(value: i8, range_start: u8, range_end
     let midpoint = ((range_start as i16 + range_end as i16 + 1) / 2);
     (value as i16 + midpoint) as u8
 }
+
+pub(crate) fn stable_partition<T, F>(v: &mut [T], mut predicate: F)
+where
+    F: FnMut(&T) -> bool,
+{
+    // 'left' will point to the start of the range where the predicate is false.
+    let mut left = 0;
+
+    // Iterate over the slice.
+    while left < v.len() {
+        // Move 'left' forward until we find an element where the predicate is false.
+        while left < v.len() && predicate(&v[left]) {
+            left += 1;
+        }
+
+        // If 'left' is at the end, we're done.
+        if left == v.len() {
+            break;
+        }
+
+        // 'right' will point to the next element where the predicate is true.
+        let mut right = left + 1;
+
+        // Move 'right' forward to find the next true element.
+        while right < v.len() && !predicate(&v[right]) {
+            right += 1;
+        }
+
+        // If 'right' is at the end, we're done.
+        if right == v.len() {
+            break;
+        }
+
+        // Swap the elements at 'left' and 'right'.
+        v.swap(left, right);
+
+        // Now that we've moved a true element to the 'left' position, increment 'left'.
+        left += 1;
+    }
+}

@@ -174,35 +174,35 @@ fn plock_seq() {
     let conn_out = get_connection_to_rytm();
     let (_conn_in, rx) = make_input_message_forwarder();
 
-    let query = PatternQuery::new(0).unwrap();
+    let query = PatternQuery::new_targeting_work_buffer();
 
-    let mut found_types = Vec::new();
+    // let mut found_types = Vec::new();
     let callback = |response: &[u8], rytm: &mut Rytm, elapsed: u64| -> Result<(), RytmError> {
         if !is_sysex(response) {
             // Pass..
             return Ok(());
         }
 
-        let r = decode_sysex_response_to_raw(response)?;
-        std::fs::write("pattern.raw", r.0).unwrap();
+        // let r = decode_sysex_response_to_raw(response)?;
+        // std::fs::write("pattern.raw", r.0).unwrap();
 
         rytm.update_from_sysex_response(response)?;
 
-        let pattern = rytm.patterns()[0];
-        let track = pattern.tracks()[0];
-        let plock_seqs = pattern.plock_seqs();
-        let mut for_first_trig_all = Vec::new();
-        let mut for_first_trig_values = Vec::new();
-        let mut for_first_trig_types = Vec::new();
-        for p in plock_seqs {
-            for_first_trig_all.push((p.plock_type, p.track_nr, p.data[0]));
-            for_first_trig_values.push(p.data[0]);
-            for_first_trig_types.push(p.plock_type);
-        }
+        let pattern = rytm.work_buffer_pattern();
+        // let track = pattern.tracks()[0];
+        // let plock_seqs = pattern.plock_seqs();
+        // let mut for_first_trig_all = Vec::new();
+        // let mut for_first_trig_values = Vec::new();
+        // let mut for_first_trig_types = Vec::new();
+        // for p in plock_seqs {
+        //     for_first_trig_all.push((p.plock_type, p.track_nr, p.data[0]));
+        //     for_first_trig_values.push(p.data[0]);
+        //     for_first_trig_types.push(p.plock_type);
+        // }
 
-        let first_trig = track.trigs()[0];
+        // let first_trig = track.trigs()[0];
 
-        clearscreen::clear().unwrap();
+        // clearscreen::clear().unwrap();
 
         // dbg!(track._maybe_useful_flag_from_default_trig_note);
         // dbg!(track._maybe_useful_flags_from_flags_and_speed);
@@ -213,18 +213,18 @@ fn plock_seq() {
         // dbg!(&for_first_trig_values[48..60]);
         // dbg!(&for_first_trig_values[60..72]);
 
-        dbg!(&for_first_trig_types[0..12]);
+        // dbg!(&for_first_trig_types[0..12]);
         // dbg!(&for_first_trig_types[12..24]);
         // dbg!(&for_first_trig_types[24..36]);
         // dbg!(&for_first_trig_types[36..48]);
         // dbg!(&for_first_trig_types[48..60]);
         // dbg!(&for_first_trig_types[60..72]);
 
-        for t in &for_first_trig_types {
-            if !found_types.contains(t) {
-                found_types.push(*t);
-            }
-        }
+        // for t in &for_first_trig_types {
+        //     if !found_types.contains(t) {
+        //         found_types.push(*t);
+        //     }
+        // }
 
         // if !found_types.is_empty() {
         //     if found_types.len() > 1 {
@@ -272,7 +272,8 @@ fn plock_seq() {
         //     retrig_velocity_offset: 91, // ok
         //     sound_lock: 255, // check
         // }
-
+        // dbg!(plock_seqs);
+        // panic!();
         Ok(())
     };
 
@@ -464,7 +465,7 @@ fn pattern_type() {
         //     mute & 0b1111,
         // );
 
-        dbg!(pattern.tracks()[0]);
+        // dbg!(pattern.tracks()[0]);
 
         // println!("usb_out: {:08b}", global.routing_usb_out);
         // println!("other: {}", global.routing_usb_out >> 2);

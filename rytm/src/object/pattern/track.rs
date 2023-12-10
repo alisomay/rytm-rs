@@ -5,7 +5,7 @@ use self::{
     trig::{HoldsTrigFlags, TrigFlags},
     types::{PadScale, RootNote},
 };
-use super::Length;
+use super::{parameter_lock::ParameterLockPool, Length};
 use crate::{
     error::{ParameterError, RytmError},
     object::pattern::types::Speed,
@@ -15,13 +15,14 @@ use bitstream_io::{BigEndian, BitRead, BitReader, BitWrite, BitWriter};
 use derivative::Derivative;
 use rytm_rs_macro::parameter_range;
 use rytm_sys::ar_pattern_track_t;
-use std::io::Cursor;
+use std::{cell::RefCell, io::Cursor, rc::Rc};
 use trig::Trig;
 
 /// A track in a pattern.
-#[derive(Derivative, Clone, Copy)]
+#[derive(Derivative, Clone)]
 #[derivative(Debug)]
 pub struct Track {
+    index: usize,
     trigs: [Trig; 64],
 
     default_trig_flags: TrigFlags,
@@ -60,104 +61,6 @@ pub struct Track {
     /// Maybe they mean something?
     #[derivative(Debug = "ignore")]
     pub(crate) __maybe_useful_flags_from_flags_and_speed: u8,
-}
-
-impl Default for Track {
-    fn default() -> Self {
-        Self {
-            trigs: Trig::default_trig_array(),
-
-            default_trig_flags: TrigFlags::default(),
-            default_trig_note: 60,
-            default_trig_velocity: 100,
-            default_trig_note_length: Length::default(),
-            default_trig_probability: 100,
-
-            number_of_steps: 16,
-            quantize_amount: 0,
-            sends_midi: false,
-            speed: Speed::default(),
-
-            euclidean_mode: false,
-            euclidean_pl1: 0,
-            euclidean_pl2: 0,
-            euclidean_ro1: 63,
-            euclidean_ro2: 63,
-            euclidean_tro: 63,
-
-            pad_scale: PadScale::default(),
-            root_note: RootNote::default(),
-
-            __maybe_useful_flag_from_default_trig_note: 0,
-            __maybe_useful_flags_from_flags_and_speed: 0,
-        }
-    }
-}
-
-impl TryFrom<&ar_pattern_track_t> for Track {
-    type Error = RytmError;
-
-    fn try_from(raw_track: &ar_pattern_track_t) -> Result<Self, RytmError> {
-        let mut trigs: [Trig; 64] = Trig::default_trig_array();
-
-        let trig_cursor = Cursor::new(raw_track.trig_bits);
-        let mut bit_reader = BitReader::endian(trig_cursor, BigEndian);
-
-        for (i, trig) in trigs.iter_mut().enumerate() {
-            let raw_trig_flags = bit_reader.read::<u16>(14).unwrap();
-            *trig = Trig::new(
-                i,
-                raw_trig_flags,
-                raw_track.notes[i],
-                raw_track.note_lengths[i],
-                raw_track.velocities[i],
-                raw_track.micro_timings[i],
-                raw_track.retrig_rates[i],
-                raw_track.retrig_lengths[i],
-                raw_track.retrig_velocity_offsets[i],
-                raw_track.sound_locks[i],
-            )?;
-        }
-
-        // Sends midi
-        let sends_midi = raw_track.flags_and_speed & 0b1000_0000 != 0;
-        // Speed
-        let speed: Speed = (raw_track.flags_and_speed & 0b0000_0111).try_into()?;
-
-        // TODO: They always seem to be 0.
-        let __maybe_useful_flags_from_flags_and_speed = raw_track.flags_and_speed & 0b0111_1000;
-
-        let __maybe_useful_flag_from_default_trig_note = raw_track.default_note & 0b1000_0000;
-        let default_trig_note = raw_track.default_note & 0b0111_1111;
-
-        Ok(Self {
-            trigs,
-
-            default_trig_note,
-            default_trig_velocity: raw_track.default_velocity,
-            default_trig_note_length: raw_track.default_note_length.try_into()?,
-            default_trig_flags: unsafe { from_s_u16_t(&raw_track.default_trig_flags).into() },
-            default_trig_probability: raw_track.trig_probability,
-
-            number_of_steps: raw_track.num_steps,
-            quantize_amount: raw_track.quantize_amount,
-            sends_midi,
-            speed,
-
-            euclidean_mode: raw_track.euc_mode == 128,
-            euclidean_pl1: raw_track.euc_pl1,
-            euclidean_pl2: raw_track.euc_pl2,
-            euclidean_ro1: raw_track.euc_ro1,
-            euclidean_ro2: raw_track.euc_ro2,
-            euclidean_tro: raw_track.euc_tro,
-
-            pad_scale: raw_track.pad_scale.try_into()?,
-            root_note: raw_track.root_note.try_into()?,
-
-            __maybe_useful_flag_from_default_trig_note,
-            __maybe_useful_flags_from_flags_and_speed,
-        })
-    }
 }
 
 impl From<&Track> for ar_pattern_track_t {
@@ -235,6 +138,110 @@ impl From<&Track> for ar_pattern_track_t {
 }
 
 impl Track {
+    #[parameter_range(range = "index:0..=12")]
+    pub(crate) fn try_default(index: usize) -> Result<Self, RytmError> {
+        Ok(Self {
+            index,
+            trigs: Trig::default_trig_array(index),
+
+            default_trig_flags: TrigFlags::default(),
+            default_trig_note: 60,
+            default_trig_velocity: 100,
+            default_trig_note_length: Length::default(),
+            default_trig_probability: 100,
+
+            number_of_steps: 16,
+            quantize_amount: 0,
+            sends_midi: false,
+            speed: Speed::default(),
+
+            euclidean_mode: false,
+            euclidean_pl1: 0,
+            euclidean_pl2: 0,
+            euclidean_ro1: 63,
+            euclidean_ro2: 63,
+            euclidean_tro: 63,
+
+            pad_scale: PadScale::default(),
+            root_note: RootNote::default(),
+
+            __maybe_useful_flag_from_default_trig_note: 0,
+            __maybe_useful_flags_from_flags_and_speed: 0,
+        })
+    }
+
+    pub(crate) fn try_from_raw(
+        index: usize,
+        raw_track: &ar_pattern_track_t,
+        parameter_lock_pool: Rc<RefCell<ParameterLockPool>>,
+    ) -> Result<Self, RytmError> {
+        let mut trigs: [Trig; 64] = Trig::default_trig_array(index);
+
+        let trig_cursor = Cursor::new(raw_track.trig_bits);
+        let mut bit_reader = BitReader::endian(trig_cursor, BigEndian);
+
+        for (i, trig) in trigs.iter_mut().enumerate() {
+            let parameter_lock_pool_ref = Rc::clone(&parameter_lock_pool);
+
+            let raw_trig_flags = bit_reader.read::<u16>(14).unwrap();
+            *trig = Trig::new(
+                // Trig index
+                i,
+                // Track index
+                index,
+                raw_trig_flags,
+                raw_track.notes[i],
+                raw_track.note_lengths[i],
+                raw_track.velocities[i],
+                raw_track.micro_timings[i],
+                raw_track.retrig_rates[i],
+                raw_track.retrig_lengths[i],
+                raw_track.retrig_velocity_offsets[i],
+                raw_track.sound_locks[i],
+                parameter_lock_pool_ref,
+            )?;
+        }
+
+        // Sends midi
+        let sends_midi = raw_track.flags_and_speed & 0b1000_0000 != 0;
+        // Speed
+        let speed: Speed = (raw_track.flags_and_speed & 0b0000_0111).try_into()?;
+
+        // TODO: They always seem to be 0.
+        let __maybe_useful_flags_from_flags_and_speed = raw_track.flags_and_speed & 0b0111_1000;
+
+        let __maybe_useful_flag_from_default_trig_note = raw_track.default_note & 0b1000_0000;
+        let default_trig_note = raw_track.default_note & 0b0111_1111;
+
+        Ok(Self {
+            index,
+            trigs,
+
+            default_trig_note,
+            default_trig_velocity: raw_track.default_velocity,
+            default_trig_note_length: raw_track.default_note_length.try_into()?,
+            default_trig_flags: unsafe { from_s_u16_t(&raw_track.default_trig_flags).into() },
+            default_trig_probability: raw_track.trig_probability,
+
+            number_of_steps: raw_track.num_steps,
+            quantize_amount: raw_track.quantize_amount,
+            sends_midi,
+            speed,
+
+            euclidean_mode: raw_track.euc_mode == 128,
+            euclidean_pl1: raw_track.euc_pl1,
+            euclidean_pl2: raw_track.euc_pl2,
+            euclidean_ro1: raw_track.euc_ro1,
+            euclidean_ro2: raw_track.euc_ro2,
+            euclidean_tro: raw_track.euc_tro,
+
+            pad_scale: raw_track.pad_scale.try_into()?,
+            root_note: raw_track.root_note.try_into()?,
+
+            __maybe_useful_flag_from_default_trig_note,
+            __maybe_useful_flags_from_flags_and_speed,
+        })
+    }
     /// Returns a mutable reference to the trigs in this track.
     ///
     /// 64 trigs in total.

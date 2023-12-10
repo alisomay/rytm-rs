@@ -38,15 +38,17 @@ pub struct Kit {
     sysex_meta: SysexMeta,
     /// Version of the kit structure.
     version: u32,
-
     index: usize,
 
     /// Name of the kit.
     name: ObjectName,
 
+    // 13th is the fx track.
+    #[derivative(Debug = "ignore")]
     track_levels: [u8; 13],
+    #[derivative(Debug = "ignore")]
     track_retrig_settings: [retrig::TrackRetrigMenu; 13],
-
+    #[derivative(Debug = "ignore")]
     sounds: [Sound; 12],
 
     fx_delay: FxDelay,
@@ -55,17 +57,19 @@ pub struct Kit {
     fx_compressor: FxCompressor,
     fx_lfo: FxLfo,
 
-    // TODO:
+    // Currently these are out of my interest.
+    // Maybe in the feature we can add support for these.
+    //
+    // ---- TODO: ----
     #[derivative(Debug = "ignore")]
-    // @attention Will be ignored for now.
     pub(crate) perf_ctl: [u8; 48 * 4], /* @0x0842..0x0901 */
     #[derivative(Debug = "ignore")]
-    // @attention Will be ignored for now.
     pub(crate) scene_ctl: [u8; 48 * 4], /* @0x0917..0x09D6 */
     // 0..=11 device 0..=11
     #[derivative(Debug = "ignore")]
     pub(crate) current_scene_id: u8, /* @0x09D8 (0..11) */
-
+    // ----------------
+    //
     #[derivative(Debug = "ignore")]
     pub(crate) __unknown: KitUnknown,
 }
@@ -208,8 +212,8 @@ impl Kit {
             fx_compressor: FxCompressor::default(),
             fx_lfo: FxLfo::default(),
 
-            perf_ctl: [0; 48 * 4],
-            scene_ctl: [0; 48 * 4],
+            perf_ctl: default_perf_ctl_array(),
+            scene_ctl: default_scene_ctl_array(),
             current_scene_id: 0,
             __unknown: KitUnknown::default(),
         })
@@ -248,8 +252,8 @@ impl Kit {
             fx_compressor: FxCompressor::default(),
             fx_lfo: FxLfo::default(),
 
-            perf_ctl: [0; 48 * 4],
-            scene_ctl: [0; 48 * 4],
+            perf_ctl: default_perf_ctl_array(),
+            scene_ctl: default_scene_ctl_array(),
             current_scene_id: 0,
             __unknown: KitUnknown::default(),
         }
@@ -265,7 +269,12 @@ impl Kit {
         &mut self.sounds
     }
 
-    #[parameter_range(range = "track_index:0..=11", range = "level:0..=127")]
+    /// Sets the level of a track.
+    ///
+    /// Range `0..=12`
+    ///
+    /// 12th track is the fx track.
+    #[parameter_range(range = "track_index:0..=12", range = "level:0..=127")]
     pub fn set_level_of_a_track(
         &mut self,
         track_index: usize,
@@ -275,6 +284,9 @@ impl Kit {
         Ok(())
     }
 
+    /// Sets the level of all tracks including the Fx track.
+    ///
+    /// Range `0..=127`
     #[parameter_range(range = "level:0..=127")]
     pub fn set_level_of_all_tracks(&mut self, level: usize) -> Result<(), RytmError> {
         for track_level in self.track_levels.iter_mut() {
@@ -285,13 +297,15 @@ impl Kit {
 
     /// Sets the level of a range of tracks.
     ///
-    /// Maximum range `0..=11`
+    /// 12th track is the fx track.
+    ///
+    /// Maximum range `0..=12`
     pub fn set_level_of_a_range_of_tracks(
         &mut self,
         range: std::ops::Range<usize>,
         level: usize,
     ) -> Result<(), RytmError> {
-        if range.end > 11 {
+        if range.end > 12 {
             return Err(RytmError::Parameter(ParameterError::Range {
                 value: format!("{:?}", range),
                 parameter_name: "range".to_string(),
@@ -304,4 +318,35 @@ impl Kit {
 
         Ok(())
     }
+}
+
+// TODO: Once these are identified remove these helpers:
+fn default_perf_ctl_array() -> [u8; 48 * 4] {
+    [
+        255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255,
+        255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255,
+        255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255,
+        255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255,
+        255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255,
+        255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255,
+        255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255,
+        255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255,
+        255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255,
+        255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255,
+    ]
+}
+
+fn default_scene_ctl_array() -> [u8; 48 * 4] {
+    [
+        255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255,
+        255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255,
+        255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255,
+        255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255,
+        255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255,
+        255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255,
+        255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255,
+        255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255,
+        255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255,
+        255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255,
+    ]
 }
