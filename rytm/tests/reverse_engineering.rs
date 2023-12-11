@@ -189,6 +189,15 @@ fn plock_seq() {
         rytm.update_from_sysex_response(response)?;
 
         let pattern = rytm.work_buffer_pattern();
+        clearscreen::clear().unwrap();
+        let types_and_tracks = pattern
+            .parameter_lock_pool
+            .borrow()
+            .inner
+            .iter()
+            .map(|p| (p.plock_type, p.track_nr))
+            .collect::<Vec<_>>();
+        dbg!(types_and_tracks);
         // let track = pattern.tracks()[0];
         // let plock_seqs = pattern.plock_seqs();
         // let mut for_first_trig_all = Vec::new();
@@ -201,8 +210,6 @@ fn plock_seq() {
         // }
 
         // let first_trig = track.trigs()[0];
-
-        // clearscreen::clear().unwrap();
 
         // dbg!(track._maybe_useful_flag_from_default_trig_note);
         // dbg!(track._maybe_useful_flags_from_flags_and_speed);

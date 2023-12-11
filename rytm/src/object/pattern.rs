@@ -59,7 +59,7 @@ pub struct Pattern {
     tracks: [Track; 13],
 
     #[derivative(Debug = "ignore")]
-    parameter_lock_pool: Rc<RefCell<ParameterLockPool>>,
+    pub parameter_lock_pool: Rc<RefCell<ParameterLockPool>>,
 
     /// Master Length
     ///

@@ -145,8 +145,8 @@ use std::cell::{Ref, RefCell};
 #[derive(Derivative, Clone, Copy)]
 #[derivative(Debug)]
 pub struct ParameterLockPool {
-    #[derivative(Debug = "ignore")]
-    inner: [rytm_sys::ar_plock_seq_t; 72],
+    // #[derivative(Debug = "ignore")]
+    pub inner: [rytm_sys::ar_plock_seq_t; 72],
 }
 
 impl Default for ParameterLockPool {
@@ -164,6 +164,24 @@ impl ParameterLockPool {
 
     pub(crate) fn from_raw(raw: [rytm_sys::ar_plock_seq_t; 72]) -> Self {
         Self { inner: raw }
+    }
+
+    pub(crate) fn set_fx_basic_plock(
+        &mut self,
+        trig_index: usize,
+        plock_type: u8,
+        value: u8,
+    ) -> Result<(), RytmError> {
+        self.set_basic_plock(trig_index, 12, plock_type, value)
+    }
+
+    pub(crate) fn set_fx_compound_plock(
+        &mut self,
+        trig_index: usize,
+        plock_type: u8,
+        value: u16,
+    ) -> Result<(), RytmError> {
+        self.set_compound_plock(trig_index, 12, plock_type, value)
     }
 
     pub(crate) fn set_basic_plock(
