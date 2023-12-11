@@ -41,40 +41,6 @@ pub fn determine_return_type(range: &str) -> syn::Type {
     }
 }
 
-pub enum SynthParameterPlockType {
-    // Range of positive integers until 255
-    BasicUInt,
-    // Range of positive and negative integers until -128..=127
-    BasicInt,
-    // Range of positive integers until 65535
-    Compound,
-    // F32 range with custom scaling
-    CompoundFloat,
-}
-
-pub fn determine_synth_parameter_plock_type(range: &str) -> SynthParameterPlockType {
-    let parts: Vec<&str> = if range.contains("..=") {
-        range.split("..=").collect()
-    } else {
-        range.split("..").collect()
-    };
-
-    let is_floating_point = parts.iter().any(|&p| p.contains('.'));
-    if is_floating_point {
-        // Floating point range
-        SynthParameterPlockType::CompoundFloat
-    } else if parts.iter().any(|&p| p.starts_with('-')) {
-        // Range with negative values
-        SynthParameterPlockType::BasicInt
-    } else if parts[0].parse::<u16>().is_ok() || parts[1].parse::<u16>().is_ok() {
-        // Range of positive integers until 65535
-        SynthParameterPlockType::Compound
-    } else {
-        // Default case
-        SynthParameterPlockType::BasicUInt
-    }
-}
-
 pub fn determine_types(range: &str) -> (syn::Type, syn::Type) {
     let parts: Vec<&str> = if range.contains("..=") {
         range.split("..=").collect()
