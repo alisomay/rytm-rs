@@ -13,6 +13,7 @@ use self::{
     settings::SoundSettings,
     unknown::SoundUnknown,
 };
+use super::pattern::parameter_lock::ParameterLockPool;
 use crate::{
     error::{RytmError, SysexConversionError},
     impl_sysex_compatible,
@@ -23,6 +24,7 @@ use crate::{
 use derivative::Derivative;
 use rytm_rs_macro::parameter_range;
 use rytm_sys::{ar_sound_raw_to_syx, ar_sound_t, ar_sysex_meta_t};
+use std::{cell::RefCell, rc::Rc};
 
 // Internal type to understand where the sound comes from.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -41,7 +43,7 @@ impl_sysex_compatible!(
     SOUND_SYSEX_SIZE
 );
 
-#[derive(Derivative, Clone, Copy)]
+#[derive(Derivative, Clone)]
 #[derivative(Debug)]
 pub struct Sound {
     #[derivative(Debug = "ignore")]
@@ -81,6 +83,9 @@ pub struct Sound {
 
     #[derivative(Debug = "ignore")]
     __unknown: SoundUnknown,
+
+    #[derivative(Debug = "ignore")]
+    pub parameter_lock_pool: Option<Rc<RefCell<ParameterLockPool>>>,
 }
 
 impl From<&Sound> for ar_sound_t {
@@ -108,6 +113,19 @@ impl From<&Sound> for ar_sound_t {
 }
 
 impl Sound {
+    /// Links a pattern's parameter lock pool to this sound.
+    ///
+    /// This way one can set parameter locks for trigs for the machine assigned to this sound.
+    pub fn link_parameter_lock_pool(
+        &mut self,
+        parameter_lock_pool: Rc<RefCell<ParameterLockPool>>,
+    ) {
+        self.parameter_lock_pool = Some(parameter_lock_pool);
+        let parameter_lock_pool_ref = Rc::clone(self.parameter_lock_pool.as_ref().unwrap());
+        self.machine_parameters
+            .link_parameter_lock_pool(parameter_lock_pool_ref);
+    }
+
     pub(crate) fn try_from_raw(
         sysex_meta: SysexMeta,
         raw_sound: &ar_sound_t,
@@ -171,12 +189,14 @@ impl Sound {
             amplitude: raw_sound.try_into()?,
             lfo: raw_sound.try_into()?,
             settings: raw_sound.try_into()?,
-            machine_parameters: raw_sound.try_into()?,
+            machine_parameters: MachineParameters::try_from_raw_sound(raw_sound, assigned_track)?,
 
             accent_level: raw_sound.accent_level,
             def_note: raw_sound.def_note,
 
             __unknown: raw_sound.into(),
+
+            parameter_lock_pool: None,
         })
     }
 
@@ -341,6 +361,8 @@ impl Sound {
             def_note: 0,
 
             __unknown: SoundUnknown::default(),
+
+            parameter_lock_pool: None,
         })
     }
 
@@ -374,6 +396,8 @@ impl Sound {
             def_note: 0,
 
             __unknown: SoundUnknown::default(),
+
+            parameter_lock_pool: None,
         })
     }
 
@@ -402,6 +426,8 @@ impl Sound {
             def_note: 0,
 
             __unknown: SoundUnknown::default(),
+
+            parameter_lock_pool: None,
         })
     }
 }

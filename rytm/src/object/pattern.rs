@@ -18,9 +18,7 @@ use crate::{
 };
 use derivative::Derivative;
 use rytm_rs_macro::parameter_range;
-use rytm_sys::{
-    ar_pattern_raw_to_syx, ar_pattern_t, ar_pattern_track_t, ar_plock_seq_t, ar_sysex_meta_t,
-};
+use rytm_sys::{ar_pattern_raw_to_syx, ar_pattern_t, ar_pattern_track_t, ar_sysex_meta_t};
 use std::{cell::RefCell, rc::Rc};
 pub use track::{
     trig::{types::*, Trig},
@@ -122,7 +120,6 @@ pub struct Pattern {
 impl From<&Pattern> for ar_pattern_t {
     fn from(pattern: &Pattern) -> Self {
         let mut tracks: [ar_pattern_track_t; 13] = [ar_pattern_track_t::default(); 13];
-        let mut plock_seqs: [ar_plock_seq_t; 72] = [ar_plock_seq_t::default(); 72];
 
         for (i, track) in pattern.tracks.iter().enumerate() {
             tracks[i] = track.into();

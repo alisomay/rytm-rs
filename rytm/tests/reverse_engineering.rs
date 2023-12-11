@@ -338,7 +338,7 @@ fn kit() {
         }
 
         rytm.update_from_sysex_response(response)?;
-        let kit = rytm.kits()[0];
+        let kit = &rytm.kits()[0];
         let kit = rytm.work_buffer_kit();
 
         clearscreen::clear().unwrap();

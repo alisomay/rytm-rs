@@ -1,12 +1,16 @@
 use crate::{
     error::{ParameterError, RytmError},
+    object::pattern::parameter_lock::ParameterLockPool,
     util::{from_s_u16_t, to_s_u16_t_union_a},
 };
+use derivative::Derivative;
 use rytm_rs_macro::parameter_range;
 use rytm_sys::ar_sound_t;
+use std::{cell::RefCell, rc::Rc};
 
 /// Parameters for the `HhLab` machine.
-#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
+#[derive(Derivative, Clone)]
+#[derivative(Debug)]
 pub struct HhLabParameters {
     lev: u8,
     osc1: u16, // 0..=16256
@@ -16,6 +20,10 @@ pub struct HhLabParameters {
     osc4: u16,
     osc5: u16,
     osc6: u16,
+
+    #[derivative(Debug = "ignore")]
+    parameter_lock_pool: Option<Rc<RefCell<ParameterLockPool>>>,
+    assigned_track: Option<usize>,
 }
 
 impl Default for HhLabParameters {
@@ -29,11 +37,17 @@ impl Default for HhLabParameters {
             osc4: 1280,
             osc5: 1536,
             osc6: 1792,
+            parameter_lock_pool: None,
+            assigned_track: None,
         }
     }
 }
 
 impl HhLabParameters {
+    pub(crate) fn link_parameter_lock_pool(&mut self, pool: Rc<RefCell<ParameterLockPool>>) {
+        self.parameter_lock_pool = Some(pool);
+    }
+
     pub(crate) fn apply_to_raw_sound(&self, raw_sound: &mut ar_sound_t) {
         raw_sound.synth_param_1 = to_s_u16_t_union_a((self.lev as u16) << 8);
         raw_sound.synth_param_2 = to_s_u16_t_union_a(self.osc1);
@@ -172,12 +186,16 @@ impl HhLabParameters {
     pub fn osc6(&self) -> usize {
         self.osc6 as usize
     }
-}
 
-impl From<&ar_sound_t> for HhLabParameters {
-    fn from(raw_sound: &ar_sound_t) -> Self {
+    #[parameter_range(range = "track_index[opt]:0..=11")]
+    pub(crate) fn from_raw_sound(
+        raw_sound: &ar_sound_t,
+        track_index: Option<usize>,
+    ) -> Result<Self, RytmError> {
         unsafe {
-            Self {
+            Ok(Self {
+                parameter_lock_pool: None,
+                assigned_track: track_index,
                 lev: (from_s_u16_t(&raw_sound.synth_param_1) >> 8) as u8,
                 osc1: from_s_u16_t(&raw_sound.synth_param_2),
                 dec: (from_s_u16_t(&raw_sound.synth_param_3) >> 8) as u8,
@@ -186,7 +204,7 @@ impl From<&ar_sound_t> for HhLabParameters {
                 osc4: from_s_u16_t(&raw_sound.synth_param_6),
                 osc5: from_s_u16_t(&raw_sound.synth_param_7),
                 osc6: from_s_u16_t(&raw_sound.synth_param_8),
-            }
+            })
         }
     }
 }

@@ -33,7 +33,10 @@ mod ut_noise;
 mod xt_classic;
 
 use super::types::MachineType;
-use crate::error::{ParameterError, RytmError};
+use crate::{
+    error::{ParameterError, RytmError},
+    object::pattern::parameter_lock::ParameterLockPool,
+};
 pub use bd_acoustic::*;
 pub use bd_classic::*;
 pub use bd_fm::*;
@@ -63,6 +66,7 @@ pub use sd_classic::*;
 pub use sd_fm::*;
 pub use sd_hard::*;
 pub use sd_natural::*;
+use std::{cell::RefCell, rc::Rc};
 pub use sy_chip::*;
 pub use sy_dual_vco::*;
 pub use sy_raw::*;
@@ -71,7 +75,7 @@ pub use ut_noise::*;
 pub use xt_classic::*;
 
 /// The machine parameters of a sound.
-#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
+#[derive(Debug, Clone)]
 pub enum MachineParameters {
     BdHard(BdHardParameters),
     BdClassic(BdClassicParameters),
@@ -110,57 +114,268 @@ pub enum MachineParameters {
     Unset,
 }
 
+impl MachineParameters {
+    pub(crate) fn link_parameter_lock_pool(
+        &mut self,
+        parameter_lock_pool: Rc<RefCell<ParameterLockPool>>,
+    ) {
+        match self {
+            MachineParameters::BdHard(bd_hard) => {
+                bd_hard.link_parameter_lock_pool(parameter_lock_pool)
+            }
+            MachineParameters::BdClassic(bd_classic) => {
+                bd_classic.link_parameter_lock_pool(parameter_lock_pool)
+            }
+            MachineParameters::BdAcoustic(bd_acoustic) => {
+                bd_acoustic.link_parameter_lock_pool(parameter_lock_pool)
+            }
+            MachineParameters::BdFm(bd_fm) => bd_fm.link_parameter_lock_pool(parameter_lock_pool),
+            MachineParameters::BdPlastic(bd_plastic) => {
+                bd_plastic.link_parameter_lock_pool(parameter_lock_pool)
+            }
+            MachineParameters::BdSilky(bd_silky) => {
+                bd_silky.link_parameter_lock_pool(parameter_lock_pool)
+            }
+            MachineParameters::BdSharp(bd_sharp) => {
+                bd_sharp.link_parameter_lock_pool(parameter_lock_pool)
+            }
+            MachineParameters::BtClassic(bt_classic) => {
+                bt_classic.link_parameter_lock_pool(parameter_lock_pool)
+            }
+            MachineParameters::CbClassic(cb_classic) => {
+                cb_classic.link_parameter_lock_pool(parameter_lock_pool)
+            }
+            MachineParameters::CbMetallic(cb_metallic) => {
+                cb_metallic.link_parameter_lock_pool(parameter_lock_pool)
+            }
+            MachineParameters::ChClassic(ch_classic) => {
+                ch_classic.link_parameter_lock_pool(parameter_lock_pool)
+            }
+            MachineParameters::ChMetallic(ch_metallic) => {
+                ch_metallic.link_parameter_lock_pool(parameter_lock_pool)
+            }
+            MachineParameters::CpClassic(cp_classic) => {
+                cp_classic.link_parameter_lock_pool(parameter_lock_pool)
+            }
+            MachineParameters::CyClassic(cy_classic) => {
+                cy_classic.link_parameter_lock_pool(parameter_lock_pool)
+            }
+            MachineParameters::CyMetallic(cy_metallic) => {
+                cy_metallic.link_parameter_lock_pool(parameter_lock_pool)
+            }
+            MachineParameters::CyRide(cy_ride) => {
+                cy_ride.link_parameter_lock_pool(parameter_lock_pool)
+            }
+            MachineParameters::HhBasic(hh_basic) => {
+                hh_basic.link_parameter_lock_pool(parameter_lock_pool)
+            }
+            MachineParameters::HhLab(hh_lab) => {
+                hh_lab.link_parameter_lock_pool(parameter_lock_pool)
+            }
+            MachineParameters::OhClassic(oh_classic) => {
+                oh_classic.link_parameter_lock_pool(parameter_lock_pool)
+            }
+            MachineParameters::OhMetallic(oh_metallic) => {
+                oh_metallic.link_parameter_lock_pool(parameter_lock_pool)
+            }
+            MachineParameters::RsClassic(rs_classic) => {
+                rs_classic.link_parameter_lock_pool(parameter_lock_pool)
+            }
+            MachineParameters::RsHard(rs_hard) => {
+                rs_hard.link_parameter_lock_pool(parameter_lock_pool)
+            }
+            MachineParameters::Disable => {
+                // Ignore
+            }
+            MachineParameters::SdAcoustic(sd_acoustic) => {
+                sd_acoustic.link_parameter_lock_pool(parameter_lock_pool)
+            }
+            MachineParameters::SdClassic(sd_classic) => {
+                sd_classic.link_parameter_lock_pool(parameter_lock_pool)
+            }
+            MachineParameters::SdFm(sd_fm) => sd_fm.link_parameter_lock_pool(parameter_lock_pool),
+            MachineParameters::SdHard(sd_hard) => {
+                sd_hard.link_parameter_lock_pool(parameter_lock_pool)
+            }
+            MachineParameters::SdNatural(sd_natural) => {
+                sd_natural.link_parameter_lock_pool(parameter_lock_pool)
+            }
+            MachineParameters::SyChip(sy_chip) => {
+                sy_chip.link_parameter_lock_pool(parameter_lock_pool)
+            }
+            MachineParameters::SyDualVco(sy_dual_vco) => {
+                sy_dual_vco.link_parameter_lock_pool(parameter_lock_pool)
+            }
+            MachineParameters::SyRaw(sy_raw) => {
+                sy_raw.link_parameter_lock_pool(parameter_lock_pool)
+            }
+            MachineParameters::UtImpulse(ut_impulse) => {
+                ut_impulse.link_parameter_lock_pool(parameter_lock_pool)
+            }
+            MachineParameters::UtNoise(ut_noise) => {
+                ut_noise.link_parameter_lock_pool(parameter_lock_pool)
+            }
+            MachineParameters::XtClassic(xt_classic) => {
+                xt_classic.link_parameter_lock_pool(parameter_lock_pool)
+            }
+            MachineParameters::Unset => {
+                // Ignore
+            }
+        }
+    }
+}
+
 impl Default for MachineParameters {
     fn default() -> Self {
         Self::BdHard(BdHardParameters::default())
     }
 }
 
-impl TryFrom<&ar_sound_t> for MachineParameters {
-    type Error = RytmError;
-    fn try_from(value: &ar_sound_t) -> Result<Self, Self::Error> {
-        let machine_type: MachineType = value.machine_type.try_into()?;
+impl MachineParameters {
+    #[parameter_range(range = "track_index[opt]:0..=11")]
+    pub(crate) fn try_from_raw_sound(
+        raw_sound: &ar_sound_t,
+        track_index: Option<usize>,
+    ) -> Result<Self, RytmError> {
+        let machine_type: MachineType = raw_sound.machine_type.try_into()?;
         match machine_type {
-            MachineType::BdHard => Ok(Self::BdHard(value.into())),
-            MachineType::BdClassic => Ok(Self::BdClassic(value.into())),
-            MachineType::BdAcoustic => Ok(Self::BdAcoustic(value.into())),
-            MachineType::BdFm => Ok(Self::BdFm(value.into())),
-            MachineType::BdPlastic => Ok(Self::BdPlastic(value.into())),
-            MachineType::BdSilky => Ok(Self::BdSilky(value.into())),
-            MachineType::BdSharp => Ok(Self::BdSharp(value.into())),
-            MachineType::BtClassic => Ok(Self::BtClassic(value.into())),
-            MachineType::CbClassic => Ok(Self::CbClassic(value.into())),
-            MachineType::CbMetallic => Ok(Self::CbMetallic(value.into())),
-            MachineType::ChClassic => Ok(Self::ChClassic(value.into())),
-            MachineType::ChMetallic => Ok(Self::ChMetallic(value.into())),
-            MachineType::CpClassic => Ok(Self::CpClassic(value.into())),
-            MachineType::CyClassic => Ok(Self::CyClassic(value.into())),
-            MachineType::CyMetallic => Ok(Self::CyMetallic(value.into())),
-            MachineType::CyRide => Ok(Self::CyRide(value.into())),
-            MachineType::HhBasic => Ok(Self::HhBasic(value.into())),
-            MachineType::HhLab => Ok(Self::HhLab(value.into())),
-            MachineType::OhClassic => Ok(Self::OhClassic(value.into())),
-            MachineType::OhMetallic => Ok(Self::OhMetallic(value.into())),
-            MachineType::RsClassic => Ok(Self::RsClassic(value.into())),
-            MachineType::RsHard => Ok(Self::RsHard(value.into())),
+            MachineType::BdHard => Ok(Self::BdHard(BdHardParameters::from_raw_sound(
+                raw_sound,
+                track_index,
+            )?)),
+            MachineType::BdClassic => Ok(Self::BdClassic(BdClassicParameters::from_raw_sound(
+                raw_sound,
+                track_index,
+            )?)),
+            MachineType::BdAcoustic => Ok(Self::BdAcoustic(BdAcousticParameters::from_raw_sound(
+                raw_sound,
+                track_index,
+            )?)),
+            MachineType::BdFm => Ok(Self::BdFm(BdFmParameters::from_raw_sound(
+                raw_sound,
+                track_index,
+            )?)),
+            MachineType::BdPlastic => Ok(Self::BdPlastic(BdPlasticParameters::from_raw_sound(
+                raw_sound,
+                track_index,
+            )?)),
+            MachineType::BdSilky => Ok(Self::BdSilky(BdSilkyParameters::from_raw_sound(
+                raw_sound,
+                track_index,
+            )?)),
+            MachineType::BdSharp => Ok(Self::BdSharp(BdSharpParameters::from_raw_sound(
+                raw_sound,
+                track_index,
+            )?)),
+            MachineType::BtClassic => Ok(Self::BtClassic(BtClassicParameters::from_raw_sound(
+                raw_sound,
+                track_index,
+            )?)),
+            MachineType::CbClassic => Ok(Self::CbClassic(CbClassicParameters::from_raw_sound(
+                raw_sound,
+                track_index,
+            )?)),
+            MachineType::CbMetallic => Ok(Self::CbMetallic(CbMetallicParameters::from_raw_sound(
+                raw_sound,
+                track_index,
+            )?)),
+            MachineType::ChClassic => Ok(Self::ChClassic(ChClassicParameters::from_raw_sound(
+                raw_sound,
+                track_index,
+            )?)),
+            MachineType::ChMetallic => Ok(Self::ChMetallic(ChMetallicParameters::from_raw_sound(
+                raw_sound,
+                track_index,
+            )?)),
+            MachineType::CpClassic => Ok(Self::CpClassic(CpClassicParameters::from_raw_sound(
+                raw_sound,
+                track_index,
+            )?)),
+            MachineType::CyClassic => Ok(Self::CyClassic(CyClassicParameters::from_raw_sound(
+                raw_sound,
+                track_index,
+            )?)),
+            MachineType::CyMetallic => Ok(Self::CyMetallic(CyMetallicParameters::from_raw_sound(
+                raw_sound,
+                track_index,
+            )?)),
+            MachineType::CyRide => Ok(Self::CyRide(CyRideParameters::from_raw_sound(
+                raw_sound,
+                track_index,
+            )?)),
+            MachineType::HhBasic => Ok(Self::HhBasic(HhBasicParameters::from_raw_sound(
+                raw_sound,
+                track_index,
+            )?)),
+            MachineType::HhLab => Ok(Self::HhLab(HhLabParameters::from_raw_sound(
+                raw_sound,
+                track_index,
+            )?)),
+            MachineType::OhClassic => Ok(Self::OhClassic(OhClassicParameters::from_raw_sound(
+                raw_sound,
+                track_index,
+            )?)),
+            MachineType::OhMetallic => Ok(Self::OhMetallic(OhMetallicParameters::from_raw_sound(
+                raw_sound,
+                track_index,
+            )?)),
+            MachineType::RsClassic => Ok(Self::RsClassic(RsClassicParameters::from_raw_sound(
+                raw_sound,
+                track_index,
+            )?)),
+            MachineType::RsHard => Ok(Self::RsHard(RsHardParameters::from_raw_sound(
+                raw_sound,
+                track_index,
+            )?)),
             MachineType::Disable => Ok(Self::Disable),
-            MachineType::SdAcoustic => Ok(Self::SdAcoustic(value.into())),
-            MachineType::SdClassic => Ok(Self::SdClassic(value.into())),
-            MachineType::SdFm => Ok(Self::SdFm(value.into())),
-            MachineType::SdHard => Ok(Self::SdHard(value.into())),
-            MachineType::SdNatural => Ok(Self::SdNatural(value.into())),
-            MachineType::SyChip => Ok(Self::SyChip(value.into())),
-            MachineType::SyDualVco => Ok(Self::SyDualVco(value.into())),
-            MachineType::SyRaw => Ok(Self::SyRaw(value.into())),
-            MachineType::UtImpulse => Ok(Self::UtImpulse(value.into())),
-            MachineType::UtNoise => Ok(Self::UtNoise(value.into())),
-            MachineType::XtClassic => Ok(Self::XtClassic(value.into())),
+            MachineType::SdAcoustic => Ok(Self::SdAcoustic(SdAcousticParameters::from_raw_sound(
+                raw_sound,
+                track_index,
+            )?)),
+            MachineType::SdClassic => Ok(Self::SdClassic(SdClassicParameters::from_raw_sound(
+                raw_sound,
+                track_index,
+            )?)),
+            MachineType::SdFm => Ok(Self::SdFm(SdFmParameters::from_raw_sound(
+                raw_sound,
+                track_index,
+            )?)),
+            MachineType::SdHard => Ok(Self::SdHard(SdHardParameters::from_raw_sound(
+                raw_sound,
+                track_index,
+            )?)),
+            MachineType::SdNatural => Ok(Self::SdNatural(SdNaturalParameters::from_raw_sound(
+                raw_sound,
+                track_index,
+            )?)),
+            MachineType::SyChip => Ok(Self::SyChip(SyChipParameters::from_raw_sound(
+                raw_sound,
+                track_index,
+            )?)),
+            MachineType::SyDualVco => Ok(Self::SyDualVco(SyDualVcoParameters::from_raw_sound(
+                raw_sound,
+                track_index,
+            )?)),
+            MachineType::SyRaw => Ok(Self::SyRaw(SyRawParameters::from_raw_sound(
+                raw_sound,
+                track_index,
+            )?)),
+            MachineType::UtImpulse => Ok(Self::UtImpulse(UtImpulseParameters::from_raw_sound(
+                raw_sound,
+                track_index,
+            )?)),
+            MachineType::UtNoise => Ok(Self::UtNoise(UtNoiseParameters::from_raw_sound(
+                raw_sound,
+                track_index,
+            )?)),
+            MachineType::XtClassic => Ok(Self::XtClassic(XtClassicParameters::from_raw_sound(
+                raw_sound,
+                track_index,
+            )?)),
             _ => todo!("Conversion error"),
         }
     }
-}
 
-impl MachineParameters {
     #[parameter_range(range = "track_index:0..=11")]
     pub fn try_default_for_track(track_index: usize) -> Result<Self, RytmError> {
         Ok(match track_index {

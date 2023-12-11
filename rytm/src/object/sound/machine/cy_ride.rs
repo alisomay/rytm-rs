@@ -1,12 +1,15 @@
 use crate::{
     error::{ParameterError, RytmError},
+    object::pattern::parameter_lock::ParameterLockPool,
     util::{
         from_s_u16_t, i8_to_u8_midpoint_of_u8_input_range, to_s_u16_t_union_a,
         u8_to_i8_midpoint_of_u8_input_range,
     },
 };
-use rytm_rs_macro::machine_parameters;
+use derivative::Derivative;
+use rytm_rs_macro::{machine_parameters, parameter_range};
 use rytm_sys::ar_sound_t;
+use std::{cell::RefCell, rc::Rc};
 
 #[machine_parameters(
     lev: "0..=127" #1,
@@ -19,7 +22,8 @@ use rytm_sys::ar_sound_t;
     c3: "0..=127" #8,
 )]
 /// Parameters for the `CyRide` machine.
-#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
+#[derive(Derivative, Clone)]
+#[derivative(Debug)]
 pub struct CyRideParameters {
     lev: u8,
     tun: i8,
@@ -29,6 +33,10 @@ pub struct CyRideParameters {
     c1: u8,
     c2: u8,
     c3: u8,
+
+    #[derivative(Debug = "ignore")]
+    parameter_lock_pool: Option<Rc<RefCell<ParameterLockPool>>>,
+    assigned_track: Option<usize>,
 }
 
 impl Default for CyRideParameters {
@@ -42,20 +50,30 @@ impl Default for CyRideParameters {
             c1: 64,
             c2: 64,
             c3: 32,
+            parameter_lock_pool: None,
+            assigned_track: None,
         }
     }
 }
 
 impl CyRideParameters {
+    pub(crate) fn link_parameter_lock_pool(&mut self, pool: Rc<RefCell<ParameterLockPool>>) {
+        self.parameter_lock_pool = Some(pool);
+    }
+
     pub(crate) fn apply_to_raw_sound(&self, raw_sound: &mut ar_sound_t) {
         self.apply_to_raw_sound_values(raw_sound);
     }
-}
 
-impl From<&ar_sound_t> for CyRideParameters {
-    fn from(raw_sound: &ar_sound_t) -> Self {
+    #[parameter_range(range = "track_index[opt]:0..=11")]
+    pub(crate) fn from_raw_sound(
+        raw_sound: &ar_sound_t,
+        track_index: Option<usize>,
+    ) -> Result<Self, RytmError> {
         unsafe {
-            Self {
+            Ok(Self {
+                parameter_lock_pool: None,
+                assigned_track: track_index,
                 lev: (from_s_u16_t(&raw_sound.synth_param_1) >> 8) as u8,
                 tun: u8_to_i8_midpoint_of_u8_input_range(
                     (from_s_u16_t(&raw_sound.synth_param_2) >> 8) as u8,
@@ -68,7 +86,7 @@ impl From<&ar_sound_t> for CyRideParameters {
                 c1: (from_s_u16_t(&raw_sound.synth_param_6) >> 8) as u8,
                 c2: (from_s_u16_t(&raw_sound.synth_param_7) >> 8) as u8,
                 c3: (from_s_u16_t(&raw_sound.synth_param_8) >> 8) as u8,
-            }
+            })
         }
     }
 }

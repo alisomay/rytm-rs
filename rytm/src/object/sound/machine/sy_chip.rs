@@ -1,12 +1,15 @@
 use crate::{
     error::{ParameterError, RytmError},
+    object::pattern::parameter_lock::ParameterLockPool,
     util::{
         from_s_u16_t, get_u16_min_max_from_float_range, i8_to_u8_midpoint_of_u8_input_range,
         scale_generic, to_s_u16_t_union_a, u8_to_i8_midpoint_of_u8_input_range,
     },
 };
-use rytm_rs_macro::machine_parameters;
+use derivative::Derivative;
+use rytm_rs_macro::{machine_parameters, parameter_range};
 use rytm_sys::ar_sound_t;
+use std::{cell::RefCell, rc::Rc};
 
 #[machine_parameters(
  lev: "0..=127" #1,
@@ -19,7 +22,8 @@ use rytm_sys::ar_sound_t;
  // #8 spd: (manual impl)  (0=128T,1=128,2=64T,3=128d,4=64,5=32T,6=64d,7=32,8=16T,9=32d,10=16,11=8T,12=16d,13=8,14=4T,15=8d,16=4,17=2T,18=4d,19=2,20=1T,21=2d,22=1,23=1d,24=1.0Hz,25=1.56Hz,26=1.88Hz,27=2Hz,28=3.13Hz,29=3.75Hz,30=4Hz,31=5Hz,32=6.25Hz,33=7.5Hz,34=10Hz,35=12.5Hz,36=15Hz,37=20Hz,38=25Hz,39=30Hz,40=40Hz,41=50Hz,42=60Hz,43=75Hz,44=100Hz,45=120Hz,46=150Hz,47=180Hz,48=200Hz,49=240Hz,50=250Hz,51=300Hz,52=350Hz,53=360Hz,54=400Hz,55=420Hz,56=480Hz,57=240 5Hz,58=200 5Hz,59=150 5Hz,60=120 5Hz,61=100 5Hz,62=60 5Hz,63=50 5Hz,64=30 5Hz,65=25 5Hz)
 )]
 /// Parameters for the `SyChip` machine.
-#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
+#[derive(Derivative, Clone)]
+#[derivative(Debug)]
 pub struct SyChipParameters {
     lev: u8,
     tun: f32,
@@ -29,6 +33,10 @@ pub struct SyChipParameters {
     of4: i8,
     wav: SyChipWaveform,
     spd: SyChipSpeed,
+
+    #[derivative(Debug = "ignore")]
+    parameter_lock_pool: Option<Rc<RefCell<ParameterLockPool>>>,
+    assigned_track: Option<usize>,
 }
 
 impl Default for SyChipParameters {
@@ -42,11 +50,17 @@ impl Default for SyChipParameters {
             of4: 10,
             wav: SyChipWaveform::default(),
             spd: SyChipSpeed::default(),
+            parameter_lock_pool: None,
+            assigned_track: None,
         }
     }
 }
 
 impl SyChipParameters {
+    pub(crate) fn link_parameter_lock_pool(&mut self, pool: Rc<RefCell<ParameterLockPool>>) {
+        self.parameter_lock_pool = Some(pool);
+    }
+
     pub(crate) fn apply_to_raw_sound(&self, raw_sound: &mut ar_sound_t) {
         self.apply_to_raw_sound_values(raw_sound);
 
@@ -78,19 +92,21 @@ impl SyChipParameters {
     pub fn get_spd(&self) -> SyChipSpeed {
         self.spd
     }
-}
 
-impl From<&ar_sound_t> for SyChipParameters {
-    fn from(raw_sound: &ar_sound_t) -> Self {
+    #[parameter_range(range = "track_index[opt]:0..=11")]
+    pub(crate) fn from_raw_sound(
+        raw_sound: &ar_sound_t,
+        track_index: Option<usize>,
+    ) -> Result<Self, RytmError> {
         let output_tun_min: f32 = -24.;
         let output_tun_max: f32 = 24.;
         let (input_tun_min, input_tun_max) =
             get_u16_min_max_from_float_range(output_tun_min, output_tun_max);
 
         unsafe {
-            // dbg!((from_s_u16_t(&raw_sound.synth_param_7) >> 8) as u8);
-            // panic!();
-            Self {
+            Ok(Self {
+                parameter_lock_pool: None,
+                assigned_track: track_index,
                 lev: (from_s_u16_t(&raw_sound.synth_param_1) >> 8) as u8,
                 tun: scale_generic(
                     from_s_u16_t(&raw_sound.synth_param_2),
@@ -118,12 +134,12 @@ impl From<&ar_sound_t> for SyChipParameters {
                 ),
                 wav: SyChipWaveform::from((from_s_u16_t(&raw_sound.synth_param_7) >> 8) as u8),
                 spd: SyChipSpeed::from((from_s_u16_t(&raw_sound.synth_param_8) >> 8) as u8),
-            }
+            })
         }
     }
 }
 
-#[derive(Debug, Default, Clone, Copy, PartialEq, PartialOrd)]
+#[derive(Debug, Default, Clone, Copy)]
 pub enum SyChipWaveform {
     Sin,
     Asin,
@@ -234,7 +250,7 @@ impl From<SyChipWaveform> for u8 {
     }
 }
 
-#[derive(Debug, Default, Clone, Copy, PartialEq, PartialOrd)]
+#[derive(Debug, Default, Clone, Copy)]
 pub enum SyChipSpeed {
     _128T,
     _128,

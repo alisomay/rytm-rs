@@ -1,14 +1,17 @@
 use crate::{
     error::{ParameterError, RytmError},
+    object::pattern::parameter_lock::ParameterLockPool,
     util::{
         from_s_u16_t, get_u16_min_max_from_float_range, i8_to_u8_midpoint_of_u8_input_range,
         scale_generic, to_s_u16_t_union_a, u8_to_i8_midpoint_of_u8_input_range,
     },
 };
-use rytm_rs_macro::machine_parameters;
+use derivative::Derivative;
+use rytm_rs_macro::{machine_parameters, parameter_range};
 use rytm_sys::ar_sound_t;
+use std::{cell::RefCell, rc::Rc};
 
-#[derive(Debug, Default, Clone, Copy, PartialEq, PartialOrd)]
+#[derive(Debug, Default, Clone, Copy)]
 pub enum SyRawWaveform1 {
     Sin,
     Asin,
@@ -49,7 +52,7 @@ impl From<SyRawWaveform1> for u8 {
     }
 }
 
-#[derive(Debug, Default, Clone, Copy, PartialEq, PartialOrd)]
+#[derive(Debug, Default, Clone, Copy)]
 pub enum SyRawWaveform2 {
     #[default]
     SineA,
@@ -92,7 +95,8 @@ impl From<SyRawWaveform2> for u8 {
  bal: "-64..=63" #8,
 )]
 /// Parameters for the `SyRaw` machine.
-#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
+#[derive(Derivative, Clone)]
+#[derivative(Debug)]
 pub struct SyRawParameters {
     lev: u8,
     tun: f32,
@@ -102,6 +106,10 @@ pub struct SyRawParameters {
     wav1: SyRawWaveform1,
     wav2: SyRawWaveform2,
     bal: i8,
+
+    #[derivative(Debug = "ignore")]
+    parameter_lock_pool: Option<Rc<RefCell<ParameterLockPool>>>,
+    assigned_track: Option<usize>,
 }
 
 impl Default for SyRawParameters {
@@ -115,11 +123,17 @@ impl Default for SyRawParameters {
             wav1: SyRawWaveform1::default(),
             wav2: SyRawWaveform2::default(),
             bal: 0,
+            parameter_lock_pool: None,
+            assigned_track: None,
         }
     }
 }
 
 impl SyRawParameters {
+    pub(crate) fn link_parameter_lock_pool(&mut self, pool: Rc<RefCell<ParameterLockPool>>) {
+        self.parameter_lock_pool = Some(pool);
+    }
+
     pub(crate) fn apply_to_raw_sound(&self, raw_sound: &mut ar_sound_t) {
         self.apply_to_raw_sound_values(raw_sound);
         let wav1: u8 = self.wav1.into();
@@ -150,16 +164,20 @@ impl SyRawParameters {
     pub fn get_wav2(&self) -> SyRawWaveform2 {
         self.wav2
     }
-}
 
-impl From<&ar_sound_t> for SyRawParameters {
-    fn from(raw_sound: &ar_sound_t) -> Self {
+    #[parameter_range(range = "track_index[opt]:0..=11")]
+    pub(crate) fn from_raw_sound(
+        raw_sound: &ar_sound_t,
+        track_index: Option<usize>,
+    ) -> Result<Self, RytmError> {
         let output_tun_min: f32 = -24.;
         let output_tun_max: f32 = 24.;
         let (input_tun_min, input_tun_max) =
             get_u16_min_max_from_float_range(output_tun_min, output_tun_max);
         unsafe {
-            Self {
+            Ok(Self {
+                parameter_lock_pool: None,
+                assigned_track: track_index,
                 lev: (from_s_u16_t(&raw_sound.synth_param_1) >> 8) as u8,
                 tun: scale_generic(
                     from_s_u16_t(&raw_sound.synth_param_2),
@@ -186,7 +204,7 @@ impl From<&ar_sound_t> for SyRawParameters {
                     0,
                     127,
                 ),
-            }
+            })
         }
     }
 }

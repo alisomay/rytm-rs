@@ -1267,8 +1267,6 @@ impl Trig {
         Err(OrphanTrig)
     }
 
-    // TODO: Syn param setters
-
     // FX Comp
 
     /// Sets a parameter lock for the FX compressor threshold.

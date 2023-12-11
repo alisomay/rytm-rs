@@ -31,7 +31,7 @@ impl_sysex_compatible!(
     KIT_SYSEX_SIZE
 );
 
-#[derive(Derivative, Clone, Copy)]
+#[derive(Derivative, Clone)]
 #[derivative(Debug)]
 pub struct Kit {
     #[derivative(Debug = "ignore")]
