@@ -2,6 +2,7 @@ use crate::{
     error::{ParameterError, RytmError},
     object::pattern::parameter_lock::ParameterLockPool,
     util::{from_s_u16_t, get_u16_min_max_from_float_range, scale_generic, to_s_u16_t_union_a},
+    RytmError::OrphanTrig,
 };
 use derivative::Derivative;
 use rytm_rs_macro::{machine_parameters, parameter_range};
@@ -129,6 +130,59 @@ impl BdAcousticParameters {
     /// Returns the `wav` parameter.
     pub fn get_wav(&self) -> BdAcousticWaveform {
         self.wav
+    }
+
+    /// Sets the parameter lock for the `wav` parameter.
+    pub fn set_plock_wav(
+        &self,
+        wav: BdAcousticWaveform,
+        trig_index: usize,
+    ) -> Result<(), RytmError> {
+        if let Some(ref pool) = self.parameter_lock_pool {
+            let assigned_track = self.assigned_track.ok_or(OrphanTrig)?;
+            pool.borrow_mut().set_basic_plock(
+                trig_index,
+                assigned_track as u8,
+                rytm_sys::AR_PLOCK_TYPE_MP6 as u8,
+                wav.into(),
+            )?;
+            return Ok(());
+        }
+        Err(OrphanTrig)
+    }
+
+    /// Gets the parameter lock for the `wav` parameter.
+    pub fn get_plock_wav(
+        &self,
+        trig_index: usize,
+    ) -> Result<Option<BdAcousticWaveform>, RytmError> {
+        if let Some(ref pool) = self.parameter_lock_pool {
+            let assigned_track = self.assigned_track.ok_or(OrphanTrig)?;
+            let wav = pool.borrow_mut().get_basic_plock(
+                trig_index,
+                assigned_track as u8,
+                rytm_sys::AR_PLOCK_TYPE_MP6 as u8,
+            );
+            if let Some(wav) = wav {
+                return Ok(Some(wav.into()));
+            }
+            return Ok(None);
+        }
+        Err(OrphanTrig)
+    }
+
+    /// Clears the parameter lock for the `wav` parameter if set.
+    pub fn clear_plock_wav(&self, trig_index: usize) -> Result<(), RytmError> {
+        if let Some(ref pool) = self.parameter_lock_pool {
+            let assigned_track = self.assigned_track.ok_or(OrphanTrig)?;
+            pool.borrow_mut().clear_basic_plock(
+                trig_index,
+                assigned_track as u8,
+                rytm_sys::AR_PLOCK_TYPE_MP6 as u8,
+            )?;
+            return Ok(());
+        }
+        Err(OrphanTrig)
     }
 
     #[parameter_range(range = "track_index[opt]:0..=11")]

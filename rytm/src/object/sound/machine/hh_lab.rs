@@ -2,6 +2,7 @@ use crate::{
     error::{ParameterError, RytmError},
     object::pattern::parameter_lock::ParameterLockPool,
     util::{from_s_u16_t, to_s_u16_t_union_a},
+    RytmError::OrphanTrig,
 };
 use derivative::Derivative;
 use rytm_rs_macro::parameter_range;
@@ -206,5 +207,446 @@ impl HhLabParameters {
                 osc6: from_s_u16_t(&raw_sound.synth_param_8),
             })
         }
+    }
+}
+
+// ParameterLockPool implementation
+impl HhLabParameters {
+    /// Sets the parameter lock for the `lev` parameter.
+    ///
+    /// Range: `0..=127`
+    #[parameter_range(range = "lev:0..=127")]
+    pub fn plock_set_lev(&self, lev: usize, trig_index: usize) -> Result<(), RytmError> {
+        if let Some(ref pool) = self.parameter_lock_pool {
+            let assigned_track = self.assigned_track.ok_or(OrphanTrig)?;
+
+            pool.borrow_mut().set_basic_plock(
+                trig_index,
+                assigned_track as u8,
+                rytm_sys::AR_PLOCK_TYPE_MP0 as u8,
+                lev as u8,
+            )?;
+
+            return Ok(());
+        }
+        Err(OrphanTrig)
+    }
+
+    /// Gets the parameter lock for the `lev` parameter.
+    ///
+    /// Range: `0..=127`
+    pub fn plock_get_lev(&self, trig_index: usize) -> Result<Option<usize>, RytmError> {
+        if let Some(ref pool) = self.parameter_lock_pool {
+            let assigned_track = self.assigned_track.ok_or(OrphanTrig)?;
+
+            let lev = pool.borrow_mut().get_basic_plock(
+                trig_index,
+                assigned_track as u8,
+                rytm_sys::AR_PLOCK_TYPE_MP0 as u8,
+            );
+
+            if let Some(lev) = lev {
+                return Ok(Some(lev as usize));
+            }
+
+            return Ok(None);
+        }
+        Err(OrphanTrig)
+    }
+
+    /// Clears the parameter lock for the `lev` parameter if set.
+    pub fn plock_clear_lev(&self, trig_index: usize) -> Result<(), RytmError> {
+        if let Some(ref pool) = self.parameter_lock_pool {
+            let assigned_track = self.assigned_track.ok_or(OrphanTrig)?;
+            pool.borrow_mut().clear_basic_plock(
+                trig_index,
+                assigned_track as u8,
+                rytm_sys::AR_PLOCK_TYPE_MP0 as u8,
+            )?;
+            return Ok(());
+        }
+        Err(OrphanTrig)
+    }
+
+    /// Sets the parameter lock for the `osc1` parameter.
+    ///
+    /// Range: `0..=16256`
+    #[parameter_range(range = "osc1:0..=16256")]
+    pub fn plock_set_osc1(&self, osc1: usize, trig_index: usize) -> Result<(), RytmError> {
+        if let Some(ref pool) = self.parameter_lock_pool {
+            let assigned_track = self.assigned_track.ok_or(OrphanTrig)?;
+
+            pool.borrow_mut().set_compound_plock(
+                trig_index,
+                assigned_track as u8,
+                rytm_sys::AR_PLOCK_TYPE_MP1 as u8,
+                osc1 as u16,
+            )?;
+
+            return Ok(());
+        }
+        Err(OrphanTrig)
+    }
+
+    /// Gets the parameter lock for the `osc1` parameter.
+    ///
+    /// Range: `0..=16256`
+    pub fn plock_get_osc1(&self, trig_index: usize) -> Result<Option<usize>, RytmError> {
+        if let Some(ref pool) = self.parameter_lock_pool {
+            let assigned_track = self.assigned_track.ok_or(OrphanTrig)?;
+
+            let osc1 = pool.borrow_mut().get_compound_plock(
+                trig_index,
+                assigned_track as u8,
+                rytm_sys::AR_PLOCK_TYPE_MP1 as u8,
+            );
+
+            if let Some(osc1) = osc1 {
+                return Ok(Some(osc1 as usize));
+            }
+
+            return Ok(None);
+        }
+        Err(OrphanTrig)
+    }
+
+    /// Clears the parameter lock for the `osc1` parameter if set.
+    pub fn plock_clear_osc1(&self, trig_index: usize) -> Result<(), RytmError> {
+        if let Some(ref pool) = self.parameter_lock_pool {
+            let assigned_track = self.assigned_track.ok_or(OrphanTrig)?;
+            pool.borrow_mut().clear_compound_plock(
+                trig_index,
+                assigned_track as u8,
+                rytm_sys::AR_PLOCK_TYPE_MP1 as u8,
+            )?;
+            return Ok(());
+        }
+        Err(OrphanTrig)
+    }
+
+    /// Sets the parameter lock for the `dec` parameter.
+    ///
+    /// Range: `0..=127`
+    #[parameter_range(range = "dec:0..=127")]
+    pub fn plock_set_dec(&self, dec: usize, trig_index: usize) -> Result<(), RytmError> {
+        if let Some(ref pool) = self.parameter_lock_pool {
+            let assigned_track = self.assigned_track.ok_or(OrphanTrig)?;
+
+            pool.borrow_mut().set_basic_plock(
+                trig_index,
+                assigned_track as u8,
+                rytm_sys::AR_PLOCK_TYPE_MP2 as u8,
+                dec as u8,
+            )?;
+
+            return Ok(());
+        }
+        Err(OrphanTrig)
+    }
+
+    /// Gets the parameter lock for the `dec` parameter.
+    ///
+    /// Range: `0..=127`
+    pub fn plock_get_dec(&self, trig_index: usize) -> Result<Option<usize>, RytmError> {
+        if let Some(ref pool) = self.parameter_lock_pool {
+            let assigned_track = self.assigned_track.ok_or(OrphanTrig)?;
+
+            let dec = pool.borrow_mut().get_basic_plock(
+                trig_index,
+                assigned_track as u8,
+                rytm_sys::AR_PLOCK_TYPE_MP2 as u8,
+            );
+
+            if let Some(dec) = dec {
+                return Ok(Some(dec as usize));
+            }
+
+            return Ok(None);
+        }
+        Err(OrphanTrig)
+    }
+
+    /// Clears the parameter lock for the `dec` parameter if set.
+    pub fn plock_clear_dec(&self, trig_index: usize) -> Result<(), RytmError> {
+        if let Some(ref pool) = self.parameter_lock_pool {
+            let assigned_track = self.assigned_track.ok_or(OrphanTrig)?;
+            pool.borrow_mut().clear_basic_plock(
+                trig_index,
+                assigned_track as u8,
+                rytm_sys::AR_PLOCK_TYPE_MP2 as u8,
+            )?;
+            return Ok(());
+        }
+        Err(OrphanTrig)
+    }
+
+    /// Sets the parameter lock for the `osc2` parameter.
+    ///
+    /// Range: `0..=16256`
+    #[parameter_range(range = "osc2:0..=16256")]
+    pub fn plock_set_osc2(&self, osc2: usize, trig_index: usize) -> Result<(), RytmError> {
+        if let Some(ref pool) = self.parameter_lock_pool {
+            let assigned_track = self.assigned_track.ok_or(OrphanTrig)?;
+
+            pool.borrow_mut().set_compound_plock(
+                trig_index,
+                assigned_track as u8,
+                rytm_sys::AR_PLOCK_TYPE_MP3 as u8,
+                osc2 as u16,
+            )?;
+
+            return Ok(());
+        }
+        Err(OrphanTrig)
+    }
+
+    /// Gets the parameter lock for the `osc2` parameter.
+    ///
+    /// Range: `0..=16256`
+    pub fn plock_get_osc2(&self, trig_index: usize) -> Result<Option<usize>, RytmError> {
+        if let Some(ref pool) = self.parameter_lock_pool {
+            let assigned_track = self.assigned_track.ok_or(OrphanTrig)?;
+
+            let osc2 = pool.borrow_mut().get_compound_plock(
+                trig_index,
+                assigned_track as u8,
+                rytm_sys::AR_PLOCK_TYPE_MP3 as u8,
+            );
+
+            if let Some(osc2) = osc2 {
+                return Ok(Some(osc2 as usize));
+            }
+
+            return Ok(None);
+        }
+        Err(OrphanTrig)
+    }
+
+    /// Clears the parameter lock for the `osc2` parameter if set.
+    pub fn plock_clear_osc2(&self, trig_index: usize) -> Result<(), RytmError> {
+        if let Some(ref pool) = self.parameter_lock_pool {
+            let assigned_track = self.assigned_track.ok_or(OrphanTrig)?;
+            pool.borrow_mut().clear_compound_plock(
+                trig_index,
+                assigned_track as u8,
+                rytm_sys::AR_PLOCK_TYPE_MP3 as u8,
+            )?;
+            return Ok(());
+        }
+        Err(OrphanTrig)
+    }
+
+    /// Sets the parameter lock for the `osc3` parameter.
+    ///
+    /// Range: `0..=16256`
+    #[parameter_range(range = "osc3:0..=16256")]
+    pub fn plock_set_osc3(&self, osc3: usize, trig_index: usize) -> Result<(), RytmError> {
+        if let Some(ref pool) = self.parameter_lock_pool {
+            let assigned_track = self.assigned_track.ok_or(OrphanTrig)?;
+
+            pool.borrow_mut().set_compound_plock(
+                trig_index,
+                assigned_track as u8,
+                rytm_sys::AR_PLOCK_TYPE_MP4 as u8,
+                osc3 as u16,
+            )?;
+
+            return Ok(());
+        }
+        Err(OrphanTrig)
+    }
+
+    /// Gets the parameter lock for the `osc3` parameter.
+    ///
+    /// Range: `0..=16256`
+    pub fn plock_get_osc3(&self, trig_index: usize) -> Result<Option<usize>, RytmError> {
+        if let Some(ref pool) = self.parameter_lock_pool {
+            let assigned_track = self.assigned_track.ok_or(OrphanTrig)?;
+
+            let osc3 = pool.borrow_mut().get_compound_plock(
+                trig_index,
+                assigned_track as u8,
+                rytm_sys::AR_PLOCK_TYPE_MP4 as u8,
+            );
+
+            if let Some(osc3) = osc3 {
+                return Ok(Some(osc3 as usize));
+            }
+
+            return Ok(None);
+        }
+        Err(OrphanTrig)
+    }
+
+    /// Clears the parameter lock for the `osc3` parameter if set.
+    pub fn plock_clear_osc3(&self, trig_index: usize) -> Result<(), RytmError> {
+        if let Some(ref pool) = self.parameter_lock_pool {
+            let assigned_track = self.assigned_track.ok_or(OrphanTrig)?;
+            pool.borrow_mut().clear_compound_plock(
+                trig_index,
+                assigned_track as u8,
+                rytm_sys::AR_PLOCK_TYPE_MP4 as u8,
+            )?;
+            return Ok(());
+        }
+        Err(OrphanTrig)
+    }
+
+    /// Sets the parameter lock for the `osc4` parameter.
+    ///
+    /// Range: `0..=16256`
+    #[parameter_range(range = "osc4:0..=16256")]
+    pub fn plock_set_osc4(&self, osc4: usize, trig_index: usize) -> Result<(), RytmError> {
+        if let Some(ref pool) = self.parameter_lock_pool {
+            let assigned_track = self.assigned_track.ok_or(OrphanTrig)?;
+
+            pool.borrow_mut().set_compound_plock(
+                trig_index,
+                assigned_track as u8,
+                rytm_sys::AR_PLOCK_TYPE_MP5 as u8,
+                osc4 as u16,
+            )?;
+
+            return Ok(());
+        }
+        Err(OrphanTrig)
+    }
+
+    /// Gets the parameter lock for the `osc4` parameter.
+    ///
+    /// Range: `0..=16256`
+    pub fn plock_get_osc4(&self, trig_index: usize) -> Result<Option<usize>, RytmError> {
+        if let Some(ref pool) = self.parameter_lock_pool {
+            let assigned_track = self.assigned_track.ok_or(OrphanTrig)?;
+
+            let osc4 = pool.borrow_mut().get_compound_plock(
+                trig_index,
+                assigned_track as u8,
+                rytm_sys::AR_PLOCK_TYPE_MP5 as u8,
+            );
+
+            if let Some(osc4) = osc4 {
+                return Ok(Some(osc4 as usize));
+            }
+
+            return Ok(None);
+        }
+        Err(OrphanTrig)
+    }
+
+    /// Clears the parameter lock for the `osc4` parameter if set.
+    pub fn plock_clear_osc4(&self, trig_index: usize) -> Result<(), RytmError> {
+        if let Some(ref pool) = self.parameter_lock_pool {
+            let assigned_track = self.assigned_track.ok_or(OrphanTrig)?;
+            pool.borrow_mut().clear_compound_plock(
+                trig_index,
+                assigned_track as u8,
+                rytm_sys::AR_PLOCK_TYPE_MP5 as u8,
+            )?;
+            return Ok(());
+        }
+        Err(OrphanTrig)
+    }
+
+    /// Sets the parameter lock for the `osc5` parameter.   
+    ///
+    /// Range: `0..=16256`
+    #[parameter_range(range = "osc5:0..=16256")]
+    pub fn plock_set_osc5(&self, osc5: usize, trig_index: usize) -> Result<(), RytmError> {
+        if let Some(ref pool) = self.parameter_lock_pool {
+            let assigned_track = self.assigned_track.ok_or(OrphanTrig)?;
+            pool.borrow_mut().set_compound_plock(
+                trig_index,
+                assigned_track as u8,
+                rytm_sys::AR_PLOCK_TYPE_MP6 as u8,
+                osc5 as u16,
+            )?;
+            return Ok(());
+        }
+        Err(OrphanTrig)
+    }
+
+    /// Gets the parameter lock for the `osc5` parameter.
+    ///
+    /// Range: `0..=16256`
+    pub fn plock_get_osc5(&self, trig_index: usize) -> Result<Option<usize>, RytmError> {
+        if let Some(ref pool) = self.parameter_lock_pool {
+            let assigned_track = self.assigned_track.ok_or(OrphanTrig)?;
+            let osc5 = pool.borrow_mut().get_compound_plock(
+                trig_index,
+                assigned_track as u8,
+                rytm_sys::AR_PLOCK_TYPE_MP6 as u8,
+            );
+            if let Some(osc5) = osc5 {
+                return Ok(Some(osc5 as usize));
+            }
+            return Ok(None);
+        }
+        Err(OrphanTrig)
+    }
+
+    /// Clears the parameter lock for the `osc5` parameter if set.
+    pub fn plock_clear_osc5(&self, trig_index: usize) -> Result<(), RytmError> {
+        if let Some(ref pool) = self.parameter_lock_pool {
+            let assigned_track = self.assigned_track.ok_or(OrphanTrig)?;
+            pool.borrow_mut().clear_compound_plock(
+                trig_index,
+                assigned_track as u8,
+                rytm_sys::AR_PLOCK_TYPE_MP6 as u8,
+            )?;
+            return Ok(());
+        }
+        Err(OrphanTrig)
+    }
+
+    /// Sets the parameter lock for the `osc6` parameter.
+    ///
+    /// Range: `0..=16256`
+    #[parameter_range(range = "osc6:0..=16256")]
+    pub fn plock_set_osc6(&self, osc6: usize, trig_index: usize) -> Result<(), RytmError> {
+        if let Some(ref pool) = self.parameter_lock_pool {
+            let assigned_track = self.assigned_track.ok_or(OrphanTrig)?;
+            pool.borrow_mut().set_compound_plock(
+                trig_index,
+                assigned_track as u8,
+                rytm_sys::AR_PLOCK_TYPE_MP7 as u8,
+                osc6 as u16,
+            )?;
+            return Ok(());
+        }
+        Err(OrphanTrig)
+    }
+
+    /// Gets the parameter lock for the `osc6` parameter.
+    ///
+    /// Range: `0..=16256`
+    pub fn plock_get_osc6(&self, trig_index: usize) -> Result<Option<usize>, RytmError> {
+        if let Some(ref pool) = self.parameter_lock_pool {
+            let assigned_track = self.assigned_track.ok_or(OrphanTrig)?;
+            let osc6 = pool.borrow_mut().get_compound_plock(
+                trig_index,
+                assigned_track as u8,
+                rytm_sys::AR_PLOCK_TYPE_MP7 as u8,
+            );
+            if let Some(osc6) = osc6 {
+                return Ok(Some(osc6 as usize));
+            }
+            return Ok(None);
+        }
+        Err(OrphanTrig)
+    }
+
+    /// Clears the parameter lock for the `osc6` parameter if set.
+    pub fn plock_clear_osc6(&self, trig_index: usize) -> Result<(), RytmError> {
+        if let Some(ref pool) = self.parameter_lock_pool {
+            let assigned_track = self.assigned_track.ok_or(OrphanTrig)?;
+            pool.borrow_mut().clear_compound_plock(
+                trig_index,
+                assigned_track as u8,
+                rytm_sys::AR_PLOCK_TYPE_MP7 as u8,
+            )?;
+            return Ok(());
+        }
+        Err(OrphanTrig)
     }
 }

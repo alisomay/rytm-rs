@@ -139,9 +139,10 @@ pub fn machine_parameters(args: TokenStream, input: TokenStream) -> TokenStream 
 
     let methods = args.0.iter().map(|arg| {
         // let (param_type, return_type) = determine_types(&arg.range);
-        let setter = generate_setter_with_range_check(arg, &struct_name);
+        let setter_and_plock_methods =
+            generate_setter_and_plock_methods_with_range_check(arg, &struct_name);
         let getter = generate_getter(arg, &struct_name);
-        quote! { #setter #getter }
+        quote! { #setter_and_plock_methods #getter }
     });
 
     let apply_to_raw_sound_values_inner =

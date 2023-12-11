@@ -5,6 +5,7 @@ use crate::{
         from_s_u16_t, get_u16_min_max_from_float_range, i8_to_u8_midpoint_of_u8_input_range,
         scale_generic, to_s_u16_t_union_a, u8_to_i8_midpoint_of_u8_input_range,
     },
+    RytmError::OrphanTrig,
 };
 use derivative::Derivative;
 use rytm_rs_macro::{machine_parameters, parameter_range};
@@ -163,6 +164,98 @@ impl SyRawParameters {
     // Returns the `wav2` parameter.
     pub fn get_wav2(&self) -> SyRawWaveform2 {
         self.wav2
+    }
+
+    /// Sets the parameter lock for the `wav1` parameter.
+    pub fn set_plock_wav1(&self, wav1: SyRawWaveform1, trig_index: usize) -> Result<(), RytmError> {
+        if let Some(ref pool) = self.parameter_lock_pool {
+            let assigned_track = self.assigned_track.ok_or(OrphanTrig)?;
+            pool.borrow_mut().set_basic_plock(
+                trig_index,
+                assigned_track as u8,
+                rytm_sys::AR_PLOCK_TYPE_MP6 as u8,
+                wav1.into(),
+            )?;
+            return Ok(());
+        }
+        Err(OrphanTrig)
+    }
+
+    /// Gets the parameter lock for the `wav1` parameter.
+    pub fn get_plock_wav1(&self, trig_index: usize) -> Result<Option<SyRawWaveform1>, RytmError> {
+        if let Some(ref pool) = self.parameter_lock_pool {
+            let assigned_track = self.assigned_track.ok_or(OrphanTrig)?;
+            let wav1 = pool.borrow_mut().get_basic_plock(
+                trig_index,
+                assigned_track as u8,
+                rytm_sys::AR_PLOCK_TYPE_MP6 as u8,
+            );
+            if let Some(wav1) = wav1 {
+                return Ok(Some(wav1.into()));
+            }
+            return Ok(None);
+        }
+        Err(OrphanTrig)
+    }
+
+    /// Clears the parameter lock for the `wav1` parameter if set.
+    pub fn clear_plock_wav1(&self, trig_index: usize) -> Result<(), RytmError> {
+        if let Some(ref pool) = self.parameter_lock_pool {
+            let assigned_track = self.assigned_track.ok_or(OrphanTrig)?;
+            pool.borrow_mut().clear_basic_plock(
+                trig_index,
+                assigned_track as u8,
+                rytm_sys::AR_PLOCK_TYPE_MP6 as u8,
+            )?;
+            return Ok(());
+        }
+        Err(OrphanTrig)
+    }
+
+    /// Sets the parameter lock for the `wav2` parameter.
+    pub fn set_plock_wav2(&self, wav2: SyRawWaveform2, trig_index: usize) -> Result<(), RytmError> {
+        if let Some(ref pool) = self.parameter_lock_pool {
+            let assigned_track = self.assigned_track.ok_or(OrphanTrig)?;
+            pool.borrow_mut().set_basic_plock(
+                trig_index,
+                assigned_track as u8,
+                rytm_sys::AR_PLOCK_TYPE_MP6 as u8,
+                wav2.into(),
+            )?;
+            return Ok(());
+        }
+        Err(OrphanTrig)
+    }
+
+    /// Gets the parameter lock for the `wav2` parameter.
+    pub fn get_plock_wav2(&self, trig_index: usize) -> Result<Option<SyRawWaveform2>, RytmError> {
+        if let Some(ref pool) = self.parameter_lock_pool {
+            let assigned_track = self.assigned_track.ok_or(OrphanTrig)?;
+            let wav2 = pool.borrow_mut().get_basic_plock(
+                trig_index,
+                assigned_track as u8,
+                rytm_sys::AR_PLOCK_TYPE_MP6 as u8,
+            );
+            if let Some(wav2) = wav2 {
+                return Ok(Some(wav2.into()));
+            }
+            return Ok(None);
+        }
+        Err(OrphanTrig)
+    }
+
+    /// Clears the parameter lock for the `wav2` parameter if set.
+    pub fn clear_plock_wav2(&self, trig_index: usize) -> Result<(), RytmError> {
+        if let Some(ref pool) = self.parameter_lock_pool {
+            let assigned_track = self.assigned_track.ok_or(OrphanTrig)?;
+            pool.borrow_mut().clear_basic_plock(
+                trig_index,
+                assigned_track as u8,
+                rytm_sys::AR_PLOCK_TYPE_MP6 as u8,
+            )?;
+            return Ok(());
+        }
+        Err(OrphanTrig)
     }
 
     #[parameter_range(range = "track_index[opt]:0..=11")]

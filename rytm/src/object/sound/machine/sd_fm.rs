@@ -2,6 +2,7 @@ use crate::{
     error::{ParameterError, RytmError},
     object::pattern::parameter_lock::ParameterLockPool,
     util::{from_s_u16_t, get_u16_min_max_from_float_range, scale_generic, to_s_u16_t_union_a},
+    RytmError::OrphanTrig,
 };
 use derivative::Derivative;
 use rytm_rs_macro::{machine_parameters, parameter_range};

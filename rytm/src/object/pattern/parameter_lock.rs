@@ -220,6 +220,42 @@ impl ParameterLockPool {
         Err(ParameterLockMemoryFull)
     }
 
+    pub fn get_basic_plock(
+        &self,
+        trig_index: usize,
+        track_index: u8,
+        plock_type: u8,
+    ) -> Option<u8> {
+        let mut pool = self.inner.iter();
+
+        // Check if we have this type of basic plock already set if so modify it.
+        if let Some(plock) = pool.find(|plock_seq| {
+            plock_seq.track_nr == track_index && plock_seq.plock_type == plock_type
+        }) {
+            return Some(plock.data[trig_index]);
+        }
+        None
+    }
+
+    pub fn get_compound_plock(
+        &self,
+        trig_index: usize,
+        track_index: u8,
+        plock_type: u8,
+    ) -> Option<u16> {
+        let mut pool = self.inner.iter();
+
+        // Check if we have this type of basic plock already set if so modify it.
+        if let Some(plock) = pool.find(|plock_seq| {
+            plock_seq.track_nr == track_index && plock_seq.plock_type == plock_type
+        }) {
+            return Some(
+                (plock.data[trig_index] as u16) << 8 | self.inner[1].data[trig_index] as u16,
+            );
+        }
+        None
+    }
+
     // TODO: Check the order of the msb lsb.
     pub(crate) fn set_compound_plock(
         &mut self,

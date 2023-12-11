@@ -5,6 +5,7 @@ use crate::{
         from_s_u16_t, get_u16_min_max_from_float_range, i8_to_u8_midpoint_of_u8_input_range,
         scale_generic, to_s_u16_t_union_a, u8_to_i8_midpoint_of_u8_input_range,
     },
+    RytmError::OrphanTrig,
 };
 use derivative::Derivative;
 use rytm_rs_macro::{machine_parameters, parameter_range};
