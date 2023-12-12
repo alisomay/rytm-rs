@@ -129,11 +129,30 @@ impl ParameterLockPool {
                     plock_seq.track_nr == track_index && plock_seq.plock_type == plock_type
                 })
         {
-            // dbg!(found_plock);
-            // panic!("PLOCK FOUND");
+            // dbg!(&found_plock);
+            // dbg!(&self.inner[i + 1]);
+            // let first_way = ((self.inner[i + 1].data[trig_index] as u16) << 8)
+            //     | self.inner[i].data[trig_index] as u16;
+            // let second_way_reverse = ((self.inner[i].data[trig_index] as u16) << 8)
+            //     | self.inner[i + 1].data[trig_index] as u16;
+            // dbg!(
+            //     trig_index,
+            //     first_way,
+            //     second_way_reverse,
+            //     crate::util::scale_u16_to_f32(
+            //         second_way_reverse,
+            //         0u16,
+            //         32767u16,
+            //         -128f32,
+            //         127.99f32,
+            //     )
+            // );
+
+            // panic!("PLOCK MODIFIED");
+
             // This is safe because if we could have set it it means these indexes are valid.
-            found_plock.data[trig_index] = value_lsb;
-            self.inner[i + 1].data[trig_index] = value_msb;
+            found_plock.data[trig_index] = value_msb;
+            self.inner[i + 1].data[trig_index] = value_lsb;
 
             return Ok(());
         }
@@ -152,32 +171,175 @@ impl ParameterLockPool {
             .enumerate()
             .find(|(_, plock_seq)| plock_seq.track_nr == 0xFF || plock_seq.plock_type == 0xFF)
         {
-            // We know at this point that 2 empty slots are available.
-            found_empty_slot.track_nr = track_index;
-            found_empty_slot.plock_type = plock_type;
-            found_empty_slot.data[trig_index] = value_lsb;
-
-            self.inner[i + 1].track_nr = ADJACENT_PLOCK_SLOT_TRACK_NUMBER_BYTE;
-            self.inner[i + 1].plock_type = ADJACENT_PLOCK_SLOT_TYPE_BYTE;
-            self.inner[i + 1].data[trig_index] = value_msb;
-
             // let first_way = ((self.inner[i + 1].data[trig_index] as u16) << 8)
             //     | self.inner[i].data[trig_index] as u16;
-            // let second_way_reverse = ((self.inner[i].data[trig_index] as u16) << 8)
-            //     | self.inner[i + 1].data[trig_index] as u16;
-
             // dbg!(self.inner[i], self.inner[i + 1]);
             // dbg!(first_way);
             // dbg!(crate::util::scale_u16_to_f32(
             //     first_way, 0u16, 32767u16, -128f32, 127.99f32,
             // ));
             // panic!("PLOCK NEW");
+
+            // We know at this point that 2 empty slots are available.
+            found_empty_slot.track_nr = track_index;
+            found_empty_slot.plock_type = plock_type;
+            found_empty_slot.data[trig_index] = value_msb;
+
+            self.inner[i + 1].track_nr = ADJACENT_PLOCK_SLOT_TRACK_NUMBER_BYTE;
+            self.inner[i + 1].plock_type = ADJACENT_PLOCK_SLOT_TYPE_BYTE;
+            self.inner[i + 1].data[trig_index] = value_lsb;
+
+            let second_way_reverse = ((self.inner[i].data[trig_index] as u16) << 8)
+                | self.inner[i + 1].data[trig_index] as u16;
+
             return Ok(());
         }
 
         Err(ParameterLockMemoryFull)
     }
 
+    // TODO: Revisit availability check.
+    // ---- pattern_type stdout ----
+    // [rytm/src/object/pattern/parameter_lock.rs:132] found_plock = ar_plock_seq_t {
+    //     plock_type: 40,
+    //     track_nr: 0,
+    //     data: [
+    //         255,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //     ],
+    // }
+    // [rytm/src/object/pattern/parameter_lock.rs:133] self.inner[i + 1] = ar_plock_seq_t {
+    //     plock_type: 128,
+    //     track_nr: 128,
+    //     data: [
+    //         255,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //     ],
+    // }
     pub fn get_basic_plock(
         &self,
         trig_index: usize,

@@ -9,7 +9,7 @@ use crate::common::util::decode_sysex_response_to_raw;
 use common::*;
 use rytm_rs::{
     error::RytmError,
-    object::pattern::Pattern,
+    object::{pattern::Pattern, sound::types::LfoMultiplier},
     query::{GlobalQuery, KitQuery, PatternQuery, SettingsQuery, SoundQuery},
     Rytm,
 };
@@ -297,7 +297,7 @@ fn sound() {
 
     let query = SoundQuery::new(0).unwrap();
     let query = SoundQuery::new_targeting_work_buffer(track_index).unwrap();
-    let out = conn_out.clone();
+
     let callback = |response: &[u8], rytm: &mut Rytm, elapsed: u64| -> Result<(), RytmError> {
         if !is_sysex(response) {
             // Pass..
@@ -305,14 +305,8 @@ fn sound() {
         }
 
         rytm.update_from_sysex_response(response)?;
+        let sound = rytm.work_buffer_sounds();
 
-        rytm.work_buffer_sounds_mut()[0]
-            .lfo_mut()
-            .set_depth(55.0)
-            .unwrap();
-
-        let msg = rytm.encode_work_buffer_sound_as_sysex_message(0).unwrap();
-        out.lock().unwrap().send(&msg[..]).unwrap();
         clearscreen::clear().unwrap();
 
         // convert unix epoch to human readable milliseconds
@@ -320,7 +314,7 @@ fn sound() {
 
         // dbg!(elapsed);
         // dbg!(sound[track_index].machine_parameters());
-        dbg!(rytm.work_buffer_sounds()[0].lfo());
+        dbg!(sound);
 
         Ok(())
     };
@@ -465,19 +459,19 @@ fn pattern_type() {
         }
 
         rytm.update_from_sysex_response(response)?;
-        // let pattern = rytm.work_buffer_pattern_mut();
+        let pattern = rytm.work_buffer_pattern_mut();
 
-        // let t = &mut pattern.tracks_mut()[0];
-        // let trigs = t.trigs_mut();
-        // let trig0 = &mut trigs[0];
-        // // dbg!(t.);
-        // trig0.p_lock_set_lfo_depth(55.0).unwrap();
+        let t = &mut pattern.tracks_mut()[0];
+        let trigs = t.trigs_mut();
+        let trig0 = &mut trigs[0];
+
+        trig0.p_lock_set_lfo_depth(-66.0).unwrap();
+        trig0.p_lock_set_lfo_speed(-63).unwrap();
+        trig0.p_lock_set_lfo_multiplier(LfoMultiplier::X1).unwrap();
         out.lock()
             .unwrap()
             .send(&rytm.encode_work_buffer_pattern_as_sysex_message().unwrap()[..])
             .unwrap();
-        // dbg!(&pattern.parameter_lock_pool);
-        // panic!();
         // clearscreen::clear().unwrap();
 
         // let mute: u16 = ((settings.track_mute_msb as u16) << 8) | (settings.track_mute_lsb as u16);
