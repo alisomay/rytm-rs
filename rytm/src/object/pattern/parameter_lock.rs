@@ -119,7 +119,8 @@ impl ParameterLockPool {
 
         let last_slot = &self.inner[self.inner.len() - 1];
         let last_slot_available = last_slot.track_nr == 0xFF || last_slot.plock_type == 0xFF;
-
+        dbg!(&self.inner[0..5]);
+        panic!();
         // Check if we have this type of compound plock already set if so modify it.
         if let Some((i, found_plock)) =
             self.inner
