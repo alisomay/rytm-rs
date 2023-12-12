@@ -5,6 +5,7 @@ use self::types::{
     FxParameterMenuItem, ParameterMenuItem, PatternMode, SampleRecorderRecordingLength,
     SampleRecorderSource, SequencerMode,
 };
+use crate::AnySysExType;
 use crate::{
     error::{ParameterError, RytmError, SysexConversionError},
     impl_sysex_compatible,

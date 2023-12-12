@@ -40,6 +40,9 @@ mod sysex_id {
     pub const ID_GLOBAL: u8 = ar_sysex_id_t_AR_TYPE_GLOBAL as u8;
 }
 
+/// The type of a sysex message.
+///
+/// Can represent known sysex types.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum SysexType {
     Pattern,
@@ -52,6 +55,7 @@ pub enum SysexType {
 }
 
 impl SysexType {
+    // Dump ids are different compared to query ids.
     pub fn try_from_dump_id(dump_id: u8) -> Result<Self, RytmError> {
         use sysex_id::*;
         match dump_id {
@@ -100,23 +104,27 @@ impl TryFrom<u8> for SysexType {
     }
 }
 
+/// Contains the metadata of a sysex message.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct SysexMeta {
     pub container_version: u16,
     pub dev_id: u8,
     pub obj_type: u8,
     pub obj_nr: u16,
+    // The rest is not calculated in queries. Only calculated in responses and the calculation is done by [libanalogrytm](https://github.com/bsp2/libanalogrytm).
     pub chksum: u16,
     pub data_size: u16,
 }
 
 impl SysexMeta {
+    // Found in all sysex messages comes from rytm.
     const SYSEX_META_CONTAINER_VERSION: u16 = 0x0101;
 
     pub fn is_targeting_work_buffer(&self) -> bool {
         self.obj_nr >= 128
     }
 
+    /// Returns the object type of the sysex message.
     pub fn object_type(&self) -> Result<SysexType, RytmError> {
         let r#type: SysexType = self.obj_type.try_into()?;
         Ok(r#type)
@@ -128,9 +136,8 @@ impl SysexMeta {
             dev_id: dev_id.unwrap_or(0) as u8,
             obj_type: SysexType::Settings.into(),
             obj_nr: 0b0000_0000,
-            // Calculated in libanalogrytm, they're dummy values here in this state.
-            chksum: 0,
-            data_size: 0,
+
+            ..Default::default()
         }
     }
 
@@ -144,9 +151,7 @@ impl SysexMeta {
             dev_id: dev_id.unwrap_or(0) as u8,
             obj_type: SysexType::Global.into(),
             obj_nr: global_slot as u16,
-            // Calculated in libanalogrytm, they're dummy values here in this state.
-            chksum: 0,
-            data_size: 0,
+            ..Default::default()
         })
     }
 
@@ -156,9 +161,7 @@ impl SysexMeta {
             dev_id: dev_id.unwrap_or(0) as u8,
             obj_type: SysexType::Global.into(),
             obj_nr: 0b1000_0000,
-            // Calculated in libanalogrytm, they're dummy values here in this state.
-            chksum: 0,
-            data_size: 0,
+            ..Default::default()
         }
     }
 
@@ -172,9 +175,7 @@ impl SysexMeta {
             dev_id: dev_id.unwrap_or(0) as u8,
             obj_type: SysexType::Pattern.into(),
             obj_nr: pattern_index as u16,
-            // Calculated in libanalogrytm, they're dummy values here in this state.
-            chksum: 0,
-            data_size: 0,
+            ..Default::default()
         })
     }
 
@@ -184,9 +185,7 @@ impl SysexMeta {
             dev_id: dev_id.unwrap_or(0) as u8,
             obj_type: SysexType::Pattern.into(),
             obj_nr: 0b1000_0000,
-            // Calculated in libanalogrytm, they're dummy values here in this state.
-            chksum: 0,
-            data_size: 0,
+            ..Default::default()
         }
     }
 
@@ -197,9 +196,7 @@ impl SysexMeta {
             dev_id: dev_id.unwrap_or(0) as u8,
             obj_type: SysexType::Kit.into(),
             obj_nr: kit_index as u16,
-            // Calculated in libanalogrytm, they're dummy values here in this state.
-            chksum: 0,
-            data_size: 0,
+            ..Default::default()
         })
     }
 
@@ -209,9 +206,7 @@ impl SysexMeta {
             dev_id: dev_id.unwrap_or(0) as u8,
             obj_type: SysexType::Kit.into(),
             obj_nr: 0b1000_0000,
-            // Calculated in libanalogrytm, they're dummy values here in this state.
-            chksum: 0,
-            data_size: 0,
+            ..Default::default()
         }
     }
 
@@ -225,21 +220,17 @@ impl SysexMeta {
             dev_id: dev_id.unwrap_or(0) as u8,
             obj_type: SysexType::Sound.into(),
             obj_nr: sound_index as u16,
-            // Calculated in libanalogrytm, they're dummy values here in this state.
-            chksum: 0,
-            data_size: 0,
+            ..Default::default()
         })
     }
 
-    pub fn default_for_sound_in_work_buffer(dev_id: Option<usize>) -> Self {
+    pub fn default_for_sound_in_work_buffer(track_index: usize, dev_id: Option<usize>) -> Self {
         Self {
             container_version: SysexMeta::SYSEX_META_CONTAINER_VERSION,
             dev_id: dev_id.unwrap_or(0) as u8,
             obj_type: SysexType::Sound.into(),
-            obj_nr: 0b1000_0000,
-            // Calculated in libanalogrytm, they're dummy values here in this state.
-            chksum: 0,
-            data_size: 0,
+            obj_nr: (0b1000_0000_u8 | track_index as u8) as u16,
+            ..Default::default()
         }
     }
 }
@@ -251,9 +242,7 @@ impl From<SysexMeta> for ar_sysex_meta_t {
             dev_id: meta.dev_id,
             obj_type: meta.obj_type,
             obj_nr: meta.obj_nr,
-            // Calculated in libanalogrytm, they're dummy values here in this state.
-            chksum: to_s_u16_t_union_b(meta.chksum),
-            data_size: to_s_u16_t_union_b(meta.data_size),
+            ..Default::default()
         }
     }
 }

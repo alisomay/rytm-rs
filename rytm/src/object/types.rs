@@ -1,7 +1,12 @@
 use crate::error::ConversionError;
 
+/// Represents a name of an object.
+///
+/// This can currently be a sound name or a kit name.
+///
+/// The name is represented as a fixed length array of 15 bytes (ASCII).
 #[derive(Clone, Copy)]
-pub struct ObjectName([u8; 15]);
+pub(crate) struct ObjectName([u8; 15]);
 
 impl ObjectName {
     pub fn from_u8_array(raw_sound_name: [u8; 15]) -> Self {

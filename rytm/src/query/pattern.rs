@@ -1,7 +1,7 @@
 use super::ObjectQuery;
 use crate::{
     error::{ParameterError, RytmError},
-    sysex::SysexType,
+    sysex::{AnySysExType, SysexType},
 };
 use rytm_rs_macro::parameter_range;
 
@@ -9,7 +9,7 @@ use rytm_rs_macro::parameter_range;
 pub struct PatternQuery {
     /// Pattern index
     object_number: usize,
-    r#type: SysexType,
+    sysex_type: SysexType,
     device_id: u8,
 }
 
@@ -18,7 +18,7 @@ impl PatternQuery {
     pub fn new(pattern_index: usize) -> Result<Self, RytmError> {
         Ok(Self {
             object_number: pattern_index,
-            r#type: SysexType::Pattern,
+            sysex_type: SysexType::Pattern,
             device_id: 0,
         })
     }
@@ -27,7 +27,7 @@ impl PatternQuery {
     pub fn new_with_device_id(pattern_index: usize, device_id: u8) -> Result<Self, RytmError> {
         Ok(Self {
             object_number: pattern_index,
-            r#type: SysexType::Pattern,
+            sysex_type: SysexType::Pattern,
             device_id,
         })
     }
@@ -35,7 +35,7 @@ impl PatternQuery {
     pub fn new_targeting_work_buffer() -> Self {
         Self {
             object_number: 0b1000_0000,
-            r#type: SysexType::Pattern,
+            sysex_type: SysexType::Pattern,
             device_id: 0,
         }
     }
@@ -43,36 +43,22 @@ impl PatternQuery {
     pub fn new_targeting_work_buffer_with_device_id(device_id: u8) -> Self {
         Self {
             object_number: 0b1000_0000,
-            r#type: SysexType::Pattern,
+            sysex_type: SysexType::Pattern,
             device_id,
         }
-    }
-
-    pub fn object_number(&self) -> usize {
-        self.object_number
-    }
-
-    pub fn r#type(&self) -> SysexType {
-        self.r#type
-    }
-
-    pub fn device_id(&self) -> u8 {
-        self.device_id
     }
 }
 
 impl ObjectQuery for PatternQuery {
-    type SysexTypeExpression = SysexType;
-
-    fn r#type(&self) -> Self::SysexTypeExpression {
-        self.r#type()
+    fn sysex_type(&self) -> AnySysExType {
+        self.sysex_type.into()
     }
 
     fn device_id(&self) -> u8 {
-        self.device_id()
+        self.device_id
     }
 
     fn obj_nr(&self) -> u16 {
-        self.object_number() as u16
+        self.object_number as u16
     }
 }

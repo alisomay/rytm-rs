@@ -464,11 +464,6 @@ impl Trig {
         Ok(())
     }
 
-    /// Sets the trig condition state.
-    // pub fn set_trig_condition(&mut self, enable: bool) {
-    //     self.trig_condition = enable;
-    // }
-
     /// Sets the velocity value.
     ///
     /// Range `0..=127`

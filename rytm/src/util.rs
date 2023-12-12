@@ -5,24 +5,18 @@ use crate::{
     object::{pattern::MicroTime, sound::types::MachineType},
 };
 use rytm_sys::{s_u16_t, s_u16_t__bindgen_ty_1};
-use std::{
-    convert::From,
-    ops::{Add, Div, Mul, Sub},
-};
 
-#[allow(unused)]
-pub(crate) fn to_s_u16_t_union_a(value: u16) -> s_u16_t {
+pub fn to_s_u16_t_union_a(value: u16) -> s_u16_t {
     let msb = (value >> 8) as u8;
     let lsb = (value & 0xFF) as u8;
     s_u16_t { a: [msb, lsb] }
 }
 
-#[allow(unused)]
-pub(crate) fn to_s_u16_t_union_v(value: u16) -> s_u16_t {
+pub fn to_s_u16_t_union_v(value: u16) -> s_u16_t {
     s_u16_t { v: value }
 }
 
-pub(crate) fn to_s_u16_t_union_b(value: u16) -> s_u16_t {
+pub fn to_s_u16_t_union_b(value: u16) -> s_u16_t {
     let msb = (value >> 8) as u8;
     let lsb = (value & 0xFF) as u8;
     s_u16_t {
@@ -30,19 +24,20 @@ pub(crate) fn to_s_u16_t_union_b(value: u16) -> s_u16_t {
     }
 }
 
-pub(crate) fn to_s_u16_t_union_b_from_u8_as_msb(value: u8) -> s_u16_t {
+pub fn to_s_u16_t_union_b_from_u8_as_msb(value: u8) -> s_u16_t {
     s_u16_t {
         b: s_u16_t__bindgen_ty_1 { hi: value, lo: 0 },
     }
 }
 
-pub(crate) fn to_s_u16_t_union_b_from_u8_as_lsb(value: u8) -> s_u16_t {
+pub fn to_s_u16_t_union_b_from_u8_as_lsb(value: u8) -> s_u16_t {
     s_u16_t {
         b: s_u16_t__bindgen_ty_1 { hi: 0, lo: value },
     }
 }
 
-pub(crate) unsafe fn from_s_u16_t(value: &s_u16_t) -> u16 {
+#[allow(clippy::missing_safety_doc)]
+pub unsafe fn from_s_u16_t(value: &s_u16_t) -> u16 {
     let msb = value.b.hi as u16;
     let lsb = value.b.lo as u16;
     (msb << 8) | lsb
@@ -77,9 +72,7 @@ pub fn is_machine_compatible_for_track(track_index: usize, machine: MachineType)
     compatible_machines_for_track_slice.contains(&((machine as u8) as i32))
 }
 
-pub(crate) fn decode_micro_timing_byte(
-    micro_timing_value: i8,
-) -> Result<MicroTime, ConversionError> {
+pub fn decode_micro_timing_byte(micro_timing_value: i8) -> Result<MicroTime, ConversionError> {
     match micro_timing_value {
         -92 => Ok(MicroTime::N23B384),
         -88 => Ok(MicroTime::N11B192),
@@ -135,7 +128,7 @@ pub(crate) fn decode_micro_timing_byte(
     }
 }
 
-pub(crate) fn encode_micro_timing_byte(micro_timing: &MicroTime) -> i8 {
+pub fn encode_micro_timing_byte(micro_timing: &MicroTime) -> i8 {
     match micro_timing {
         MicroTime::N23B384 => -92,
         MicroTime::N11B192 => -88,
@@ -248,7 +241,7 @@ pub fn i8_to_u8_midpoint_of_u8_input_range(value: i8, range_start: u8, range_end
     (value as i16 + midpoint) as u8
 }
 
-pub(crate) fn stable_partition<T, F>(v: &mut [T], mut predicate: F)
+pub fn stable_partition<T, F>(v: &mut [T], mut predicate: F)
 where
     F: FnMut(&T) -> bool,
 {

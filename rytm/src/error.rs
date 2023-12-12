@@ -61,6 +61,8 @@ pub enum SysexConversionError {
     InvalidSize(usize, usize),
     #[error("Unknown error code: {0}")]
     Unknown(u8),
+    #[error("Sysex type of {0} is encountered but not implemented yet.")]
+    Unimplemented(String),
 }
 
 impl From<u8> for SysexConversionError {

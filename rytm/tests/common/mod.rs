@@ -1,5 +1,5 @@
 //! Utilities for reverse engineering sysex responses from the Rytm.
-
+use rytm_rs::prelude::*;
 pub(crate) mod port;
 pub(crate) mod util;
 
@@ -7,7 +7,7 @@ use midir::{Ignore, MidiInputConnection, MidiOutputConnection};
 use rytm_rs::{
     error::{RytmError, SysexConversionError},
     query::ObjectQuery,
-    Rytm,
+    RytmProject,
 };
 use std::sync::{Arc, Mutex};
 use util::SysexMeta;
@@ -50,18 +50,18 @@ pub fn make_input_message_forwarder() -> (
 }
 
 pub fn poll_with_query_blocking(
-    rytm: &mut Rytm,
+    rytm: &mut RytmProject,
     query: impl ObjectQuery,
     conn_out: Arc<Mutex<MidiOutputConnection>>,
     rx: std::sync::mpsc::Receiver<(Vec<u8>, u64)>,
     interval_in_millis: u64,
-    mut callback: impl FnMut(&[u8], &mut Rytm, u64) -> Result<(), RytmError>,
+    mut callback: impl FnMut(&[u8], &mut RytmProject, u64) -> Result<(), RytmError>,
 ) -> Result<(), RytmError> {
     loop {
         conn_out
             .lock()
             .unwrap()
-            .send(&query.serialize_to_sysex().unwrap())
+            .send(&query.as_sysex().unwrap())
             .unwrap();
         // Timestamp
         let query_start = std::time::SystemTime::now()

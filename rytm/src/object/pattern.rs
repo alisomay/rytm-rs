@@ -9,6 +9,7 @@ use self::{
     parameter_lock::ParameterLockPool,
     types::{Speed, TimeMode},
 };
+use crate::AnySysExType;
 use crate::{
     error::{ParameterError, RytmError, SysexConversionError},
     impl_sysex_compatible,

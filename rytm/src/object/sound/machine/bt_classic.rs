@@ -1,4 +1,3 @@
-use crate::util::scale_f32_to_u16;
 use crate::{
     error::{ParameterError, RytmError},
     object::pattern::parameter_lock::ParameterLockPool,

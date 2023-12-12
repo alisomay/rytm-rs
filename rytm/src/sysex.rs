@@ -25,16 +25,57 @@ pub const SOUND_RAW_SIZE: usize = std::mem::size_of::<ar_sound_t>();
 pub const SETTINGS_RAW_SIZE: usize = std::mem::size_of::<ar_settings_t>();
 pub const GLOBAL_RAW_SIZE: usize = std::mem::size_of::<ar_global_t>();
 
-pub trait SysexCompatible {
-    fn r#type(&self) -> SysexType;
-    fn as_sysex_message(&self) -> Result<Vec<u8>, RytmError>;
+/// Meta type for sysex messages.
+///
+/// Can represent known and unknown sysex types.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum AnySysExType {
+    Known(SysexType),
+    Unknown(u8),
 }
 
+impl From<SysexType> for AnySysExType {
+    fn from(t: SysexType) -> Self {
+        Self::Known(t)
+    }
+}
+
+impl From<u8> for AnySysExType {
+    fn from(t: u8) -> Self {
+        if let Ok(t) = SysexType::try_from_dump_id(t) {
+            return Self::from(t);
+        }
+        if let Ok(t) = SysexType::try_from(t) {
+            return Self::from(t);
+        }
+        Self::Unknown(t)
+    }
+}
+
+impl From<AnySysExType> for u8 {
+    fn from(t: AnySysExType) -> Self {
+        match t {
+            AnySysExType::Known(t) => t.into(),
+            AnySysExType::Unknown(t) => t,
+        }
+    }
+}
+
+/// A trait which is implemented by all objects which can be converted to sysex messages including queries and rytm project structures.
+pub trait SysexCompatible {
+    /// Returns the sysex type of the object.
+    fn sysex_type(&self) -> AnySysExType;
+
+    /// Serializes the object to a sysex message.
+    fn as_sysex(&self) -> Result<Vec<u8>, RytmError>;
+}
+
+// Helper macro to implement the SysexCompatible trait for a given object.
 #[macro_export]
 macro_rules! impl_sysex_compatible {
     ($object_type:ty, $object_raw_type:ty, $object_encoder_function:ident, $object_sysex_type:expr, $object_sysex_size:expr) => {
         impl SysexCompatible for $object_type {
-            fn as_sysex_message(&self) -> Result<Vec<u8>, RytmError> {
+            fn as_sysex(&self) -> Result<Vec<u8>, RytmError> {
                 let (sysex_meta, raw_object) = self.as_raw_parts();
 
                 let raw_size = std::mem::size_of::<$object_raw_type>();
@@ -70,8 +111,8 @@ macro_rules! impl_sysex_compatible {
                 }
             }
 
-            fn r#type(&self) -> SysexType {
-                $object_sysex_type
+            fn sysex_type(&self) -> AnySysExType {
+                $object_sysex_type.into()
             }
         }
     };

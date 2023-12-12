@@ -119,8 +119,7 @@ impl ParameterLockPool {
 
         let last_slot = &self.inner[self.inner.len() - 1];
         let last_slot_available = last_slot.track_nr == 0xFF || last_slot.plock_type == 0xFF;
-        dbg!(&self.inner[0..5]);
-        panic!();
+
         // Check if we have this type of compound plock already set if so modify it.
         if let Some((i, found_plock)) =
             self.inner
@@ -130,27 +129,6 @@ impl ParameterLockPool {
                     plock_seq.track_nr == track_index && plock_seq.plock_type == plock_type
                 })
         {
-            // dbg!(&found_plock);
-            // dbg!(&self.inner[i + 1]);
-            // let first_way = ((self.inner[i + 1].data[trig_index] as u16) << 8)
-            //     | self.inner[i].data[trig_index] as u16;
-            // let second_way_reverse = ((self.inner[i].data[trig_index] as u16) << 8)
-            //     | self.inner[i + 1].data[trig_index] as u16;
-            // dbg!(
-            //     trig_index,
-            //     first_way,
-            //     second_way_reverse,
-            //     crate::util::scale_u16_to_f32(
-            //         second_way_reverse,
-            //         0u16,
-            //         32767u16,
-            //         -128f32,
-            //         127.99f32,
-            //     )
-            // );
-
-            // panic!("PLOCK MODIFIED");
-
             // This is safe because if we could have set it it means these indexes are valid.
             found_plock.data[trig_index] = value_msb;
             self.inner[i + 1].data[trig_index] = value_lsb;
@@ -172,15 +150,6 @@ impl ParameterLockPool {
             .enumerate()
             .find(|(_, plock_seq)| plock_seq.track_nr == 0xFF || plock_seq.plock_type == 0xFF)
         {
-            // let first_way = ((self.inner[i + 1].data[trig_index] as u16) << 8)
-            //     | self.inner[i].data[trig_index] as u16;
-            // dbg!(self.inner[i], self.inner[i + 1]);
-            // dbg!(first_way);
-            // dbg!(crate::util::scale_u16_to_f32(
-            //     first_way, 0u16, 32767u16, -128f32, 127.99f32,
-            // ));
-            // panic!("PLOCK NEW");
-
             // We know at this point that 2 empty slots are available.
             found_empty_slot.track_nr = track_index;
             found_empty_slot.plock_type = plock_type;
@@ -190,157 +159,12 @@ impl ParameterLockPool {
             self.inner[i + 1].plock_type = ADJACENT_PLOCK_SLOT_TYPE_BYTE;
             self.inner[i + 1].data[trig_index] = value_lsb;
 
-            let second_way_reverse = ((self.inner[i].data[trig_index] as u16) << 8)
-                | self.inner[i + 1].data[trig_index] as u16;
-
             return Ok(());
         }
 
         Err(ParameterLockMemoryFull)
     }
 
-    // TODO: Revisit availability check.
-    // ---- pattern_type stdout ----
-    // [rytm/src/object/pattern/parameter_lock.rs:132] found_plock = ar_plock_seq_t {
-    //     plock_type: 40,
-    //     track_nr: 0,
-    //     data: [
-    //         255,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //     ],
-    // }
-    // [rytm/src/object/pattern/parameter_lock.rs:133] self.inner[i + 1] = ar_plock_seq_t {
-    //     plock_type: 128,
-    //     track_nr: 128,
-    //     data: [
-    //         255,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //     ],
-    // }
     pub fn get_basic_plock(
         &self,
         trig_index: usize,
@@ -363,11 +187,17 @@ impl ParameterLockPool {
         plock_type: u8,
     ) -> Option<u16> {
         // Check if we have this type of basic plock already set if so modify it.
-        if let Some(plock) = self.inner.iter().find(|plock_seq| -> bool {
-            plock_seq.track_nr == track_index && plock_seq.plock_type == plock_type
-        }) {
+        if let Some((i, plock)) = self
+            .inner
+            .iter()
+            .enumerate()
+            .find(|(i, plock_seq)| -> bool {
+                plock_seq.track_nr == track_index && plock_seq.plock_type == plock_type
+            })
+        {
             return Some(
-                (plock.data[trig_index] as u16) | (self.inner[1].data[trig_index] as u16) << 8,
+                ((plock.data[trig_index] as u16) << 8)
+                    | (self.inner[i + 1].data[trig_index] as u16),
             );
         }
         None
@@ -441,7 +271,7 @@ impl ParameterLockPool {
             plock_seq.plock_type = 0xFF;
             for byte in plock_seq.data.iter_mut() {
                 // Like the default.
-                *byte = 0;
+                *byte = 0xFF;
             }
         }
     }
@@ -453,7 +283,7 @@ impl ParameterLockPool {
                 plock_seq.plock_type = 0xFF;
                 for byte in plock_seq.data.iter_mut() {
                     // Like the default.
-                    *byte = 0;
+                    *byte = 0xFF;
                 }
             }
         }
@@ -466,7 +296,7 @@ impl ParameterLockPool {
                 plock_seq.plock_type = 0xFF;
                 for byte in plock_seq.data.iter_mut() {
                     // Like the default.
-                    *byte = 0;
+                    *byte = 0xFF;
                 }
             }
         }

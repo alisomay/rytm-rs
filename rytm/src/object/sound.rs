@@ -14,6 +14,7 @@ use self::{
     unknown::SoundUnknown,
 };
 use super::pattern::parameter_lock::ParameterLockPool;
+use crate::AnySysExType;
 use crate::{
     error::{RytmError, SysexConversionError},
     impl_sysex_compatible,
@@ -403,9 +404,10 @@ impl Sound {
 
     #[parameter_range(range = "track_index:0..=11")]
     pub fn try_work_buffer_default(track_index: usize) -> Result<Self, RytmError> {
+        // Continue indexing from 128 since this is in work buffer.
         let index = track_index | 0b1000_0000;
         Ok(Self {
-            sysex_meta: SysexMeta::default_for_sound_in_work_buffer(None),
+            sysex_meta: SysexMeta::default_for_sound_in_work_buffer(track_index, None),
             index,
             pool_index: None,
             kit_number: None,

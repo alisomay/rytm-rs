@@ -3,6 +3,7 @@ pub mod types;
 pub(crate) mod unknown;
 
 use self::unknown::GlobalUnknown;
+use crate::AnySysExType;
 use crate::{
     error::{ParameterError, RytmError, SysexConversionError},
     impl_sysex_compatible,

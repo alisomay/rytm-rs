@@ -11,6 +11,7 @@ use self::{
     comp::FxCompressor, delay::FxDelay, dist::FxDistortion, lfo::FxLfo, reverb::FxReverb,
     unknown::KitUnknown,
 };
+use crate::AnySysExType;
 use crate::{
     error::{ParameterError, RytmError, SysexConversionError},
     impl_sysex_compatible,
