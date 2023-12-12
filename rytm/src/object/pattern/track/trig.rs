@@ -422,7 +422,7 @@ impl Trig {
     }
 
     pub(crate) fn encode_note(&self) -> u8 {
-        (self.trig_condition as u8) & 0b1000_0000 | self.note
+        (((self.trig_condition as u8) & 0b0_1000000) << 1) | self.note
     }
 
     #[allow(overflowing_literals)]
@@ -433,17 +433,17 @@ impl Trig {
         //
         // Since we're just setting bits, fabricating values and not doing any arithmetic we can use the literal values.
         // Overflowing literals are safe in this case.
-        ((encoded_byte >> 2) | (((self.trig_condition as i8) & 0b0110_0000) << 1)) as u8
+        ((encoded_byte >> 2) | (((self.trig_condition as i8) & 0b0_0110000) << 2)) as u8
     }
 
     pub(crate) fn encode_retrig_length(&self) -> u8 {
         // Apply the trig condition's least significant mid bit to the retrig length's most significant bit.
-        (((self.trig_condition as u8) & 0b0000_1000) << 4) | self.retrig_length as u8
+        (((self.trig_condition as u8) & 0b0_0001000) << 4) | self.retrig_length as u8
     }
 
     pub(crate) fn encode_retrig_rate(&self) -> u8 {
         // Apply the trig condition's least significant 3 bits to the retrig rate's most significant 3 bits.
-        (((self.trig_condition as u8) & 0b0000_0111) << 5) | self.retrig_rate as u8
+        (((self.trig_condition as u8) & 0b0_0000111) << 5) | self.retrig_rate as u8
     }
 
     /// Returns the index of the trig.

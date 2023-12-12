@@ -17,7 +17,7 @@ impl Default for ParameterLockPool {
 }
 
 impl ParameterLockPool {
-    pub(crate) fn to_raw(&self) -> [rytm_sys::ar_plock_seq_t; 72] {
+    pub(crate) fn as_raw(&self) -> [rytm_sys::ar_plock_seq_t; 72] {
         self.inner
     }
 
@@ -74,23 +74,19 @@ impl ParameterLockPool {
         plock_type: u8,
         value: u8,
     ) -> Result<(), RytmError> {
-        let mut pool = self.inner.iter_mut();
-
         // Check if we have this type of basic plock already set if so modify it.
-        if let Some(plock) = pool.find(|plock_seq| {
+        if let Some(plock) = self.inner.iter_mut().find(|plock_seq| {
             plock_seq.track_nr == track_index && plock_seq.plock_type == plock_type
         }) {
             plock.data[trig_index] = value;
             return Ok(());
         }
 
-        // I don't know if || is the right thing to do here.
-        // Maybe && we'll see..
-        // Find gets the first found one right?
-
         // Check if we have an available slot anywhere in the array.
-        if let Some(empty_slot) =
-            pool.find(|plock_seq| plock_seq.track_nr == 0xFF || plock_seq.plock_type == 0xFF)
+        if let Some(empty_slot) = self
+            .inner
+            .iter_mut()
+            .find(|plock_seq| plock_seq.track_nr == 0xFF || plock_seq.plock_type == 0xFF)
         {
             // We know at this point that an empty slot is available.
             empty_slot.track_nr = track_index;
@@ -103,43 +99,6 @@ impl ParameterLockPool {
         Err(ParameterLockMemoryFull)
     }
 
-    pub fn get_basic_plock(
-        &self,
-        trig_index: usize,
-        track_index: u8,
-        plock_type: u8,
-    ) -> Option<u8> {
-        let mut pool = self.inner.iter();
-
-        // Check if we have this type of basic plock already set if so modify it.
-        if let Some(plock) = pool.find(|plock_seq| {
-            plock_seq.track_nr == track_index && plock_seq.plock_type == plock_type
-        }) {
-            return Some(plock.data[trig_index]);
-        }
-        None
-    }
-
-    pub fn get_compound_plock(
-        &self,
-        trig_index: usize,
-        track_index: u8,
-        plock_type: u8,
-    ) -> Option<u16> {
-        let mut pool = self.inner.iter();
-
-        // Check if we have this type of basic plock already set if so modify it.
-        if let Some(plock) = pool.find(|plock_seq| {
-            plock_seq.track_nr == track_index && plock_seq.plock_type == plock_type
-        }) {
-            return Some(
-                (plock.data[trig_index] as u16) << 8 | self.inner[1].data[trig_index] as u16,
-            );
-        }
-        None
-    }
-
-    // TODO: Check the order of the msb lsb.
     pub(crate) fn set_compound_plock(
         &mut self,
         trig_index: usize,
@@ -161,16 +120,21 @@ impl ParameterLockPool {
         let last_slot = &self.inner[self.inner.len() - 1];
         let last_slot_available = last_slot.track_nr == 0xFF || last_slot.plock_type == 0xFF;
 
-        let mut pool_iter = self.inner.iter_mut().enumerate();
-
         // Check if we have this type of compound plock already set if so modify it.
-        if let Some((i, found_plock)) = pool_iter.find(|(_, plock_seq)| {
-            plock_seq.track_nr == track_index && plock_seq.plock_type == plock_type
-        }) {
+        if let Some((i, found_plock)) =
+            self.inner
+                .iter_mut()
+                .enumerate()
+                .find(|(_, plock_seq)| -> bool {
+                    plock_seq.track_nr == track_index && plock_seq.plock_type == plock_type
+                })
+        {
+            // dbg!(found_plock);
+            // panic!("PLOCK FOUND");
             // This is safe because if we could have set it it means these indexes are valid.
-            // TODO: Check msb lsb order.
-            found_plock.data[trig_index] = value_msb;
-            self.inner[i + 1].data[trig_index] = value_lsb;
+            found_plock.data[trig_index] = value_lsb;
+            self.inner[i + 1].data[trig_index] = value_msb;
+
             return Ok(());
         }
 
@@ -182,22 +146,68 @@ impl ParameterLockPool {
 
         // Then we have enough slots to set the companion byte.
         // Let's find the first available slot.
-        if let Some((i, found_empty_slot)) = pool_iter
+        if let Some((i, found_empty_slot)) = self
+            .inner
+            .iter_mut()
+            .enumerate()
             .find(|(_, plock_seq)| plock_seq.track_nr == 0xFF || plock_seq.plock_type == 0xFF)
         {
             // We know at this point that 2 empty slots are available.
             found_empty_slot.track_nr = track_index;
             found_empty_slot.plock_type = plock_type;
-            found_empty_slot.data[trig_index] = value_msb;
+            found_empty_slot.data[trig_index] = value_lsb;
 
             self.inner[i + 1].track_nr = ADJACENT_PLOCK_SLOT_TRACK_NUMBER_BYTE;
             self.inner[i + 1].plock_type = ADJACENT_PLOCK_SLOT_TYPE_BYTE;
-            self.inner[i + 1].data[trig_index] = value_lsb;
+            self.inner[i + 1].data[trig_index] = value_msb;
 
+            // let first_way = ((self.inner[i + 1].data[trig_index] as u16) << 8)
+            //     | self.inner[i].data[trig_index] as u16;
+            // let second_way_reverse = ((self.inner[i].data[trig_index] as u16) << 8)
+            //     | self.inner[i + 1].data[trig_index] as u16;
+
+            // dbg!(self.inner[i], self.inner[i + 1]);
+            // dbg!(first_way);
+            // dbg!(crate::util::scale_u16_to_f32(
+            //     first_way, 0u16, 32767u16, -128f32, 127.99f32,
+            // ));
+            // panic!("PLOCK NEW");
             return Ok(());
         }
 
         Err(ParameterLockMemoryFull)
+    }
+
+    pub fn get_basic_plock(
+        &self,
+        trig_index: usize,
+        track_index: u8,
+        plock_type: u8,
+    ) -> Option<u8> {
+        // Check if we have this type of basic plock already set if so modify it.
+        if let Some(plock) = self.inner.iter().find(|plock_seq| {
+            plock_seq.track_nr == track_index && plock_seq.plock_type == plock_type
+        }) {
+            return Some(plock.data[trig_index]);
+        }
+        None
+    }
+
+    pub fn get_compound_plock(
+        &self,
+        trig_index: usize,
+        track_index: u8,
+        plock_type: u8,
+    ) -> Option<u16> {
+        // Check if we have this type of basic plock already set if so modify it.
+        if let Some(plock) = self.inner.iter().find(|plock_seq| -> bool {
+            plock_seq.track_nr == track_index && plock_seq.plock_type == plock_type
+        }) {
+            return Some(
+                (plock.data[trig_index] as u16) | (self.inner[1].data[trig_index] as u16) << 8,
+            );
+        }
+        None
     }
 
     /// Clears the basic plock for the given trig.
@@ -207,12 +217,10 @@ impl ParameterLockPool {
         track_index: u8,
         plock_type: u8,
     ) -> Result<(), RytmError> {
-        let mut pool = self.inner.iter_mut().enumerate();
-
         let mut plock_seq_index_which_we_cleared_from: Option<usize> = None;
 
         // Check if we have this type of basic plock already set if so modify it.
-        if let Some((i, plock)) = pool.find(|(_, plock_seq)| {
+        if let Some((i, plock)) = self.inner.iter_mut().enumerate().find(|(_, plock_seq)| {
             plock_seq.track_nr == track_index && plock_seq.plock_type == plock_type
         }) {
             plock.data[trig_index] = 0xFF;
@@ -238,12 +246,10 @@ impl ParameterLockPool {
         track_index: u8,
         plock_type: u8,
     ) -> Result<(), RytmError> {
-        let mut pool = self.inner.iter_mut().enumerate();
-
         let mut plock_seq_index_which_we_cleared_from: Option<usize> = None;
 
         // Check if we have this type of compound plock already set if so modify it.
-        if let Some((i, plock)) = pool.find(|(i, plock_seq)| {
+        if let Some((i, plock)) = self.inner.iter_mut().enumerate().find(|(i, plock_seq)| {
             plock_seq.track_nr == track_index && plock_seq.plock_type == plock_type
         }) {
             plock.data[trig_index] = 0xFF;

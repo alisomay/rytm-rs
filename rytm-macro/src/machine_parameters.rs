@@ -250,9 +250,7 @@ pub fn generate_setter_and_plock_methods_with_range_check(
                             trig_index,
                             assigned_track as u8,
                             rytm_sys::#syn_param_type_ident as u8,
-                            scale_generic(#param_ident, #range_f32_min, #range_f32_max, #range_u16_min, #range_u16_max, |x| {
-                                x.round() as u16
-                            })
+                            scale_f32_to_u16(#param_ident, #range_f32_min, #range_f32_max, #range_u16_min, #range_u16_max)
                         )?;
 
                         return Ok(());
@@ -271,10 +269,7 @@ pub fn generate_setter_and_plock_methods_with_range_check(
                         );
 
                         if let Some(#param_ident) = #param_ident {
-                            let scaled = scale_generic(#param_ident, #range_u16_min, #range_u16_max, #range_f32_min, #range_f32_max, |x| {
-                                x as f32
-                            });
-
+                            let scaled = scale_u16_to_f32(#param_ident, #range_u16_min, #range_u16_max, #range_f32_min, #range_f32_max);
                             return Ok(Some(scaled));
                         }
                         return Ok(None);
@@ -368,13 +363,12 @@ pub fn generate_apply_to_raw_sound_values_inner(
         let (output_min, output_max) = get_u16_min_max_from_float_range(input_min, input_max);
 
         quote! {
-            raw_sound.#syn_param = to_s_u16_t_union_a(scale_generic(
+            raw_sound.#syn_param = to_s_u16_t_union_a(scale_f32_to_u16(
                 self.#param_ident,
                 #input_min,
                 #input_max,
                 #output_min,
                 #output_max,
-                |#param_ident: f32| #param_ident.round() as u16,
             ));
         }
     } else if parts.iter().any(|&p| p.starts_with('-')) {

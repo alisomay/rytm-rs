@@ -1,8 +1,8 @@
 use crate::{
     error::{ConversionError, ParameterError, RytmError},
     util::{
-        from_s_u16_t, i8_to_u8_midpoint_of_u8_input_range, scale_generic, to_s_u16_t_union_a,
-        u8_to_i8_midpoint_of_u8_input_range,
+        from_s_u16_t, i8_to_u8_midpoint_of_u8_input_range, scale_f32_to_u16, scale_u16_to_f32,
+        to_s_u16_t_union_a, u8_to_i8_midpoint_of_u8_input_range,
     },
 };
 use rytm_rs_macro::parameter_range;
@@ -41,22 +41,20 @@ impl TryFrom<&ar_sound_t> for Sample {
     fn try_from(raw_sound: &ar_sound_t) -> Result<Self, Self::Error> {
         // // map range of u16 0..=30720 to 0.0..=120.0
 
-        let start = scale_generic(
+        let start = scale_u16_to_f32(
             unsafe { from_s_u16_t(&raw_sound.sample_start) },
             0u16,
             30720u16,
             0f32,
             120.0f32,
-            |x| x as f32,
         );
 
-        let end = scale_generic(
+        let end = scale_u16_to_f32(
             unsafe { from_s_u16_t(&raw_sound.sample_end) },
             0u16,
             30720u16,
             0f32,
             120.0f32,
-            |x| x as f32,
         );
 
         Ok(Self {
@@ -75,12 +73,8 @@ impl TryFrom<&ar_sound_t> for Sample {
 impl Sample {
     pub(crate) fn apply_to_raw_sound(&self, raw_sound: &mut ar_sound_t) {
         // // map range of 0.0..=120.0 to u16 0..=30720
-        let start = scale_generic(self.start, 0f32, 120.0f32, 0u16, 30720u16, |x| {
-            x.round() as u16
-        });
-        let end = scale_generic(self.end, 0f32, 120.0f32, 0u16, 30720u16, |x| {
-            x.round() as u16
-        });
+        let start = scale_f32_to_u16(self.start, 0f32, 120.0f32, 0u16, 30720u16);
+        let end = scale_f32_to_u16(self.end, 0f32, 120.0f32, 0u16, 30720u16);
 
         raw_sound.sample_tune = i8_to_u8_midpoint_of_u8_input_range(self.tune, 127, 0);
         raw_sound.sample_fine_tune = i8_to_u8_midpoint_of_u8_input_range(self.fine_tune, 127, 0);

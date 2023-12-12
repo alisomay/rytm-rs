@@ -2,7 +2,8 @@ use crate::{
     error::{ParameterError, RytmError},
     object::pattern::Trig,
     util::{
-        i8_to_u8_midpoint_of_u8_input_range, scale_generic, u8_to_i8_midpoint_of_u8_input_range,
+        i8_to_u8_midpoint_of_u8_input_range, scale_f32_to_u16, scale_u16_to_f32,
+        u8_to_i8_midpoint_of_u8_input_range,
     },
     RytmError::OrphanTrig,
 };
@@ -90,9 +91,7 @@ impl Trig {
     #[parameter_range(range = "sample_start:0.0..=120.0")]
     pub fn p_lock_set_sample_start(&self, sample_start: f32) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
-            let start = scale_generic(sample_start, 0f32, 120.0f32, 0u16, 30720u16, |x| {
-                x.round() as u16
-            });
+            let start = scale_f32_to_u16(sample_start, 0f32, 120.0f32, 0u16, 30720u16);
 
             pool.borrow_mut().set_compound_plock(
                 self.index,
@@ -112,9 +111,7 @@ impl Trig {
     #[parameter_range(range = "sample_end:0.0..=120.0")]
     pub fn p_lock_set_sample_end(&self, sample_end: f32) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
-            let end = scale_generic(sample_end, 0f32, 120.0f32, 0u16, 30720u16, |x| {
-                x.round() as u16
-            });
+            let end = scale_f32_to_u16(sample_end, 0f32, 120.0f32, 0u16, 30720u16);
 
             pool.borrow_mut().set_compound_plock(
                 self.index,
@@ -257,14 +254,7 @@ impl Trig {
             );
 
             if let Some(value) = value {
-                return Ok(Some(scale_generic(
-                    value,
-                    0u16,
-                    30720u16,
-                    0f32,
-                    120f32,
-                    |x| x as f32,
-                )));
+                return Ok(Some(scale_u16_to_f32(value, 0u16, 30720u16, 0f32, 120f32)));
             }
 
             return Ok(None);
@@ -284,14 +274,7 @@ impl Trig {
             );
 
             if let Some(value) = value {
-                return Ok(Some(scale_generic(
-                    value,
-                    0u16,
-                    30720u16,
-                    0f32,
-                    120f32,
-                    |x| x as f32,
-                )));
+                return Ok(Some(scale_u16_to_f32(value, 0u16, 30720u16, 0f32, 120f32)));
             }
 
             return Ok(None);

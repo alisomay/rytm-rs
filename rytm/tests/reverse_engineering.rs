@@ -297,7 +297,7 @@ fn sound() {
 
     let query = SoundQuery::new(0).unwrap();
     let query = SoundQuery::new_targeting_work_buffer(track_index).unwrap();
-
+    let out = conn_out.clone();
     let callback = |response: &[u8], rytm: &mut Rytm, elapsed: u64| -> Result<(), RytmError> {
         if !is_sysex(response) {
             // Pass..
@@ -305,8 +305,14 @@ fn sound() {
         }
 
         rytm.update_from_sysex_response(response)?;
-        let sound = rytm.work_buffer_sounds();
 
+        rytm.work_buffer_sounds_mut()[0]
+            .lfo_mut()
+            .set_depth(55.0)
+            .unwrap();
+
+        let msg = rytm.encode_work_buffer_sound_as_sysex_message(0).unwrap();
+        out.lock().unwrap().send(&msg[..]).unwrap();
         clearscreen::clear().unwrap();
 
         // convert unix epoch to human readable milliseconds
@@ -314,7 +320,7 @@ fn sound() {
 
         // dbg!(elapsed);
         // dbg!(sound[track_index].machine_parameters());
-        dbg!(sound);
+        dbg!(rytm.work_buffer_sounds()[0].lfo());
 
         Ok(())
     };
@@ -451,6 +457,7 @@ fn pattern_type() {
 
     let query = PatternQuery::new_targeting_work_buffer();
 
+    let out = conn_out.clone();
     let callback = |response: &[u8], rytm: &mut Rytm, elapsed: u64| -> Result<(), RytmError> {
         if !is_sysex(response) {
             // Pass..
@@ -458,8 +465,19 @@ fn pattern_type() {
         }
 
         rytm.update_from_sysex_response(response)?;
-        let pattern = rytm.work_buffer_pattern();
+        // let pattern = rytm.work_buffer_pattern_mut();
 
+        // let t = &mut pattern.tracks_mut()[0];
+        // let trigs = t.trigs_mut();
+        // let trig0 = &mut trigs[0];
+        // // dbg!(t.);
+        // trig0.p_lock_set_lfo_depth(55.0).unwrap();
+        out.lock()
+            .unwrap()
+            .send(&rytm.encode_work_buffer_pattern_as_sysex_message().unwrap()[..])
+            .unwrap();
+        // dbg!(&pattern.parameter_lock_pool);
+        // panic!();
         // clearscreen::clear().unwrap();
 
         // let mute: u16 = ((settings.track_mute_msb as u16) << 8) | (settings.track_mute_lsb as u16);
@@ -480,5 +498,5 @@ fn pattern_type() {
         Ok(())
     };
 
-    poll_with_query_blocking(&mut rytm, query, conn_out, rx, 1000, callback).unwrap();
+    poll_with_query_blocking(&mut rytm, query, conn_out, rx, 3000, callback).unwrap();
 }

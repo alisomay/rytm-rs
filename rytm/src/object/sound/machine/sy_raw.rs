@@ -1,9 +1,10 @@
+use crate::util::scale_f32_to_u16;
 use crate::{
     error::{ParameterError, RytmError},
     object::pattern::parameter_lock::ParameterLockPool,
     util::{
         from_s_u16_t, get_u16_min_max_from_float_range, i8_to_u8_midpoint_of_u8_input_range,
-        scale_generic, to_s_u16_t_union_a, u8_to_i8_midpoint_of_u8_input_range,
+        scale_u16_to_f32, to_s_u16_t_union_a, u8_to_i8_midpoint_of_u8_input_range,
     },
     RytmError::OrphanTrig,
 };
@@ -272,22 +273,20 @@ impl SyRawParameters {
                 parameter_lock_pool: None,
                 assigned_track: track_index,
                 lev: (from_s_u16_t(&raw_sound.synth_param_1) >> 8) as u8,
-                tun: scale_generic(
+                tun: scale_u16_to_f32(
                     from_s_u16_t(&raw_sound.synth_param_2),
                     input_tun_min,
                     input_tun_max,
                     output_tun_min,
                     output_tun_max,
-                    |tun: u16| tun as f32,
                 ),
                 dec2: (from_s_u16_t(&raw_sound.synth_param_3) >> 8) as u8,
-                det: scale_generic(
+                det: scale_u16_to_f32(
                     from_s_u16_t(&raw_sound.synth_param_4),
                     input_tun_min,
                     input_tun_max,
                     output_tun_min,
                     output_tun_max,
-                    |tun: u16| tun as f32,
                 ),
                 nlev: (from_s_u16_t(&raw_sound.synth_param_5) >> 8) as u8,
                 wav1: ((from_s_u16_t(&raw_sound.synth_param_6) >> 8) as u8).into(),

@@ -187,24 +187,34 @@ pub(crate) fn encode_micro_timing_byte(micro_timing: &MicroTime) -> i8 {
     }
 }
 
-pub fn scale_generic<T, S, F>(
-    input: T,
-    input_min: T,
-    input_max: T,
-    output_min: S,
-    output_max: S,
-    convert: F,
-) -> S
-where
-    T: Copy + PartialOrd + Sub<Output = T> + Div<Output = T>,
-    S: Copy + Add<Output = S> + Sub<Output = S> + Mul<Output = S> + Div<Output = S>,
-    F: Fn(T) -> S,
-{
-    let input_range = convert(input_max) - convert(input_min);
+pub fn scale_f32_to_u16(
+    input: f32,
+    input_min: f32,
+    input_max: f32,
+    output_min: u16,
+    output_max: u16,
+) -> u16 {
+    let input_range = input_max - input_min;
+    let output_range = output_max as f32 - output_min as f32;
+    let scale_factor = output_range / input_range;
+
+    let normalized_input = input - input_min;
+    let scaled_input = normalized_input * scale_factor + output_min as f32;
+    scaled_input.round() as u16
+}
+
+pub fn scale_u16_to_f32(
+    input: u16,
+    input_min: u16,
+    input_max: u16,
+    output_min: f32,
+    output_max: f32,
+) -> f32 {
+    let input_range = input_max as f32 - input_min as f32;
     let output_range = output_max - output_min;
     let scale_factor = output_range / input_range;
 
-    let normalized_input = convert(input) - convert(input_min);
+    let normalized_input = input as f32 - input_min as f32;
     normalized_input * scale_factor + output_min
 }
 

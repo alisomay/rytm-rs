@@ -1,9 +1,10 @@
+use crate::util::scale_f32_to_u16;
 use crate::{
     error::{ParameterError, RytmError},
     object::pattern::parameter_lock::ParameterLockPool,
     util::{
         from_s_u16_t, get_u16_min_max_from_float_range, i8_to_u8_midpoint_of_u8_input_range,
-        scale_generic, to_s_u16_t_union_a, u8_to_i8_midpoint_of_u8_input_range,
+        scale_u16_to_f32, to_s_u16_t_union_a, u8_to_i8_midpoint_of_u8_input_range,
     },
     RytmError::OrphanTrig,
 };
@@ -80,13 +81,12 @@ impl RsClassicParameters {
                 parameter_lock_pool: None,
                 assigned_track: track_index,
                 lev: (from_s_u16_t(&raw_sound.synth_param_1) >> 8) as u8,
-                t1: scale_generic(
+                t1: scale_u16_to_f32(
                     from_s_u16_t(&raw_sound.synth_param_2),
                     input_tun_min,
                     input_tun_max,
                     output_tun_min,
                     output_tun_max,
-                    |tun: u16| tun as f32,
                 ),
                 dec: (from_s_u16_t(&raw_sound.synth_param_3) >> 8) as u8,
                 bal: u8_to_i8_midpoint_of_u8_input_range(
@@ -94,13 +94,12 @@ impl RsClassicParameters {
                     0,
                     127,
                 ),
-                t2: scale_generic(
+                t2: scale_u16_to_f32(
                     from_s_u16_t(&raw_sound.synth_param_5),
                     input_tun_min,
                     input_tun_max,
                     output_tun_min,
                     output_tun_max,
-                    |tun: u16| tun as f32,
                 ),
                 sym: u8_to_i8_midpoint_of_u8_input_range(
                     (from_s_u16_t(&raw_sound.synth_param_6) >> 8) as u8,

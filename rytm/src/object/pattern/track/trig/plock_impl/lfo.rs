@@ -5,7 +5,8 @@ use crate::{
         sound::types::{LfoDestination, LfoMode, LfoMultiplier, LfoWaveform},
     },
     util::{
-        i8_to_u8_midpoint_of_u8_input_range, scale_generic, u8_to_i8_midpoint_of_u8_input_range,
+        i8_to_u8_midpoint_of_u8_input_range, scale_f32_to_u16, scale_u16_to_f32,
+        u8_to_i8_midpoint_of_u8_input_range,
     },
     RytmError::OrphanTrig,
 };
@@ -138,9 +139,7 @@ impl Trig {
     #[parameter_range(range = "lfo_depth:-128.0..=127.99")]
     pub fn p_lock_set_lfo_depth(&self, lfo_depth: f32) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
-            let depth = scale_generic(lfo_depth, -128f32, 127.99f32, 0u16, 32767u16, |x| {
-                x.round() as u16
-            });
+            let depth = scale_f32_to_u16(lfo_depth, -128f32, 127.99f32, 0u16, 32767u16);
 
             pool.borrow_mut().set_compound_plock(
                 self.index,
@@ -302,13 +301,8 @@ impl Trig {
             );
 
             if let Some(value) = value {
-                return Ok(Some(scale_generic(
-                    value,
-                    0u16,
-                    32767u16,
-                    -128f32,
-                    127.99f32,
-                    |x| x as f32,
+                return Ok(Some(scale_u16_to_f32(
+                    value, 0u16, 32767u16, -128f32, 127.99f32,
                 )));
             }
 

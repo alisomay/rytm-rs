@@ -135,7 +135,7 @@ impl From<&Pattern> for ar_pattern_t {
         Self {
             magic: header,
             tracks,
-            plock_seqs: pattern.parameter_lock_pool.borrow().to_raw(),
+            plock_seqs: pattern.parameter_lock_pool.borrow().as_raw(),
             master_length: to_s_u16_t_union_b(pattern.master_length),
             master_chg_msb: (pattern.master_change >> 8) as u8,
             master_chg_lsb: pattern.master_change as u8,

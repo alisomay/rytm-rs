@@ -1,9 +1,11 @@
+use core::panic;
+
 use crate::{
     error::{ConversionError, ParameterError, RytmError},
     object::sound::types::{LfoDestination, LfoMode, LfoMultiplier, LfoWaveform},
     util::{
-        from_s_u16_t, i8_to_u8_midpoint_of_u8_input_range, scale_generic, to_s_u16_t_union_a,
-        u8_to_i8_midpoint_of_u8_input_range,
+        from_s_u16_t, i8_to_u8_midpoint_of_u8_input_range, scale_f32_to_u16, scale_u16_to_f32,
+        to_s_u16_t_union_a, u8_to_i8_midpoint_of_u8_input_range,
     },
 };
 use rytm_rs_macro::parameter_range;
@@ -42,13 +44,12 @@ impl TryFrom<&ar_sound_t> for Lfo {
     fn try_from(raw_sound: &ar_sound_t) -> Result<Self, Self::Error> {
         // map range of 0..=32767 to -128.0..=127.99
 
-        let depth = scale_generic(
+        let depth = scale_u16_to_f32(
             unsafe { from_s_u16_t(&raw_sound.lfo_depth) },
             0u16,
             32767u16,
             -128f32,
             127.99f32,
-            |x| x as f32,
         );
 
         Ok(Self {
@@ -67,13 +68,8 @@ impl TryFrom<&ar_sound_t> for Lfo {
 impl Lfo {
     pub(crate) fn apply_to_raw_sound(&self, raw_sound: &mut ar_sound_t) {
         // map range of -128.0..=127.99 to 0..=32767
-        let depth = to_s_u16_t_union_a(scale_generic(
-            self.depth,
-            -128f32,
-            127.99f32,
-            0u16,
-            32767u16,
-            |x| x.round() as u16,
+        let depth = to_s_u16_t_union_a(scale_f32_to_u16(
+            self.depth, -128f32, 127.99f32, 0u16, 32767u16,
         ));
 
         raw_sound.lfo_speed = i8_to_u8_midpoint_of_u8_input_range(self.speed, 0, 127);
@@ -119,6 +115,15 @@ impl Lfo {
     /// Sets the waveform of the LFO.
     pub fn set_waveform(&mut self, waveform: LfoWaveform) -> Result<(), RytmError> {
         self.waveform = waveform;
+        Ok(())
+    }
+
+    /// Sets the depth of the LFO.
+    ///
+    /// Range: `-128.0..=127.99`
+    #[parameter_range(range = "depth:-128.0..=127.99")]
+    pub fn set_depth(&mut self, depth: f32) -> Result<(), RytmError> {
+        self.depth = depth;
         Ok(())
     }
 
