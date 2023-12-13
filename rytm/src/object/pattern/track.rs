@@ -61,6 +61,13 @@ pub struct Track {
     /// Maybe they mean something?
     #[derivative(Debug = "ignore")]
     pub(crate) __maybe_useful_flags_from_flags_and_speed: u8,
+
+    #[derivative(Debug = "ignore")]
+    parameter_lock_pool: Option<Rc<RefCell<ParameterLockPool>>>,
+
+    #[derivative(Debug = "ignore")]
+    #[allow(dead_code)]
+    fx_track_ref: Option<Rc<RefCell<Track>>>,
 }
 
 impl From<&Track> for ar_pattern_track_t {
@@ -140,6 +147,12 @@ impl From<&Track> for ar_pattern_track_t {
 impl Track {
     #[parameter_range(range = "index:0..=12")]
     pub(crate) fn try_default(index: usize) -> Result<Self, RytmError> {
+        let fx_track_ref = if index == 12 {
+            None
+        } else {
+            Some(Rc::new(RefCell::new(Self::try_default(12)?)))
+        };
+
         Ok(Self {
             index,
             trigs: Trig::default_trig_array(index),
@@ -167,6 +180,9 @@ impl Track {
 
             __maybe_useful_flag_from_default_trig_note: 0,
             __maybe_useful_flags_from_flags_and_speed: 0,
+
+            parameter_lock_pool: None,
+            fx_track_ref,
         })
     }
 
@@ -174,6 +190,7 @@ impl Track {
         index: usize,
         raw_track: &ar_pattern_track_t,
         parameter_lock_pool: Rc<RefCell<ParameterLockPool>>,
+        fx_track_ref: Option<Rc<RefCell<Track>>>,
     ) -> Result<Self, RytmError> {
         let mut trigs: [Trig; 64] = Trig::default_trig_array(index);
 
@@ -199,6 +216,7 @@ impl Track {
                 raw_track.retrig_velocity_offsets[i],
                 raw_track.sound_locks[i],
                 parameter_lock_pool_ref,
+                fx_track_ref.as_ref().map(Rc::clone),
             )?;
         }
 
@@ -238,6 +256,9 @@ impl Track {
 
             __maybe_useful_flag_from_default_trig_note,
             __maybe_useful_flags_from_flags_and_speed,
+
+            parameter_lock_pool: Some(Rc::clone(&parameter_lock_pool)),
+            fx_track_ref,
         })
     }
     /// Returns a mutable reference to the trigs in this track.
@@ -515,5 +536,14 @@ impl Track {
     /// Returns the root note for this track.
     pub fn root_note(&self) -> RootNote {
         self.root_note
+    }
+
+    /// Clears all the parameter locks for this track.
+    pub fn clear_all_plocks(&self) -> Result<(), RytmError> {
+        if let Some(pool) = &self.parameter_lock_pool {
+            pool.borrow_mut()
+                .clear_all_plocks_for_track(self.index as u8);
+        }
+        Ok(())
     }
 }

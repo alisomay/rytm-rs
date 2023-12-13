@@ -19,6 +19,8 @@ impl Trig {
                 pre_delay as u8,
             )?;
 
+            self.enable_fx_trig_if_necessary();
+
             return Ok(());
         }
         Err(OrphanTrig)
@@ -35,6 +37,8 @@ impl Trig {
                 AR_FX_PLOCK_TYPE_REVERB_DECAY as u8,
                 decay as u8,
             )?;
+
+            self.enable_fx_trig_if_necessary();
 
             return Ok(());
         }
@@ -53,6 +57,8 @@ impl Trig {
                 freq as u8,
             )?;
 
+            self.enable_fx_trig_if_necessary();
+
             return Ok(());
         }
         Err(OrphanTrig)
@@ -69,6 +75,8 @@ impl Trig {
                 AR_FX_PLOCK_TYPE_REVERB_GAIN as u8,
                 gain as u8,
             )?;
+
+            self.enable_fx_trig_if_necessary();
 
             return Ok(());
         }
@@ -87,6 +95,8 @@ impl Trig {
                 hpf as u8,
             )?;
 
+            self.enable_fx_trig_if_necessary();
+
             return Ok(());
         }
         Err(OrphanTrig)
@@ -104,6 +114,8 @@ impl Trig {
                 lpf as u8,
             )?;
 
+            self.enable_fx_trig_if_necessary();
+
             return Ok(());
         }
         Err(OrphanTrig)
@@ -120,6 +132,8 @@ impl Trig {
                 AR_FX_PLOCK_TYPE_REVERB_VOL as u8,
                 volume as u8,
             )?;
+
+            self.enable_fx_trig_if_necessary();
 
             return Ok(());
         }
@@ -257,6 +271,7 @@ impl Trig {
         if let Some(ref pool) = self.parameter_lock_pool {
             pool.borrow_mut()
                 .clear_fx_basic_plock(self.index, AR_FX_PLOCK_TYPE_REVERB_PRE as u8)?;
+            self.disable_fx_trig_if_necessary();
 
             return Ok(());
         }
@@ -268,6 +283,7 @@ impl Trig {
         if let Some(ref pool) = self.parameter_lock_pool {
             pool.borrow_mut()
                 .clear_fx_basic_plock(self.index, AR_FX_PLOCK_TYPE_REVERB_DECAY as u8)?;
+            self.disable_fx_trig_if_necessary();
 
             return Ok(());
         }
@@ -279,6 +295,7 @@ impl Trig {
         if let Some(ref pool) = self.parameter_lock_pool {
             pool.borrow_mut()
                 .clear_fx_basic_plock(self.index, AR_FX_PLOCK_TYPE_REVERB_FREQ as u8)?;
+            self.disable_fx_trig_if_necessary();
 
             return Ok(());
         }
@@ -290,6 +307,7 @@ impl Trig {
         if let Some(ref pool) = self.parameter_lock_pool {
             pool.borrow_mut()
                 .clear_fx_basic_plock(self.index, AR_FX_PLOCK_TYPE_REVERB_GAIN as u8)?;
+            self.disable_fx_trig_if_necessary();
 
             return Ok(());
         }
@@ -301,6 +319,7 @@ impl Trig {
         if let Some(ref pool) = self.parameter_lock_pool {
             pool.borrow_mut()
                 .clear_fx_basic_plock(self.index, AR_FX_PLOCK_TYPE_REVERB_HPF as u8)?;
+            self.disable_fx_trig_if_necessary();
 
             return Ok(());
         }
@@ -312,6 +331,7 @@ impl Trig {
         if let Some(ref pool) = self.parameter_lock_pool {
             pool.borrow_mut()
                 .clear_fx_basic_plock(self.index, AR_FX_PLOCK_TYPE_REVERB_LPF as u8)?;
+            self.disable_fx_trig_if_necessary();
 
             return Ok(());
         }
@@ -323,6 +343,7 @@ impl Trig {
         if let Some(ref pool) = self.parameter_lock_pool {
             pool.borrow_mut()
                 .clear_fx_basic_plock(self.index, AR_FX_PLOCK_TYPE_REVERB_VOL as u8)?;
+            self.disable_fx_trig_if_necessary();
 
             return Ok(());
         }

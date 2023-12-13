@@ -27,6 +27,8 @@ impl Trig {
                 i8_to_u8_midpoint_of_u8_input_range(speed as i8, 0, 127),
             )?;
 
+            self.enable_fx_trig_if_necessary();
+
             return Ok(());
         }
         Err(OrphanTrig)
@@ -40,6 +42,8 @@ impl Trig {
                 AR_FX_PLOCK_TYPE_LFO_MULTIPLY as u8,
                 multiplier.into(),
             )?;
+
+            self.enable_fx_trig_if_necessary();
 
             return Ok(());
         }
@@ -58,6 +62,8 @@ impl Trig {
                 i8_to_u8_midpoint_of_u8_input_range(fade as i8, 0, 127),
             )?;
 
+            self.enable_fx_trig_if_necessary();
+
             return Ok(());
         }
         Err(OrphanTrig)
@@ -75,6 +81,8 @@ impl Trig {
                 destination.into(),
             )?;
 
+            self.enable_fx_trig_if_necessary();
+
             return Ok(());
         }
         Err(OrphanTrig)
@@ -88,6 +96,8 @@ impl Trig {
                 AR_FX_PLOCK_TYPE_LFO_WAVEFORM as u8,
                 waveform.into(),
             )?;
+
+            self.enable_fx_trig_if_necessary();
 
             return Ok(());
         }
@@ -106,6 +116,8 @@ impl Trig {
                 start_phase as u8,
             )?;
 
+            self.enable_fx_trig_if_necessary();
+
             return Ok(());
         }
         Err(OrphanTrig)
@@ -119,6 +131,8 @@ impl Trig {
                 AR_FX_PLOCK_TYPE_LFO_MOD as u8,
                 mode.into(),
             )?;
+
+            self.enable_fx_trig_if_necessary();
 
             return Ok(());
         }
@@ -138,6 +152,8 @@ impl Trig {
                 AR_FX_PLOCK_TYPE_LFO_DEPTH as u8,
                 depth,
             )?;
+
+            self.enable_fx_trig_if_necessary();
 
             return Ok(());
         }
@@ -293,6 +309,7 @@ impl Trig {
         if let Some(ref pool) = self.parameter_lock_pool {
             pool.borrow_mut()
                 .clear_fx_basic_plock(self.index, AR_FX_PLOCK_TYPE_LFO_SPEED as u8)?;
+            self.disable_fx_trig_if_necessary();
 
             return Ok(());
         }
@@ -304,6 +321,7 @@ impl Trig {
         if let Some(ref pool) = self.parameter_lock_pool {
             pool.borrow_mut()
                 .clear_fx_basic_plock(self.index, AR_FX_PLOCK_TYPE_LFO_MULTIPLY as u8)?;
+            self.disable_fx_trig_if_necessary();
 
             return Ok(());
         }
@@ -315,6 +333,7 @@ impl Trig {
         if let Some(ref pool) = self.parameter_lock_pool {
             pool.borrow_mut()
                 .clear_fx_basic_plock(self.index, AR_FX_PLOCK_TYPE_LFO_FADE as u8)?;
+            self.disable_fx_trig_if_necessary();
 
             return Ok(());
         }
@@ -326,6 +345,7 @@ impl Trig {
         if let Some(ref pool) = self.parameter_lock_pool {
             pool.borrow_mut()
                 .clear_fx_basic_plock(self.index, AR_FX_PLOCK_TYPE_LFO_DEST as u8)?;
+            self.disable_fx_trig_if_necessary();
 
             return Ok(());
         }
@@ -337,6 +357,7 @@ impl Trig {
         if let Some(ref pool) = self.parameter_lock_pool {
             pool.borrow_mut()
                 .clear_fx_basic_plock(self.index, AR_FX_PLOCK_TYPE_LFO_WAVEFORM as u8)?;
+            self.disable_fx_trig_if_necessary();
 
             return Ok(());
         }
@@ -348,6 +369,7 @@ impl Trig {
         if let Some(ref pool) = self.parameter_lock_pool {
             pool.borrow_mut()
                 .clear_fx_basic_plock(self.index, AR_FX_PLOCK_TYPE_LFO_PHASE as u8)?;
+            self.disable_fx_trig_if_necessary();
 
             return Ok(());
         }
@@ -359,6 +381,7 @@ impl Trig {
         if let Some(ref pool) = self.parameter_lock_pool {
             pool.borrow_mut()
                 .clear_fx_basic_plock(self.index, AR_FX_PLOCK_TYPE_LFO_MOD as u8)?;
+            self.disable_fx_trig_if_necessary();
 
             return Ok(());
         }

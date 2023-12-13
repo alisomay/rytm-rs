@@ -18,6 +18,8 @@ use std::{
     rc::Rc,
 };
 
+use super::Track;
+
 pub trait HoldsTrigFlags {
     /// Returns the raw flags value.
     fn raw_trig_flags(&self) -> u16;
@@ -337,6 +339,9 @@ pub struct Trig {
 
     #[derivative(Debug = "ignore")]
     parameter_lock_pool: Option<Rc<RefCell<ParameterLockPool>>>,
+
+    #[derivative(Debug = "ignore")]
+    fx_track_ref: Option<Rc<RefCell<Track>>>,
 }
 
 // TODO: Maybe builder..
@@ -364,8 +369,8 @@ impl Trig {
             retrig_length: Length::Quarter,
             retrig_velocity_offset: 0,
             sound_lock: 0xFF,
-            // Inefficient but it will be dropped as soon as the trig is created so it sh
             parameter_lock_pool: None,
+            fx_track_ref: None,
         })
     }
 
@@ -383,6 +388,7 @@ impl Trig {
         retrig_velocity_offset: i8,
         sound_lock: u8,
         parameter_lock_pool: Rc<RefCell<ParameterLockPool>>,
+        fx_track_ref: Option<Rc<RefCell<Track>>>,
     ) -> Result<Self, RytmError> {
         let trig_condition_msb = note & 0b1000_0000;
         let note = note & 0b0111_1111;
@@ -418,6 +424,7 @@ impl Trig {
             retrig_velocity_offset,
             sound_lock,
             parameter_lock_pool: Some(parameter_lock_pool),
+            fx_track_ref,
         })
     }
 
@@ -447,8 +454,17 @@ impl Trig {
     }
 
     /// Returns the index of the trig.
+    ///
+    /// Range `0..=63`
     pub fn index(&self) -> usize {
         self.index
+    }
+
+    /// Returns the index of the track which this trig belongs to.
+    ///
+    /// Range `0..=12`
+    pub fn track_index(&self) -> usize {
+        self.track_index
     }
 
     // TODO: On device 36..=84 is valid.
@@ -626,6 +642,35 @@ impl Trig {
     /// Range `0..=127`
     pub fn sound_lock(&self) -> usize {
         self.sound_lock as usize
+    }
+
+    /// Returns if this trig is a trig for the FX track.
+    pub fn is_fx_trig(&self) -> bool {
+        self.track_index == 12
+    }
+
+    /// Utility method to be called in fx plock setter.
+    ///
+    /// When a parameter lock is set regarding fx, it is necessary to sync the fx track's trigs.
+    pub(crate) fn enable_fx_trig_if_necessary(&self) {
+        // Enable fx trig if this method is called on a non-fx trig.
+        if let Some(ref fx_track_ref) = self.fx_track_ref {
+            let mut borrow = fx_track_ref.borrow_mut();
+            let fx_trig = &mut borrow.trigs_mut()[self.index];
+            fx_trig.set_trig_enable(true);
+        }
+    }
+
+    /// Utility method to be called in fx plock clearer.
+    ///
+    /// When a parameter lock is cleared regarding fx, it is necessary to sync the fx track's trigs.
+    pub(crate) fn disable_fx_trig_if_necessary(&self) {
+        // Disable fx trig if this method is called on a non-fx trig.
+        if let Some(ref fx_track_ref) = self.fx_track_ref {
+            let mut borrow = fx_track_ref.borrow_mut();
+            let fx_trig = &mut borrow.trigs_mut()[self.index];
+            fx_trig.set_trig_enable(false);
+        }
     }
 }
 

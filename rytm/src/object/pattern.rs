@@ -13,7 +13,7 @@ use crate::{
     impl_sysex_compatible,
     object::pattern::track::Track,
     sysex::{SysexCompatible, SysexMeta, SysexType, PATTERN_SYSEX_SIZE},
-    util::{from_s_u16_t, to_s_u16_t_union_b},
+    util::{assemble_u32_from_u8_array, from_s_u16_t, to_s_u16_t_union_b},
 };
 use crate::{util::break_u32_into_u8_array, AnySysexType};
 use derivative::Derivative;
@@ -52,10 +52,9 @@ pub struct Pattern {
     version: u32,
     /// Tracks
     ///
-    /// 13 tracks of analog rytm.
-    ///
-    /// Fx track is the 13th track.
-    tracks: [Track; 13],
+    /// 12 tracks of analog rytm excluding the FX track.
+    tracks: [Track; 12],
+    fx_track: Rc<RefCell<Track>>,
 
     #[derivative(Debug = "ignore")]
     pub parameter_lock_pool: Rc<RefCell<ParameterLockPool>>,
@@ -123,6 +122,11 @@ impl From<&Pattern> for ar_pattern_t {
         let mut tracks: [ar_pattern_track_t; 13] = [ar_pattern_track_t::default(); 13];
 
         for (i, track) in pattern.tracks.iter().enumerate() {
+            if i == 12 {
+                let borrow = pattern.fx_track.borrow();
+                tracks[i] = (&*borrow).into();
+                break;
+            }
             tracks[i] = track.into();
         }
 
@@ -158,7 +162,7 @@ impl Pattern {
             sysex_meta.obj_nr as usize
         };
 
-        let mut tracks: [Track; 13] = [
+        let mut tracks: [Track; 12] = [
             Track::try_default(0).unwrap(),
             Track::try_default(1).unwrap(),
             Track::try_default(2).unwrap(),
@@ -171,23 +175,33 @@ impl Pattern {
             Track::try_default(9).unwrap(),
             Track::try_default(10).unwrap(),
             Track::try_default(11).unwrap(),
-            // Fx Track
-            Track::try_default(12).unwrap(),
         ];
 
         let parameter_lock_pool = Rc::new(RefCell::new(ParameterLockPool::from_raw(
             raw_pattern.plock_seqs,
         )));
 
+        let fx_track = Rc::new(RefCell::new(Track::try_from_raw(
+            12,
+            &raw_pattern.tracks[12],
+            Rc::clone(&parameter_lock_pool),
+            None,
+        )?));
+
         for (i, track) in raw_pattern.tracks.iter().enumerate() {
+            if i == 12 {
+                break;
+            }
             let parameter_lock_pool_ref = Rc::clone(&parameter_lock_pool);
-            tracks[i] = Track::try_from_raw(i, track, parameter_lock_pool_ref)?;
+            tracks[i] = Track::try_from_raw(
+                i,
+                track,
+                parameter_lock_pool_ref,
+                Some(Rc::clone(&fx_track)),
+            )?;
         }
 
-        let version = ((raw_pattern.magic[0] as u32) << 24)
-            | ((raw_pattern.magic[1] as u32) << 16)
-            | ((raw_pattern.magic[2] as u32) << 8)
-            | (raw_pattern.magic[3] as u32);
+        let version = assemble_u32_from_u8_array(&raw_pattern.magic);
 
         let bpm = ((raw_pattern.bpm_msb as u16) << 8) | (raw_pattern.bpm_lsb as u16);
         let bpm = bpm as f32 / 120.0;
@@ -200,6 +214,7 @@ impl Pattern {
             sysex_meta,
             version,
             tracks,
+            fx_track,
             parameter_lock_pool,
             master_length: unsafe { from_s_u16_t(&raw_pattern.master_length) },
             master_change,
@@ -236,9 +251,8 @@ impl Pattern {
                 Track::try_default(9).unwrap(),
                 Track::try_default(10).unwrap(),
                 Track::try_default(11).unwrap(),
-                // Fx Track
-                Track::try_default(12).unwrap(),
             ],
+            fx_track: Rc::new(RefCell::new(Track::try_default(12).unwrap())),
             parameter_lock_pool: Rc::new(RefCell::new(ParameterLockPool::default())),
             master_length: 16,
             master_change: 1,
@@ -270,9 +284,8 @@ impl Pattern {
                 Track::try_default(9).unwrap(),
                 Track::try_default(10).unwrap(),
                 Track::try_default(11).unwrap(),
-                // Fx Track
-                Track::try_default(12).unwrap(),
             ],
+            fx_track: Rc::new(RefCell::new(Track::try_default(12).unwrap())),
             parameter_lock_pool: Rc::new(RefCell::new(ParameterLockPool::default())),
             master_length: 16,
             master_change: 1,
@@ -467,5 +480,20 @@ impl Pattern {
     /// Returns the version of the pattern structure.
     pub fn structure_version(&self) -> u32 {
         self.version
+    }
+
+    /// Clears all the parameter locks for this pattern.
+    pub fn clear_all_plocks(&mut self) {
+        self.parameter_lock_pool.borrow_mut().clear_all_plocks();
+    }
+
+    /// Clears all the parameter locks for the given track in this pattern.
+    #[parameter_range(range = "track_index:0..=12")]
+    pub fn clear_all_plocks_for_track(&mut self, track_index: u8) -> Result<(), RytmError> {
+        self.parameter_lock_pool
+            .borrow_mut()
+            .clear_all_plocks_for_track(track_index);
+
+        Ok(())
     }
 }

@@ -20,6 +20,8 @@ impl Trig {
                 time as u8,
             )?;
 
+            self.enable_fx_trig_if_necessary();
+
             return Ok(());
         }
         Err(OrphanTrig)
@@ -33,6 +35,8 @@ impl Trig {
                 AR_FX_PLOCK_TYPE_DELAY_PING_PONG as u8,
                 ping_pong as u8,
             )?;
+
+            self.enable_fx_trig_if_necessary();
 
             return Ok(());
         }
@@ -51,6 +55,8 @@ impl Trig {
                 i8_to_u8_midpoint_of_u8_input_range(stereo_width as i8, 0, 127),
             )?;
 
+            self.enable_fx_trig_if_necessary();
+
             return Ok(());
         }
         Err(OrphanTrig)
@@ -67,6 +73,8 @@ impl Trig {
                 AR_FX_PLOCK_TYPE_DELAY_FEEDBACK as u8,
                 feedback as u8,
             )?;
+
+            self.enable_fx_trig_if_necessary();
 
             return Ok(());
         }
@@ -85,6 +93,8 @@ impl Trig {
                 hpf as u8,
             )?;
 
+            self.enable_fx_trig_if_necessary();
+
             return Ok(());
         }
         Err(OrphanTrig)
@@ -101,6 +111,8 @@ impl Trig {
                 AR_FX_PLOCK_TYPE_DELAY_LPF as u8,
                 lpf as u8,
             )?;
+
+            self.enable_fx_trig_if_necessary();
 
             return Ok(());
         }
@@ -119,6 +131,8 @@ impl Trig {
                 reverb_send as u8,
             )?;
 
+            self.enable_fx_trig_if_necessary();
+
             return Ok(());
         }
         Err(OrphanTrig)
@@ -135,6 +149,8 @@ impl Trig {
                 AR_FX_PLOCK_TYPE_DELAY_VOL as u8,
                 volume as u8,
             )?;
+
+            self.enable_fx_trig_if_necessary();
 
             return Ok(());
         }
@@ -290,6 +306,7 @@ impl Trig {
         if let Some(ref pool) = self.parameter_lock_pool {
             pool.borrow_mut()
                 .clear_fx_basic_plock(self.index, AR_FX_PLOCK_TYPE_DELAY_TIME as u8)?;
+            self.disable_fx_trig_if_necessary();
 
             return Ok(());
         }
@@ -301,6 +318,7 @@ impl Trig {
         if let Some(ref pool) = self.parameter_lock_pool {
             pool.borrow_mut()
                 .clear_fx_basic_plock(self.index, AR_FX_PLOCK_TYPE_DELAY_PING_PONG as u8)?;
+            self.disable_fx_trig_if_necessary();
 
             return Ok(());
         }
@@ -312,6 +330,7 @@ impl Trig {
         if let Some(ref pool) = self.parameter_lock_pool {
             pool.borrow_mut()
                 .clear_fx_basic_plock(self.index, AR_FX_PLOCK_TYPE_DELAY_WIDTH as u8)?;
+            self.disable_fx_trig_if_necessary();
 
             return Ok(());
         }
@@ -323,6 +342,7 @@ impl Trig {
         if let Some(ref pool) = self.parameter_lock_pool {
             pool.borrow_mut()
                 .clear_fx_basic_plock(self.index, AR_FX_PLOCK_TYPE_DELAY_FEEDBACK as u8)?;
+            self.disable_fx_trig_if_necessary();
 
             return Ok(());
         }
@@ -334,6 +354,7 @@ impl Trig {
         if let Some(ref pool) = self.parameter_lock_pool {
             pool.borrow_mut()
                 .clear_fx_basic_plock(self.index, AR_FX_PLOCK_TYPE_DELAY_HPF as u8)?;
+            self.disable_fx_trig_if_necessary();
 
             return Ok(());
         }
@@ -345,6 +366,7 @@ impl Trig {
         if let Some(ref pool) = self.parameter_lock_pool {
             pool.borrow_mut()
                 .clear_fx_basic_plock(self.index, AR_FX_PLOCK_TYPE_DELAY_LPF as u8)?;
+            self.disable_fx_trig_if_necessary();
 
             return Ok(());
         }
@@ -356,6 +378,7 @@ impl Trig {
         if let Some(ref pool) = self.parameter_lock_pool {
             pool.borrow_mut()
                 .clear_fx_basic_plock(self.index, AR_FX_PLOCK_TYPE_DELAY_REV as u8)?;
+            self.disable_fx_trig_if_necessary();
 
             return Ok(());
         }
@@ -367,6 +390,7 @@ impl Trig {
         if let Some(ref pool) = self.parameter_lock_pool {
             pool.borrow_mut()
                 .clear_fx_basic_plock(self.index, AR_FX_PLOCK_TYPE_DELAY_VOL as u8)?;
+            self.disable_fx_trig_if_necessary();
 
             return Ok(());
         }

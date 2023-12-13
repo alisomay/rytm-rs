@@ -31,48 +31,6 @@ impl ParameterLockPool {
         Self { inner: raw }
     }
 
-    pub fn set_fx_basic_plock(
-        &mut self,
-        trig_index: usize,
-        plock_type: u8,
-        value: u8,
-    ) -> Result<(), RytmError> {
-        self.set_basic_plock(trig_index, 12, plock_type, value)
-    }
-
-    pub fn set_fx_compound_plock(
-        &mut self,
-        trig_index: usize,
-        plock_type: u8,
-        value: u16,
-    ) -> Result<(), RytmError> {
-        self.set_compound_plock(trig_index, 12, plock_type, value)
-    }
-
-    pub fn clear_fx_basic_plock(
-        &mut self,
-        trig_index: usize,
-        plock_type: u8,
-    ) -> Result<(), RytmError> {
-        self.clear_basic_plock(trig_index, 12, plock_type)
-    }
-
-    pub fn clear_fx_compound_plock(
-        &mut self,
-        trig_index: usize,
-        plock_type: u8,
-    ) -> Result<(), RytmError> {
-        self.clear_compound_plock(trig_index, 12, plock_type)
-    }
-
-    pub fn get_fx_basic_plock(&self, trig_index: usize, plock_type: u8) -> Option<u8> {
-        self.get_basic_plock(trig_index, 12, plock_type)
-    }
-
-    pub fn get_fx_compound_plock(&self, trig_index: usize, plock_type: u8) -> Option<u16> {
-        self.get_compound_plock(trig_index, 12, plock_type)
-    }
-
     pub fn set_basic_plock(
         &mut self,
         trig_index: usize,
@@ -197,7 +155,7 @@ impl ParameterLockPool {
             .inner
             .iter()
             .enumerate()
-            .find(|(i, plock_seq)| -> bool {
+            .find(|(_, plock_seq)| -> bool {
                 plock_seq.track_nr == track_index && plock_seq.plock_type == plock_type
             })
         {
@@ -248,7 +206,7 @@ impl ParameterLockPool {
         let mut plock_seq_index_which_we_cleared_from: Option<usize> = None;
 
         // Check if we have this type of compound plock already set if so modify it.
-        if let Some((i, plock)) = self.inner.iter_mut().enumerate().find(|(i, plock_seq)| {
+        if let Some((i, plock)) = self.inner.iter_mut().enumerate().find(|(_, plock_seq)| {
             plock_seq.track_nr == track_index && plock_seq.plock_type == plock_type
         }) {
             plock.data[trig_index] = 0xFF;
@@ -269,6 +227,48 @@ impl ParameterLockPool {
         }
 
         Ok(())
+    }
+
+    pub fn set_fx_basic_plock(
+        &mut self,
+        trig_index: usize,
+        plock_type: u8,
+        value: u8,
+    ) -> Result<(), RytmError> {
+        self.set_basic_plock(trig_index, 12, plock_type, value)
+    }
+
+    pub fn set_fx_compound_plock(
+        &mut self,
+        trig_index: usize,
+        plock_type: u8,
+        value: u16,
+    ) -> Result<(), RytmError> {
+        self.set_compound_plock(trig_index, 12, plock_type, value)
+    }
+
+    pub fn get_fx_basic_plock(&self, trig_index: usize, plock_type: u8) -> Option<u8> {
+        self.get_basic_plock(trig_index, 12, plock_type)
+    }
+
+    pub fn get_fx_compound_plock(&self, trig_index: usize, plock_type: u8) -> Option<u16> {
+        self.get_compound_plock(trig_index, 12, plock_type)
+    }
+
+    pub fn clear_fx_basic_plock(
+        &mut self,
+        trig_index: usize,
+        plock_type: u8,
+    ) -> Result<(), RytmError> {
+        self.clear_basic_plock(trig_index, 12, plock_type)
+    }
+
+    pub fn clear_fx_compound_plock(
+        &mut self,
+        trig_index: usize,
+        plock_type: u8,
+    ) -> Result<(), RytmError> {
+        self.clear_compound_plock(trig_index, 12, plock_type)
     }
 
     pub fn clear_all_plocks(&mut self) {
@@ -294,35 +294,4 @@ impl ParameterLockPool {
             }
         }
     }
-
-    pub fn clear_all_plocks_for_plock_type(&mut self, plock_type: u8) {
-        for plock_seq in self.inner.iter_mut() {
-            if plock_seq.plock_type == plock_type {
-                plock_seq.track_nr = 0xFF;
-                plock_seq.plock_type = 0xFF;
-                for byte in plock_seq.data.iter_mut() {
-                    // Like the default.
-                    *byte = 0xFF;
-                }
-            }
-        }
-    }
-
-    // TODO: Update and write an interface for this or do it in a higher level.
-    pub fn plock_gets_assigned_for_a_trigger(
-        &self,
-        trig_index: usize,
-    ) -> Vec<(&rytm_sys::ar_plock_seq_t, u8)> {
-        let mut plocks = Vec::new();
-
-        for plock_seq in self.inner.iter() {
-            if plock_seq.data[trig_index] != 0xFF {
-                plocks.push((plock_seq, plock_seq.data[trig_index]));
-            }
-        }
-
-        plocks
-    }
-
-    // TODO: A couple of more variants might make sense.
 }
