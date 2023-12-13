@@ -123,6 +123,8 @@ impl Filter {
     }
 
     /// Sets the envelope amount of the filter.
+    ///
+    /// Range: `-64..=63`
     #[parameter_range(range = "envelope_amount:-64..=63")]
     pub fn set_envelope_amount(&mut self, envelope_amount: isize) -> Result<(), RytmError> {
         self.envelope_amount = envelope_amount as i8;
@@ -177,6 +179,8 @@ impl Filter {
     }
 
     /// Returns the envelope amount of the filter.
+    ///
+    /// Range: `-64..=63`
     pub fn envelope_amount(&self) -> isize {
         self.envelope_amount as isize
     }

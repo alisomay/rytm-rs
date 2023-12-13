@@ -1,4 +1,4 @@
-use crate::sysex::AnySysExType;
+use crate::sysex::AnySysexType;
 
 use super::ObjectQuery;
 
@@ -28,7 +28,7 @@ impl RawQuery {
 }
 
 impl ObjectQuery for RawQuery {
-    fn sysex_type(&self) -> AnySysExType {
+    fn sysex_type(&self) -> AnySysexType {
         self.sysex_type.into()
     }
 

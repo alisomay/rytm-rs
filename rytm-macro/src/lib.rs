@@ -9,11 +9,7 @@ use parameter_range::*;
 use proc_macro::TokenStream;
 use quote::{format_ident, quote};
 use syn::{
-    parse::{Parse, ParseStream},
-    parse_macro_input, parse_str,
-    punctuated::Punctuated,
-    token::Comma,
-    DeriveInput, Error as SynError, Ident, ItemFn, Lit, LitInt, LitStr, Meta, Token,
+    parse_macro_input, punctuated::Punctuated, token::Comma, DeriveInput, Error as SynError, ItemFn,
 };
 
 /******** Parameter Range *********/

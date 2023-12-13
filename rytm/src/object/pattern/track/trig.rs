@@ -6,7 +6,7 @@ pub mod types;
 use self::types::{Length, MicroTime, RetrigRate, TrigCondition};
 use crate::{
     error::{ParameterError, RytmError},
-    object::pattern::parameter_lock::ParameterLockPool,
+    object::pattern::plock::ParameterLockPool,
     util::decode_micro_timing_byte,
 };
 use derivative::Derivative;

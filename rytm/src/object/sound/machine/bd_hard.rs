@@ -1,7 +1,7 @@
 use crate::util::scale_f32_to_u16;
 use crate::{
     error::{ParameterError, RytmError},
-    object::pattern::parameter_lock::ParameterLockPool,
+    object::pattern::plock::ParameterLockPool,
     util::{from_s_u16_t, get_u16_min_max_from_float_range, scale_u16_to_f32, to_s_u16_t_union_a},
     RytmError::OrphanTrig,
 };
@@ -20,7 +20,6 @@ use std::{cell::RefCell, rc::Rc};
  wav: "0..=2" #7,
  tic: "0..=127" #8,
 )]
-
 /// Parameters for the `BdHard` machine.
 #[derive(Derivative, Clone)]
 #[derivative(Debug)]

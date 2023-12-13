@@ -126,8 +126,7 @@ impl SysexMeta {
 
     /// Returns the object type of the sysex message.
     pub fn object_type(&self) -> Result<SysexType, RytmError> {
-        let r#type: SysexType = self.obj_type.try_into()?;
-        Ok(r#type)
+        Ok(self.obj_type.try_into()?)
     }
 
     pub fn default_for_settings(dev_id: Option<usize>) -> Self {
@@ -136,7 +135,6 @@ impl SysexMeta {
             dev_id: dev_id.unwrap_or(0) as u8,
             obj_type: SysexType::Settings.into(),
             obj_nr: 0b0000_0000,
-
             ..Default::default()
         }
     }

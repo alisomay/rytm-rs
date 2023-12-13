@@ -1,7 +1,7 @@
 use crate::util::scale_f32_to_u16;
 use crate::{
     error::{ParameterError, RytmError},
-    object::pattern::parameter_lock::ParameterLockPool,
+    object::pattern::plock::ParameterLockPool,
     util::{
         from_s_u16_t, get_u16_min_max_from_float_range, i8_to_u8_midpoint_of_u8_input_range,
         scale_u16_to_f32, to_s_u16_t_union_a, u8_to_i8_midpoint_of_u8_input_range,

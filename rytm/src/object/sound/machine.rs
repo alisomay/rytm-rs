@@ -35,7 +35,7 @@ mod xt_classic;
 use super::types::MachineType;
 use crate::{
     error::{ParameterError, RytmError},
-    object::pattern::parameter_lock::ParameterLockPool,
+    object::pattern::plock::ParameterLockPool,
 };
 pub use bd_acoustic::*;
 pub use bd_classic::*;
@@ -75,6 +75,10 @@ pub use ut_noise::*;
 pub use xt_classic::*;
 
 /// The machine parameters of a sound.
+///
+/// Every machine has distinct parameters and ranges for those parameters.
+///
+/// Not every machine can be assigned to every track.
 #[derive(Debug, Clone)]
 pub enum MachineParameters {
     BdHard(BdHardParameters),
@@ -114,120 +118,51 @@ pub enum MachineParameters {
     Unset,
 }
 
-impl MachineParameters {
-    pub(crate) fn link_parameter_lock_pool(
-        &mut self,
-        parameter_lock_pool: Rc<RefCell<ParameterLockPool>>,
-    ) {
-        match self {
-            MachineParameters::BdHard(bd_hard) => {
-                bd_hard.link_parameter_lock_pool(parameter_lock_pool)
-            }
-            MachineParameters::BdClassic(bd_classic) => {
-                bd_classic.link_parameter_lock_pool(parameter_lock_pool)
-            }
-            MachineParameters::BdAcoustic(bd_acoustic) => {
-                bd_acoustic.link_parameter_lock_pool(parameter_lock_pool)
-            }
-            MachineParameters::BdFm(bd_fm) => bd_fm.link_parameter_lock_pool(parameter_lock_pool),
-            MachineParameters::BdPlastic(bd_plastic) => {
-                bd_plastic.link_parameter_lock_pool(parameter_lock_pool)
-            }
-            MachineParameters::BdSilky(bd_silky) => {
-                bd_silky.link_parameter_lock_pool(parameter_lock_pool)
-            }
-            MachineParameters::BdSharp(bd_sharp) => {
-                bd_sharp.link_parameter_lock_pool(parameter_lock_pool)
-            }
-            MachineParameters::BtClassic(bt_classic) => {
-                bt_classic.link_parameter_lock_pool(parameter_lock_pool)
-            }
-            MachineParameters::CbClassic(cb_classic) => {
-                cb_classic.link_parameter_lock_pool(parameter_lock_pool)
-            }
-            MachineParameters::CbMetallic(cb_metallic) => {
-                cb_metallic.link_parameter_lock_pool(parameter_lock_pool)
-            }
-            MachineParameters::ChClassic(ch_classic) => {
-                ch_classic.link_parameter_lock_pool(parameter_lock_pool)
-            }
-            MachineParameters::ChMetallic(ch_metallic) => {
-                ch_metallic.link_parameter_lock_pool(parameter_lock_pool)
-            }
-            MachineParameters::CpClassic(cp_classic) => {
-                cp_classic.link_parameter_lock_pool(parameter_lock_pool)
-            }
-            MachineParameters::CyClassic(cy_classic) => {
-                cy_classic.link_parameter_lock_pool(parameter_lock_pool)
-            }
-            MachineParameters::CyMetallic(cy_metallic) => {
-                cy_metallic.link_parameter_lock_pool(parameter_lock_pool)
-            }
-            MachineParameters::CyRide(cy_ride) => {
-                cy_ride.link_parameter_lock_pool(parameter_lock_pool)
-            }
-            MachineParameters::HhBasic(hh_basic) => {
-                hh_basic.link_parameter_lock_pool(parameter_lock_pool)
-            }
-            MachineParameters::HhLab(hh_lab) => {
-                hh_lab.link_parameter_lock_pool(parameter_lock_pool)
-            }
-            MachineParameters::OhClassic(oh_classic) => {
-                oh_classic.link_parameter_lock_pool(parameter_lock_pool)
-            }
-            MachineParameters::OhMetallic(oh_metallic) => {
-                oh_metallic.link_parameter_lock_pool(parameter_lock_pool)
-            }
-            MachineParameters::RsClassic(rs_classic) => {
-                rs_classic.link_parameter_lock_pool(parameter_lock_pool)
-            }
-            MachineParameters::RsHard(rs_hard) => {
-                rs_hard.link_parameter_lock_pool(parameter_lock_pool)
-            }
-            MachineParameters::Disable => {
-                // Ignore
-            }
-            MachineParameters::SdAcoustic(sd_acoustic) => {
-                sd_acoustic.link_parameter_lock_pool(parameter_lock_pool)
-            }
-            MachineParameters::SdClassic(sd_classic) => {
-                sd_classic.link_parameter_lock_pool(parameter_lock_pool)
-            }
-            MachineParameters::SdFm(sd_fm) => sd_fm.link_parameter_lock_pool(parameter_lock_pool),
-            MachineParameters::SdHard(sd_hard) => {
-                sd_hard.link_parameter_lock_pool(parameter_lock_pool)
-            }
-            MachineParameters::SdNatural(sd_natural) => {
-                sd_natural.link_parameter_lock_pool(parameter_lock_pool)
-            }
-            MachineParameters::SyChip(sy_chip) => {
-                sy_chip.link_parameter_lock_pool(parameter_lock_pool)
-            }
-            MachineParameters::SyDualVco(sy_dual_vco) => {
-                sy_dual_vco.link_parameter_lock_pool(parameter_lock_pool)
-            }
-            MachineParameters::SyRaw(sy_raw) => {
-                sy_raw.link_parameter_lock_pool(parameter_lock_pool)
-            }
-            MachineParameters::UtImpulse(ut_impulse) => {
-                ut_impulse.link_parameter_lock_pool(parameter_lock_pool)
-            }
-            MachineParameters::UtNoise(ut_noise) => {
-                ut_noise.link_parameter_lock_pool(parameter_lock_pool)
-            }
-            MachineParameters::XtClassic(xt_classic) => {
-                xt_classic.link_parameter_lock_pool(parameter_lock_pool)
-            }
-            MachineParameters::Unset => {
-                // Ignore
-            }
-        }
-    }
-}
-
 impl Default for MachineParameters {
     fn default() -> Self {
         Self::BdHard(BdHardParameters::default())
+    }
+}
+
+impl From<MachineType> for MachineParameters {
+    fn from(machine_type: MachineType) -> Self {
+        match machine_type {
+            MachineType::BdHard => Self::BdHard(BdHardParameters::default()),
+            MachineType::BdClassic => Self::BdClassic(BdClassicParameters::default()),
+            MachineType::SdHard => Self::SdHard(SdHardParameters::default()),
+            MachineType::SdClassic => Self::SdClassic(SdClassicParameters::default()),
+            MachineType::RsHard => Self::RsHard(RsHardParameters::default()),
+            MachineType::RsClassic => Self::RsClassic(RsClassicParameters::default()),
+            MachineType::CpClassic => Self::CpClassic(CpClassicParameters::default()),
+            MachineType::BtClassic => Self::BtClassic(BtClassicParameters::default()),
+            MachineType::XtClassic => Self::XtClassic(XtClassicParameters::default()),
+            MachineType::ChClassic => Self::ChClassic(ChClassicParameters::default()),
+            MachineType::OhClassic => Self::OhClassic(OhClassicParameters::default()),
+            MachineType::CyClassic => Self::CyClassic(CyClassicParameters::default()),
+            MachineType::CbClassic => Self::CbClassic(CbClassicParameters::default()),
+            MachineType::BdFm => Self::BdFm(BdFmParameters::default()),
+            MachineType::SdFm => Self::SdFm(SdFmParameters::default()),
+            MachineType::UtNoise => Self::UtNoise(UtNoiseParameters::default()),
+            MachineType::UtImpulse => Self::UtImpulse(UtImpulseParameters::default()),
+            MachineType::ChMetallic => Self::ChMetallic(ChMetallicParameters::default()),
+            MachineType::OhMetallic => Self::OhMetallic(OhMetallicParameters::default()),
+            MachineType::CyMetallic => Self::CyMetallic(CyMetallicParameters::default()),
+            MachineType::CbMetallic => Self::CbMetallic(CbMetallicParameters::default()),
+            MachineType::BdPlastic => Self::BdPlastic(BdPlasticParameters::default()),
+            MachineType::BdSilky => Self::BdSilky(BdSilkyParameters::default()),
+            MachineType::SdNatural => Self::SdNatural(SdNaturalParameters::default()),
+            MachineType::HhBasic => Self::HhBasic(HhBasicParameters::default()),
+            MachineType::CyRide => Self::CyRide(CyRideParameters::default()),
+            MachineType::BdSharp => Self::BdSharp(BdSharpParameters::default()),
+            MachineType::Disable => Self::Disable,
+            MachineType::SyDualVco => Self::SyDualVco(SyDualVcoParameters::default()),
+            MachineType::SyChip => Self::SyChip(SyChipParameters::default()),
+            MachineType::BdAcoustic => Self::BdAcoustic(BdAcousticParameters::default()),
+            MachineType::SdAcoustic => Self::SdAcoustic(SdAcousticParameters::default()),
+            MachineType::SyRaw => Self::SyRaw(SyRawParameters::default()),
+            MachineType::HhLab => Self::HhLab(HhLabParameters::default()),
+            MachineType::Unset => Self::Unset,
+        }
     }
 }
 
@@ -447,46 +382,112 @@ impl MachineParameters {
         }
     }
 
-    pub(crate) fn internal_machine_type_as_u8(&self) -> u8 {
+    pub(crate) fn link_parameter_lock_pool(
+        &mut self,
+        parameter_lock_pool: Rc<RefCell<ParameterLockPool>>,
+    ) {
         match self {
-            MachineParameters::BdHard(_) => 0,
-            MachineParameters::BdClassic(_) => 1,
-            MachineParameters::BdAcoustic(_) => 30,
-            MachineParameters::BdFm(_) => 13,
-            MachineParameters::BdPlastic(_) => 21,
-            MachineParameters::BdSilky(_) => 22,
-            MachineParameters::BdSharp(_) => 26,
-            MachineParameters::BtClassic(_) => 7,
-            MachineParameters::CbClassic(_) => 12,
-            MachineParameters::CbMetallic(_) => 20,
-            MachineParameters::ChClassic(_) => 9,
-            MachineParameters::ChMetallic(_) => 17,
-            MachineParameters::CpClassic(_) => 6,
-            MachineParameters::CyClassic(_) => 11,
-            MachineParameters::CyMetallic(_) => 19,
-            MachineParameters::CyRide(_) => 25,
-            MachineParameters::HhBasic(_) => 24,
-            MachineParameters::HhLab(_) => 33,
-            MachineParameters::OhClassic(_) => 10,
-            MachineParameters::OhMetallic(_) => 18,
-            MachineParameters::RsClassic(_) => 5,
-            MachineParameters::RsHard(_) => 4,
-            MachineParameters::Disable => 27,
-            MachineParameters::SdAcoustic(_) => 31,
-            MachineParameters::SdClassic(_) => 3,
-            MachineParameters::SdFm(_) => 14,
-            MachineParameters::SdHard(_) => 2,
-            MachineParameters::SdNatural(_) => 23,
-            MachineParameters::SyChip(_) => 29,
-            MachineParameters::SyDualVco(_) => 28,
-            MachineParameters::SyRaw(_) => 32,
-            MachineParameters::UtImpulse(_) => 16,
-            MachineParameters::UtNoise(_) => 15,
-            MachineParameters::XtClassic(_) => 8,
-            // TODO: Double check probably this never comes.
-            MachineParameters::Unset => 0xFF,
+            MachineParameters::BdHard(bd_hard) => {
+                bd_hard.link_parameter_lock_pool(parameter_lock_pool)
+            }
+            MachineParameters::BdClassic(bd_classic) => {
+                bd_classic.link_parameter_lock_pool(parameter_lock_pool)
+            }
+            MachineParameters::BdAcoustic(bd_acoustic) => {
+                bd_acoustic.link_parameter_lock_pool(parameter_lock_pool)
+            }
+            MachineParameters::BdFm(bd_fm) => bd_fm.link_parameter_lock_pool(parameter_lock_pool),
+            MachineParameters::BdPlastic(bd_plastic) => {
+                bd_plastic.link_parameter_lock_pool(parameter_lock_pool)
+            }
+            MachineParameters::BdSilky(bd_silky) => {
+                bd_silky.link_parameter_lock_pool(parameter_lock_pool)
+            }
+            MachineParameters::BdSharp(bd_sharp) => {
+                bd_sharp.link_parameter_lock_pool(parameter_lock_pool)
+            }
+            MachineParameters::BtClassic(bt_classic) => {
+                bt_classic.link_parameter_lock_pool(parameter_lock_pool)
+            }
+            MachineParameters::CbClassic(cb_classic) => {
+                cb_classic.link_parameter_lock_pool(parameter_lock_pool)
+            }
+            MachineParameters::CbMetallic(cb_metallic) => {
+                cb_metallic.link_parameter_lock_pool(parameter_lock_pool)
+            }
+            MachineParameters::ChClassic(ch_classic) => {
+                ch_classic.link_parameter_lock_pool(parameter_lock_pool)
+            }
+            MachineParameters::ChMetallic(ch_metallic) => {
+                ch_metallic.link_parameter_lock_pool(parameter_lock_pool)
+            }
+            MachineParameters::CpClassic(cp_classic) => {
+                cp_classic.link_parameter_lock_pool(parameter_lock_pool)
+            }
+            MachineParameters::CyClassic(cy_classic) => {
+                cy_classic.link_parameter_lock_pool(parameter_lock_pool)
+            }
+            MachineParameters::CyMetallic(cy_metallic) => {
+                cy_metallic.link_parameter_lock_pool(parameter_lock_pool)
+            }
+            MachineParameters::CyRide(cy_ride) => {
+                cy_ride.link_parameter_lock_pool(parameter_lock_pool)
+            }
+            MachineParameters::HhBasic(hh_basic) => {
+                hh_basic.link_parameter_lock_pool(parameter_lock_pool)
+            }
+            MachineParameters::HhLab(hh_lab) => {
+                hh_lab.link_parameter_lock_pool(parameter_lock_pool)
+            }
+            MachineParameters::OhClassic(oh_classic) => {
+                oh_classic.link_parameter_lock_pool(parameter_lock_pool)
+            }
+            MachineParameters::OhMetallic(oh_metallic) => {
+                oh_metallic.link_parameter_lock_pool(parameter_lock_pool)
+            }
+            MachineParameters::RsClassic(rs_classic) => {
+                rs_classic.link_parameter_lock_pool(parameter_lock_pool)
+            }
+            MachineParameters::RsHard(rs_hard) => {
+                rs_hard.link_parameter_lock_pool(parameter_lock_pool)
+            }
+            MachineParameters::Disable => {
+                // Ignore
+            }
+            MachineParameters::SdAcoustic(sd_acoustic) => {
+                sd_acoustic.link_parameter_lock_pool(parameter_lock_pool)
+            }
+            MachineParameters::SdClassic(sd_classic) => {
+                sd_classic.link_parameter_lock_pool(parameter_lock_pool)
+            }
+            MachineParameters::SdFm(sd_fm) => sd_fm.link_parameter_lock_pool(parameter_lock_pool),
+            MachineParameters::SdHard(sd_hard) => {
+                sd_hard.link_parameter_lock_pool(parameter_lock_pool)
+            }
+            MachineParameters::SdNatural(sd_natural) => {
+                sd_natural.link_parameter_lock_pool(parameter_lock_pool)
+            }
+            MachineParameters::SyChip(sy_chip) => {
+                sy_chip.link_parameter_lock_pool(parameter_lock_pool)
+            }
+            MachineParameters::SyDualVco(sy_dual_vco) => {
+                sy_dual_vco.link_parameter_lock_pool(parameter_lock_pool)
+            }
+            MachineParameters::SyRaw(sy_raw) => {
+                sy_raw.link_parameter_lock_pool(parameter_lock_pool)
+            }
+            MachineParameters::UtImpulse(ut_impulse) => {
+                ut_impulse.link_parameter_lock_pool(parameter_lock_pool)
+            }
+            MachineParameters::UtNoise(ut_noise) => {
+                ut_noise.link_parameter_lock_pool(parameter_lock_pool)
+            }
+            MachineParameters::XtClassic(xt_classic) => {
+                xt_classic.link_parameter_lock_pool(parameter_lock_pool)
+            }
+            MachineParameters::Unset => {
+                // Ignore
+            }
         }
-
-        // TODO: Write enum getter also
     }
 }

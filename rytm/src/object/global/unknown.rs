@@ -5,8 +5,8 @@ use rytm_sys::ar_global_t;
 pub struct GlobalUnknown {
     pub __unknown0x09_0x0a: [u8; 2],
     pub __unknown0x31: u8,
-    pub __unknown0x36_0x45: [u8; 16], /* @?0x36..0x45  */
-    pub __unknown0x50_0x4f: [u8; 6],  /* @?0x50..0x4F  */
+    pub __unknown0x36_0x45: [u8; 16], /* @0x36..0x45  */
+    pub __unknown0x50_0x4f: [u8; 6],  /* @0x50..0x4F  */
 }
 
 impl Default for GlobalUnknown {

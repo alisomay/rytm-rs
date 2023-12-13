@@ -1,6 +1,6 @@
 use crate::{
     error::{ParameterError, RytmError},
-    object::pattern::parameter_lock::ParameterLockPool,
+    object::pattern::plock::ParameterLockPool,
     util::{
         from_s_u16_t, i8_to_u8_midpoint_of_u8_input_range, to_s_u16_t_union_a,
         u8_to_i8_midpoint_of_u8_input_range,
@@ -16,7 +16,8 @@ use std::{cell::RefCell, rc::Rc};
     lev: "0..=127" #1,
     tun: "-64..=63" #2,
     dec: "0..=127" #3,
-    typ: "0..=3" #4, // (0..3=A..D)
+    // (0..=3 = A..=D)
+    typ: "0..=3" #4,
     hit: "0..=127" #5,
     c1: "0..=127" #6,
     c2: "0..=127" #7,

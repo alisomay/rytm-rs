@@ -1,5 +1,7 @@
 use crate::error::ConversionError;
 
+use super::machine::MachineParameters;
+
 #[allow(unused)]
 mod machines {
     use rytm_sys::{
@@ -165,7 +167,7 @@ pub(crate) mod sound_mod_target {
     pub const AMP_REV: u8 = AR_SOUND_MOD_DEST_AMP_REV as u8;
 }
 
-/// The machine type of a sound.
+/// Machine type of a sound.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum MachineType {
     BdHard,
@@ -336,6 +338,49 @@ impl From<MachineType> for u8 {
             MachineType::SyRaw => SY_RAW,
             MachineType::HhLab => HH_LAB,
             MachineType::Unset => UNSET,
+        }
+    }
+}
+
+impl From<MachineParameters> for MachineType {
+    fn from(machine: MachineParameters) -> Self {
+        use MachineParameters::*;
+        match machine {
+            BdHard(_) => Self::BdHard,
+            BdClassic(_) => Self::BdClassic,
+            SdHard(_) => Self::SdHard,
+            SdClassic(_) => Self::SdClassic,
+            RsHard(_) => Self::RsHard,
+            RsClassic(_) => Self::RsClassic,
+            CpClassic(_) => Self::CpClassic,
+            BtClassic(_) => Self::BtClassic,
+            XtClassic(_) => Self::XtClassic,
+            ChClassic(_) => Self::ChClassic,
+            OhClassic(_) => Self::OhClassic,
+            CyClassic(_) => Self::CyClassic,
+            CbClassic(_) => Self::CbClassic,
+            BdFm(_) => Self::BdFm,
+            SdFm(_) => Self::SdFm,
+            UtNoise(_) => Self::UtNoise,
+            UtImpulse(_) => Self::UtImpulse,
+            ChMetallic(_) => Self::ChMetallic,
+            OhMetallic(_) => Self::OhMetallic,
+            CyMetallic(_) => Self::CyMetallic,
+            CbMetallic(_) => Self::CbMetallic,
+            BdPlastic(_) => Self::BdPlastic,
+            BdSilky(_) => Self::BdSilky,
+            SdNatural(_) => Self::SdNatural,
+            HhBasic(_) => Self::HhBasic,
+            CyRide(_) => Self::CyRide,
+            BdSharp(_) => Self::BdSharp,
+            Disable => Self::Disable,
+            SyDualVco(_) => Self::SyDualVco,
+            SyChip(_) => Self::SyChip,
+            BdAcoustic(_) => Self::BdAcoustic,
+            SdAcoustic(_) => Self::SdAcoustic,
+            SyRaw(_) => Self::SyRaw,
+            HhLab(_) => Self::HhLab,
+            Unset => Self::Unset,
         }
     }
 }
@@ -654,7 +699,7 @@ impl From<SoundModTarget> for u8 {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
-/// Filter type of a sound.
+/// Filter type of a filter.
 pub enum FilterType {
     #[default]
     Lp2,
@@ -699,7 +744,7 @@ impl From<FilterType> for u8 {
     }
 }
 
-/// LFO multiplier of a sound.
+/// Multiplier for an LFO.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum LfoMultiplier {
     /// x1
@@ -820,7 +865,7 @@ impl From<LfoMultiplier> for u8 {
     }
 }
 
-/// The shape of the LFO wave.
+/// The shape of an LFO wave.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum LfoWaveform {
     #[default]
@@ -866,7 +911,7 @@ impl From<LfoWaveform> for u8 {
     }
 }
 
-/// The mode of the LFO.
+/// The mode of an LFO.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum LfoMode {
     #[default]
@@ -906,6 +951,7 @@ impl From<LfoMode> for u8 {
     }
 }
 
+/// The chromatic mode of a sound.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum SoundSettingsChromaticMode {
     Off,

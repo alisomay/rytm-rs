@@ -11,10 +11,10 @@ use self::{
     machine::MachineParameters,
     page::{Amplitude, Filter, Lfo, Sample},
     settings::SoundSettings,
+    types::MachineType,
     unknown::SoundUnknown,
 };
-use super::pattern::parameter_lock::ParameterLockPool;
-use crate::AnySysExType;
+use super::pattern::plock::ParameterLockPool;
 use crate::{
     error::{RytmError, SysexConversionError},
     impl_sysex_compatible,
@@ -22,6 +22,7 @@ use crate::{
     sysex::{SysexCompatible, SysexMeta, SysexType, SOUND_SYSEX_SIZE},
     ParameterError,
 };
+use crate::{util::assemble_u32_from_u8_array, AnySysexType};
 use derivative::Derivative;
 use rytm_rs_macro::parameter_range;
 use rytm_sys::{ar_sound_raw_to_syx, ar_sound_t, ar_sysex_meta_t};
@@ -29,7 +30,7 @@ use std::{cell::RefCell, rc::Rc};
 
 // Internal type to understand where the sound comes from.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub(crate) enum SoundType {
+pub enum SoundType {
     Pool,
     #[default]
     WorkBuffer,
@@ -91,8 +92,6 @@ pub struct Sound {
 
 impl From<&Sound> for ar_sound_t {
     fn from(sound: &Sound) -> Self {
-        // TODO: Synth parameters omitted. Don't forget to implement them.
-
         let mut raw_sound = rytm_sys::ar_sound_t {
             name: sound.name.copy_inner(),
             accent_level: sound.accent_level,
@@ -116,11 +115,15 @@ impl From<&Sound> for ar_sound_t {
 impl Sound {
     /// Links a pattern's parameter lock pool to this sound.
     ///
-    /// This way one can set parameter locks for trigs for the machine assigned to this sound.
+    /// This way, one can set parameter locks for trigs for the machine assigned to this sound.
+    ///
+    /// Sound must be a track sound. This is necessary because the pattern's parameter lock pool
+    /// belongs to a pattern but sounds are not. Sounds are received with different query compared to patterns.
     pub fn link_parameter_lock_pool(
         &mut self,
         parameter_lock_pool: Rc<RefCell<ParameterLockPool>>,
     ) {
+        // TODO: Checks
         self.parameter_lock_pool = Some(parameter_lock_pool);
         let parameter_lock_pool_ref = Rc::clone(self.parameter_lock_pool.as_ref().unwrap());
         self.machine_parameters
@@ -132,11 +135,6 @@ impl Sound {
         raw_sound: &ar_sound_t,
         kit_number_and_assigned_track: Option<(usize, usize)>,
     ) -> Result<Self, RytmError> {
-        let version = ((raw_sound.__unknown_arr1[4] as u32) << 24)
-            | ((raw_sound.__unknown_arr1[5] as u32) << 16)
-            | ((raw_sound.__unknown_arr1[6] as u32) << 8)
-            | (raw_sound.__unknown_arr1[7] as u32);
-
         let mut index: usize = 0;
         let mut assigned_track = None;
         let mut kit_number = None;
@@ -181,7 +179,7 @@ impl Sound {
             kit_number,
             assigned_track,
             sysex_meta,
-            version,
+            version: assemble_u32_from_u8_array(&raw_sound.__unknown_arr1[4..=7]),
 
             name: ObjectName::from_u8_array(raw_sound.name),
 
@@ -205,7 +203,7 @@ impl Sound {
         (self.sysex_meta, self.into())
     }
 
-    pub(crate) fn sound_type(&self) -> SoundType {
+    pub fn sound_type(&self) -> SoundType {
         if self.is_pool_sound() {
             SoundType::Pool
         } else if self.is_work_buffer_sound() {
@@ -234,18 +232,7 @@ impl Sound {
     ///
     /// The name must be ASCII and have a length of 15 characters or less.
     pub fn set_name(&mut self, name: &str) -> Result<(), RytmError> {
-        if !name.is_ascii() || name.len() > 15 {
-            return Err(ParameterError::Compatibility {
-                value: name.to_string(),
-                parameter_name: "Name".to_string(),
-                reason: Some(
-                    "Name must be ASCII and have a length of 15 characters or less.".to_owned(),
-                ),
-            }
-            .into());
-        }
-
-        self.name = ObjectName::from_u8_array(name.as_bytes().try_into().unwrap());
+        self.name = name.try_into()?;
         Ok(())
     }
 
@@ -261,8 +248,28 @@ impl Sound {
     /// Returns the assigned track if this is a track sound.
     ///
     /// Returns `None` if this is not a track sound.
+    ///
+    /// Range: `0..=11`
     pub fn assigned_track(&self) -> Option<usize> {
         self.assigned_track
+    }
+
+    /// Returns the kit number if this sound is a part of a kit.
+    ///
+    /// Returns `None` if this is not a kit sound.
+    ///
+    /// Range: `0..=127`
+    pub fn kit_number(&self) -> Option<usize> {
+        self.kit_number
+    }
+
+    /// Returns the kit number if this sound is a part of a kit.
+    ///
+    /// Returns `None` if this is not a kit sound.
+    ///
+    /// Range: `0..=127`
+    pub fn pool_index(&self) -> Option<usize> {
+        self.pool_index
     }
 
     /// Returns the accent level of the sound.
@@ -302,6 +309,11 @@ impl Sound {
         &self.settings
     }
 
+    /// Returns the machine parameters of the sound.
+    pub fn machine_parameters(&self) -> &MachineParameters {
+        &self.machine_parameters
+    }
+
     /// Returns the sample page parameters of the sound mutably.
     pub fn sample_mut(&mut self) -> &mut Sample {
         &mut self.sample
@@ -327,14 +339,14 @@ impl Sound {
         &mut self.settings
     }
 
-    /// Returns the machine parameters of the sound.
-    pub fn machine_parameters(&self) -> &MachineParameters {
-        &self.machine_parameters
-    }
-
     /// Returns the machine parameters of the sound mutably.
     pub fn machine_parameters_mut(&mut self) -> &mut MachineParameters {
         &mut self.machine_parameters
+    }
+
+    /// Returns the version of the sound structure.
+    pub fn structure_version(&self) -> u32 {
+        self.version
     }
 
     #[parameter_range(range = "sound_index:0..=127")]
@@ -431,5 +443,26 @@ impl Sound {
 
             parameter_lock_pool: None,
         })
+    }
+
+    /// Sets the machine of the sound.
+    pub fn set_machine_type(&mut self, machine_type: MachineType) -> Result<(), RytmError> {
+        if let Some(assigned_track) = self.assigned_track() {
+            if !crate::util::is_machine_compatible_for_track(assigned_track, machine_type) {
+                return Err(ParameterError::Compatibility {
+                    value: machine_type.to_string(),
+                    parameter_name: "Machine".to_string(),
+                    reason: Some(format!(
+                        "Given machine {} is not compatible for track {}",
+                        machine_type, self.index
+                    )),
+                }
+                .into());
+            }
+        }
+
+        self.settings_mut().machine_type = machine_type;
+        self.machine_parameters = machine_type.into();
+        Ok(())
     }
 }

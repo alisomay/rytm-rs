@@ -1,6 +1,6 @@
 use crate::error::ConversionError;
 
-/// Represents a name of an object.
+/// Represents the name of an object.
 ///
 /// This can currently be a sound name or a kit name.
 ///

@@ -11,7 +11,7 @@ impl Trig {
     ///
     /// Range `0..=127`
     #[parameter_range(range = "amplitude_attack:0..=127")]
-    pub fn p_lock_set_amplitude_attack(&self, amplitude_attack: usize) -> Result<(), RytmError> {
+    pub fn plock_set_amplitude_attack(&self, amplitude_attack: usize) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             pool.borrow_mut().set_basic_plock(
                 self.index,
@@ -29,7 +29,7 @@ impl Trig {
     ///
     /// Range `0..=127`
     #[parameter_range(range = "amplitude_hold:0..=127")]
-    pub fn p_lock_set_amplitude_hold(&self, amplitude_hold: usize) -> Result<(), RytmError> {
+    pub fn plock_set_amplitude_hold(&self, amplitude_hold: usize) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             pool.borrow_mut().set_basic_plock(
                 self.index,
@@ -47,7 +47,7 @@ impl Trig {
     ///
     /// Range `0..=127`
     #[parameter_range(range = "amplitude_decay:0..=127")]
-    pub fn p_lock_set_amplitude_decay(&self, amplitude_decay: usize) -> Result<(), RytmError> {
+    pub fn plock_set_amplitude_decay(&self, amplitude_decay: usize) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             pool.borrow_mut().set_basic_plock(
                 self.index,
@@ -65,7 +65,7 @@ impl Trig {
     ///
     /// Range `0..=127`
     #[parameter_range(range = "amplitude_overdrive:0..=127")]
-    pub fn p_lock_set_amplitude_overdrive(
+    pub fn plock_set_amplitude_overdrive(
         &self,
         amplitude_overdrive: usize,
     ) -> Result<(), RytmError> {
@@ -86,7 +86,7 @@ impl Trig {
     ///
     /// Range `0..=127`
     #[parameter_range(range = "amplitude_delay_send:0..=127")]
-    pub fn p_lock_set_amplitude_delay_send(
+    pub fn plock_set_amplitude_delay_send(
         &self,
         amplitude_delay_send: usize,
     ) -> Result<(), RytmError> {
@@ -107,7 +107,7 @@ impl Trig {
     ///
     /// Range `0..=127`
     #[parameter_range(range = "amplitude_reverb_send:0..=127")]
-    pub fn p_lock_set_amplitude_reverb_send(
+    pub fn plock_set_amplitude_reverb_send(
         &self,
         amplitude_reverb_send: usize,
     ) -> Result<(), RytmError> {
@@ -128,7 +128,7 @@ impl Trig {
     ///
     /// Range `-64..=63`
     #[parameter_range(range = "amplitude_pan:-64..=63")]
-    pub fn p_lock_set_amplitude_pan(&self, amplitude_pan: isize) -> Result<(), RytmError> {
+    pub fn plock_set_amplitude_pan(&self, amplitude_pan: isize) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             pool.borrow_mut().set_basic_plock(
                 self.index,
@@ -146,7 +146,7 @@ impl Trig {
     ///
     /// Range `0..=127`
     #[parameter_range(range = "amplitude_volume:0..=127")]
-    pub fn p_lock_set_amplitude_volume(&self, amplitude_volume: usize) -> Result<(), RytmError> {
+    pub fn plock_set_amplitude_volume(&self, amplitude_volume: usize) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             pool.borrow_mut().set_basic_plock(
                 self.index,
@@ -163,7 +163,7 @@ impl Trig {
     /// Gets the parameter lock for the amplitude attack.
     ///
     /// Range `0..=127`
-    pub fn p_lock_get_amplitude_attack(&self) -> Result<Option<usize>, RytmError> {
+    pub fn plock_get_amplitude_attack(&self) -> Result<Option<usize>, RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             let value = pool.borrow_mut().get_basic_plock(
                 self.index,
@@ -183,7 +183,7 @@ impl Trig {
     /// Gets the parameter lock for the amplitude hold.
     ///
     /// Range `0..=127`
-    pub fn p_lock_get_amplitude_hold(&self) -> Result<Option<usize>, RytmError> {
+    pub fn plock_get_amplitude_hold(&self) -> Result<Option<usize>, RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             let value = pool.borrow_mut().get_basic_plock(
                 self.index,
@@ -203,7 +203,7 @@ impl Trig {
     /// Gets the parameter lock for the amplitude decay.
     ///
     /// Range `0..=127`
-    pub fn p_lock_get_amplitude_decay(&self) -> Result<Option<usize>, RytmError> {
+    pub fn plock_get_amplitude_decay(&self) -> Result<Option<usize>, RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             let value = pool.borrow_mut().get_basic_plock(
                 self.index,
@@ -223,7 +223,7 @@ impl Trig {
     /// Gets the parameter lock for the amplitude overdrive.
     ///
     /// Range `0..=127`
-    pub fn p_lock_get_amplitude_overdrive(&self) -> Result<Option<usize>, RytmError> {
+    pub fn plock_get_amplitude_overdrive(&self) -> Result<Option<usize>, RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             let value = pool.borrow_mut().get_basic_plock(
                 self.index,
@@ -243,7 +243,7 @@ impl Trig {
     /// Gets the parameter lock for the amplitude delay send.
     ///
     /// Range `0..=127`
-    pub fn p_lock_get_amplitude_delay_send(&self) -> Result<Option<usize>, RytmError> {
+    pub fn plock_get_amplitude_delay_send(&self) -> Result<Option<usize>, RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             let value = pool.borrow_mut().get_basic_plock(
                 self.index,
@@ -263,7 +263,7 @@ impl Trig {
     /// Gets the parameter lock for the amplitude reverb send.
     ///
     /// Range `0..=127`
-    pub fn p_lock_get_amplitude_reverb_send(&self) -> Result<Option<usize>, RytmError> {
+    pub fn plock_get_amplitude_reverb_send(&self) -> Result<Option<usize>, RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             let value = pool.borrow_mut().get_basic_plock(
                 self.index,
@@ -283,7 +283,7 @@ impl Trig {
     /// Gets the parameter lock for the amplitude pan.
     ///
     /// Range `-64..=63`
-    pub fn p_lock_get_amplitude_pan(&self) -> Result<Option<isize>, RytmError> {
+    pub fn plock_get_amplitude_pan(&self) -> Result<Option<isize>, RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             let value = pool.borrow_mut().get_basic_plock(
                 self.index,
@@ -305,7 +305,7 @@ impl Trig {
     /// Gets the parameter lock for the amplitude volume.
     ///
     /// Range `0..=127`
-    pub fn p_lock_get_amplitude_volume(&self) -> Result<Option<usize>, RytmError> {
+    pub fn plock_get_amplitude_volume(&self) -> Result<Option<usize>, RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             let value = pool.borrow_mut().get_basic_plock(
                 self.index,
@@ -323,7 +323,7 @@ impl Trig {
     }
 
     /// Clears the parameter lock for the amplitude attack.
-    pub fn p_lock_clear_amplitude_attack(&self) -> Result<(), RytmError> {
+    pub fn plock_clear_amplitude_attack(&self) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             pool.borrow_mut().clear_basic_plock(
                 self.index,
@@ -337,7 +337,7 @@ impl Trig {
     }
 
     /// Clears the parameter lock for the amplitude hold.
-    pub fn p_lock_clear_amplitude_hold(&self) -> Result<(), RytmError> {
+    pub fn plock_clear_amplitude_hold(&self) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             pool.borrow_mut().clear_basic_plock(
                 self.index,
@@ -351,7 +351,7 @@ impl Trig {
     }
 
     /// Clears the parameter lock for the amplitude decay.
-    pub fn p_lock_clear_amplitude_decay(&self) -> Result<(), RytmError> {
+    pub fn plock_clear_amplitude_decay(&self) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             pool.borrow_mut().clear_basic_plock(
                 self.index,
@@ -365,7 +365,7 @@ impl Trig {
     }
 
     /// Clears the parameter lock for the amplitude overdrive.
-    pub fn p_lock_clear_amplitude_overdrive(&self) -> Result<(), RytmError> {
+    pub fn plock_clear_amplitude_overdrive(&self) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             pool.borrow_mut().clear_basic_plock(
                 self.index,
@@ -379,7 +379,7 @@ impl Trig {
     }
 
     /// Clears the parameter lock for the amplitude delay send.
-    pub fn p_lock_clear_amplitude_delay_send(&self) -> Result<(), RytmError> {
+    pub fn plock_clear_amplitude_delay_send(&self) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             pool.borrow_mut().clear_basic_plock(
                 self.index,
@@ -393,7 +393,7 @@ impl Trig {
     }
 
     /// Clears the parameter lock for the amplitude reverb send.
-    pub fn p_lock_clear_amplitude_reverb_send(&self) -> Result<(), RytmError> {
+    pub fn plock_clear_amplitude_reverb_send(&self) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             pool.borrow_mut().clear_basic_plock(
                 self.index,
@@ -407,7 +407,7 @@ impl Trig {
     }
 
     /// Clears the parameter lock for the amplitude pan.
-    pub fn p_lock_clear_amplitude_pan(&self) -> Result<(), RytmError> {
+    pub fn plock_clear_amplitude_pan(&self) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             pool.borrow_mut().clear_basic_plock(
                 self.index,
@@ -421,7 +421,7 @@ impl Trig {
     }
 
     /// Clears the parameter lock for the amplitude volume.
-    pub fn p_lock_clear_amplitude_volume(&self) -> Result<(), RytmError> {
+    pub fn plock_clear_amplitude_volume(&self) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             pool.borrow_mut().clear_basic_plock(
                 self.index,

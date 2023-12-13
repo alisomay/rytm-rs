@@ -1,6 +1,6 @@
 use crate::{
     error::{ParameterError, RytmError},
-    object::pattern::parameter_lock::ParameterLockPool,
+    object::pattern::plock::ParameterLockPool,
     util::{from_s_u16_t, to_s_u16_t_union_a},
     RytmError::OrphanTrig,
 };
@@ -135,56 +135,56 @@ impl HhLabParameters {
     /// Returns the `lev` parameter.
     ///
     /// Range: `0..=127`
-    pub fn lev(&self) -> usize {
+    pub fn get_lev(&self) -> usize {
         self.lev as usize
     }
 
     /// Returns the `osc1` parameter.
     ///
     /// Range: `0..=16256`
-    pub fn osc1(&self) -> usize {
+    pub fn get_osc1(&self) -> usize {
         self.osc1 as usize
     }
 
     /// Returns the `dec` parameter.
     ///
     /// Range: `0..=127`
-    pub fn dec(&self) -> usize {
+    pub fn get_dec(&self) -> usize {
         self.dec as usize
     }
 
     /// Returns the `osc2` parameter.
     ///
     /// Range: `0..=16256`
-    pub fn osc2(&self) -> usize {
+    pub fn get_osc2(&self) -> usize {
         self.osc2 as usize
     }
 
     /// Returns the `osc3` parameter.
     ///
     /// Range: `0..=16256`
-    pub fn osc3(&self) -> usize {
+    pub fn get_osc3(&self) -> usize {
         self.osc3 as usize
     }
 
     /// Returns the `osc4` parameter.
     ///
     /// Range: `0..=16256`
-    pub fn osc4(&self) -> usize {
+    pub fn get_osc4(&self) -> usize {
         self.osc4 as usize
     }
 
     /// Returns the `osc5` parameter.
     ///
     /// Range: `0..=16256`
-    pub fn osc5(&self) -> usize {
+    pub fn get_osc5(&self) -> usize {
         self.osc5 as usize
     }
 
     /// Returns the `osc6` parameter.
     ///
     /// Range: `0..=16256`
-    pub fn osc6(&self) -> usize {
+    pub fn get_osc6(&self) -> usize {
         self.osc6 as usize
     }
 
@@ -210,7 +210,6 @@ impl HhLabParameters {
     }
 }
 
-// ParameterLockPool implementation
 impl HhLabParameters {
     /// Sets the parameter lock for the `lev` parameter.
     ///

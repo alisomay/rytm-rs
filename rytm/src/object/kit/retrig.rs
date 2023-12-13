@@ -6,6 +6,7 @@ use crate::{
 use rytm_rs_macro::parameter_range;
 use rytm_sys::ar_kit_t;
 
+/// Represents the retrig settings for a track.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct TrackRetrigMenu {
     track_index: usize,
@@ -50,7 +51,7 @@ impl TrackRetrigMenu {
     }
 
     #[parameter_range(range = "track_index:0..=12")]
-    pub fn try_from_raw(track_index: usize, raw_kit: &ar_kit_t) -> Result<Self, RytmError> {
+    pub(crate) fn try_from_raw(track_index: usize, raw_kit: &ar_kit_t) -> Result<Self, RytmError> {
         let flags = unsafe { from_s_u16_t(&raw_kit.retrig_always_on) };
         let always_on = flags & (1 << track_index) != 0;
 

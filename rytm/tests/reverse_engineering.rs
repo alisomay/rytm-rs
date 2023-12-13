@@ -197,14 +197,14 @@ fn plock_seq() {
 
             let pattern = rytm.work_buffer().pattern();
             clearscreen::clear().unwrap();
-            let types_and_tracks = pattern
-                .parameter_lock_pool
-                .borrow()
-                .inner
-                .iter()
-                .map(|p| (p.plock_type, p.track_nr))
-                .collect::<Vec<_>>();
-            dbg!(types_and_tracks);
+            // let types_and_tracks = pattern
+            //     .parameter_lock_pool
+            //     .borrow()
+            //     .inner
+            //     .iter()
+            //     .map(|p| (p.plock_type, p.track_nr))
+            //     .collect::<Vec<_>>();
+            // dbg!(types_and_tracks);
             // let track = pattern.tracks()[0];
             // let plock_seqs = pattern.plock_seqs();
             // let mut for_first_trig_all = Vec::new();
@@ -477,9 +477,9 @@ fn pattern_type() {
             let trigs = t.trigs_mut();
             let trig0 = &mut trigs[0];
 
-            trig0.p_lock_set_lfo_depth(-66.0).unwrap();
-            trig0.p_lock_set_lfo_speed(-63).unwrap();
-            trig0.p_lock_set_lfo_multiplier(LfoMultiplier::X1).unwrap();
+            trig0.plock_set_lfo_depth(-66.0).unwrap();
+            trig0.plock_set_lfo_speed(-63).unwrap();
+            trig0.plock_set_lfo_multiplier(LfoMultiplier::X1).unwrap();
             out.lock().unwrap().send(&pattern.as_sysex()?).unwrap();
             // clearscreen::clear().unwrap();
 
@@ -517,9 +517,9 @@ fn usage() {
     // let trigs = track_0.trigs_mut();
 
     // for trig in trigs {
-    //     trig.p_lock_set_lfo_depth(-66.0).unwrap();
-    //     trig.p_lock_set_lfo_speed(-63).unwrap();
-    //     trig.p_lock_set_lfo_multiplier(LfoMultiplier::X1).unwrap();
+    //     trig.plock_set_lfo_depth(-66.0).unwrap();
+    //     trig.plock_set_lfo_speed(-63).unwrap();
+    //     trig.plock_set_lfo_multiplier(LfoMultiplier::X1).unwrap();
     // }
 
     // // Use shared ref.
@@ -534,9 +534,9 @@ fn usage() {
     // // Use mut ref again.
 
     // for trig in trigs {
-    //     trig.p_lock_set_lfo_depth(-66.0).unwrap();
-    //     trig.p_lock_set_lfo_speed(-63).unwrap();
-    //     trig.p_lock_set_lfo_multiplier(LfoMultiplier::X1).unwrap();
+    //     trig.plock_set_lfo_depth(-66.0).unwrap();
+    //     trig.plock_set_lfo_speed(-63).unwrap();
+    //     trig.plock_set_lfo_multiplier(LfoMultiplier::X1).unwrap();
     // }
 
     use rytm_rs::SysexCompatible;
@@ -548,9 +548,9 @@ fn usage() {
         let trigs = track_0.trigs_mut();
 
         for trig in trigs {
-            trig.p_lock_set_lfo_depth(-66.0).unwrap();
-            trig.p_lock_set_lfo_speed(-63).unwrap();
-            trig.p_lock_set_lfo_multiplier(LfoMultiplier::X1).unwrap();
+            trig.plock_set_lfo_depth(-66.0).unwrap();
+            trig.plock_set_lfo_speed(-63).unwrap();
+            trig.plock_set_lfo_multiplier(LfoMultiplier::X1).unwrap();
         }
 
         let msg = pattern_2.as_sysex().unwrap();
@@ -570,9 +570,9 @@ fn usage() {
     //     let trigs = track_0.trigs_mut();
 
     //     for trig in trigs {
-    //         trig.p_lock_set_lfo_depth(-66.0).unwrap();
-    //         trig.p_lock_set_lfo_speed(-63).unwrap();
-    //         trig.p_lock_set_lfo_multiplier(LfoMultiplier::X1).unwrap();
+    //         trig.plock_set_lfo_depth(-66.0).unwrap();
+    //         trig.plock_set_lfo_speed(-63).unwrap();
+    //         trig.plock_set_lfo_multiplier(LfoMultiplier::X1).unwrap();
     //     }
     // }
 }

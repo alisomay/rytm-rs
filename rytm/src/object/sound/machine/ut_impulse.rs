@@ -1,6 +1,6 @@
 use crate::{
     error::{ParameterError, RytmError},
-    object::pattern::parameter_lock::ParameterLockPool,
+    object::pattern::plock::ParameterLockPool,
     util::{from_s_u16_t, to_s_u16_t_union_a},
     RytmError::OrphanTrig,
 };

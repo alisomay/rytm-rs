@@ -3,7 +3,8 @@ pub mod types;
 pub(crate) mod unknown;
 
 use self::unknown::GlobalUnknown;
-use crate::AnySysExType;
+use crate::util::{assemble_u32_from_u8_array, break_u32_into_u8_array};
+use crate::AnySysexType;
 use crate::{
     error::{ParameterError, RytmError, SysexConversionError},
     impl_sysex_compatible,
@@ -48,12 +49,10 @@ pub struct Global {
 
 impl From<&Global> for ar_global_t {
     fn from(global: &Global) -> Self {
-        let mut raw_global = ar_global_t::default();
-
-        raw_global.version[0] = ((global.version >> 24) & 0xFF) as u8;
-        raw_global.version[1] = ((global.version >> 16) & 0xFF) as u8;
-        raw_global.version[2] = ((global.version >> 8) & 0xFF) as u8;
-        raw_global.version[3] = (global.version & 0xFF) as u8;
+        let mut raw_global = ar_global_t {
+            version: break_u32_into_u8_array(global.version),
+            ..Default::default()
+        };
 
         global
             .metronome_settings
@@ -73,15 +72,10 @@ impl Global {
         (self.sysex_meta, self.into())
     }
 
-    pub fn try_from_raw(
+    pub(crate) fn try_from_raw(
         sysex_meta: SysexMeta,
         raw_global: &ar_global_t,
     ) -> Result<Self, RytmError> {
-        let version = ((raw_global.version[0] as u32) << 24)
-            | ((raw_global.version[1] as u32) << 16)
-            | ((raw_global.version[2] as u32) << 8)
-            | (raw_global.version[3] as u32);
-
         let slot_number = if sysex_meta.is_targeting_work_buffer() {
             // TODO: Double check
             0
@@ -92,7 +86,7 @@ impl Global {
         Ok(Self {
             index: slot_number,
             sysex_meta,
-            version,
+            version: assemble_u32_from_u8_array(&raw_global.version),
 
             metronome_settings: raw_global.try_into()?,
             midi_config: raw_global.try_into()?,
@@ -132,5 +126,10 @@ impl Global {
 
             __unknown: GlobalUnknown::default(),
         }
+    }
+
+    /// Returns the version of the global structure.
+    pub fn structure_version(&self) -> u32 {
+        self.version
     }
 }

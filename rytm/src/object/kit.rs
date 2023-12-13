@@ -11,7 +11,8 @@ use self::{
     comp::FxCompressor, delay::FxDelay, dist::FxDistortion, lfo::FxLfo, reverb::FxReverb,
     unknown::KitUnknown,
 };
-use crate::AnySysExType;
+use crate::util::{assemble_u32_from_u8_array, break_u32_into_u8_array};
+use crate::AnySysexType;
 use crate::{
     error::{ParameterError, RytmError, SysexConversionError},
     impl_sysex_compatible,
@@ -32,6 +33,7 @@ impl_sysex_compatible!(
     KIT_SYSEX_SIZE
 );
 
+// TODO: Check if we can get info about if this kit is assigned to a pattern.
 #[derive(Derivative, Clone)]
 #[derivative(Debug)]
 pub struct Kit {
@@ -78,6 +80,8 @@ pub struct Kit {
 impl From<&Kit> for ar_kit_t {
     fn from(kit: &Kit) -> Self {
         let mut raw_kit = ar_kit_t {
+            // Version
+            __unknown_arr1: break_u32_into_u8_array(kit.version),
             name: kit.name.copy_inner(),
             perf_ctl: kit.perf_ctl,
             scene_ctl: kit.scene_ctl,
@@ -111,16 +115,10 @@ impl From<&Kit> for ar_kit_t {
 }
 
 impl Kit {
-    pub(crate) fn as_raw_parts(&self) -> (SysexMeta, ar_kit_t) {
-        (self.sysex_meta, self.into())
-    }
-
-    pub fn try_from_raw(sysex_meta: SysexMeta, raw_kit: &ar_kit_t) -> Result<Self, RytmError> {
-        let version = ((raw_kit.__unknown_arr1[0] as u32) << 24)
-            | ((raw_kit.__unknown_arr1[1] as u32) << 16)
-            | ((raw_kit.__unknown_arr1[2] as u32) << 8)
-            | (raw_kit.__unknown_arr1[3] as u32);
-
+    pub(crate) fn try_from_raw(
+        sysex_meta: SysexMeta,
+        raw_kit: &ar_kit_t,
+    ) -> Result<Self, RytmError> {
         let kit_number = if sysex_meta.is_targeting_work_buffer() {
             // TODO: Double check
             0
@@ -158,7 +156,7 @@ impl Kit {
         Ok(Self {
             index: kit_number,
             sysex_meta,
-            version,
+            version: assemble_u32_from_u8_array(&raw_kit.__unknown_arr1),
 
             name,
 
@@ -177,6 +175,10 @@ impl Kit {
             current_scene_id: raw_kit.current_scene_id,
             __unknown: raw_kit.into(),
         })
+    }
+
+    pub(crate) fn as_raw_parts(&self) -> (SysexMeta, ar_kit_t) {
+        (self.sysex_meta, self.into())
     }
 
     #[parameter_range(range = "kit_index:0..=127")]
@@ -276,11 +278,7 @@ impl Kit {
     ///
     /// 12th track is the fx track.
     #[parameter_range(range = "track_index:0..=12", range = "level:0..=127")]
-    pub fn set_level_of_a_track(
-        &mut self,
-        track_index: usize,
-        level: usize,
-    ) -> Result<(), RytmError> {
+    pub fn set_track_level(&mut self, track_index: usize, level: usize) -> Result<(), RytmError> {
         self.track_levels[track_index] = level as u8;
         Ok(())
     }
@@ -289,7 +287,7 @@ impl Kit {
     ///
     /// Range `0..=127`
     #[parameter_range(range = "level:0..=127")]
-    pub fn set_level_of_all_tracks(&mut self, level: usize) -> Result<(), RytmError> {
+    pub fn set_all_track_levels(&mut self, level: usize) -> Result<(), RytmError> {
         for track_level in self.track_levels.iter_mut() {
             *track_level = level as u8;
         }
@@ -301,7 +299,7 @@ impl Kit {
     /// 12th track is the fx track.
     ///
     /// Maximum range `0..=12`
-    pub fn set_level_of_a_range_of_tracks(
+    pub fn set_a_range_of_track_levels(
         &mut self,
         range: std::ops::Range<usize>,
         level: usize,
@@ -314,10 +312,82 @@ impl Kit {
         }
 
         for track_index in range {
-            self.set_level_of_a_track(track_index, level)?;
+            self.set_track_level(track_index, level)?;
         }
 
         Ok(())
+    }
+
+    /// Gets the level of a track.
+    ///
+    /// Range `0..=12`
+    #[parameter_range(range = "track_index:0..=12")]
+    pub fn track_level(&self, track_index: usize) -> Result<usize, RytmError> {
+        if track_index > 12 {
+            return Err(RytmError::Parameter(ParameterError::Range {
+                value: format!("{:?}", track_index),
+                parameter_name: "track_index".to_string(),
+            }));
+        }
+
+        Ok(self.track_levels[track_index] as usize)
+    }
+
+    /// Gets the level of all tracks including the Fx track.
+    ///
+    /// Range `0..=127`
+    pub fn track_levels(&self) -> Vec<usize> {
+        self.track_levels
+            .iter()
+            .map(|&l| l as usize)
+            .collect::<Vec<_>>()
+    }
+
+    /// Gets the level of a range of tracks.
+    ///
+    /// 12th track is the fx track.
+    ///
+    /// Maximum range `0..=12`
+    pub fn range_of_track_levels(
+        &self,
+        range: std::ops::Range<usize>,
+    ) -> Result<Vec<usize>, RytmError> {
+        let mut levels = Vec::new();
+        for track_index in range {
+            levels.push(self.track_level(track_index)?);
+        }
+        Ok(levels)
+    }
+
+    /// Returns the version of the kit structure.
+    pub fn structure_version(&self) -> u32 {
+        self.version
+    }
+
+    /// Gets the retrig menu of a track
+    ///
+    /// 12th track is the fx track.
+    ///
+    /// Range `0..=12`
+    #[parameter_range(range = "track_index:0..=12")]
+    pub fn track_retrig_settings(
+        &self,
+        track_index: usize,
+    ) -> Result<&retrig::TrackRetrigMenu, RytmError> {
+        Ok(&self.track_retrig_settings[track_index])
+    }
+
+    /// Gets the retrig menu of a track mutably
+    ///
+    /// 12th track is the fx track.
+    ///
+    /// Range `0..=12`
+    #[parameter_range(range = "track_index:0..=12")]
+    pub fn track_retrig_settings_mut(
+        &mut self,
+        track_index: usize,
+    ) -> Result<&mut retrig::TrackRetrigMenu, RytmError> {
+        Ok(&mut self.track_retrig_settings[track_index])
     }
 }
 

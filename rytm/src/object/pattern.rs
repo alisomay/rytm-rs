@@ -1,15 +1,13 @@
 // TODO: Correctly represent unset values in pattern, trig, track.
 
-// pub mod plock_seq;
-pub mod parameter_lock;
+pub(crate) mod plock;
 pub mod track;
 pub mod types;
 
 use self::{
-    parameter_lock::ParameterLockPool,
+    plock::ParameterLockPool,
     types::{Speed, TimeMode},
 };
-use crate::AnySysExType;
 use crate::{
     error::{ParameterError, RytmError, SysexConversionError},
     impl_sysex_compatible,
@@ -17,6 +15,7 @@ use crate::{
     sysex::{SysexCompatible, SysexMeta, SysexType, PATTERN_SYSEX_SIZE},
     util::{from_s_u16_t, to_s_u16_t_union_b},
 };
+use crate::{util::break_u32_into_u8_array, AnySysexType};
 use derivative::Derivative;
 use rytm_rs_macro::parameter_range;
 use rytm_sys::{ar_pattern_raw_to_syx, ar_pattern_t, ar_pattern_track_t, ar_sysex_meta_t};
@@ -34,6 +33,7 @@ impl_sysex_compatible!(
     PATTERN_SYSEX_SIZE
 );
 
+// TODO: Check if we can get info about if this pattern has a kit assigned and which?
 /// # Pattern
 ///
 /// This structure represents a pattern in the analog rytm.
@@ -126,15 +126,9 @@ impl From<&Pattern> for ar_pattern_t {
             tracks[i] = track.into();
         }
 
-        let mut header = [0; 4];
-        header[0] = (pattern.version >> 24) as u8;
-        header[1] = (pattern.version >> 16) as u8;
-        header[2] = (pattern.version >> 8) as u8;
-        header[3] = pattern.version as u8;
-
         let bpm = (pattern.bpm * 120.0) as u16;
         Self {
-            magic: header,
+            magic: break_u32_into_u8_array(pattern.version),
             tracks,
             plock_seqs: pattern.parameter_lock_pool.borrow().as_raw(),
             master_length: to_s_u16_t_union_b(pattern.master_length),
@@ -154,7 +148,7 @@ impl From<&Pattern> for ar_pattern_t {
 
 impl Pattern {
     #[allow(clippy::too_many_arguments)]
-    pub fn try_from_raw(
+    pub(crate) fn try_from_raw(
         sysex_meta: SysexMeta,
         raw_pattern: &ar_pattern_t,
     ) -> Result<Self, RytmError> {

@@ -1,6 +1,6 @@
 use crate::{
     error::{ParameterError, RytmError},
-    object::pattern::parameter_lock::ParameterLockPool,
+    object::pattern::plock::ParameterLockPool,
     util::{from_s_u16_t, to_s_u16_t_union_a},
     RytmError::OrphanTrig,
 };
@@ -19,7 +19,6 @@ use std::{cell::RefCell, rc::Rc};
     rnd: "0..=127" #7,
     cpt: "0..=127" #8,
 )]
-
 /// Parameters for the `CpClassic` machine.
 #[derive(Derivative, Clone)]
 #[derivative(Debug)]

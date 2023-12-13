@@ -739,8 +739,8 @@ impl TryFrom<u8> for RoutingUsbInOptions {
 }
 
 impl From<RoutingUsbInOptions> for u8 {
-    fn from(ruio: RoutingUsbInOptions) -> Self {
-        match ruio {
+    fn from(value: RoutingUsbInOptions) -> Self {
+        match value {
             RoutingUsbInOptions::PreFx => 0,
             RoutingUsbInOptions::PostFx => 1,
             RoutingUsbInOptions::VoiceRouting((left_channel_routing, right_channel_routing)) => {
@@ -807,8 +807,8 @@ impl TryFrom<u8> for RoutingUsbOutOptions {
 }
 
 impl From<RoutingUsbOutOptions> for u8 {
-    fn from(ruoo: RoutingUsbOutOptions) -> Self {
-        match ruoo {
+    fn from(value: RoutingUsbOutOptions) -> Self {
+        match value {
             RoutingUsbOutOptions::MainOut => 0,
             RoutingUsbOutOptions::VoiceRouting((left_channel_routing, right_channel_routing)) => {
                 let mut flags = 0b0000_0001;

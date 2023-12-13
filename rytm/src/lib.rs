@@ -7,7 +7,7 @@ pub(crate) mod sysex;
 // TODO: pub(crate) before wrapping up.
 pub mod util;
 
-pub use sysex::{AnySysExType, SysexCompatible, SysexType};
+pub use sysex::{AnySysexType, SysexCompatible, SysexType};
 
 use self::error::RytmError;
 use crate::error::ParameterError;

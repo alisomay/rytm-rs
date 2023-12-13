@@ -1,5 +1,3 @@
-use core::panic;
-
 use crate::{
     error::{ConversionError, ParameterError, RytmError},
     object::sound::types::{LfoDestination, LfoMode, LfoMultiplier, LfoWaveform},
@@ -67,7 +65,6 @@ impl TryFrom<&ar_sound_t> for Lfo {
 
 impl Lfo {
     pub(crate) fn apply_to_raw_sound(&self, raw_sound: &mut ar_sound_t) {
-        // map range of -128.0..=127.99 to 0..=32767
         let depth = to_s_u16_t_union_a(scale_f32_to_u16(
             self.depth, -128f32, 127.99f32, 0u16, 32767u16,
         ));

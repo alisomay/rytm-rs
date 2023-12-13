@@ -1,7 +1,7 @@
 use crate::util::scale_f32_to_u16;
 use crate::{
     error::{ParameterError, RytmError},
-    object::pattern::parameter_lock::ParameterLockPool,
+    object::pattern::plock::ParameterLockPool,
     util::{from_s_u16_t, get_u16_min_max_from_float_range, scale_u16_to_f32, to_s_u16_t_union_a},
     RytmError::OrphanTrig,
 };
@@ -73,7 +73,7 @@ impl From<BdSharpWaveform> for u8 {
     hld: "0..=127" #4,
     swt: "0..=127" #5,
     swd: "0..=127" #6,
-    // wav: (0=sinA,1=sinB,2=asinA,3=asinB,4=triA,5=triB,6=ssawA,7=ssawB,8=sawA,9=sawB,10=sqrA,11=sqrB)
+    // wav #7
     tic: "0..=127" #8,
 )]
 /// Parameters for the `BdSharp` machine.
@@ -136,7 +136,7 @@ impl BdSharpParameters {
     }
 
     /// Sets the parameter lock for the `wav` parameter.
-    pub fn set_plock_wav(&self, wav: BdSharpWaveform, trig_index: usize) -> Result<(), RytmError> {
+    pub fn plock_set_wav(&self, wav: BdSharpWaveform, trig_index: usize) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             let assigned_track = self.assigned_track.ok_or(OrphanTrig)?;
             pool.borrow_mut().set_basic_plock(
@@ -151,7 +151,7 @@ impl BdSharpParameters {
     }
 
     /// Gets the parameter lock for the `wav` parameter.
-    pub fn get_plock_wav(&self, trig_index: usize) -> Result<Option<BdSharpWaveform>, RytmError> {
+    pub fn plock_get_wav(&self, trig_index: usize) -> Result<Option<BdSharpWaveform>, RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             let assigned_track = self.assigned_track.ok_or(OrphanTrig)?;
             let wav = pool.borrow_mut().get_basic_plock(
@@ -168,7 +168,7 @@ impl BdSharpParameters {
     }
 
     /// Clears the parameter lock for the `wav` parameter if set.
-    pub fn clear_plock_wav(&self, trig_index: usize) -> Result<(), RytmError> {
+    pub fn plock_clear_wav(&self, trig_index: usize) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             let assigned_track = self.assigned_track.ok_or(OrphanTrig)?;
             pool.borrow_mut().clear_basic_plock(

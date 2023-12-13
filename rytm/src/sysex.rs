@@ -29,18 +29,18 @@ pub const GLOBAL_RAW_SIZE: usize = std::mem::size_of::<ar_global_t>();
 ///
 /// Can represent known and unknown sysex types.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub enum AnySysExType {
+pub enum AnySysexType {
     Known(SysexType),
     Unknown(u8),
 }
 
-impl From<SysexType> for AnySysExType {
+impl From<SysexType> for AnySysexType {
     fn from(t: SysexType) -> Self {
         Self::Known(t)
     }
 }
 
-impl From<u8> for AnySysExType {
+impl From<u8> for AnySysexType {
     fn from(t: u8) -> Self {
         if let Ok(t) = SysexType::try_from_dump_id(t) {
             return Self::from(t);
@@ -52,11 +52,11 @@ impl From<u8> for AnySysExType {
     }
 }
 
-impl From<AnySysExType> for u8 {
-    fn from(t: AnySysExType) -> Self {
+impl From<AnySysexType> for u8 {
+    fn from(t: AnySysexType) -> Self {
         match t {
-            AnySysExType::Known(t) => t.into(),
-            AnySysExType::Unknown(t) => t,
+            AnySysexType::Known(t) => t.into(),
+            AnySysexType::Unknown(t) => t,
         }
     }
 }
@@ -64,7 +64,7 @@ impl From<AnySysExType> for u8 {
 /// A trait which is implemented by all objects which can be converted to sysex messages including queries and rytm project structures.
 pub trait SysexCompatible {
     /// Returns the sysex type of the object.
-    fn sysex_type(&self) -> AnySysExType;
+    fn sysex_type(&self) -> AnySysexType;
 
     /// Serializes the object to a sysex message.
     fn as_sysex(&self) -> Result<Vec<u8>, RytmError>;
@@ -111,7 +111,7 @@ macro_rules! impl_sysex_compatible {
                 }
             }
 
-            fn sysex_type(&self) -> AnySysExType {
+            fn sysex_type(&self) -> AnySysexType {
                 $object_sysex_type.into()
             }
         }

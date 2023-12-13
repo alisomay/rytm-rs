@@ -1,5 +1,5 @@
 use super::ObjectQuery;
-use crate::sysex::{AnySysExType, SysexType};
+use crate::sysex::{AnySysexType, SysexType};
 
 /// A query for the settings object.
 pub struct SettingsQuery {
@@ -25,7 +25,7 @@ impl SettingsQuery {
 }
 
 impl ObjectQuery for SettingsQuery {
-    fn sysex_type(&self) -> AnySysExType {
+    fn sysex_type(&self) -> AnySysexType {
         self.sysex_type.into()
     }
 

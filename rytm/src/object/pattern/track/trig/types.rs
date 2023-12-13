@@ -853,7 +853,6 @@ impl From<RetrigRate> for u8 {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
-// TODO: Comment rest of the trig conditions.
 /// Trig condition of a trig.
 pub enum TrigCondition {
     /// 1% probability.

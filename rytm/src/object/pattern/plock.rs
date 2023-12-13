@@ -1,10 +1,16 @@
 use crate::{error::RytmError, util::stable_partition, RytmError::ParameterLockMemoryFull};
 use derivative::Derivative;
 
+/// Wrapper type for the parameter lock pool.
+///
+/// This represents the parameter lock pool for a single patterns.
+///
+/// Has a total of 72 slots for 72 different parameter locks.
+///
+/// Each slot can hold 64 parameter lock values which corresponds to the 64 possible trigs in a pattern.
 #[derive(Derivative, Clone, Copy)]
 #[derivative(Debug)]
 pub struct ParameterLockPool {
-    // #[derivative(Debug = "ignore")]
     pub inner: [rytm_sys::ar_plock_seq_t; 72],
 }
 
@@ -17,15 +23,15 @@ impl Default for ParameterLockPool {
 }
 
 impl ParameterLockPool {
-    pub(crate) fn as_raw(&self) -> [rytm_sys::ar_plock_seq_t; 72] {
+    pub fn as_raw(&self) -> [rytm_sys::ar_plock_seq_t; 72] {
         self.inner
     }
 
-    pub(crate) fn from_raw(raw: [rytm_sys::ar_plock_seq_t; 72]) -> Self {
+    pub fn from_raw(raw: [rytm_sys::ar_plock_seq_t; 72]) -> Self {
         Self { inner: raw }
     }
 
-    pub(crate) fn set_fx_basic_plock(
+    pub fn set_fx_basic_plock(
         &mut self,
         trig_index: usize,
         plock_type: u8,
@@ -34,7 +40,7 @@ impl ParameterLockPool {
         self.set_basic_plock(trig_index, 12, plock_type, value)
     }
 
-    pub(crate) fn set_fx_compound_plock(
+    pub fn set_fx_compound_plock(
         &mut self,
         trig_index: usize,
         plock_type: u8,
@@ -43,7 +49,7 @@ impl ParameterLockPool {
         self.set_compound_plock(trig_index, 12, plock_type, value)
     }
 
-    pub(crate) fn clear_fx_basic_plock(
+    pub fn clear_fx_basic_plock(
         &mut self,
         trig_index: usize,
         plock_type: u8,
@@ -51,7 +57,7 @@ impl ParameterLockPool {
         self.clear_basic_plock(trig_index, 12, plock_type)
     }
 
-    pub(crate) fn clear_fx_compound_plock(
+    pub fn clear_fx_compound_plock(
         &mut self,
         trig_index: usize,
         plock_type: u8,
@@ -59,15 +65,15 @@ impl ParameterLockPool {
         self.clear_compound_plock(trig_index, 12, plock_type)
     }
 
-    pub(crate) fn get_fx_basic_plock(&self, trig_index: usize, plock_type: u8) -> Option<u8> {
+    pub fn get_fx_basic_plock(&self, trig_index: usize, plock_type: u8) -> Option<u8> {
         self.get_basic_plock(trig_index, 12, plock_type)
     }
 
-    pub(crate) fn get_fx_compound_plock(&self, trig_index: usize, plock_type: u8) -> Option<u16> {
+    pub fn get_fx_compound_plock(&self, trig_index: usize, plock_type: u8) -> Option<u16> {
         self.get_compound_plock(trig_index, 12, plock_type)
     }
 
-    pub(crate) fn set_basic_plock(
+    pub fn set_basic_plock(
         &mut self,
         trig_index: usize,
         track_index: u8,
@@ -99,7 +105,7 @@ impl ParameterLockPool {
         Err(ParameterLockMemoryFull)
     }
 
-    pub(crate) fn set_compound_plock(
+    pub fn set_compound_plock(
         &mut self,
         trig_index: usize,
         track_index: u8,
@@ -204,7 +210,7 @@ impl ParameterLockPool {
     }
 
     /// Clears the basic plock for the given trig.
-    pub(crate) fn clear_basic_plock(
+    pub fn clear_basic_plock(
         &mut self,
         trig_index: usize,
         track_index: u8,
@@ -233,7 +239,7 @@ impl ParameterLockPool {
         Ok(())
     }
 
-    pub(crate) fn clear_compound_plock(
+    pub fn clear_compound_plock(
         &mut self,
         trig_index: usize,
         track_index: u8,
@@ -265,7 +271,7 @@ impl ParameterLockPool {
         Ok(())
     }
 
-    pub(crate) fn clear_all_plocks(&mut self) {
+    pub fn clear_all_plocks(&mut self) {
         for plock_seq in self.inner.iter_mut() {
             plock_seq.track_nr = 0xFF;
             plock_seq.plock_type = 0xFF;
@@ -276,7 +282,7 @@ impl ParameterLockPool {
         }
     }
 
-    pub(crate) fn clear_all_plocks_for_track(&mut self, track_index: u8) {
+    pub fn clear_all_plocks_for_track(&mut self, track_index: u8) {
         for plock_seq in self.inner.iter_mut() {
             if plock_seq.track_nr == track_index {
                 plock_seq.track_nr = 0xFF;
@@ -289,7 +295,7 @@ impl ParameterLockPool {
         }
     }
 
-    pub(crate) fn clear_all_plocks_for_plock_type(&mut self, plock_type: u8) {
+    pub fn clear_all_plocks_for_plock_type(&mut self, plock_type: u8) {
         for plock_seq in self.inner.iter_mut() {
             if plock_seq.plock_type == plock_type {
                 plock_seq.track_nr = 0xFF;
@@ -303,7 +309,7 @@ impl ParameterLockPool {
     }
 
     // TODO: Update and write an interface for this or do it in a higher level.
-    pub(crate) fn get_plocks_assigned_for_a_trigger(
+    pub fn plock_gets_assigned_for_a_trigger(
         &self,
         trig_index: usize,
     ) -> Vec<(&rytm_sys::ar_plock_seq_t, u8)> {

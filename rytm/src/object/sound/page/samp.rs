@@ -39,8 +39,6 @@ impl Default for Sample {
 impl TryFrom<&ar_sound_t> for Sample {
     type Error = ConversionError;
     fn try_from(raw_sound: &ar_sound_t) -> Result<Self, Self::Error> {
-        // // map range of u16 0..=30720 to 0.0..=120.0
-
         let start = scale_u16_to_f32(
             unsafe { from_s_u16_t(&raw_sound.sample_start) },
             0u16,

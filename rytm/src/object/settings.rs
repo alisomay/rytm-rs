@@ -5,7 +5,8 @@ use self::types::{
     FxParameterMenuItem, ParameterMenuItem, PatternMode, SampleRecorderRecordingLength,
     SampleRecorderSource, SequencerMode,
 };
-use crate::AnySysExType;
+use crate::util::{assemble_u32_from_u8_array, break_u32_into_u8_array};
+use crate::AnySysexType;
 use crate::{
     error::{ParameterError, RytmError, SysexConversionError},
     impl_sysex_compatible,
@@ -27,14 +28,14 @@ impl_sysex_compatible!(
 /// # Settings
 ///
 /// This structure represents settings in the analog rytm.
-///3
+///
 /// It does not map identically to the relevant structure in the firmware.
 #[derive(Derivative, Clone, Copy)]
 #[derivative(Debug)]
 pub struct Settings {
     #[derivative(Debug = "ignore")]
     sysex_meta: SysexMeta,
-    /// Version of the kit structure.
+    /// Version of the settings structure.
     version: u32,
 
     bpm_project: f32,
@@ -62,12 +63,6 @@ pub struct Settings {
 
 impl From<&Settings> for ar_settings_t {
     fn from(settings: &Settings) -> Self {
-        let mut version = [0; 4];
-        version[0] = (settings.version >> 24) as u8;
-        version[1] = (settings.version >> 16) as u8;
-        version[2] = (settings.version >> 8) as u8;
-        version[3] = settings.version as u8;
-
         let bpm = (settings.bpm_project * 120.0) as u16;
         let bpm_msb = (bpm >> 8) as u8;
         let bpm_lsb = bpm as u8;
@@ -76,7 +71,7 @@ impl From<&Settings> for ar_settings_t {
         let track_mute_lsb = settings.mute_flags as u8;
 
         let mut raw_settings = Self {
-            version,
+            version: break_u32_into_u8_array(settings.version),
             bpm_msb,
             bpm_lsb,
             selected_track: settings.selected_track,
@@ -144,15 +139,10 @@ impl Settings {
         (self.sysex_meta, self.into())
     }
 
-    pub fn try_from_raw(
+    pub(crate) fn try_from_raw(
         sysex_meta: SysexMeta,
         raw_settings: &ar_settings_t,
     ) -> Result<Self, RytmError> {
-        let version = ((raw_settings.version[0] as u32) << 24)
-            | ((raw_settings.version[1] as u32) << 16)
-            | ((raw_settings.version[2] as u32) << 8)
-            | (raw_settings.version[3] as u32);
-
         let bpm_project = (raw_settings.bpm_msb as u16) << 8 | raw_settings.bpm_lsb as u16;
         let bpm_project = bpm_project as f32 / 120.0;
 
@@ -161,7 +151,7 @@ impl Settings {
 
         Ok(Self {
             sysex_meta,
-            version,
+            version: assemble_u32_from_u8_array(&raw_settings.version),
             bpm_project,
             selected_track: raw_settings.selected_track,
 
@@ -476,7 +466,7 @@ impl Settings {
         self.sample_recorder_rlen
     }
 
-    /// Returns the version of the pattern structure.
+    /// Returns the version of the settings structure.
     pub fn structure_version(&self) -> u32 {
         self.version
     }

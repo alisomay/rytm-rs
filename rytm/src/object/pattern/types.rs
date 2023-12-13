@@ -5,14 +5,6 @@ use rytm_sys::{
 };
 
 /// The speed of a pattern.
-///
-/// - `X1`: 1x
-/// - `X2`: 2x
-/// - `X3B2`: 3/2x
-/// - `X3B4`: 3/4x
-/// - `X1B2`: 1/2x
-/// - `X1B4`: 1/4x
-/// - `X1B8`: 1/8x
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum Speed {
     #[default]

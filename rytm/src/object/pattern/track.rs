@@ -5,7 +5,7 @@ use self::{
     trig::{HoldsTrigFlags, TrigFlags},
     types::{PadScale, RootNote},
 };
-use super::{parameter_lock::ParameterLockPool, Length};
+use super::{plock::ParameterLockPool, Length};
 use crate::{
     error::{ParameterError, RytmError},
     object::pattern::types::Speed,
@@ -202,12 +202,10 @@ impl Track {
             )?;
         }
 
-        // Sends midi
         let sends_midi = raw_track.flags_and_speed & 0b1000_0000 != 0;
-        // Speed
         let speed: Speed = (raw_track.flags_and_speed & 0b0000_0111).try_into()?;
 
-        // TODO: They always seem to be 0.
+        // They always seem to be 0.
         let __maybe_useful_flags_from_flags_and_speed = raw_track.flags_and_speed & 0b0111_1000;
 
         let __maybe_useful_flag_from_default_trig_note = raw_track.default_note & 0b1000_0000;

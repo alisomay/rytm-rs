@@ -1,6 +1,6 @@
 use crate::{
     error::{ParameterError, RytmError},
-    object::pattern::parameter_lock::ParameterLockPool,
+    object::pattern::plock::ParameterLockPool,
     util::{
         from_s_u16_t, i8_to_u8_midpoint_of_u8_input_range, to_s_u16_t_union_a,
         u8_to_i8_midpoint_of_u8_input_range,
@@ -18,7 +18,7 @@ use std::{cell::RefCell, rc::Rc};
     dec: "0..=127" #3,
     ton:  "-64..=63" #4,
     trd: "0..=127" #5,
-    // rst #6 (manual impl)
+    // rst #6 
     // Unavailable #7
     // Unavailable #8
 )]
@@ -64,13 +64,59 @@ impl HhBasicParameters {
     }
 
     /// Returns the `rst` parameter.
-    pub fn rst(&self) -> bool {
+    pub fn get_rst(&self) -> bool {
         self.rst
     }
 
     /// Sets the `rst` parameter.
     pub fn set_rst(&mut self, rst: bool) {
         self.rst = rst;
+    }
+
+    /// Sets the parameter lock for the `rst` parameter.
+    pub fn plock_set_rst(&self, rst: bool, trig_index: usize) -> Result<(), RytmError> {
+        if let Some(ref pool) = self.parameter_lock_pool {
+            let assigned_track = self.assigned_track.ok_or(OrphanTrig)?;
+            pool.borrow_mut().set_basic_plock(
+                trig_index,
+                assigned_track as u8,
+                rytm_sys::AR_PLOCK_TYPE_MP6 as u8,
+                rst as u8,
+            )?;
+            return Ok(());
+        }
+        Err(OrphanTrig)
+    }
+
+    /// Gets the parameter lock for the `rst` parameter.
+    pub fn plock_get_rst(&self, trig_index: usize) -> Result<Option<bool>, RytmError> {
+        if let Some(ref pool) = self.parameter_lock_pool {
+            let assigned_track = self.assigned_track.ok_or(OrphanTrig)?;
+            let rst = pool.borrow_mut().get_basic_plock(
+                trig_index,
+                assigned_track as u8,
+                rytm_sys::AR_PLOCK_TYPE_MP6 as u8,
+            );
+            if let Some(rst) = rst {
+                return Ok(Some(rst != 0));
+            }
+            return Ok(None);
+        }
+        Err(OrphanTrig)
+    }
+
+    /// Clears the parameter lock for the `rst` parameter if set.
+    pub fn plock_clear_rst(&self, trig_index: usize) -> Result<(), RytmError> {
+        if let Some(ref pool) = self.parameter_lock_pool {
+            let assigned_track = self.assigned_track.ok_or(OrphanTrig)?;
+            pool.borrow_mut().clear_basic_plock(
+                trig_index,
+                assigned_track as u8,
+                rytm_sys::AR_PLOCK_TYPE_MP6 as u8,
+            )?;
+            return Ok(());
+        }
+        Err(OrphanTrig)
     }
 
     #[parameter_range(range = "track_index[opt]:0..=11")]

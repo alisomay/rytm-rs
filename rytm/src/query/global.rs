@@ -1,7 +1,7 @@
 use super::ObjectQuery;
 use crate::{
     error::{ParameterError, RytmError},
-    sysex::{AnySysExType, SysexType},
+    sysex::{AnySysexType, SysexType},
 };
 use rytm_rs_macro::parameter_range;
 
@@ -50,7 +50,7 @@ impl GlobalQuery {
 }
 
 impl ObjectQuery for GlobalQuery {
-    fn sysex_type(&self) -> AnySysExType {
+    fn sysex_type(&self) -> AnySysexType {
         self.sysex_type.into()
     }
 

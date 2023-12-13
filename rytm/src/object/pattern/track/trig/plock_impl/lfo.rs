@@ -17,7 +17,7 @@ impl Trig {
     ///
     /// Range `-64..=63`
     #[parameter_range(range = "lfo_speed:-64..=63")]
-    pub fn p_lock_set_lfo_speed(&self, lfo_speed: isize) -> Result<(), RytmError> {
+    pub fn plock_set_lfo_speed(&self, lfo_speed: isize) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             pool.borrow_mut().set_basic_plock(
                 self.index,
@@ -32,10 +32,7 @@ impl Trig {
     }
 
     /// Sets a parameter lock for the LFO multiplier.
-    pub fn p_lock_set_lfo_multiplier(
-        &self,
-        lfo_multiplier: LfoMultiplier,
-    ) -> Result<(), RytmError> {
+    pub fn plock_set_lfo_multiplier(&self, lfo_multiplier: LfoMultiplier) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             pool.borrow_mut().set_basic_plock(
                 self.index,
@@ -53,7 +50,7 @@ impl Trig {
     ///
     /// Range `-64..=63`
     #[parameter_range(range = "lfo_fade:-64..=63")]
-    pub fn p_lock_set_lfo_fade(&self, lfo_fade: isize) -> Result<(), RytmError> {
+    pub fn plock_set_lfo_fade(&self, lfo_fade: isize) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             pool.borrow_mut().set_basic_plock(
                 self.index,
@@ -68,7 +65,7 @@ impl Trig {
     }
 
     /// Sets a parameter lock for the LFO destination.
-    pub fn p_lock_set_lfo_destination(
+    pub fn plock_set_lfo_destination(
         &self,
         lfo_destination: LfoDestination,
     ) -> Result<(), RytmError> {
@@ -86,7 +83,7 @@ impl Trig {
     }
 
     /// Sets a parameter lock for the LFO waveform.
-    pub fn p_lock_set_lfo_waveform(&self, lfo_waveform: LfoWaveform) -> Result<(), RytmError> {
+    pub fn plock_set_lfo_waveform(&self, lfo_waveform: LfoWaveform) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             pool.borrow_mut().set_basic_plock(
                 self.index,
@@ -104,7 +101,7 @@ impl Trig {
     ///
     /// Range `0..=127`
     #[parameter_range(range = "lfo_start_phase:0..=127")]
-    pub fn p_lock_set_lfo_start_phase(&self, lfo_start_phase: usize) -> Result<(), RytmError> {
+    pub fn plock_set_lfo_start_phase(&self, lfo_start_phase: usize) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             pool.borrow_mut().set_basic_plock(
                 self.index,
@@ -119,7 +116,7 @@ impl Trig {
     }
 
     /// Sets a parameter lock for the LFO mode.
-    pub fn p_lock_set_lfo_mode(&self, lfo_mode: LfoMode) -> Result<(), RytmError> {
+    pub fn plock_set_lfo_mode(&self, lfo_mode: LfoMode) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             pool.borrow_mut().set_basic_plock(
                 self.index,
@@ -137,7 +134,7 @@ impl Trig {
     ///
     /// Range `-128.0..=127.99`
     #[parameter_range(range = "lfo_depth:-128.0..=127.99")]
-    pub fn p_lock_set_lfo_depth(&self, lfo_depth: f32) -> Result<(), RytmError> {
+    pub fn plock_set_lfo_depth(&self, lfo_depth: f32) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             let depth = scale_f32_to_u16(lfo_depth, -128f32, 127.99f32, 0u16, 32767u16);
 
@@ -156,7 +153,7 @@ impl Trig {
     /// Gets the parameter lock for the LFO speed.
     ///
     /// Range `-64..=63`
-    pub fn p_lock_get_lfo_speed(&self) -> Result<Option<isize>, RytmError> {
+    pub fn plock_get_lfo_speed(&self) -> Result<Option<isize>, RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             let value = pool.borrow_mut().get_basic_plock(
                 self.index,
@@ -176,7 +173,7 @@ impl Trig {
     }
 
     /// Gets the parameter lock for the LFO multiplier.
-    pub fn p_lock_get_lfo_multiplier(&self) -> Result<Option<LfoMultiplier>, RytmError> {
+    pub fn plock_get_lfo_multiplier(&self) -> Result<Option<LfoMultiplier>, RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             let value = pool.borrow_mut().get_basic_plock(
                 self.index,
@@ -196,7 +193,7 @@ impl Trig {
     /// Gets the parameter lock for the LFO fade.
     ///
     /// Range `-64..=63`
-    pub fn p_lock_get_lfo_fade(&self) -> Result<Option<isize>, RytmError> {
+    pub fn plock_get_lfo_fade(&self) -> Result<Option<isize>, RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             let value = pool.borrow_mut().get_basic_plock(
                 self.index,
@@ -216,7 +213,7 @@ impl Trig {
     }
 
     /// Gets the parameter lock for the LFO destination.
-    pub fn p_lock_get_lfo_destination(&self) -> Result<Option<LfoDestination>, RytmError> {
+    pub fn plock_get_lfo_destination(&self) -> Result<Option<LfoDestination>, RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             let value = pool.borrow_mut().get_basic_plock(
                 self.index,
@@ -234,7 +231,7 @@ impl Trig {
     }
 
     /// Gets the parameter lock for the LFO waveform.
-    pub fn p_lock_get_lfo_waveform(&self) -> Result<Option<LfoWaveform>, RytmError> {
+    pub fn plock_get_lfo_waveform(&self) -> Result<Option<LfoWaveform>, RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             let value = pool.borrow_mut().get_basic_plock(
                 self.index,
@@ -254,7 +251,7 @@ impl Trig {
     /// Gets the parameter lock for the LFO start phase.
     ///
     /// Range `0..=127`
-    pub fn p_lock_get_lfo_start_phase(&self) -> Result<Option<usize>, RytmError> {
+    pub fn plock_get_lfo_start_phase(&self) -> Result<Option<usize>, RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             let value = pool.borrow_mut().get_basic_plock(
                 self.index,
@@ -272,7 +269,7 @@ impl Trig {
     }
 
     /// Gets the parameter lock for the LFO mode.
-    pub fn p_lock_get_lfo_mode(&self) -> Result<Option<LfoMode>, RytmError> {
+    pub fn plock_get_lfo_mode(&self) -> Result<Option<LfoMode>, RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             let value = pool.borrow_mut().get_basic_plock(
                 self.index,
@@ -292,7 +289,7 @@ impl Trig {
     /// Gets the parameter lock for the LFO depth.
     ///
     /// Range `-128.0..=127.99`
-    pub fn p_lock_get_lfo_depth(&self) -> Result<Option<f32>, RytmError> {
+    pub fn plock_get_lfo_depth(&self) -> Result<Option<f32>, RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             let value = pool.borrow_mut().get_compound_plock(
                 self.index,
@@ -312,7 +309,7 @@ impl Trig {
     }
 
     /// Clears the parameter lock for the LFO speed.
-    pub fn p_lock_clear_lfo_speed(&self) -> Result<(), RytmError> {
+    pub fn plock_clear_lfo_speed(&self) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             pool.borrow_mut().clear_basic_plock(
                 self.index,
@@ -326,7 +323,7 @@ impl Trig {
     }
 
     /// Clears the parameter lock for the LFO multiplier.
-    pub fn p_lock_clear_lfo_multiplier(&self) -> Result<(), RytmError> {
+    pub fn plock_clear_lfo_multiplier(&self) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             pool.borrow_mut().clear_basic_plock(
                 self.index,
@@ -340,7 +337,7 @@ impl Trig {
     }
 
     /// Clears the parameter lock for the LFO fade.
-    pub fn p_lock_clear_lfo_fade(&self) -> Result<(), RytmError> {
+    pub fn plock_clear_lfo_fade(&self) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             pool.borrow_mut().clear_basic_plock(
                 self.index,
@@ -354,7 +351,7 @@ impl Trig {
     }
 
     /// Clears the parameter lock for the LFO destination.
-    pub fn p_lock_clear_lfo_destination(&self) -> Result<(), RytmError> {
+    pub fn plock_clear_lfo_destination(&self) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             pool.borrow_mut().clear_basic_plock(
                 self.index,
@@ -368,7 +365,7 @@ impl Trig {
     }
 
     /// Clears the parameter lock for the LFO waveform.
-    pub fn p_lock_clear_lfo_waveform(&self) -> Result<(), RytmError> {
+    pub fn plock_clear_lfo_waveform(&self) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             pool.borrow_mut().clear_basic_plock(
                 self.index,
@@ -382,7 +379,7 @@ impl Trig {
     }
 
     /// Clears the parameter lock for the LFO start phase.
-    pub fn p_lock_clear_lfo_start_phase(&self) -> Result<(), RytmError> {
+    pub fn plock_clear_lfo_start_phase(&self) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             pool.borrow_mut().clear_basic_plock(
                 self.index,
@@ -396,7 +393,7 @@ impl Trig {
     }
 
     /// Clears the parameter lock for the LFO mode.
-    pub fn p_lock_clear_lfo_mode(&self) -> Result<(), RytmError> {
+    pub fn plock_clear_lfo_mode(&self) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             pool.borrow_mut().clear_basic_plock(
                 self.index,
@@ -410,7 +407,7 @@ impl Trig {
     }
 
     /// Clears the parameter lock for the LFO depth.
-    pub fn p_lock_clear_lfo_depth(&self) -> Result<(), RytmError> {
+    pub fn plock_clear_lfo_depth(&self) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             pool.borrow_mut().clear_compound_plock(
                 self.index,

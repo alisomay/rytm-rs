@@ -7,7 +7,7 @@ use rytm_sys::ar_sound_t;
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 
 pub struct SoundSettings {
-    machine_type: MachineType,
+    pub(crate) machine_type: MachineType,
     chromatic_mode: SoundSettingsChromaticMode,
     env_reset_filter: bool,
     velocity_to_volume: bool,
@@ -101,27 +101,6 @@ impl SoundSettings {
         raw_sound.at_amt_4 = self.after_touch_modulation_amt_4 as u8;
         raw_sound.at_target_4 = self.after_touch_modulation_target_4.into();
     }
-
-    // TODO:
-    //     /// Sets the machine of the sound.
-    // pub fn set_machine(&mut self, machine: Machine) -> Result<(), RytmError> {
-    //     if let Some(assigned_track) = self.assigned_track() {
-    //         if !crate::util::is_machine_compatible_for_track(assigned_track, machine) {
-    //             return Err(ParameterError::Compatibility {
-    //                 value: machine.to_string(),
-    //                 parameter_name: "Machine".to_string(),
-    //                 reason: Some(format!(
-    //                     "Given machine {} is not compatible for track {}",
-    //                     machine, self.index
-    //                 )),
-    //             }
-    //             .into());
-    //         }
-    //     }
-
-    //     self.machine = machine;
-    //     Ok(())
-    // }
 
     /// Sets the chromatic mode of the sound.
     pub fn set_chromatic_mode(&mut self, chromatic_mode: SoundSettingsChromaticMode) {
@@ -311,7 +290,6 @@ impl SoundSettings {
     }
 
     /// Returns the chromatic mode of the sound.
-
     pub fn chromatic_mode(&self) -> SoundSettingsChromaticMode {
         self.chromatic_mode
     }

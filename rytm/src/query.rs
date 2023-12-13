@@ -21,14 +21,14 @@ const RYTM_SYSEX_QUERY_SIZE: usize = rytm_sys::AR_SYSEX_REQUEST_MSG_SZ as usize;
 
 use super::error::{RytmError, SysexConversionError};
 use crate::{
-    sysex::{AnySysExType, SysexMeta},
+    sysex::{AnySysexType, SysexMeta},
     SysexCompatible,
 };
 
 /// A trait which is implemented by all structures which can be converted to rytm sysex query messages.
 pub trait ObjectQuery {
     /// Returns the sysex type of the object.
-    fn sysex_type(&self) -> AnySysExType;
+    fn sysex_type(&self) -> AnySysexType;
 
     /// Returns the device id of the object.
     fn device_id(&self) -> u8;
@@ -56,7 +56,7 @@ pub trait ObjectQuery {
 }
 
 impl<T: ObjectQuery> SysexCompatible for T {
-    fn sysex_type(&self) -> AnySysExType {
+    fn sysex_type(&self) -> AnySysexType {
         self.sysex_type()
     }
 
