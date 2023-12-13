@@ -1,3 +1,4 @@
+pub(crate) mod defaults;
 pub mod error;
 pub mod object;
 pub mod prelude;
@@ -20,8 +21,8 @@ use object::{
     sound::{Sound, SoundType},
 };
 
+use defaults::*;
 use rytm_sys::{ar_global_t, ar_kit_t, ar_pattern_t, ar_settings_t, ar_sound_t};
-use std::mem::{self, MaybeUninit};
 use sysex::decode_sysex_response_to_raw;
 
 /// [`RytmProject`] represents the state of the analog rytm.
@@ -30,66 +31,32 @@ use sysex::decode_sysex_response_to_raw;
 #[derive(Clone, Debug)]
 pub struct RytmProject {
     work_buffer: RytmProjectWorkBuffer,
-    patterns: [Pattern; 128],
-    pool_sounds: [Sound; 128],
-    kits: [Kit; 128],
-    globals: [Global; 4],
+    patterns: Vec<Pattern>,
+    pool_sounds: [Sound; POOL_SOUND_MAX_COUNT],
+    kits: Vec<Kit>,
+    globals: [Global; GLOBAL_MAX_COUNT],
     // TODO: Songs (16)
     settings: Settings,
 }
 
 impl Default for RytmProject {
     fn default() -> Self {
-        const PATTERN_MAX_COUNT: usize = 128;
-        const POOL_SOUND_MAX_COUNT: usize = 128;
-        const KIT_MAX_COUNT: usize = 128;
-
-        // Pattern, Sound and Kit are not Copy, so we need to initialize them manually.
-        // It would not be convenient to literally write out 128 of each, so we use MaybeUninit.
-        // This technique is also avoiding the possible extra copy that would be done if we used `vec!`.
-
-        // Safety:
-        // - Before the array is transmuted to the initialized array, all elements are initialized.
-        // - The size and alignment of the transmuted types are correct.
-        // - The length of the array matches the expected size.
-        // - The initialization code does not panic even if `unwrap`s are used. Those are used index bounds check.
-        // The indexes in loops are in bound.
-
-        // Declare the uninitialized arrays.
-        let mut patterns: [MaybeUninit<Pattern>; PATTERN_MAX_COUNT] =
-            unsafe { MaybeUninit::uninit().assume_init() };
-        let mut pool_sounds: [MaybeUninit<Sound>; POOL_SOUND_MAX_COUNT] =
-            unsafe { MaybeUninit::uninit().assume_init() };
-        let mut kits: [MaybeUninit<Kit>; KIT_MAX_COUNT] =
-            unsafe { MaybeUninit::uninit().assume_init() };
-
-        // Initialize the arrays.
-        for (i, pattern) in patterns.iter_mut().enumerate() {
-            *pattern = MaybeUninit::new(Pattern::try_default(i).unwrap());
-        }
-        for (i, sound) in pool_sounds.iter_mut().enumerate() {
-            *sound = MaybeUninit::new(Sound::try_default(i).unwrap());
-        }
-        for (i, kit) in kits.iter_mut().enumerate() {
-            *kit = MaybeUninit::new(Kit::try_default(i).unwrap());
+        let mut patterns = Vec::with_capacity(PATTERN_MAX_COUNT);
+        for i in 0..PATTERN_MAX_COUNT {
+            patterns.push(Pattern::try_default(i).unwrap());
         }
 
-        // Transmute the arrays to initialized arrays with the right type.
-        let patterns: [Pattern; PATTERN_MAX_COUNT] = unsafe { mem::transmute(patterns) };
-        let pool_sounds: [Sound; POOL_SOUND_MAX_COUNT] = unsafe { mem::transmute(pool_sounds) };
-        let kits: [Kit; KIT_MAX_COUNT] = unsafe { mem::transmute(kits) };
+        let mut kits = Vec::with_capacity(KIT_MAX_COUNT);
+        for i in 0..KIT_MAX_COUNT {
+            kits.push(Kit::try_default(i).unwrap());
+        }
 
         Self {
             work_buffer: RytmProjectWorkBuffer::default(),
             patterns,
-            pool_sounds,
+            pool_sounds: default_pool_sounds(),
             kits,
-            globals: [
-                Global::try_default(0).unwrap(),
-                Global::try_default(1).unwrap(),
-                Global::try_default(2).unwrap(),
-                Global::try_default(3).unwrap(),
-            ],
+            globals: default_globals(),
             settings: Settings::default(),
         }
     }
@@ -119,6 +86,10 @@ impl RytmProject {
     /// Never happened to me in practice but a cut transmission may also cause this in theory.
     /// - All other  [`crate::error::RytmError::SysexConversionError`] variants are possible which are inherited from [libanalogrytm](https://github.com/bsp2/libanalogrytm).
     pub fn update_from_sysex_response(&mut self, response: &[u8]) -> Result<(), RytmError> {
+        if response.len() < 2 {
+            return Err(SysexConversionError::ShortRead.into());
+        }
+
         // Ignore non-sysex messages.
         if !(response[0] == 0xF0 && response[response.len() - 1] == 0xF7) {
             return Ok(());
@@ -292,7 +263,7 @@ impl RytmProject {
 pub struct RytmProjectWorkBuffer {
     pattern: Pattern,
     kit: Kit,
-    sounds: [Sound; 12],
+    sounds: [Sound; TRACK_MAX_COUNT],
     global: Global,
     // TODO: Work buffer song
 }
@@ -302,20 +273,7 @@ impl Default for RytmProjectWorkBuffer {
         Self {
             pattern: Pattern::work_buffer_default(),
             kit: Kit::work_buffer_default(),
-            sounds: [
-                Sound::try_work_buffer_default(0).unwrap(),
-                Sound::try_work_buffer_default(1).unwrap(),
-                Sound::try_work_buffer_default(2).unwrap(),
-                Sound::try_work_buffer_default(3).unwrap(),
-                Sound::try_work_buffer_default(4).unwrap(),
-                Sound::try_work_buffer_default(5).unwrap(),
-                Sound::try_work_buffer_default(6).unwrap(),
-                Sound::try_work_buffer_default(7).unwrap(),
-                Sound::try_work_buffer_default(8).unwrap(),
-                Sound::try_work_buffer_default(9).unwrap(),
-                Sound::try_work_buffer_default(10).unwrap(),
-                Sound::try_work_buffer_default(11).unwrap(),
-            ],
+            sounds: default_work_buffer_sounds(),
             global: Global::work_buffer_default(),
         }
     }

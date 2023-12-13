@@ -5,6 +5,8 @@
 //! The tests are not expected to be stable, and may change at any time.
 
 mod common;
+use std::sync::{Arc, Mutex};
+
 use crate::common::util::decode_sysex_response_to_raw;
 use common::*;
 use rytm_rs::prelude::*;
@@ -576,3 +578,105 @@ fn usage() {
     //     }
     // }
 }
+
+#[test]
+fn stuff() {
+    // let out = get_connection_to_rytm();
+    // let (_conn_in, rx) = make_input_message_forwarder();
+
+    // let query = SoundQuery::new_targeting_work_buffer(0).unwrap();
+
+    // let mut rytm = Arc::new(Mutex::new(RytmProject::default()));
+    // let out = get_connection_to_rytm();
+
+    // let rytm1 = rytm.clone();
+    // let out1 = out.clone();
+
+    // std::thread::spawn(move || loop {
+    //     out1.lock()
+    //         .unwrap()
+    //         .send(&query.as_sysex().unwrap())
+    //         .unwrap();
+
+    //     match rx.recv() {
+    //         Ok((message, _stamp)) => {
+    //             callback(&message, rytm, elapsed)?;
+    //         }
+    //         Err(err) => {
+    //             println!("Error: {:?}", err);
+    //         }
+    //     }
+
+    //     std::thread::sleep(std::time::Duration::from_millis(interval_in_millis));
+    // });
+
+    // let mut out = out.lock().unwrap();
+    // out.send(&query.as_sysex().unwrap()).unwrap();
+
+    // while let Ok((msg, _)) = rx.recv() {
+    //     if !is_sysex(&msg) {
+    //         continue;
+    //     }
+
+    //     if rytm.update_from_sysex_response(&msg).is_err() {
+    //         continue;
+    //     }
+
+    //     let sound = &mut rytm.work_buffer_mut().sounds_mut()[0];
+    //     sound
+    //         .set_machine_type(rytm_rs::object::sound::types::MachineType::BdAcoustic)
+    //         .unwrap();
+
+    //     out.send(&sound.as_sysex().unwrap()).unwrap();
+    // }
+
+    // rytm.update_from_sysex_response(response)?;
+    // let pattern = rytm.work_buffer_mut().pattern_mut();
+
+    // let t = &mut pattern.tracks_mut()[0];
+    // let trigs = t.trigs_mut();
+    // let trig0 = &mut trigs[0];
+
+    // trig0.plock_set_lfo_depth(-66.0).unwrap();
+    // trig0.plock_set_lfo_speed(-63).unwrap();
+    // trig0.plock_set_lfo_multiplier(LfoMultiplier::X1).unwrap();
+    // out.lock().unwrap().send(&pattern.as_sysex()?).unwrap();
+}
+
+// pub fn poll_with_query_blocking(
+//     rytm: &mut RytmProject,
+//     query: impl ObjectQuery,
+//     conn_out: Arc<Mutex<MidiOutputConnection>>,
+//     rx: std::sync::mpsc::Receiver<(Vec<u8>, u64)>,
+//     interval_in_millis: u64,
+//     mut callback: impl FnMut(&[u8], &mut RytmProject, u64) -> Result<(), RytmError>,
+// ) -> Result<(), RytmError> {
+//     loop {
+//         conn_out
+//             .lock()
+//             .unwrap()
+//             .send(&query.as_sysex().unwrap())
+//             .unwrap();
+//         // Timestamp
+//         let query_start = std::time::SystemTime::now()
+//             .duration_since(std::time::UNIX_EPOCH)
+//             .unwrap()
+//             .as_millis() as u64;
+
+//         match rx.recv() {
+//             Ok((message, _stamp)) => {
+//                 let response_received = std::time::SystemTime::now()
+//                     .duration_since(std::time::UNIX_EPOCH)
+//                     .unwrap()
+//                     .as_millis() as u64;
+//                 let elapsed = response_received - query_start;
+//                 callback(&message, rytm, elapsed)?;
+//             }
+//             Err(err) => {
+//                 println!("Error: {:?}", err);
+//             }
+//         }
+
+//         std::thread::sleep(std::time::Duration::from_millis(interval_in_millis));
+//     }
+// }

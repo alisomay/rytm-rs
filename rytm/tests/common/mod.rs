@@ -88,6 +88,9 @@ pub fn poll_with_query_blocking(
 }
 
 pub fn is_sysex(response: &[u8]) -> bool {
+    if response.len() < 2 {
+        return false;
+    }
     response[0] == 0xF0 && response[response.len() - 1] == 0xF7
 }
 

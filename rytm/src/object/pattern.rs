@@ -9,6 +9,7 @@ use self::{
     types::{Speed, TimeMode},
 };
 use crate::{
+    defaults::default_tracks,
     error::{ParameterError, RytmError, SysexConversionError},
     impl_sysex_compatible,
     object::pattern::track::Track,
@@ -54,11 +55,11 @@ pub struct Pattern {
     ///
     /// 12 tracks of analog rytm excluding the FX track.
     tracks: [Track; 12],
+    /// Fx Track
     fx_track: Rc<RefCell<Track>>,
-
+    /// Parameter Lock Pool
     #[derivative(Debug = "ignore")]
-    pub parameter_lock_pool: Rc<RefCell<ParameterLockPool>>,
-
+    parameter_lock_pool: Rc<RefCell<ParameterLockPool>>,
     /// Master Length
     ///
     /// Range `1..=1024`
@@ -162,20 +163,7 @@ impl Pattern {
             sysex_meta.obj_nr as usize
         };
 
-        let mut tracks: [Track; 12] = [
-            Track::try_default(0).unwrap(),
-            Track::try_default(1).unwrap(),
-            Track::try_default(2).unwrap(),
-            Track::try_default(3).unwrap(),
-            Track::try_default(4).unwrap(),
-            Track::try_default(5).unwrap(),
-            Track::try_default(6).unwrap(),
-            Track::try_default(7).unwrap(),
-            Track::try_default(8).unwrap(),
-            Track::try_default(9).unwrap(),
-            Track::try_default(10).unwrap(),
-            Track::try_default(11).unwrap(),
-        ];
+        let mut tracks: [Track; 12] = default_tracks();
 
         let parameter_lock_pool = Rc::new(RefCell::new(ParameterLockPool::from_raw(
             raw_pattern.plock_seqs,
@@ -238,20 +226,7 @@ impl Pattern {
             sysex_meta: SysexMeta::try_default_for_pattern(index, None)?,
             index,
             version: 5,
-            tracks: [
-                Track::try_default(0).unwrap(),
-                Track::try_default(1).unwrap(),
-                Track::try_default(2).unwrap(),
-                Track::try_default(3).unwrap(),
-                Track::try_default(4).unwrap(),
-                Track::try_default(5).unwrap(),
-                Track::try_default(6).unwrap(),
-                Track::try_default(7).unwrap(),
-                Track::try_default(8).unwrap(),
-                Track::try_default(9).unwrap(),
-                Track::try_default(10).unwrap(),
-                Track::try_default(11).unwrap(),
-            ],
+            tracks: default_tracks(),
             fx_track: Rc::new(RefCell::new(Track::try_default(12).unwrap())),
             parameter_lock_pool: Rc::new(RefCell::new(ParameterLockPool::default())),
             master_length: 16,
@@ -271,20 +246,7 @@ impl Pattern {
             sysex_meta: SysexMeta::default_for_pattern_in_work_buffer(None),
             index: 0,
             version: 5,
-            tracks: [
-                Track::try_default(0).unwrap(),
-                Track::try_default(1).unwrap(),
-                Track::try_default(2).unwrap(),
-                Track::try_default(3).unwrap(),
-                Track::try_default(4).unwrap(),
-                Track::try_default(5).unwrap(),
-                Track::try_default(6).unwrap(),
-                Track::try_default(7).unwrap(),
-                Track::try_default(8).unwrap(),
-                Track::try_default(9).unwrap(),
-                Track::try_default(10).unwrap(),
-                Track::try_default(11).unwrap(),
-            ],
+            tracks: default_tracks(),
             fx_track: Rc::new(RefCell::new(Track::try_default(12).unwrap())),
             parameter_lock_pool: Rc::new(RefCell::new(ParameterLockPool::default())),
             master_length: 16,
