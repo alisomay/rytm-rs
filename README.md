@@ -1,6 +1,6 @@
-<!-- <p align="center">
-  <img src="https://raw.githubusercontent.com/alisomay/rytm-rs/main/assets/logo_transparent.png"/>
-</p> -->
+<p align="center">
+  <img src="https://raw.githubusercontent.com/alisomay/rytm-rs/main/assets/logo.png"/>
+</p>
 
 # rytm-rs
 

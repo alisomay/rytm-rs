@@ -1,3 +1,10 @@
+#![doc(
+    html_logo_url = "https://raw.githubusercontent.com/alisomay/rytm-rs/main/assets/logo.png",
+    html_favicon_url = "https://raw.githubusercontent.com/alisomay/rytm-rs/main/assets/favicon/favicon.ico"
+)]
+
+//! Many thanks to [Başak Ünal](https://basakunal.design) for the logo.
+
 pub(crate) mod defaults;
 pub mod error;
 pub mod object;
