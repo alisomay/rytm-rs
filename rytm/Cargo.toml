@@ -1,6 +1,6 @@
 [package]
 name = "rytm-rs"
-version = "0.1.10"
+version = "0.1.0"
 authors = ["alisomay <alisomay@runbox.com>"]
 edition = "2021"
 license = "MIT"
