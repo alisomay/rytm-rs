@@ -1,7 +1,16 @@
 [package]
 name = "rytm-rs-macro"
 version = "0.1.0"
+authors = ["alisomay <alisomay@runbox.com>"]
 edition = "2021"
+license = "MIT"
+description = "A procedural macro for generating rytm-rs code"
+readme = "README.md"
+homepage = "https://github.com/alisomay/rytm-rs"
+repository = "https://github.com/alisomay/rytm-rs"
+documentation = "https://docs.rs/rytm-rs-macro/latest/rytm_rs_macro/#"
+keywords = ["procmacro", "rytm", "rytm-rs"]
+categories = ["development-tools"]
 
 [lib]
 name = "rytm_rs_macro"
@@ -9,11 +18,12 @@ path = "src/lib.rs"
 proc-macro = true
 
 [dependencies]
-# https://github.com/dtolnay/proc-macro-workshop#debugging-tips
 syn = { version = "*", features = ["extra-traits"] }
-quote = "*"
-proc-macro2 = "*"
-r3bl_rs_utils = "*"
+quote = "1.0.33"
+proc-macro2 = "1.0.70"
+
+
+
 
 
 

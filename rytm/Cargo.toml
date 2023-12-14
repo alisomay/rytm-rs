@@ -1,23 +1,36 @@
 [package]
 name = "rytm-rs"
-version = "0.1.0"
+version = "0.1.10"
+authors = ["alisomay <alisomay@runbox.com>"]
 edition = "2021"
+license = "MIT"
+description = "More than safe rust abstractions over rytm-sys, an unofficial SDK for Analog Rytm MKII running firmware 1.70"
+readme = "README.md"
+homepage = "https://github.com/alisomay/rytm-rs"
+repository = "https://github.com/alisomay/rytm-rs"
+documentation = "https://docs.rs/rytm-rs/0.1.9/rytm_rs/#"
+keywords = ["analogrytm", "sdk", "audio", "midi", "rytm"]
+categories = ["encoding"]
+exclude = [
+    "tests/*",
+    "assets/favicon/*",
+    "assets/logo_*"
+]
 
 [dependencies]
-anyhow = "1.0"
-# rytm-sys = "0.1"
-bitstream-io = "2"
-rytm-sys = { path = "../../rytm-sys" }
-thiserror = "1.0"
-rand = "0.8"
-rytm-rs-macro = { path = "../rytm-macro" }
-derivative = "2"
-num-traits = "0.2"
+thiserror = "1"
+rytm-sys = "0.1"
+bitstream-io = "2.2.0"
+rytm-rs-macro = "0.1"
+derivative = "2.2.0"
+embed-doc-image = "0.1.4"
 
 [dev-dependencies]
-# rytm-sys = "0.1"
-rytm-sys = { path = "../../rytm-sys" }
+anyhow = "1.0"
+rytm-sys = "0.1"
 midir = "0.9"
 clearscreen = "2"
-anyhow = "1.0"
+
+
+
 
