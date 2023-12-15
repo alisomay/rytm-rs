@@ -1,6 +1,6 @@
 [package]
 name = "rytm-rs-macro"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["alisomay <alisomay@runbox.com>"]
 edition = "2021"
 license = "MIT"
