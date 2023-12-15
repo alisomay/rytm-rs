@@ -1,3 +1,4 @@
+use crate::error::ConversionError;
 use crate::util::scale_f32_to_u16;
 use crate::{
     error::{ParameterError, RytmError},
@@ -25,17 +26,21 @@ pub enum SyRawWaveform1 {
     Ring,
 }
 
-impl From<u8> for SyRawWaveform1 {
-    fn from(value: u8) -> Self {
+impl TryFrom<u8> for SyRawWaveform1 {
+    type Error = ConversionError;
+    fn try_from(value: u8) -> Result<Self, Self::Error> {
         match value {
-            0 => Self::Sin,
-            1 => Self::Asin,
-            2 => Self::Tri,
-            3 => Self::Ssaw,
-            4 => Self::Asaw,
-            5 => Self::Saw,
-            6 => Self::Ring,
-            _ => panic!("Invalid SyRawWaveform1 value: {}", value),
+            0 => Ok(Self::Sin),
+            1 => Ok(Self::Asin),
+            2 => Ok(Self::Tri),
+            3 => Ok(Self::Ssaw),
+            4 => Ok(Self::Asaw),
+            5 => Ok(Self::Saw),
+            6 => Ok(Self::Ring),
+            _ => Err(ConversionError::Range {
+                value: value.to_string(),
+                type_name: "SyRawWaveform1".into(),
+            }),
         }
     }
 }
@@ -63,14 +68,18 @@ pub enum SyRawWaveform2 {
     SsawB,
 }
 
-impl From<u8> for SyRawWaveform2 {
-    fn from(value: u8) -> Self {
+impl TryFrom<u8> for SyRawWaveform2 {
+    type Error = ConversionError;
+    fn try_from(value: u8) -> Result<Self, Self::Error> {
         match value {
-            0 => Self::SineA,
-            1 => Self::SsawA,
-            2 => Self::SineB,
-            3 => Self::SsawB,
-            _ => panic!("Invalid SyRawWaveform2 value: {}", value),
+            0 => Ok(Self::SineA),
+            1 => Ok(Self::SsawA),
+            2 => Ok(Self::SineB),
+            3 => Ok(Self::SsawB),
+            _ => Err(ConversionError::Range {
+                value: value.to_string(),
+                type_name: "SyRawWaveform2".into(),
+            }),
         }
     }
 }
@@ -146,24 +155,22 @@ impl SyRawParameters {
     }
 
     // Sets the `wav1` parameter.
-    pub fn set_wav1(&mut self, wav1: SyRawWaveform1) -> Result<(), ParameterError> {
+    pub fn set_wav1(&mut self, wav1: SyRawWaveform1) {
         self.wav1 = wav1;
-        Ok(())
     }
 
     // Sets the `wav2` parameter.
-    pub fn set_wav2(&mut self, wav2: SyRawWaveform2) -> Result<(), ParameterError> {
+    pub fn set_wav2(&mut self, wav2: SyRawWaveform2) {
         self.wav2 = wav2;
-        Ok(())
     }
 
     // Returns the `wav1` parameter.
-    pub fn get_wav1(&self) -> SyRawWaveform1 {
+    pub const fn get_wav1(&self) -> SyRawWaveform1 {
         self.wav1
     }
 
     // Returns the `wav2` parameter.
-    pub fn get_wav2(&self) -> SyRawWaveform2 {
+    pub const fn get_wav2(&self) -> SyRawWaveform2 {
         self.wav2
     }
 
@@ -192,7 +199,7 @@ impl SyRawParameters {
                 rytm_sys::AR_PLOCK_TYPE_MP6 as u8,
             );
             if let Some(wav1) = wav1 {
-                return Ok(Some(wav1.into()));
+                return Ok(Some(wav1.try_into()?));
             }
             return Ok(None);
         }
@@ -238,7 +245,7 @@ impl SyRawParameters {
                 rytm_sys::AR_PLOCK_TYPE_MP6 as u8,
             );
             if let Some(wav2) = wav2 {
-                return Ok(Some(wav2.into()));
+                return Ok(Some(wav2.try_into()?));
             }
             return Ok(None);
         }
@@ -289,8 +296,8 @@ impl SyRawParameters {
                     output_tun_max,
                 ),
                 nlev: (from_s_u16_t(raw_sound.synth_param_5) >> 8) as u8,
-                wav1: ((from_s_u16_t(raw_sound.synth_param_6) >> 8) as u8).into(),
-                wav2: ((from_s_u16_t(raw_sound.synth_param_7) >> 8) as u8).into(),
+                wav1: ((from_s_u16_t(raw_sound.synth_param_6) >> 8) as u8).try_into()?,
+                wav2: ((from_s_u16_t(raw_sound.synth_param_7) >> 8) as u8).try_into()?,
                 bal: u8_to_i8_midpoint_of_u8_input_range(
                     (from_s_u16_t(raw_sound.synth_param_8) >> 8) as u8,
                     0,

@@ -27,7 +27,10 @@ impl ParameterLockPool {
         self.inner
     }
 
-    // TODO: Value or ref?
+    // This type is around 4kb in size, copying is indeed inefficient.
+    // But until now it didn't create any practical problems.
+    // If we see a slowdown in the future we can change this.
+    #[allow(clippy::large_types_passed_by_value)]
     pub const fn from_raw(raw: [rytm_sys::ar_plock_seq_t; 72]) -> Self {
         Self { inner: raw }
     }

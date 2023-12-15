@@ -64,7 +64,7 @@ impl HhBasicParameters {
     }
 
     /// Returns the `rst` parameter.
-    pub fn get_rst(&self) -> bool {
+    pub const fn get_rst(&self) -> bool {
         self.rst
     }
 

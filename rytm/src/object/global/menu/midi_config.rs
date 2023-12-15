@@ -493,23 +493,26 @@ impl From<&ar_global_t> for Channels {
 
 impl Channels {
     pub(crate) fn apply_to_raw_global(&self, raw_global: &mut ar_global_t) {
-        raw_global.auto_channel = self.auto_channel.into();
-        raw_global.track_channels[0] = self.track_channels[0].into();
-        raw_global.track_channels[1] = self.track_channels[1].into();
-        raw_global.track_channels[2] = self.track_channels[2].into();
-        raw_global.track_channels[3] = self.track_channels[3].into();
-        raw_global.track_channels[4] = self.track_channels[4].into();
-        raw_global.track_channels[5] = self.track_channels[5].into();
-        raw_global.track_channels[6] = self.track_channels[6].into();
-        raw_global.track_channels[7] = self.track_channels[7].into();
-        raw_global.track_channels[8] = self.track_channels[8].into();
-        raw_global.track_channels[9] = self.track_channels[9].into();
-        raw_global.track_channels[10] = self.track_channels[10].into();
-        raw_global.track_channels[11] = self.track_channels[11].into();
-        raw_global.track_fx_channel = self.track_fx_channel.into();
-        raw_global.prog_ch_in_channel = self.program_change_in_channel.into();
-        raw_global.prog_ch_out_channel = self.program_change_out_channel.into();
-        raw_global.perf_channel = self.performance_channel.into();
+        const ERROR_MSG: &str = "We shouldn't reach here. There are many checks before this function is called. But if we did that means either the sysex format has changed or corrupted.";
+
+        raw_global.auto_channel = self.auto_channel.try_into().expect(ERROR_MSG);
+        raw_global.track_channels[0] = self.track_channels[0].try_into().expect(ERROR_MSG);
+        raw_global.track_channels[1] = self.track_channels[1].try_into().expect(ERROR_MSG);
+        raw_global.track_channels[2] = self.track_channels[2].try_into().expect(ERROR_MSG);
+        raw_global.track_channels[3] = self.track_channels[3].try_into().expect(ERROR_MSG);
+        raw_global.track_channels[4] = self.track_channels[4].try_into().expect(ERROR_MSG);
+        raw_global.track_channels[5] = self.track_channels[5].try_into().expect(ERROR_MSG);
+        raw_global.track_channels[6] = self.track_channels[6].try_into().expect(ERROR_MSG);
+        raw_global.track_channels[7] = self.track_channels[7].try_into().expect(ERROR_MSG);
+        raw_global.track_channels[8] = self.track_channels[8].try_into().expect(ERROR_MSG);
+        raw_global.track_channels[9] = self.track_channels[9].try_into().expect(ERROR_MSG);
+        raw_global.track_channels[10] = self.track_channels[10].try_into().expect(ERROR_MSG);
+        raw_global.track_channels[11] = self.track_channels[11].try_into().expect(ERROR_MSG);
+        raw_global.track_fx_channel = self.track_fx_channel.try_into().expect(ERROR_MSG);
+        raw_global.prog_ch_in_channel = self.program_change_in_channel.try_into().expect(ERROR_MSG);
+        raw_global.prog_ch_out_channel =
+            self.program_change_out_channel.try_into().expect(ERROR_MSG);
+        raw_global.perf_channel = self.performance_channel.try_into().expect(ERROR_MSG);
     }
 
     fn validate_midi_channel(channel: &MidiChannel, auto: bool) -> Result<(), ParameterError> {

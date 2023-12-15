@@ -1,3 +1,4 @@
+use crate::error::ConversionError;
 use crate::util::scale_f32_to_u16;
 use crate::{
     error::{ParameterError, RytmError},
@@ -27,22 +28,26 @@ pub enum BdSharpWaveform {
     SqrB,
 }
 
-impl From<u8> for BdSharpWaveform {
-    fn from(value: u8) -> Self {
+impl TryFrom<u8> for BdSharpWaveform {
+    type Error = ConversionError;
+    fn try_from(value: u8) -> Result<Self, Self::Error> {
         match value {
-            0 => Self::SinA,
-            1 => Self::SinB,
-            2 => Self::AsinA,
-            3 => Self::AsinB,
-            4 => Self::TriA,
-            5 => Self::TriB,
-            6 => Self::SsawA,
-            7 => Self::SsawB,
-            8 => Self::SawA,
-            9 => Self::SawB,
-            10 => Self::SqrA,
-            11 => Self::SqrB,
-            _ => panic!("Invalid BdSharpWaveform value: {}", value),
+            0 => Ok(Self::SinA),
+            1 => Ok(Self::SinB),
+            2 => Ok(Self::AsinA),
+            3 => Ok(Self::AsinB),
+            4 => Ok(Self::TriA),
+            5 => Ok(Self::TriB),
+            6 => Ok(Self::SsawA),
+            7 => Ok(Self::SsawB),
+            8 => Ok(Self::SawA),
+            9 => Ok(Self::SawB),
+            10 => Ok(Self::SqrA),
+            11 => Ok(Self::SqrB),
+            _ => Err(ConversionError::Range {
+                value: value.to_string(),
+                type_name: "BdSharpWaveform".into(),
+            }),
         }
     }
 }
@@ -125,13 +130,12 @@ impl BdSharpParameters {
     }
 
     /// Sets the `wav` parameter.
-    pub fn set_wav(&mut self, wav: BdSharpWaveform) -> Result<(), RytmError> {
+    pub fn set_wav(&mut self, wav: BdSharpWaveform) {
         self.wav = wav;
-        Ok(())
     }
 
     /// Returns the `wav` parameter.
-    pub fn get_wav(&self) -> BdSharpWaveform {
+    pub const fn get_wav(&self) -> BdSharpWaveform {
         self.wav
     }
 
@@ -160,7 +164,7 @@ impl BdSharpParameters {
                 rytm_sys::AR_PLOCK_TYPE_MP6 as u8,
             );
             if let Some(wav) = wav {
-                return Ok(Some(wav.into()));
+                return Ok(Some(wav.try_into()?));
             }
             return Ok(None);
         }
@@ -206,7 +210,7 @@ impl BdSharpParameters {
                 hld: (from_s_u16_t(raw_sound.synth_param_4) >> 8) as u8,
                 swt: (from_s_u16_t(raw_sound.synth_param_5) >> 8) as u8,
                 swd: (from_s_u16_t(raw_sound.synth_param_6) >> 8) as u8,
-                wav: ((from_s_u16_t(raw_sound.synth_param_7) >> 8) as u8).into(),
+                wav: ((from_s_u16_t(raw_sound.synth_param_7) >> 8) as u8).try_into()?,
                 tic: (from_s_u16_t(raw_sound.synth_param_8) >> 8) as u8,
             })
         }

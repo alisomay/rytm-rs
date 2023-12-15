@@ -6,6 +6,8 @@
     clippy::cast_possible_truncation,
     clippy::cast_sign_loss
 )]
+// TODO: I'm currently really lazy to write errors doc for plock impls. Will do it later..
+#![allow(clippy::missing_errors_doc)]
 
 /// Bd Acoustic machine parameters.
 mod bd_acoustic;

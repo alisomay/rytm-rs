@@ -135,56 +135,56 @@ impl HhLabParameters {
     /// Returns the `lev` parameter.
     ///
     /// Range: `0..=127`
-    pub fn get_lev(&self) -> usize {
+    pub const fn get_lev(&self) -> usize {
         self.lev as usize
     }
 
     /// Returns the `osc1` parameter.
     ///
     /// Range: `0..=16256`
-    pub fn get_osc1(&self) -> usize {
+    pub const fn get_osc1(&self) -> usize {
         self.osc1 as usize
     }
 
     /// Returns the `dec` parameter.
     ///
     /// Range: `0..=127`
-    pub fn get_dec(&self) -> usize {
+    pub const fn get_dec(&self) -> usize {
         self.dec as usize
     }
 
     /// Returns the `osc2` parameter.
     ///
     /// Range: `0..=16256`
-    pub fn get_osc2(&self) -> usize {
+    pub const fn get_osc2(&self) -> usize {
         self.osc2 as usize
     }
 
     /// Returns the `osc3` parameter.
     ///
     /// Range: `0..=16256`
-    pub fn get_osc3(&self) -> usize {
+    pub const fn get_osc3(&self) -> usize {
         self.osc3 as usize
     }
 
     /// Returns the `osc4` parameter.
     ///
     /// Range: `0..=16256`
-    pub fn get_osc4(&self) -> usize {
+    pub const fn get_osc4(&self) -> usize {
         self.osc4 as usize
     }
 
     /// Returns the `osc5` parameter.
     ///
     /// Range: `0..=16256`
-    pub fn get_osc5(&self) -> usize {
+    pub const fn get_osc5(&self) -> usize {
         self.osc5 as usize
     }
 
     /// Returns the `osc6` parameter.
     ///
     /// Range: `0..=16256`
-    pub fn get_osc6(&self) -> usize {
+    pub const fn get_osc6(&self) -> usize {
         self.osc6 as usize
     }
 

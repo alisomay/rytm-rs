@@ -1,3 +1,4 @@
+use crate::error::ConversionError;
 use crate::util::scale_f32_to_u16;
 use crate::{
     error::{ParameterError, RytmError},
@@ -74,13 +75,12 @@ impl SyChipParameters {
     }
 
     /// Sets the `wav` parameter.
-    pub fn set_wav(&mut self, wav: SyChipWaveform) -> Result<(), RytmError> {
+    pub fn set_wav(&mut self, wav: SyChipWaveform) {
         self.wav = wav;
-        Ok(())
     }
 
     /// Returns the `wav` parameter.
-    pub fn get_wav(&self) -> SyChipWaveform {
+    pub const fn get_wav(&self) -> SyChipWaveform {
         self.wav
     }
 
@@ -109,7 +109,7 @@ impl SyChipParameters {
                 rytm_sys::AR_PLOCK_TYPE_MP6 as u8,
             );
             if let Some(wav) = wav {
-                return Ok(Some(wav.into()));
+                return Ok(Some(wav.try_into()?));
             }
             return Ok(None);
         }
@@ -137,7 +137,7 @@ impl SyChipParameters {
     }
 
     /// Returns the `spd` parameter.
-    pub fn get_spd(&self) -> SyChipSpeed {
+    pub const fn get_spd(&self) -> SyChipSpeed {
         self.spd
     }
 
@@ -166,7 +166,7 @@ impl SyChipParameters {
                 rytm_sys::AR_PLOCK_TYPE_MP7 as u8,
             );
             if let Some(spd) = spd {
-                return Ok(Some(spd.into()));
+                return Ok(Some(spd.try_into()?));
             }
             return Ok(None);
         }
@@ -225,8 +225,8 @@ impl SyChipParameters {
                     0,
                     127,
                 ),
-                wav: SyChipWaveform::from((from_s_u16_t(raw_sound.synth_param_7) >> 8) as u8),
-                spd: SyChipSpeed::from((from_s_u16_t(raw_sound.synth_param_8) >> 8) as u8),
+                wav: SyChipWaveform::try_from((from_s_u16_t(raw_sound.synth_param_7) >> 8) as u8)?,
+                spd: SyChipSpeed::try_from((from_s_u16_t(raw_sound.synth_param_8) >> 8) as u8)?,
             })
         }
     }
@@ -268,40 +268,44 @@ pub enum SyChipWaveform {
     Percentage(usize),
 }
 
-impl From<u8> for SyChipWaveform {
-    fn from(wav: u8) -> Self {
+impl TryFrom<u8> for SyChipWaveform {
+    type Error = ConversionError;
+    fn try_from(wav: u8) -> Result<Self, Self::Error> {
         match wav {
-            0 => Self::Sin,
-            1 => Self::Asin,
-            2 => Self::Tri,
-            3 => Self::Ssaw,
-            4 => Self::Saw,
-            5 => Self::Sqr,
-            6 => Self::Noise,
-            7 => Self::Anm1,
-            8 => Self::Anm2,
-            9 => Self::Anm3,
-            10 => Self::Anm4,
-            11 => Self::Anm5,
-            12 => Self::PwmPlus,
-            13 => Self::PwmMinus,
-            14 => Self::TriB,
-            15 => Self::TriPlus,
-            16 => Self::TriPlusPlus,
-            17 => Self::TriX,
-            18 => Self::SawB,
-            19 => Self::SawPlus,
-            20 => Self::SawPlusPlus,
-            21 => Self::SawX,
-            22 => Self::SqrB,
-            23 => Self::SqrPlus,
-            24 => Self::SqrPlusPlus,
-            25 => Self::SqrX,
-            26 => Self::Tbl1,
-            27 => Self::Tbl2,
-            28 => Self::Tbl3,
-            29..=127 => Self::Percentage(wav as usize - 28),
-            _ => panic!("Invalid SyChipWaveform value: {}", wav),
+            0 => Ok(Self::Sin),
+            1 => Ok(Self::Asin),
+            2 => Ok(Self::Tri),
+            3 => Ok(Self::Ssaw),
+            4 => Ok(Self::Saw),
+            5 => Ok(Self::Sqr),
+            6 => Ok(Self::Noise),
+            7 => Ok(Self::Anm1),
+            8 => Ok(Self::Anm2),
+            9 => Ok(Self::Anm3),
+            10 => Ok(Self::Anm4),
+            11 => Ok(Self::Anm5),
+            12 => Ok(Self::PwmPlus),
+            13 => Ok(Self::PwmMinus),
+            14 => Ok(Self::TriB),
+            15 => Ok(Self::TriPlus),
+            16 => Ok(Self::TriPlusPlus),
+            17 => Ok(Self::TriX),
+            18 => Ok(Self::SawB),
+            19 => Ok(Self::SawPlus),
+            20 => Ok(Self::SawPlusPlus),
+            21 => Ok(Self::SawX),
+            22 => Ok(Self::SqrB),
+            23 => Ok(Self::SqrPlus),
+            24 => Ok(Self::SqrPlusPlus),
+            25 => Ok(Self::SqrX),
+            26 => Ok(Self::Tbl1),
+            27 => Ok(Self::Tbl2),
+            28 => Ok(Self::Tbl3),
+            29..=127 => Ok(Self::Percentage(wav as usize - 28)),
+            _ => Err(ConversionError::Range {
+                value: wav.to_string(),
+                type_name: "SyChipWaveform".into(),
+            }),
         }
     }
 }
@@ -338,7 +342,7 @@ impl From<SyChipWaveform> for u8 {
             SyChipWaveform::Tbl1 => 26,
             SyChipWaveform::Tbl2 => 27,
             SyChipWaveform::Tbl3 => 28,
-            SyChipWaveform::Percentage(wav) => wav as u8 + 28,
+            SyChipWaveform::Percentage(wav) => wav as Self + 28,
         }
     }
 }
@@ -414,76 +418,80 @@ pub enum SyChipSpeed {
     _25S,
 }
 
-impl From<u8> for SyChipSpeed {
-    fn from(spd: u8) -> Self {
+impl TryFrom<u8> for SyChipSpeed {
+    type Error = ConversionError;
+    fn try_from(spd: u8) -> Result<Self, Self::Error> {
         match spd {
-            0 => Self::_128T,
-            1 => Self::_128,
-            2 => Self::_64T,
-            3 => Self::_128D,
-            4 => Self::_64,
-            5 => Self::_32T,
-            6 => Self::_64D,
-            7 => Self::_32,
-            8 => Self::_16T,
-            9 => Self::_32D,
-            10 => Self::_16,
-            11 => Self::_8T,
-            12 => Self::_16D,
-            13 => Self::_8,
-            14 => Self::_4T,
-            15 => Self::_8D,
-            16 => Self::_4,
-            17 => Self::_2T,
-            18 => Self::_4D,
-            19 => Self::_2,
-            20 => Self::_1T,
-            21 => Self::_2D,
-            22 => Self::_1,
-            23 => Self::_1D,
-            24 => Self::_1_0Hz,
-            25 => Self::_1_56Hz,
-            26 => Self::_1_88Hz,
-            27 => Self::_2Hz,
-            28 => Self::_3_13Hz,
-            29 => Self::_3_75Hz,
-            30 => Self::_4Hz,
-            31 => Self::_5Hz,
-            32 => Self::_6_25Hz,
-            33 => Self::_7_5Hz,
-            34 => Self::_10Hz,
-            35 => Self::_12_5Hz,
-            36 => Self::_15Hz,
-            37 => Self::_20Hz,
-            38 => Self::_25Hz,
-            39 => Self::_30Hz,
-            40 => Self::_40Hz,
-            41 => Self::_50Hz,
-            42 => Self::_60Hz,
-            43 => Self::_75Hz,
-            44 => Self::_100Hz,
-            45 => Self::_120Hz,
-            46 => Self::_150Hz,
-            47 => Self::_180Hz,
-            48 => Self::_200Hz,
-            49 => Self::_240Hz,
-            50 => Self::_250Hz,
-            51 => Self::_300Hz,
-            52 => Self::_350Hz,
-            53 => Self::_360Hz,
-            54 => Self::_400Hz,
-            55 => Self::_420Hz,
-            56 => Self::_480Hz,
-            57 => Self::_240S,
-            58 => Self::_200S,
-            59 => Self::_150S,
-            60 => Self::_120S,
-            61 => Self::_100S,
-            62 => Self::_60S,
-            63 => Self::_50S,
-            64 => Self::_30S,
-            65 => Self::_25S,
-            _ => panic!("Invalid SyChipSpeed value: {}", spd),
+            0 => Ok(Self::_128T),
+            1 => Ok(Self::_128),
+            2 => Ok(Self::_64T),
+            3 => Ok(Self::_128D),
+            4 => Ok(Self::_64),
+            5 => Ok(Self::_32T),
+            6 => Ok(Self::_64D),
+            7 => Ok(Self::_32),
+            8 => Ok(Self::_16T),
+            9 => Ok(Self::_32D),
+            10 => Ok(Self::_16),
+            11 => Ok(Self::_8T),
+            12 => Ok(Self::_16D),
+            13 => Ok(Self::_8),
+            14 => Ok(Self::_4T),
+            15 => Ok(Self::_8D),
+            16 => Ok(Self::_4),
+            17 => Ok(Self::_2T),
+            18 => Ok(Self::_4D),
+            19 => Ok(Self::_2),
+            20 => Ok(Self::_1T),
+            21 => Ok(Self::_2D),
+            22 => Ok(Self::_1),
+            23 => Ok(Self::_1D),
+            24 => Ok(Self::_1_0Hz),
+            25 => Ok(Self::_1_56Hz),
+            26 => Ok(Self::_1_88Hz),
+            27 => Ok(Self::_2Hz),
+            28 => Ok(Self::_3_13Hz),
+            29 => Ok(Self::_3_75Hz),
+            30 => Ok(Self::_4Hz),
+            31 => Ok(Self::_5Hz),
+            32 => Ok(Self::_6_25Hz),
+            33 => Ok(Self::_7_5Hz),
+            34 => Ok(Self::_10Hz),
+            35 => Ok(Self::_12_5Hz),
+            36 => Ok(Self::_15Hz),
+            37 => Ok(Self::_20Hz),
+            38 => Ok(Self::_25Hz),
+            39 => Ok(Self::_30Hz),
+            40 => Ok(Self::_40Hz),
+            41 => Ok(Self::_50Hz),
+            42 => Ok(Self::_60Hz),
+            43 => Ok(Self::_75Hz),
+            44 => Ok(Self::_100Hz),
+            45 => Ok(Self::_120Hz),
+            46 => Ok(Self::_150Hz),
+            47 => Ok(Self::_180Hz),
+            48 => Ok(Self::_200Hz),
+            49 => Ok(Self::_240Hz),
+            50 => Ok(Self::_250Hz),
+            51 => Ok(Self::_300Hz),
+            52 => Ok(Self::_350Hz),
+            53 => Ok(Self::_360Hz),
+            54 => Ok(Self::_400Hz),
+            55 => Ok(Self::_420Hz),
+            56 => Ok(Self::_480Hz),
+            57 => Ok(Self::_240S),
+            58 => Ok(Self::_200S),
+            59 => Ok(Self::_150S),
+            60 => Ok(Self::_120S),
+            61 => Ok(Self::_100S),
+            62 => Ok(Self::_60S),
+            63 => Ok(Self::_50S),
+            64 => Ok(Self::_30S),
+            65 => Ok(Self::_25S),
+            _ => Err(ConversionError::Range {
+                value: spd.to_string(),
+                type_name: "SyChipSpeed".into(),
+            }),
         }
     }
 }

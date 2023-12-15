@@ -63,15 +63,15 @@ pub fn generate_getter(parameter: &ParameterArg, struct_name: &Ident) -> proc_ma
     let return_type = determine_return_type(&parameter.range);
     let range = &parameter.range;
 
-    let doc_comment_setter = format!(
+    let doc_comment_getter = format!(
         " Gets the `{}` parameter.\n\n Range: `{}`",
         param_name, range
     );
 
     quote! {
         impl #struct_name {
-            #[doc = #doc_comment_setter]
-            pub fn #getter_fn_name(&self) -> #return_type {
+            #[doc = #doc_comment_getter]
+            pub const fn #getter_fn_name(&self) -> #return_type {
                 self.#param_ident as #return_type
             }
         }

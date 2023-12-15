@@ -377,13 +377,24 @@ pub enum MidiChannel {
     Off,
 }
 
-#[allow(clippy::from_over_into)]
-impl Into<u8> for MidiChannel {
-    fn into(self) -> u8 {
+// Since auto and off are the same value depending on context it is wise not to expose From implementation here.
+#[allow(clippy::from_over_into, clippy::cast_possible_truncation)]
+impl TryInto<u8> for MidiChannel {
+    type Error = ConversionError;
+
+    fn try_into(self) -> Result<u8, Self::Error> {
         match self {
-            Self::Channel(channel) => channel as u8,
-            // We can't do From implementations because 0xFF can mean Auto or Off depending on the context.
-            Self::Auto | Self::Off => 0xFF,
+            Self::Channel(channel) => {
+                if channel > 15 {
+                    Err(ConversionError::Range {
+                        value: channel.to_string(),
+                        type_name: "MidiChannel".into(),
+                    })
+                } else {
+                    Ok(channel as u8)
+                }
+            }
+            Self::Auto | Self::Off => Ok(0xFF),
         }
     }
 }
