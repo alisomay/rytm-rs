@@ -508,7 +508,106 @@ fn pattern_type() {
 
 #[test]
 fn usage() {
-    let mut rytm = RytmProject::default();
+    use midir::{Ignore, MidiInputConnection, MidiOutputConnection};
+    use rytm_rs::prelude::*;
+    use std::sync::{Arc, Mutex};
+
+    // We'll be using this connection for sending sysex messages to the device.
+    fn get_connection_to_rytm() -> Arc<Mutex<MidiOutputConnection>> {
+        let output = port::MidiOut::new("rytm_test_out").unwrap();
+        let rytm_out_identifier = "Elektron Analog Rytm MKII";
+        let rytm_output_port = output.find_output_port(rytm_out_identifier).unwrap();
+
+        Arc::new(Mutex::new(
+            output.make_output_connection(&rytm_output_port, 0).unwrap(),
+        ))
+    }
+
+    // We'll be using this connection for receiving sysex messages from the device and forwarding them to our main thread.
+    pub fn make_input_message_forwarder() -> (
+        MidiInputConnection<()>,
+        std::sync::mpsc::Receiver<(Vec<u8>, u64)>,
+    ) {
+        let mut input = crate::port::MidiIn::new("rytm_test_in").unwrap();
+        input.ignore(Ignore::None);
+        let rytm_in_identifier = "Elektron Analog Rytm MKII";
+        let rytm_input_port = input.find_input_port(rytm_in_identifier).unwrap();
+
+        let (tx, rx) = std::sync::mpsc::channel::<(Vec<u8>, u64)>();
+
+        let conn_in: midir::MidiInputConnection<()> = input
+            .into_inner()
+            .connect(
+                &rytm_input_port,
+                "rytm_test_in",
+                move |stamp, message, _| {
+                    // Do some filtering here if you like.
+                    tx.send((message.to_vec(), stamp)).unwrap();
+                },
+                (),
+            )
+            .unwrap();
+
+        (conn_in, rx)
+    }
+
+    fn mainz() {
+        // Make a default rytm project
+        let mut rytm = RytmProject::default();
+
+        // Get a connection to the device
+        let conn_out = get_connection_to_rytm();
+
+        // Listen for incoming messages from the device
+        let (_conn_in, rx) = make_input_message_forwarder();
+
+        // Make a query for the pattern in the work buffer
+        let query = PatternQuery::new_targeting_work_buffer();
+
+        // Send the query to the device
+        conn_out
+            .lock()
+            .unwrap()
+            .send(&query.as_sysex().unwrap())
+            .unwrap();
+
+        // Wait for the response
+        match rx.recv() {
+            Ok((message, _stamp)) => {
+                match rytm.update_from_sysex_response(&message) {
+                    Ok(_) => {
+                        for track in rytm.work_buffer_mut().pattern_mut().tracks_mut() {
+                            // Set the number of steps to 64
+                            track.set_number_of_steps(64).unwrap();
+                            for (i, trig) in track.trigs_mut().iter_mut().enumerate() {
+                                // Enable every 4th trig.
+                                // Set retrig on.
+                                if i % 4 == 0 {
+                                    trig.set_trig_enable(true);
+                                    trig.set_retrig(true);
+                                }
+                            }
+                        }
+
+                        // Send the updated pattern to the device if you like
+                        conn_out
+                            .lock()
+                            .unwrap()
+                            .send(&rytm.work_buffer().pattern().as_sysex().unwrap())
+                            .unwrap();
+                    }
+                    Err(err) => {
+                        println!("Error: {:?}", err);
+                    }
+                }
+            }
+            Err(err) => {
+                println!("Error: {:?}", err);
+            }
+        }
+    }
+
+    // let mut rytm = RytmProject::default();
 
     // let patterns = rytm.patterns_mut();
 
@@ -541,22 +640,22 @@ fn usage() {
     //     trig.plock_set_lfo_multiplier(LfoMultiplier::X1).unwrap();
     // }
 
-    use rytm_rs::SysexCompatible;
+    // use rytm_rs::SysexCompatible;
 
-    {
-        let patterns = rytm.patterns_mut();
-        let pattern_2 = &mut patterns[2];
-        let track_0 = &mut pattern_2.tracks_mut()[0];
-        let trigs = track_0.trigs_mut();
+    // {
+    //     let patterns = rytm.patterns_mut();
+    //     let pattern_2 = &mut patterns[2];
+    //     let track_0 = &mut pattern_2.tracks_mut()[0];
+    //     let trigs = track_0.trigs_mut();
 
-        for trig in trigs {
-            trig.plock_set_lfo_depth(-66.0).unwrap();
-            trig.plock_set_lfo_speed(-63).unwrap();
-            trig.plock_set_lfo_multiplier(LfoMultiplier::X1).unwrap();
-        }
+    //     for trig in trigs {
+    //         trig.plock_set_lfo_depth(-66.0).unwrap();
+    //         trig.plock_set_lfo_speed(-63).unwrap();
+    //         trig.plock_set_lfo_multiplier(LfoMultiplier::X1).unwrap();
+    //     }
 
-        let msg = pattern_2.as_sysex().unwrap();
-    } // Mutable borrows end here
+    //     let msg = pattern_2.as_sysex().unwrap();
+    // } // Mutable borrows end here
 
     // Now it's safe to borrow rytm immutably
     // let rytm_ref = &rytm;
