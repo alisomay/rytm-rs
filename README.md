@@ -188,6 +188,8 @@ There are also some ideas which may be nice for the community in the future.
 - [Neon](https://github.com/neon-bindings/neon) bindings might be very useful so people can use Node for Max to build Max patches or Live devices on top of this crate easily.
 - Expanding the crate to support easy interfacing with `CC` and `NRPN` messages would be an idea.
 
+You can also search for `TODO` in the codebase to find some ideas.
+
 For all communication and contributions for this repo the [Rust Code of Conduct](https://www.rust-lang.org/policies/code-of-conduct) applies.
 
 ## License
