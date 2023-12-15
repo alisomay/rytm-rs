@@ -4,7 +4,7 @@ use rytm_rs_macro::parameter_range;
 use rytm_sys::ar_kit_t;
 
 /// Compressor parameters for the kit.
-#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub struct FxCompressor {
     threshold: u8,
     attack: FxCompAttack,
@@ -48,7 +48,7 @@ impl TryFrom<&ar_kit_t> for FxCompressor {
 }
 
 impl FxCompressor {
-    pub(crate) fn apply_to_raw_kit(&self, raw_kit: &mut ar_kit_t) {
+    pub(crate) fn apply_to_raw_kit(self, raw_kit: &mut ar_kit_t) {
         raw_kit.fx_comp_threshold = self.threshold;
         raw_kit.fx_comp_attack = self.attack as u8;
         raw_kit.fx_comp_release = self.release as u8;
@@ -69,27 +69,23 @@ impl FxCompressor {
     }
 
     /// Sets the attack of the compressor.
-    pub fn set_attack(&mut self, attack: FxCompAttack) -> Result<(), RytmError> {
+    pub fn set_attack(&mut self, attack: FxCompAttack) {
         self.attack = attack;
-        Ok(())
     }
 
     /// Sets the release of the compressor.
-    pub fn set_release(&mut self, release: FxCompRelease) -> Result<(), RytmError> {
+    pub fn set_release(&mut self, release: FxCompRelease) {
         self.release = release;
-        Ok(())
     }
 
     /// Sets the ratio of the compressor.
-    pub fn set_ratio(&mut self, ratio: FxCompRatio) -> Result<(), RytmError> {
+    pub fn set_ratio(&mut self, ratio: FxCompRatio) {
         self.ratio = ratio;
-        Ok(())
     }
 
     /// Sets the side chain eq of the compressor.
-    pub fn set_side_chain_eq(&mut self, seq: FxCompSideChainEq) -> Result<(), RytmError> {
+    pub fn set_side_chain_eq(&mut self, seq: FxCompSideChainEq) {
         self.seq = seq;
-        Ok(())
     }
 
     /// Sets the gain of the compressor.
@@ -122,48 +118,48 @@ impl FxCompressor {
     /// Returns the threshold of the compressor.
     ///
     /// Range: `0..=127`
-    pub fn threshold(&self) -> usize {
+    pub const fn threshold(&self) -> usize {
         self.threshold as usize
     }
 
     /// Returns the attack of the compressor.
-    pub fn attack(&self) -> &FxCompAttack {
+    pub const fn attack(&self) -> &FxCompAttack {
         &self.attack
     }
 
     /// Returns the release of the compressor.
-    pub fn release(&self) -> &FxCompRelease {
+    pub const fn release(&self) -> &FxCompRelease {
         &self.release
     }
 
     /// Returns the ratio of the compressor.
-    pub fn ratio(&self) -> &FxCompRatio {
+    pub const fn ratio(&self) -> &FxCompRatio {
         &self.ratio
     }
 
     /// Returns the side chain eq of the compressor.
-    pub fn side_chain_eq(&self) -> &FxCompSideChainEq {
+    pub const fn side_chain_eq(&self) -> &FxCompSideChainEq {
         &self.seq
     }
 
     /// Returns the gain of the compressor.
     ///
     /// Range: `0..=127`
-    pub fn gain(&self) -> usize {
+    pub const fn gain(&self) -> usize {
         self.gain as usize
     }
 
     /// Returns the mix of the compressor.
     ///
     /// Range: `0..=127`
-    pub fn mix(&self) -> usize {
+    pub const fn mix(&self) -> usize {
         self.mix as usize
     }
 
     /// Returns the volume of the compressor.
     ///
     /// Range: `0..=127`
-    pub fn volume(&self) -> usize {
+    pub const fn volume(&self) -> usize {
         self.volume as usize
     }
 }

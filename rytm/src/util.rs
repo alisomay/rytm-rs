@@ -1,4 +1,15 @@
+//! Internal utilities for the library.
+
 #![allow(unused)]
+#![allow(clippy::similar_names)]
+// All casts in this file are intended or safe within the context of this library.
+//
+// One can change `allow` to `warn` to review them if necessary.
+#![allow(
+    clippy::cast_lossless,
+    clippy::cast_possible_truncation,
+    clippy::cast_sign_loss
+)]
 
 use crate::{
     error::ConversionError,
@@ -6,17 +17,17 @@ use crate::{
 };
 use rytm_sys::{s_u16_t, s_u16_t__bindgen_ty_1};
 
-pub fn to_s_u16_t_union_a(value: u16) -> s_u16_t {
+pub const fn to_s_u16_t_union_a(value: u16) -> s_u16_t {
     let msb = (value >> 8) as u8;
     let lsb = (value & 0xFF) as u8;
     s_u16_t { a: [msb, lsb] }
 }
 
-pub fn to_s_u16_t_union_v(value: u16) -> s_u16_t {
+pub const fn to_s_u16_t_union_v(value: u16) -> s_u16_t {
     s_u16_t { v: value }
 }
 
-pub fn to_s_u16_t_union_b(value: u16) -> s_u16_t {
+pub const fn to_s_u16_t_union_b(value: u16) -> s_u16_t {
     let msb = (value >> 8) as u8;
     let lsb = (value & 0xFF) as u8;
     s_u16_t {
@@ -24,13 +35,13 @@ pub fn to_s_u16_t_union_b(value: u16) -> s_u16_t {
     }
 }
 
-pub fn to_s_u16_t_union_b_from_u8_as_msb(value: u8) -> s_u16_t {
+pub const fn to_s_u16_t_union_b_from_u8_as_msb(value: u8) -> s_u16_t {
     s_u16_t {
         b: s_u16_t__bindgen_ty_1 { hi: value, lo: 0 },
     }
 }
 
-pub fn to_s_u16_t_union_b_from_u8_as_lsb(value: u8) -> s_u16_t {
+pub const fn to_s_u16_t_union_b_from_u8_as_lsb(value: u8) -> s_u16_t {
     s_u16_t {
         b: s_u16_t__bindgen_ty_1 { hi: 0, lo: value },
     }
@@ -53,7 +64,7 @@ pub fn break_u32_into_u8_array(value: u32) -> [u8; 4] {
 }
 
 #[allow(clippy::missing_safety_doc)]
-pub unsafe fn from_s_u16_t(value: &s_u16_t) -> u16 {
+pub unsafe fn from_s_u16_t(value: s_u16_t) -> u16 {
     let msb = value.b.hi as u16;
     let lsb = value.b.lo as u16;
     (msb << 8) | lsb
@@ -144,7 +155,7 @@ pub fn decode_micro_timing_byte(micro_timing_value: i8) -> Result<MicroTime, Con
     }
 }
 
-pub fn encode_micro_timing_byte(micro_timing: &MicroTime) -> i8 {
+pub const fn encode_micro_timing_byte(micro_timing: MicroTime) -> i8 {
     match micro_timing {
         MicroTime::N23B384 => -92,
         MicroTime::N11B192 => -88,
@@ -208,7 +219,7 @@ pub fn scale_f32_to_u16(
     let scale_factor = output_range / input_range;
 
     let normalized_input = input - input_min;
-    let scaled_input = normalized_input * scale_factor + output_min as f32;
+    let scaled_input = normalized_input.mul_add(scale_factor, output_min as f32);
     scaled_input.round() as u16
 }
 
@@ -224,7 +235,7 @@ pub fn scale_u16_to_f32(
     let scale_factor = output_range / input_range;
 
     let normalized_input = input as f32 - input_min as f32;
-    normalized_input * scale_factor + output_min
+    normalized_input.mul_add(scale_factor, output_min)
 }
 
 // Helper function to decode synth parameter float minus plus scaling.
@@ -247,16 +258,19 @@ pub fn get_u16_min_max_from_float_range(min: f32, max: f32) -> (u16, u16) {
     (scaled_min, scaled_max)
 }
 
-pub fn u8_to_i8_midpoint_of_u8_input_range(value: u8, range_start: u8, range_end: u8) -> i8 {
+pub const fn u8_to_i8_midpoint_of_u8_input_range(value: u8, range_start: u8, range_end: u8) -> i8 {
     let midpoint = ((range_start as i16 + range_end as i16 + 1) / 2);
     (value as i16 - midpoint) as i8
 }
 
-pub fn i8_to_u8_midpoint_of_u8_input_range(value: i8, range_start: u8, range_end: u8) -> u8 {
+pub const fn i8_to_u8_midpoint_of_u8_input_range(value: i8, range_start: u8, range_end: u8) -> u8 {
     let midpoint = ((range_start as i16 + range_end as i16 + 1) / 2);
     (value as i16 + midpoint) as u8
 }
 
+/// Like `std::slice::partition`, but stable.
+///
+/// It preserves the order of the partitioned elements.
 pub fn stable_partition<T, F>(v: &mut [T], mut predicate: F)
 where
     F: FnMut(&T) -> bool,
@@ -264,7 +278,7 @@ where
     // 'left' will point to the start of the range where the predicate is false.
     let mut left = 0;
 
-    // Iterate over the slice.
+    // Iterate over the slice.s
     while left < v.len() {
         // Move 'left' forward until we find an element where the predicate is false.
         while left < v.len() && predicate(&v[left]) {

@@ -315,7 +315,7 @@ impl Trig {
                 self.index,
                 self.track_index as u8,
                 rytm_sys::AR_PLOCK_TYPE_LFO_SPEED as u8,
-            )?;
+            );
 
             return Ok(());
         }
@@ -329,7 +329,7 @@ impl Trig {
                 self.index,
                 self.track_index as u8,
                 rytm_sys::AR_PLOCK_TYPE_LFO_MULTIPLY as u8,
-            )?;
+            );
 
             return Ok(());
         }
@@ -343,7 +343,7 @@ impl Trig {
                 self.index,
                 self.track_index as u8,
                 rytm_sys::AR_PLOCK_TYPE_LFO_FADE as u8,
-            )?;
+            );
 
             return Ok(());
         }
@@ -357,7 +357,7 @@ impl Trig {
                 self.index,
                 self.track_index as u8,
                 rytm_sys::AR_PLOCK_TYPE_LFO_DEST as u8,
-            )?;
+            );
 
             return Ok(());
         }
@@ -371,7 +371,7 @@ impl Trig {
                 self.index,
                 self.track_index as u8,
                 rytm_sys::AR_PLOCK_TYPE_LFO_WAVEFORM as u8,
-            )?;
+            );
 
             return Ok(());
         }
@@ -385,7 +385,7 @@ impl Trig {
                 self.index,
                 self.track_index as u8,
                 rytm_sys::AR_PLOCK_TYPE_LFO_PHASE as u8,
-            )?;
+            );
 
             return Ok(());
         }
@@ -399,7 +399,7 @@ impl Trig {
                 self.index,
                 self.track_index as u8,
                 rytm_sys::AR_PLOCK_TYPE_LFO_TRIGMODE as u8,
-            )?;
+            );
 
             return Ok(());
         }
@@ -413,7 +413,7 @@ impl Trig {
                 self.index,
                 self.track_index as u8,
                 rytm_sys::AR_PLOCK_TYPE_LFO_DEPTH as u8,
-            )?;
+            );
 
             return Ok(());
         }

@@ -1,9 +1,10 @@
-// TODO:
-// - Not understood kit offsets is it relevant?
-
+/// All structures related to machines and their parameters.
 pub mod machine;
+/// Holds the page settings of the sound. Like `[AMP]`, `[FLT]`, `[LFO]`, `[SAMP]` on the device.
 pub mod page;
+/// Holds the structures which represent the settings of the sound.
 pub mod settings;
+/// Types which are relevant to sounds.
 pub mod types;
 pub(crate) mod unknown;
 
@@ -28,7 +29,9 @@ use rytm_rs_macro::parameter_range;
 use rytm_sys::{ar_sound_raw_to_syx, ar_sound_t, ar_sysex_meta_t};
 use std::{cell::RefCell, rc::Rc};
 
-// Internal type to understand where the sound comes from.
+/// An enum to understand where the sound is coming from.
+///
+/// The sound can be a pool sound, the work buffer or as a part of a kit.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum SoundType {
     Pool,
@@ -45,6 +48,9 @@ impl_sysex_compatible!(
     SOUND_SYSEX_SIZE
 );
 
+/// Represents a sound in the analog rytm.
+///
+/// This structure does not map identically to the relevant structure in the firmware.
 #[derive(Derivative, Clone)]
 #[derivative(Debug)]
 pub struct Sound {
@@ -92,7 +98,7 @@ pub struct Sound {
 
 impl From<&Sound> for ar_sound_t {
     fn from(sound: &Sound) -> Self {
-        let mut raw_sound = rytm_sys::ar_sound_t {
+        let mut raw_sound = Self {
             name: sound.name.copy_inner(),
             accent_level: sound.accent_level,
             def_note: sound.def_note,
@@ -113,23 +119,38 @@ impl From<&Sound> for ar_sound_t {
 }
 
 impl Sound {
+    // This can never fail.
+    #[allow(clippy::missing_panics_doc)]
     /// Links a pattern's parameter lock pool to this sound.
     ///
     /// This way, one can set parameter locks for trigs for the machine assigned to this sound.
     ///
+    /// # Errors
+    ///
     /// Sound must be a track sound. This is necessary because the pattern's parameter lock pool
     /// belongs to a pattern but sounds are not. Sounds are received with different query compared to patterns.
+    ///
+    /// Calling this method on a pool sound will result in an error.
     pub fn link_parameter_lock_pool(
         &mut self,
         parameter_lock_pool: Rc<RefCell<ParameterLockPool>>,
-    ) {
-        // TODO: Checks
+    ) -> Result<(), RytmError> {
+        if self.is_pool_sound() {
+            return Err(ParameterError::Compatibility {
+                value: "ParameterLockPool".into(),
+                parameter_name: "parameter_lock_pool".into(),
+                reason: Some("The sound you're trying to link the parameter lock pool is a pool sound. Pool sounds cannot have parameter locks.".into()),
+            }
+            .into());
+        }
         self.parameter_lock_pool = Some(parameter_lock_pool);
         let parameter_lock_pool_ref = Rc::clone(self.parameter_lock_pool.as_ref().unwrap());
         self.machine_parameters
             .link_parameter_lock_pool(parameter_lock_pool_ref);
+        Ok(())
     }
 
+    // The panics in this function should be basically unreachable when this function is used correctly.
     pub(crate) fn try_from_raw(
         sysex_meta: SysexMeta,
         raw_sound: &ar_sound_t,
@@ -166,11 +187,10 @@ impl Sound {
                     assigned_track = Some(assigned_t);
                     kit_number = Some(kit_n);
                 } else {
-                    // TODO: Maybe better handle all these.
-                    todo!("Error here, this is not a sound query. Kit queries should provide the kit number and assigned track.")
+                    panic!("This is not a sound query. Kit queries should provide the kit number and assigned track.")
                 }
             }
-            _ => unreachable!(" TODO: This is not a sound or kit query handle error."),
+            _ => panic!(" This is not a sound or kit query."),
         }
 
         Ok(Self {
@@ -203,7 +223,8 @@ impl Sound {
         (self.sysex_meta, self.into())
     }
 
-    pub fn sound_type(&self) -> SoundType {
+    /// Returns the type of the sound.
+    pub const fn sound_type(&self) -> SoundType {
         if self.is_pool_sound() {
             SoundType::Pool
         } else if self.is_work_buffer_sound() {
@@ -214,23 +235,25 @@ impl Sound {
     }
 
     /// Returns if the sound is coming from the sound pool.
-    pub fn is_pool_sound(&self) -> bool {
+    pub const fn is_pool_sound(&self) -> bool {
         self.pool_index.is_some()
     }
 
     /// Returns if the sound is coming from the work buffer and assigned to a track.
-    pub fn is_work_buffer_sound(&self) -> bool {
+    pub const fn is_work_buffer_sound(&self) -> bool {
         self.assigned_track().is_some() && self.kit_number.is_none()
     }
 
     /// Returns if the sound is coming from a kit query and loaded as a part of a kit.
-    pub fn is_part_of_a_kit_query(&self) -> bool {
+    pub const fn is_part_of_a_kit_query(&self) -> bool {
         self.kit_number.is_some()
     }
 
     /// Sets the name of the sound.
     ///
-    /// The name must be ASCII and have a length of 15 characters or less.
+    /// # Errors
+    ///
+    /// The name must be ASCII and have a length of 15 characters or less. Other cases will result in an error.
     pub fn set_name(&mut self, name: &str) -> Result<(), RytmError> {
         self.name = name.try_into()?;
         Ok(())
@@ -250,7 +273,7 @@ impl Sound {
     /// Returns `None` if this is not a track sound.
     ///
     /// Range: `0..=11`
-    pub fn assigned_track(&self) -> Option<usize> {
+    pub const fn assigned_track(&self) -> Option<usize> {
         self.assigned_track
     }
 
@@ -259,7 +282,7 @@ impl Sound {
     /// Returns `None` if this is not a kit sound.
     ///
     /// Range: `0..=127`
-    pub fn kit_number(&self) -> Option<usize> {
+    pub const fn kit_number(&self) -> Option<usize> {
         self.kit_number
     }
 
@@ -268,14 +291,14 @@ impl Sound {
     /// Returns `None` if this is not a kit sound.
     ///
     /// Range: `0..=127`
-    pub fn pool_index(&self) -> Option<usize> {
+    pub const fn pool_index(&self) -> Option<usize> {
         self.pool_index
     }
 
     /// Returns the accent level of the sound.
     ///
     /// Range: `0..=127`
-    pub fn accent_level(&self) -> usize {
+    pub const fn accent_level(&self) -> usize {
         self.accent_level as usize
     }
 
@@ -285,32 +308,32 @@ impl Sound {
     }
 
     /// Returns the sample page parameters of the sound.
-    pub fn sample(&self) -> &Sample {
+    pub const fn sample(&self) -> &Sample {
         &self.sample
     }
 
     /// Returns the filter page parameters of the sound.
-    pub fn filter(&self) -> &Filter {
+    pub const fn filter(&self) -> &Filter {
         &self.filter
     }
 
     /// Returns the amplitude page parameters of the sound.
-    pub fn amplitude(&self) -> &Amplitude {
+    pub const fn amplitude(&self) -> &Amplitude {
         &self.amplitude
     }
 
     /// Returns the LFO page parameters of the sound.
-    pub fn lfo(&self) -> &Lfo {
+    pub const fn lfo(&self) -> &Lfo {
         &self.lfo
     }
 
     /// Returns sound settings of the sound.
-    pub fn settings(&self) -> &SoundSettings {
+    pub const fn settings(&self) -> &SoundSettings {
         &self.settings
     }
 
     /// Returns the machine parameters of the sound.
-    pub fn machine_parameters(&self) -> &MachineParameters {
+    pub const fn machine_parameters(&self) -> &MachineParameters {
         &self.machine_parameters
     }
 
@@ -345,10 +368,13 @@ impl Sound {
     }
 
     /// Returns the version of the sound structure.
-    pub fn structure_version(&self) -> u32 {
+    pub const fn structure_version(&self) -> u32 {
         self.version
     }
 
+    /// Makes a new pool sound with the given index complying to project defaults.
+    ///
+    /// Range: `0..=127`
     #[parameter_range(range = "sound_index:0..=127")]
     pub fn try_default(sound_index: usize) -> Result<Self, RytmError> {
         Ok(Self {
@@ -360,7 +386,7 @@ impl Sound {
 
             version: 4,
             // TODO: Decide default name.
-            name: ObjectName::try_from(format!("POOL_SOUND {}", sound_index))?,
+            name: ObjectName::try_from(format!("POOL_SOUND {sound_index}"))?,
             accent_level: 32,
 
             sample: Sample::default(),
@@ -379,6 +405,10 @@ impl Sound {
         })
     }
 
+    /// Makes a new sound with the given index complying to project defaults as if it comes from a part of a kit.
+    ///
+    /// Track index range: `0..=11`
+    /// Kit index range: `0..=127`
     #[parameter_range(range = "track_index:0..=11", range = "kit_index:0..=127")]
     pub fn try_kit_default(
         track_index: usize,
@@ -395,7 +425,7 @@ impl Sound {
             assigned_track: Some(track_index),
 
             version: 4,
-            name: ObjectName::try_from(format!("KIT_SOUND {}", track_index))?,
+            name: ObjectName::try_from(format!("KIT_SOUND {track_index}"))?,
             accent_level: 32,
 
             sample: Sample::default(),
@@ -414,6 +444,9 @@ impl Sound {
         })
     }
 
+    /// Makes a new sound with the given index complying to project defaults as if it comes from the work buffer.
+    ///
+    /// Track index range: `0..=11`
     #[parameter_range(range = "track_index:0..=11")]
     pub fn try_work_buffer_default(track_index: usize) -> Result<Self, RytmError> {
         // Continue indexing from 128 since this is in work buffer.
@@ -426,7 +459,7 @@ impl Sound {
             assigned_track: Some(track_index),
 
             version: 4,
-            name: ObjectName::try_from(format!("SOUND {}", track_index))?,
+            name: ObjectName::try_from(format!("SOUND {track_index}"))?,
             accent_level: 32,
 
             sample: Sample::default(),
@@ -445,7 +478,15 @@ impl Sound {
         })
     }
 
-    /// Sets the machine of the sound.
+    /// Sets the machine type of the sound.
+    ///
+    /// # Errors
+    ///
+    /// Not every machine type could be set for every sound if they're assigned to a track.
+    ///
+    /// For the sounds which are assigned to a track, the machine type must be compatible with the track or an error will be returned.
+    ///
+    /// For pool sounds this function will always succeed.
     pub fn set_machine_type(&mut self, machine_type: MachineType) -> Result<(), RytmError> {
         if let Some(assigned_track) = self.assigned_track() {
             if !crate::util::is_machine_compatible_for_track(assigned_track, machine_type) {

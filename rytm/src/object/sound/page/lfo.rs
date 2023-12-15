@@ -1,3 +1,12 @@
+// All casts in this file are intended or safe within the context of this library.
+//
+// One can change `allow` to `warn` to review them if necessary.
+#![allow(
+    clippy::cast_lossless,
+    clippy::cast_possible_truncation,
+    clippy::cast_sign_loss
+)]
+
 use crate::{
     error::{ConversionError, ParameterError, RytmError},
     object::sound::types::{LfoDestination, LfoMode, LfoMultiplier, LfoWaveform},
@@ -43,7 +52,7 @@ impl TryFrom<&ar_sound_t> for Lfo {
         // map range of 0..=32767 to -128.0..=127.99
 
         let depth = scale_u16_to_f32(
-            unsafe { from_s_u16_t(&raw_sound.lfo_depth) },
+            unsafe { from_s_u16_t(raw_sound.lfo_depth) },
             0u16,
             32767u16,
             -128f32,
@@ -89,9 +98,8 @@ impl Lfo {
     }
 
     /// Sets the multiplier of the LFO.
-    pub fn set_multiplier(&mut self, multiplier: LfoMultiplier) -> Result<(), RytmError> {
+    pub fn set_multiplier(&mut self, multiplier: LfoMultiplier) {
         self.multiplier = multiplier;
-        Ok(())
     }
 
     /// Sets the fade of the LFO.
@@ -104,15 +112,13 @@ impl Lfo {
     }
 
     /// Sets the destination of the LFO.
-    pub fn set_destination(&mut self, destination: LfoDestination) -> Result<(), RytmError> {
+    pub fn set_destination(&mut self, destination: LfoDestination) {
         self.destination = destination;
-        Ok(())
     }
 
     /// Sets the waveform of the LFO.
-    pub fn set_waveform(&mut self, waveform: LfoWaveform) -> Result<(), RytmError> {
+    pub fn set_waveform(&mut self, waveform: LfoWaveform) {
         self.waveform = waveform;
-        Ok(())
     }
 
     /// Sets the depth of the LFO.
@@ -134,48 +140,47 @@ impl Lfo {
     }
 
     /// Sets the mode of the LFO.
-    pub fn set_mode(&mut self, mode: LfoMode) -> Result<(), RytmError> {
+    pub fn set_mode(&mut self, mode: LfoMode) {
         self.mode = mode;
-        Ok(())
     }
 
     /// Returns the speed of the LFO.
-    pub fn speed(&self) -> isize {
+    pub const fn speed(&self) -> isize {
         self.speed as isize
     }
 
     /// Returns the multiplier of the LFO.
-    pub fn multiplier(&self) -> &LfoMultiplier {
+    pub const fn multiplier(&self) -> &LfoMultiplier {
         &self.multiplier
     }
 
     /// Returns the fade of the LFO.
-    pub fn fade(&self) -> isize {
+    pub const fn fade(&self) -> isize {
         self.fade as isize
     }
 
     /// Returns the destination of the LFO.
-    pub fn destination(&self) -> &LfoDestination {
+    pub const fn destination(&self) -> &LfoDestination {
         &self.destination
     }
 
     /// Returns the waveform of the LFO.
-    pub fn waveform(&self) -> &LfoWaveform {
+    pub const fn waveform(&self) -> &LfoWaveform {
         &self.waveform
     }
 
     /// Returns the start phase of the LFO.
-    pub fn start_phase_or_slew(&self) -> usize {
+    pub const fn start_phase_or_slew(&self) -> usize {
         self.start_phase_or_slew as usize
     }
 
     /// Returns the mode of the LFO.
-    pub fn mode(&self) -> &LfoMode {
+    pub const fn mode(&self) -> &LfoMode {
         &self.mode
     }
 
     /// Returns the depth of the LFO.
-    pub fn depth(&self) -> f32 {
+    pub const fn depth(&self) -> f32 {
         self.depth
     }
 }

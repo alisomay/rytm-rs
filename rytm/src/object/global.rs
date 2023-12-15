@@ -23,11 +23,11 @@ impl_sysex_compatible!(
     GLOBAL_SYSEX_SIZE
 );
 
-/// # Global
+/// Represents a global in the analog rytm.
 ///
-/// This structure represents a global slot in the analog rytm.
+/// It does not map identically to the structure in the firmware.
 ///
-/// It does not map identically to the relevant structure in the firmware.
+/// Globals are global settings which you may found in the settings menu of the device.
 #[derive(Derivative, Clone, Copy)]
 #[derivative(Debug)]
 pub struct Global {
@@ -49,7 +49,7 @@ pub struct Global {
 
 impl From<&Global> for ar_global_t {
     fn from(global: &Global) -> Self {
-        let mut raw_global = ar_global_t {
+        let mut raw_global = Self {
             version: break_u32_into_u8_array(global.version),
             ..Default::default()
         };
@@ -97,6 +97,9 @@ impl Global {
         })
     }
 
+    /// Makes a new global complying to project defaults.
+    ///
+    /// Accepts a global slot index in the range of `0..=3`.
     #[parameter_range(range = "global_slot:0..=3")]
     pub fn try_default(global_slot: usize) -> Result<Self, RytmError> {
         Ok(Self {
@@ -113,6 +116,7 @@ impl Global {
         })
     }
 
+    /// Makes a new global in the work buffer complying to project defaults as if it comes from the work buffer.
     pub fn work_buffer_default() -> Self {
         Self {
             index: 0,
@@ -129,7 +133,7 @@ impl Global {
     }
 
     /// Returns the version of the global structure.
-    pub fn structure_version(&self) -> u32 {
+    pub const fn structure_version(&self) -> u32 {
         self.version
     }
 }

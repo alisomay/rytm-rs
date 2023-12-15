@@ -6,7 +6,7 @@ use crate::{
 use rytm_rs_macro::parameter_range;
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
-/// A query for a sound object.
+/// A query to retrieve a [`Sound`](crate::object::Sound) object from rytm.
 pub struct SoundQuery {
     /// Sound index or track index if targeting work buffer
     object_number: usize,
@@ -15,6 +15,9 @@ pub struct SoundQuery {
 }
 
 impl SoundQuery {
+    /// Creates a new sound query for a pool sound.
+    ///
+    /// Accepts a sound index in the range of `0..=127`.
     #[parameter_range(range = "sound_index:0..=127")]
     pub fn new(sound_index: usize) -> Result<Self, RytmError> {
         Ok(Self {
@@ -24,6 +27,11 @@ impl SoundQuery {
         })
     }
 
+    /// Creates a new sound query for a pool sound.
+    ///
+    /// Accepts a sound index in the range of `0..=127`.
+    ///
+    /// Accepts a device id in the range of `0..=255`.
     #[parameter_range(range = "sound_index:0..=127")]
     pub fn new_with_device_id(sound_index: usize, device_id: u8) -> Result<Self, RytmError> {
         Ok(Self {
@@ -33,6 +41,9 @@ impl SoundQuery {
         })
     }
 
+    /// Creates a new sound query for a sound in the work buffer.
+    ///
+    /// Accepts a track index in the range of `0..=11`.
     #[parameter_range(range = "track_index:0..=11")]
     pub fn new_targeting_work_buffer(track_index: usize) -> Result<Self, RytmError> {
         Ok(Self {
@@ -42,6 +53,11 @@ impl SoundQuery {
         })
     }
 
+    /// Creates a new sound query for a sound in the work buffer.
+    ///
+    /// Accepts a track index in the range of `0..=11`.
+    ///
+    /// Accepts a device id in the range of `0..=255`.
     #[parameter_range(range = "track_index:0..=11")]
     pub fn new_targeting_work_buffer_with_device_id(
         track_index: usize,

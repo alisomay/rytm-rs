@@ -1,3 +1,14 @@
+// All casts in this file are intended or safe within the context of this library.
+//
+// One can change `allow` to `warn` to review them if necessary.
+#![allow(
+    clippy::cast_lossless,
+    clippy::cast_possible_truncation,
+    clippy::cast_sign_loss
+)]
+// TODO: I'm currently really lazy to write errors doc for this module. Will do it later
+#![allow(clippy::missing_errors_doc)]
+
 mod amp;
 mod comp;
 mod delay;
@@ -8,7 +19,7 @@ mod lfo;
 mod reverb;
 mod samp;
 
-pub(crate) mod fx_plock_types {
+pub mod fx_plock_types {
     pub const AR_FX_PLOCK_TYPE_DELAY_TIME: u32 = 0;
     pub const AR_FX_PLOCK_TYPE_DELAY_PING_PONG: u32 = 1;
     pub const AR_FX_PLOCK_TYPE_DELAY_WIDTH: u32 = 2;

@@ -64,10 +64,10 @@ impl UtImpulseParameters {
             Ok(Self {
                 parameter_lock_pool: None,
                 assigned_track: track_index,
-                lev: (from_s_u16_t(&raw_sound.synth_param_1) >> 8) as u8,
-                atk: (from_s_u16_t(&raw_sound.synth_param_2) >> 8) as u8,
-                dec: (from_s_u16_t(&raw_sound.synth_param_3) >> 8) as u8,
-                pol: (from_s_u16_t(&raw_sound.synth_param_8) >> 8) as u8,
+                lev: (from_s_u16_t(raw_sound.synth_param_1) >> 8) as u8,
+                atk: (from_s_u16_t(raw_sound.synth_param_2) >> 8) as u8,
+                dec: (from_s_u16_t(raw_sound.synth_param_3) >> 8) as u8,
+                pol: (from_s_u16_t(raw_sound.synth_param_8) >> 8) as u8,
             })
         }
     }

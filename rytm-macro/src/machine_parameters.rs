@@ -208,7 +208,7 @@ pub fn generate_setter_and_plock_methods_with_range_check(
                     trig_index,
                     assigned_track as u8,
                     rytm_sys::#syn_param_type_ident as u8,
-                )?;
+                );
                 return Ok(());
             }
             Err(OrphanTrig)
@@ -224,7 +224,7 @@ pub fn generate_setter_and_plock_methods_with_range_check(
                     trig_index,
                     assigned_track as u8,
                     rytm_sys::#syn_param_type_ident as u8,
-                )?;
+                );
                 return Ok(());
             }
             Err(OrphanTrig)

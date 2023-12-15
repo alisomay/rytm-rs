@@ -329,7 +329,7 @@ impl Trig {
                 self.index,
                 self.track_index as u8,
                 rytm_sys::AR_PLOCK_TYPE_AMP_ATTACK as u8,
-            )?;
+            );
 
             return Ok(());
         }
@@ -343,7 +343,7 @@ impl Trig {
                 self.index,
                 self.track_index as u8,
                 rytm_sys::AR_PLOCK_TYPE_AMP_HOLD as u8,
-            )?;
+            );
 
             return Ok(());
         }
@@ -357,7 +357,7 @@ impl Trig {
                 self.index,
                 self.track_index as u8,
                 rytm_sys::AR_PLOCK_TYPE_AMP_DECAY as u8,
-            )?;
+            );
 
             return Ok(());
         }
@@ -371,7 +371,7 @@ impl Trig {
                 self.index,
                 self.track_index as u8,
                 rytm_sys::AR_PLOCK_TYPE_AMP_DRIVE as u8,
-            )?;
+            );
 
             return Ok(());
         }
@@ -385,7 +385,7 @@ impl Trig {
                 self.index,
                 self.track_index as u8,
                 rytm_sys::AR_PLOCK_TYPE_AMP_DELAY as u8,
-            )?;
+            );
 
             return Ok(());
         }
@@ -399,7 +399,7 @@ impl Trig {
                 self.index,
                 self.track_index as u8,
                 rytm_sys::AR_PLOCK_TYPE_AMP_REVERB as u8,
-            )?;
+            );
 
             return Ok(());
         }
@@ -413,7 +413,7 @@ impl Trig {
                 self.index,
                 self.track_index as u8,
                 rytm_sys::AR_PLOCK_TYPE_AMP_PAN as u8,
-            )?;
+            );
 
             return Ok(());
         }
@@ -427,7 +427,7 @@ impl Trig {
                 self.index,
                 self.track_index as u8,
                 rytm_sys::AR_PLOCK_TYPE_AMP_VOLUME as u8,
-            )?;
+            );
 
             return Ok(());
         }

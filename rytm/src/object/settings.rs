@@ -1,3 +1,13 @@
+// All casts in this file are intended or safe within the context of this library.
+//
+// One can change `allow` to `warn` to review them if necessary.
+#![allow(
+    clippy::cast_lossless,
+    clippy::cast_possible_truncation,
+    clippy::cast_sign_loss
+)]
+// TODO: Re-check if bpm related casts are accurate.
+
 pub mod types;
 pub(crate) mod unknown;
 
@@ -25,11 +35,11 @@ impl_sysex_compatible!(
     SETTINGS_SYSEX_SIZE
 );
 
-/// # Settings
-///
-/// This structure represents settings in the analog rytm.
+/// Represents settings in the analog rytm.
 ///
 /// It does not map identically to the relevant structure in the firmware.
+///
+/// Settings may not be a familiar structure for all, to understand what kind of settings are available, please check the methods of this struct.
 #[derive(Derivative, Clone, Copy)]
 #[derivative(Debug)]
 pub struct Settings {
@@ -274,10 +284,14 @@ impl Settings {
     /// Mutes a range of sounds.
     ///
     /// Maximum range `0..=11`
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the range is out of bounds.
     pub fn mute_range_of_sounds(&mut self, range: std::ops::Range<usize>) -> Result<(), RytmError> {
         if range.end > 11 {
             return Err(RytmError::Parameter(ParameterError::Range {
-                value: format!("{:?}", range),
+                value: format!("{range:?}",),
                 parameter_name: "range".to_string(),
             }));
         }
@@ -292,6 +306,10 @@ impl Settings {
     /// Unmute a range of sounds.
     ///
     /// Maximum range `0..=11`
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the range is out of bounds.
     pub fn unmute_range_of_sounds(
         &mut self,
         range: std::ops::Range<usize>,
@@ -305,6 +323,10 @@ impl Settings {
     /// Toggles the mute state of a range of sounds.
     ///
     /// Maximum range `0..=11`
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the range is out of bounds.
     pub fn toggle_mute_range_of_sounds(
         &mut self,
         range: std::ops::Range<usize>,
@@ -367,46 +389,46 @@ impl Settings {
     /// Range `30.0..=300.0`
     ///
     /// This is only effective when project level bpm is enabled.
-    pub fn bpm(&self) -> f32 {
+    pub const fn bpm(&self) -> f32 {
         self.bpm_project
     }
 
     /// Returns the selected track.
     ///
     /// Range `0..=11`
-    pub fn selected_track(&self) -> usize {
+    pub const fn selected_track(&self) -> usize {
         self.selected_track as usize
     }
 
     /// Returns the selected parameter menu item.
-    pub fn selected_parameter_menu_item(&self) -> ParameterMenuItem {
+    pub const fn selected_parameter_menu_item(&self) -> ParameterMenuItem {
         self.selected_parameter_menu_item
     }
 
     /// Returns the selected fx menu item.
-    pub fn selected_fx_menu_item(&self) -> FxParameterMenuItem {
+    pub const fn selected_fx_menu_item(&self) -> FxParameterMenuItem {
         self.selected_fx_menu_item
     }
 
     /// Returns the selected page.
     ///
     /// Range `0..=3`
-    pub fn selected_page(&self) -> usize {
+    pub const fn selected_page(&self) -> usize {
         self.selected_page as usize
     }
 
     /// Returns the selected sequencer mode.
-    pub fn selected_mode(&self) -> SequencerMode {
+    pub const fn selected_mode(&self) -> SequencerMode {
         self.selected_mode
     }
 
     /// Returns the selected pattern mode.
-    pub fn selected_pattern_mode(&self) -> PatternMode {
+    pub const fn selected_pattern_mode(&self) -> PatternMode {
         self.selected_pattern_mode
     }
 
     /// Returns the raw mute flags for sounds.
-    pub fn raw_mute_flags(&self) -> u16 {
+    pub const fn raw_mute_flags(&self) -> u16 {
         self.mute_flags
     }
 
@@ -433,41 +455,41 @@ impl Settings {
     }
 
     /// Returns the fixed velocity enable state.
-    pub fn fixed_velocity_enabled(&self) -> bool {
+    pub const fn fixed_velocity_enabled(&self) -> bool {
         self.fixed_velocity_enable
     }
 
     /// Returns the fixed velocity amount.
     ///
     /// Range `0..=127`
-    pub fn fixed_velocity_amount(&self) -> usize {
+    pub const fn fixed_velocity_amount(&self) -> usize {
         self.fixed_velocity_amount as usize
     }
 
     /// Returns the sample recorder source.
-    pub fn sample_recorder_source(&self) -> SampleRecorderSource {
+    pub const fn sample_recorder_source(&self) -> SampleRecorderSource {
         self.sample_recorder_src
     }
 
     /// Returns the sample recorder threshold.
     ///
     /// Range `0..=127`
-    pub fn sample_recorder_threshold(&self) -> usize {
+    pub const fn sample_recorder_threshold(&self) -> usize {
         self.sample_recorder_thr as usize
     }
 
     /// Returns the sample recorder monitor state.
-    pub fn sample_recorder_monitor_enabled(&self) -> bool {
+    pub const fn sample_recorder_monitor_enabled(&self) -> bool {
         self.sample_recorder_monitor_enable
     }
 
     /// Returns the sample recorder recording length.
-    pub fn sample_recorder_recording_length(&self) -> SampleRecorderRecordingLength {
+    pub const fn sample_recorder_recording_length(&self) -> SampleRecorderRecordingLength {
         self.sample_recorder_rlen
     }
 
     /// Returns the version of the settings structure.
-    pub fn structure_version(&self) -> u32 {
+    pub const fn structure_version(&self) -> u32 {
         self.version
     }
 }

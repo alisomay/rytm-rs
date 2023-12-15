@@ -9,7 +9,7 @@ use crate::error::ConversionError;
 pub(crate) struct ObjectName([u8; 15]);
 
 impl ObjectName {
-    pub fn from_u8_array(raw_sound_name: [u8; 15]) -> Self {
+    pub const fn from_u8_array(raw_sound_name: [u8; 15]) -> Self {
         Self(raw_sound_name)
     }
 
@@ -17,7 +17,7 @@ impl ObjectName {
         std::str::from_utf8(&self.0).unwrap().trim_end()
     }
 
-    pub fn copy_inner(&self) -> [u8; 15] {
+    pub const fn copy_inner(&self) -> [u8; 15] {
         self.0
     }
 }

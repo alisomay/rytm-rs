@@ -1,3 +1,12 @@
+// All casts in this file are intended or safe within the context of this library.
+//
+// One can change `allow` to `warn` to review them if necessary.
+#![allow(
+    clippy::cast_lossless,
+    clippy::cast_possible_truncation,
+    clippy::cast_sign_loss
+)]
+
 use crate::{
     error::{ConversionError, ParameterError, RytmError},
     object::sound::types::FilterType,
@@ -52,7 +61,7 @@ impl TryFrom<&ar_sound_t> for Filter {
 }
 
 impl Filter {
-    pub(crate) fn apply_to_raw_sound(&self, raw_sound: &mut ar_sound_t) {
+    pub(crate) fn apply_to_raw_sound(self, raw_sound: &mut ar_sound_t) {
         raw_sound.flt_attack = self.attack;
         raw_sound.flt_sustain = self.sustain;
         raw_sound.flt_decay = self.decay;
@@ -134,54 +143,54 @@ impl Filter {
     /// Returns the attack of the filter envelope.
     ///
     /// Range: `0..=127`
-    pub fn attack(&self) -> usize {
+    pub const fn attack(&self) -> usize {
         self.attack as usize
     }
 
     /// Returns the sustain of the filter envelope.
     ///
     /// Range: `0..=127`
-    pub fn sustain(&self) -> usize {
+    pub const fn sustain(&self) -> usize {
         self.sustain as usize
     }
 
     /// Returns the decay of the filter envelope.
     ///
     /// Range: `0..=127`
-    pub fn decay(&self) -> usize {
+    pub const fn decay(&self) -> usize {
         self.decay as usize
     }
 
     /// Returns the release of the filter envelope.
     ///
     /// Range: `0..=127`
-    pub fn release(&self) -> usize {
+    pub const fn release(&self) -> usize {
         self.release as usize
     }
 
     /// Returns the cutoff of the filter.
     ///
     /// Range: `0..=127`
-    pub fn cutoff(&self) -> usize {
+    pub const fn cutoff(&self) -> usize {
         self.cutoff as usize
     }
 
     /// Returns the resonance of the filter.
     ///
     /// Range: `0..=127`
-    pub fn resonance(&self) -> usize {
+    pub const fn resonance(&self) -> usize {
         self.resonance as usize
     }
 
     /// Returns the filter type.
-    pub fn filter_type(&self) -> FilterType {
+    pub const fn filter_type(&self) -> FilterType {
         self.filter_type
     }
 
     /// Returns the envelope amount of the filter.
     ///
     /// Range: `-64..=63`
-    pub fn envelope_amount(&self) -> isize {
+    pub const fn envelope_amount(&self) -> isize {
         self.envelope_amount as isize
     }
 }

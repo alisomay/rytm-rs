@@ -37,17 +37,17 @@ impl MidiConfig {
     }
 
     /// Returns the `Sync` menu.
-    pub fn sync(&self) -> &Sync {
+    pub const fn sync(&self) -> &Sync {
         &self.sync
     }
 
     /// Returns the `Port Config` menu.
-    pub fn port_config(&self) -> &PortConfig {
+    pub const fn port_config(&self) -> &PortConfig {
         &self.port_config
     }
 
     /// Returns the `Channels` menu.
-    pub fn channels(&self) -> &Channels {
+    pub const fn channels(&self) -> &Channels {
         &self.channels
     }
 
@@ -67,6 +67,8 @@ impl MidiConfig {
     }
 }
 
+// It is better to do it a struct because of consistency.
+#[allow(clippy::struct_excessive_bools)]
 /// Represents the `Sync` menu in `Midi Config` menu.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Sync {
@@ -106,7 +108,7 @@ impl TryFrom<&ar_global_t> for Sync {
 }
 
 impl Sync {
-    pub(crate) fn apply_to_raw_global(&self, raw_global: &mut ar_global_t) {
+    pub(crate) fn apply_to_raw_global(self, raw_global: &mut ar_global_t) {
         raw_global.clock_receive = self.clock_receive as u8;
         raw_global.clock_send = self.clock_send as u8;
         raw_global.transport_receive = self.transport_receive as u8;
@@ -146,32 +148,32 @@ impl Sync {
     }
 
     /// Returns `true` if clock receive is on.
-    pub fn clock_receive(&self) -> bool {
+    pub const fn clock_receive(&self) -> bool {
         self.clock_receive
     }
 
     /// Returns `true` if clock send is on.
-    pub fn clock_send(&self) -> bool {
+    pub const fn clock_send(&self) -> bool {
         self.clock_send
     }
 
     /// Returns `true` if transport receive is on.
-    pub fn transport_receive(&self) -> bool {
+    pub const fn transport_receive(&self) -> bool {
         self.transport_receive
     }
 
     /// Returns `true` if transport send is on.
-    pub fn transport_send(&self) -> bool {
+    pub const fn transport_send(&self) -> bool {
         self.transport_send
     }
 
     /// Returns `true` if program change receive is on.
-    pub fn program_change_receive(&self) -> bool {
+    pub const fn program_change_receive(&self) -> bool {
         self.program_change_receive
     }
 
     /// Returns `true` if program change send is on.
-    pub fn program_change_send(&self) -> bool {
+    pub const fn program_change_send(&self) -> bool {
         self.program_change_send
     }
 }
@@ -321,7 +323,6 @@ impl PortConfig {
         self.encoder_dest = encoder_parameter_destination;
     }
 
-    // TODO: Double check
     /// Sets the destination of parameters produced by muting tracks.
     pub fn set_mute_parameter_destination(
         &mut self,
@@ -339,62 +340,62 @@ impl PortConfig {
     }
 
     /// Returns the function of the MIDI out port.
-    pub fn output_port_function(&self) -> MidiPortFunction {
+    pub const fn output_port_function(&self) -> MidiPortFunction {
         self.out_port_func
     }
 
     /// Returns the function of the MIDI thru port.
-    pub fn thru_port_function(&self) -> MidiPortFunction {
+    pub const fn thru_port_function(&self) -> MidiPortFunction {
         self.thru_port_func
     }
 
     /// Returns the transport layer to receive MIDI from.
-    pub fn input_transport(&self) -> MidiTransportLayer {
+    pub const fn input_transport(&self) -> MidiTransportLayer {
         self.input_from
     }
 
     /// Returns the transport layer to send MIDI to.
-    pub fn output_transport(&self) -> MidiTransportLayer {
+    pub const fn output_transport(&self) -> MidiTransportLayer {
         self.output_to
     }
 
     /// Returns the MIDI parameter output type.
-    pub fn parameter_output_type(&self) -> MidiParameterOutput {
+    pub const fn parameter_output_type(&self) -> MidiParameterOutput {
         self.param_output
     }
 
     /// Returns `true` if note messages receive is on.
-    pub fn receive_notes(&self) -> bool {
+    pub const fn receive_notes(&self) -> bool {
         self.receive_notes
     }
 
     /// Returns `true` if CC and NRPN messages receive is on.
-    pub fn receive_cc_nrpn(&self) -> bool {
+    pub const fn receive_cc_nrpn(&self) -> bool {
         self.receive_cc_nrpn
     }
 
     /// Returns the destination of parameters produced by pressing pads.
-    pub fn pad_parameter_destination(&self) -> ParameterDestination {
+    pub const fn pad_parameter_destination(&self) -> ParameterDestination {
         self.pad_dest
     }
 
     /// Returns the destination of parameters produced by pressure amount when pressing pads.
-    pub fn pressure_parameter_destination(&self) -> ParameterDestination {
+    pub const fn pressure_parameter_destination(&self) -> ParameterDestination {
         self.pressure_dest
     }
 
     /// Returns the destination of parameters produced by turning encoders.
-    pub fn encoder_parameter_destination(&self) -> ParameterDestination {
+    pub const fn encoder_parameter_destination(&self) -> ParameterDestination {
         self.encoder_dest
     }
 
     /// Returns the destination of parameters produced by muting tracks.
-    pub fn mute_parameter_destination(&self) -> ParameterDestination {
+    pub const fn mute_parameter_destination(&self) -> ParameterDestination {
         self.mute_dest
     }
 
     /// Returns the channel of the MIDI ports output.
-    pub fn ports_output_channel(&self) -> MidiPortsOutputChannel {
+    pub const fn ports_output_channel(&self) -> MidiPortsOutputChannel {
         self.ports_output_channel
     }
 
@@ -406,7 +407,7 @@ impl PortConfig {
     /// But since I can not enable it without connecting a turbo speed capable MIDI interface I can not be sure.
     ///
     /// If you have a turbo speed capable MIDI interface and can confirm this please open an issue on the GitHub repository.
-    pub fn turbo_speed(&self) -> bool {
+    pub const fn turbo_speed(&self) -> bool {
         self.__unknown0x29 != 0
     }
 }
@@ -423,7 +424,6 @@ pub struct Channels {
 }
 
 impl Default for Channels {
-    // TODO: Double check these defaults.
     fn default() -> Self {
         Self {
             auto_channel: MidiChannel::Channel(13),
@@ -555,6 +555,10 @@ impl Channels {
     /// Only [`MidiChannel::Off`] or [`MidiChannel::Channel(usize)`] variants can be used.
     ///
     /// Range of [`MidiChannel::Channel(usize)`] is: `0..=15`.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the channel is not compatible with the function.
     pub fn set_auto_channel(&mut self, auto_channel: MidiChannel) -> Result<(), RytmError> {
         Self::validate_midi_channel(&auto_channel, false)?;
         self.auto_channel = auto_channel;
@@ -582,6 +586,10 @@ impl Channels {
     /// Only [`MidiChannel::Off`] or [`MidiChannel::Channel(usize)`] variants can be used.
     ///
     /// Range of [`MidiChannel::Channel(usize)`] is: `0..=15`.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the channel is not compatible with the function.
     pub fn set_track_fx_channel(&mut self, track_fx_channel: MidiChannel) -> Result<(), RytmError> {
         Self::validate_midi_channel(&track_fx_channel, false)?;
         self.track_fx_channel = track_fx_channel;
@@ -593,6 +601,10 @@ impl Channels {
     /// Only [`MidiChannel::Auto`] or [`MidiChannel::Channel(usize)`] variants can be used.
     ///
     /// Range of [`MidiChannel::Channel(usize)`] is: `0..=15`.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the channel is not compatible with the function.
     pub fn set_program_change_in_channel(
         &mut self,
         program_change_in_channel: MidiChannel,
@@ -607,6 +619,10 @@ impl Channels {
     /// Only [`MidiChannel::Auto`] or [`MidiChannel::Channel(usize)`] variants can be used.
     ///
     /// Range of [`MidiChannel::Channel(usize)`] is: `0..=15`.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the channel is not compatible with the function.
     pub fn set_program_change_out_channel(
         &mut self,
         program_change_out_channel: MidiChannel,
@@ -621,6 +637,10 @@ impl Channels {
     /// Only [`MidiChannel::Off`] or [`MidiChannel::Channel(usize)`] variants can be used.
     ///
     /// Range of [`MidiChannel::Channel(usize)`] is: `0..=15`.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the channel is not compatible with the function.
     pub fn set_performance_channel(
         &mut self,
         performance_channel: MidiChannel,
@@ -631,12 +651,12 @@ impl Channels {
     }
 
     /// Returns the auto channel.
-    pub fn auto_channel(&self) -> MidiChannel {
+    pub const fn auto_channel(&self) -> MidiChannel {
         self.auto_channel
     }
 
     /// Returns the track channels.
-    pub fn track_channels(&self) -> &[MidiChannel; 12] {
+    pub const fn track_channels(&self) -> &[MidiChannel; 12] {
         &self.track_channels
     }
 
@@ -649,22 +669,22 @@ impl Channels {
     }
 
     /// Returns the track FX channel.
-    pub fn track_fx_channel(&self) -> MidiChannel {
+    pub const fn track_fx_channel(&self) -> MidiChannel {
         self.track_fx_channel
     }
 
     /// Returns the program change in channel.
-    pub fn program_change_in_channel(&self) -> MidiChannel {
+    pub const fn program_change_in_channel(&self) -> MidiChannel {
         self.program_change_in_channel
     }
 
     /// Returns the program change out channel.
-    pub fn program_change_out_channel(&self) -> MidiChannel {
+    pub const fn program_change_out_channel(&self) -> MidiChannel {
         self.program_change_out_channel
     }
 
     /// Returns the performance channel.
-    pub fn performance_channel(&self) -> MidiChannel {
+    pub const fn performance_channel(&self) -> MidiChannel {
         self.performance_channel
     }
 }

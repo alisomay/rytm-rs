@@ -7,7 +7,7 @@ use rytm_rs_macro::parameter_range;
 use rytm_sys::ar_kit_t;
 
 /// Delay parameters for the kit.
-#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub struct FxDelay {
     time: u8,
     ping_pong: bool,
@@ -58,7 +58,7 @@ impl TryFrom<&ar_kit_t> for FxDelay {
 }
 
 impl FxDelay {
-    pub(crate) fn apply_to_raw_kit(&self, raw_kit: &mut ar_kit_t) {
+    pub(crate) fn apply_to_raw_kit(self, raw_kit: &mut ar_kit_t) {
         // map 0..=198 to 0..=127
         let feedback = (self.feedback as f32 / 198.0 * 127.0) as u8;
 
@@ -84,15 +84,13 @@ impl FxDelay {
     }
 
     /// Sets the time of the delay on the grid.
-    pub fn set_time_on_grid(&mut self, time: FxDelayTimeOnTheGrid) -> Result<(), RytmError> {
+    pub fn set_time_on_grid(&mut self, time: FxDelayTimeOnTheGrid) {
         self.time = time.into();
-        Ok(())
     }
 
     /// Sets the ping pong of the delay.
-    pub fn set_ping_pong(&mut self, enable: bool) -> Result<(), RytmError> {
+    pub fn set_ping_pong(&mut self, enable: bool) {
         self.ping_pong = enable;
-        Ok(())
     }
 
     /// Sets the stereo width of the delay.
@@ -153,54 +151,54 @@ impl FxDelay {
     /// Returns the time of the delay.
     ///
     /// Range: `0..=127`
-    pub fn time(&self) -> usize {
+    pub const fn time(&self) -> usize {
         self.time as usize
     }
 
     /// Returns the ping pong state of the delay.
-    pub fn ping_pong(&self) -> bool {
+    pub const fn ping_pong(&self) -> bool {
         self.ping_pong
     }
 
     /// Returns the stereo width of the delay.
     ///
     /// Range: `-64..=63`
-    pub fn stereo_width(&self) -> isize {
+    pub const fn stereo_width(&self) -> isize {
         self.stereo_width as isize
     }
 
     /// Returns the feedback of the delay.
     ///
     /// Range: `0..=198`
-    pub fn feedback(&self) -> usize {
+    pub const fn feedback(&self) -> usize {
         self.feedback as usize
     }
 
     /// Returns the high pass filter of the delay.
     ///
     /// Range: `0..=127`
-    pub fn hpf(&self) -> usize {
+    pub const fn hpf(&self) -> usize {
         self.hpf as usize
     }
 
     /// Returns the low pass filter of the delay.
     ///
     /// Range: `0..=127`
-    pub fn lpf(&self) -> usize {
+    pub const fn lpf(&self) -> usize {
         self.lpf as usize
     }
 
     /// Returns the reverb send of the delay.
     ///
     /// Range: `0..=127`
-    pub fn reverb_send(&self) -> usize {
+    pub const fn reverb_send(&self) -> usize {
         self.reverb_send as usize
     }
 
     /// Returns the volume of the delay.
     ///
     /// Range: `0..=127`
-    pub fn volume(&self) -> usize {
+    pub const fn volume(&self) -> usize {
         self.volume as usize
     }
 }

@@ -113,7 +113,7 @@ impl HhBasicParameters {
                 trig_index,
                 assigned_track as u8,
                 rytm_sys::AR_PLOCK_TYPE_MP6 as u8,
-            )?;
+            );
             return Ok(());
         }
         Err(OrphanTrig)
@@ -128,20 +128,20 @@ impl HhBasicParameters {
             Ok(Self {
                 parameter_lock_pool: None,
                 assigned_track: track_index,
-                lev: (from_s_u16_t(&raw_sound.synth_param_1) >> 8) as u8,
+                lev: (from_s_u16_t(raw_sound.synth_param_1) >> 8) as u8,
                 tun: u8_to_i8_midpoint_of_u8_input_range(
-                    (from_s_u16_t(&raw_sound.synth_param_2) >> 8) as u8,
+                    (from_s_u16_t(raw_sound.synth_param_2) >> 8) as u8,
                     0,
                     127,
                 ),
-                dec: (from_s_u16_t(&raw_sound.synth_param_3) >> 8) as u8,
+                dec: (from_s_u16_t(raw_sound.synth_param_3) >> 8) as u8,
                 ton: u8_to_i8_midpoint_of_u8_input_range(
-                    (from_s_u16_t(&raw_sound.synth_param_4) >> 8) as u8,
+                    (from_s_u16_t(raw_sound.synth_param_4) >> 8) as u8,
                     0,
                     127,
                 ),
-                trd: (from_s_u16_t(&raw_sound.synth_param_5) >> 8) as u8,
-                rst: from_s_u16_t(&raw_sound.synth_param_6) >> 8 != 0,
+                trd: (from_s_u16_t(raw_sound.synth_param_5) >> 8) as u8,
+                rst: from_s_u16_t(raw_sound.synth_param_6) >> 8 != 0,
             })
         }
     }

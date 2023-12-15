@@ -327,7 +327,7 @@ impl Trig {
                 self.index,
                 self.track_index as u8,
                 rytm_sys::AR_PLOCK_TYPE_SMP_TUNE as u8,
-            )?;
+            );
 
             return Ok(());
         }
@@ -341,7 +341,7 @@ impl Trig {
                 self.index,
                 self.track_index as u8,
                 rytm_sys::AR_PLOCK_TYPE_SMP_FINE as u8,
-            )?;
+            );
 
             return Ok(());
         }
@@ -355,7 +355,7 @@ impl Trig {
                 self.index,
                 self.track_index as u8,
                 rytm_sys::AR_PLOCK_TYPE_SMP_NR as u8,
-            )?;
+            );
 
             return Ok(());
         }
@@ -369,7 +369,7 @@ impl Trig {
                 self.index,
                 self.track_index as u8,
                 rytm_sys::AR_PLOCK_TYPE_SMP_BITRDC as u8,
-            )?;
+            );
 
             return Ok(());
         }
@@ -383,7 +383,7 @@ impl Trig {
                 self.index,
                 self.track_index as u8,
                 rytm_sys::AR_PLOCK_TYPE_SMP_START as u8,
-            )?;
+            );
 
             return Ok(());
         }
@@ -397,7 +397,7 @@ impl Trig {
                 self.index,
                 self.track_index as u8,
                 rytm_sys::AR_PLOCK_TYPE_SMP_END as u8,
-            )?;
+            );
 
             return Ok(());
         }
@@ -411,7 +411,7 @@ impl Trig {
                 self.index,
                 self.track_index as u8,
                 rytm_sys::AR_PLOCK_TYPE_SMP_LOOPSW as u8,
-            )?;
+            );
 
             return Ok(());
         }
@@ -425,7 +425,7 @@ impl Trig {
                 self.index,
                 self.track_index as u8,
                 rytm_sys::AR_PLOCK_TYPE_SMP_LEVEL as u8,
-            )?;
+            );
 
             return Ok(());
         }

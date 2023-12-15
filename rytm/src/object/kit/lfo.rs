@@ -84,9 +84,8 @@ impl FxLfo {
     }
 
     /// Sets the multiplier of the LFO.
-    pub fn set_multiplier(&mut self, multiplier: LfoMultiplier) -> Result<(), RytmError> {
+    pub fn set_multiplier(&mut self, multiplier: LfoMultiplier) {
         self.multiplier = multiplier;
-        Ok(())
     }
 
     /// Sets the fade of the LFO.
@@ -99,15 +98,13 @@ impl FxLfo {
     }
 
     /// Sets the destination of the LFO.
-    pub fn set_destination(&mut self, destination: FxLfoDestination) -> Result<(), RytmError> {
+    pub fn set_destination(&mut self, destination: FxLfoDestination) {
         self.destination = destination;
-        Ok(())
     }
 
     /// Sets the waveform of the LFO.
-    pub fn set_waveform(&mut self, waveform: LfoWaveform) -> Result<(), RytmError> {
+    pub fn set_waveform(&mut self, waveform: LfoWaveform) {
         self.waveform = waveform;
-        Ok(())
     }
 
     /// Sets the start phase of the LFO.
@@ -120,48 +117,47 @@ impl FxLfo {
     }
 
     /// Sets the mode of the LFO.
-    pub fn set_mode(&mut self, mode: LfoMode) -> Result<(), RytmError> {
+    pub fn set_mode(&mut self, mode: LfoMode) {
         self.mode = mode;
-        Ok(())
     }
 
     /// Returns the speed of the LFO.
-    pub fn speed(&self) -> isize {
+    pub const fn speed(&self) -> isize {
         self.speed as isize
     }
 
     /// Returns the multiplier of the LFO.
-    pub fn multiplier(&self) -> &LfoMultiplier {
+    pub const fn multiplier(&self) -> &LfoMultiplier {
         &self.multiplier
     }
 
     /// Returns the fade of the LFO.
-    pub fn fade(&self) -> isize {
+    pub const fn fade(&self) -> isize {
         self.fade as isize
     }
 
     /// Returns the destination of the LFO.
-    pub fn destination(&self) -> &FxLfoDestination {
+    pub const fn destination(&self) -> &FxLfoDestination {
         &self.destination
     }
 
     /// Returns the waveform of the LFO.
-    pub fn waveform(&self) -> &LfoWaveform {
+    pub const fn waveform(&self) -> &LfoWaveform {
         &self.waveform
     }
 
     /// Returns the start phase of the LFO.
-    pub fn start_phase_or_slew(&self) -> usize {
+    pub const fn start_phase_or_slew(&self) -> usize {
         self.start_phase_or_slew as usize
     }
 
     /// Returns the mode of the LFO.
-    pub fn mode(&self) -> &LfoMode {
+    pub const fn mode(&self) -> &LfoMode {
         &self.mode
     }
 
     /// Returns the depth of the LFO.
-    pub fn depth(&self) -> f32 {
+    pub const fn depth(&self) -> f32 {
         self.depth
     }
 }

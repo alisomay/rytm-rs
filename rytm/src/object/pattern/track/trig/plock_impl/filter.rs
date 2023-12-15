@@ -320,7 +320,7 @@ impl Trig {
                 self.index,
                 self.track_index as u8,
                 rytm_sys::AR_PLOCK_TYPE_FLT_ATTACK as u8,
-            )?;
+            );
 
             return Ok(());
         }
@@ -334,7 +334,7 @@ impl Trig {
                 self.index,
                 self.track_index as u8,
                 rytm_sys::AR_PLOCK_TYPE_FLT_DECAY as u8,
-            )?;
+            );
 
             return Ok(());
         }
@@ -348,7 +348,7 @@ impl Trig {
                 self.index,
                 self.track_index as u8,
                 rytm_sys::AR_PLOCK_TYPE_FLT_SUSTAIN as u8,
-            )?;
+            );
 
             return Ok(());
         }
@@ -362,7 +362,7 @@ impl Trig {
                 self.index,
                 self.track_index as u8,
                 rytm_sys::AR_PLOCK_TYPE_FLT_RELEASE as u8,
-            )?;
+            );
 
             return Ok(());
         }
@@ -376,7 +376,7 @@ impl Trig {
                 self.index,
                 self.track_index as u8,
                 rytm_sys::AR_PLOCK_TYPE_FLT_FREQ as u8,
-            )?;
+            );
 
             return Ok(());
         }
@@ -390,7 +390,7 @@ impl Trig {
                 self.index,
                 self.track_index as u8,
                 rytm_sys::AR_PLOCK_TYPE_FLT_RESO as u8,
-            )?;
+            );
 
             return Ok(());
         }
@@ -404,7 +404,7 @@ impl Trig {
                 self.index,
                 self.track_index as u8,
                 rytm_sys::AR_PLOCK_TYPE_FLT_TYPE as u8,
-            )?;
+            );
 
             return Ok(());
         }
@@ -418,7 +418,7 @@ impl Trig {
                 self.index,
                 self.track_index as u8,
                 rytm_sys::AR_PLOCK_TYPE_FLT_ENV as u8,
-            )?;
+            );
 
             return Ok(());
         }

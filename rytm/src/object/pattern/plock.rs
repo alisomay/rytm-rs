@@ -23,11 +23,12 @@ impl Default for ParameterLockPool {
 }
 
 impl ParameterLockPool {
-    pub fn as_raw(&self) -> [rytm_sys::ar_plock_seq_t; 72] {
+    pub const fn as_raw(&self) -> [rytm_sys::ar_plock_seq_t; 72] {
         self.inner
     }
 
-    pub fn from_raw(raw: [rytm_sys::ar_plock_seq_t; 72]) -> Self {
+    // TODO: Value or ref?
+    pub const fn from_raw(raw: [rytm_sys::ar_plock_seq_t; 72]) -> Self {
         Self { inner: raw }
     }
 
@@ -168,12 +169,7 @@ impl ParameterLockPool {
     }
 
     /// Clears the basic plock for the given trig.
-    pub fn clear_basic_plock(
-        &mut self,
-        trig_index: usize,
-        track_index: u8,
-        plock_type: u8,
-    ) -> Result<(), RytmError> {
+    pub fn clear_basic_plock(&mut self, trig_index: usize, track_index: u8, plock_type: u8) {
         let mut plock_seq_index_which_we_cleared_from: Option<usize> = None;
 
         // Check if we have this type of basic plock already set if so modify it.
@@ -193,16 +189,9 @@ impl ParameterLockPool {
                 plock.plock_type = 0xFF;
             }
         }
-
-        Ok(())
     }
 
-    pub fn clear_compound_plock(
-        &mut self,
-        trig_index: usize,
-        track_index: u8,
-        plock_type: u8,
-    ) -> Result<(), RytmError> {
+    pub fn clear_compound_plock(&mut self, trig_index: usize, track_index: u8, plock_type: u8) {
         let mut plock_seq_index_which_we_cleared_from: Option<usize> = None;
 
         // Check if we have this type of compound plock already set if so modify it.
@@ -225,8 +214,6 @@ impl ParameterLockPool {
                 self.inner[i + 1].plock_type = 0xFF;
             }
         }
-
-        Ok(())
     }
 
     pub fn set_fx_basic_plock(
@@ -255,27 +242,19 @@ impl ParameterLockPool {
         self.get_compound_plock(trig_index, 12, plock_type)
     }
 
-    pub fn clear_fx_basic_plock(
-        &mut self,
-        trig_index: usize,
-        plock_type: u8,
-    ) -> Result<(), RytmError> {
-        self.clear_basic_plock(trig_index, 12, plock_type)
+    pub fn clear_fx_basic_plock(&mut self, trig_index: usize, plock_type: u8) {
+        self.clear_basic_plock(trig_index, 12, plock_type);
     }
 
-    pub fn clear_fx_compound_plock(
-        &mut self,
-        trig_index: usize,
-        plock_type: u8,
-    ) -> Result<(), RytmError> {
-        self.clear_compound_plock(trig_index, 12, plock_type)
+    pub fn clear_fx_compound_plock(&mut self, trig_index: usize, plock_type: u8) {
+        self.clear_compound_plock(trig_index, 12, plock_type);
     }
 
     pub fn clear_all_plocks(&mut self) {
-        for plock_seq in self.inner.iter_mut() {
+        for plock_seq in &mut self.inner {
             plock_seq.track_nr = 0xFF;
             plock_seq.plock_type = 0xFF;
-            for byte in plock_seq.data.iter_mut() {
+            for byte in &mut plock_seq.data {
                 // Like the default.
                 *byte = 0xFF;
             }
@@ -283,11 +262,11 @@ impl ParameterLockPool {
     }
 
     pub fn clear_all_plocks_for_track(&mut self, track_index: u8) {
-        for plock_seq in self.inner.iter_mut() {
+        for plock_seq in &mut self.inner {
             if plock_seq.track_nr == track_index {
                 plock_seq.track_nr = 0xFF;
                 plock_seq.plock_type = 0xFF;
-                for byte in plock_seq.data.iter_mut() {
+                for byte in &mut plock_seq.data {
                     // Like the default.
                     *byte = 0xFF;
                 }

@@ -1,7 +1,19 @@
+//! Internal module for sysex related operations.
+
+// All casts in this file are intended or safe within the context of this library.
+//
+// One can change `allow` to `warn` to review them if necessary.
+#![allow(
+    clippy::cast_lossless,
+    clippy::cast_possible_truncation,
+    clippy::cast_sign_loss
+)]
+
 pub mod types;
 
 use crate::error::{RytmError, SysexConversionError};
 use rytm_sys::{ar_global_t, ar_kit_t, ar_pattern_t, ar_settings_t, ar_sound_t};
+use std::ptr::addr_of_mut;
 pub use types::*;
 
 /// Pattern sysex response size for FW 1.70.
@@ -67,6 +79,10 @@ pub trait SysexCompatible {
     fn sysex_type(&self) -> AnySysexType;
 
     /// Serializes the object to a sysex message.
+    ///
+    /// # Errors
+    ///
+    /// May return a [`SysexConversionError`](crate::error::SysexConversionError) if the conversion fails.
     fn as_sysex(&self) -> Result<Vec<u8>, RytmError>;
 }
 
@@ -82,7 +98,7 @@ macro_rules! impl_sysex_compatible {
                 let mut raw_buffer: Vec<u8> = Vec::with_capacity(raw_size);
 
                 unsafe {
-                    let raw: *const u8 = &raw_object as *const $object_raw_type as *const u8;
+                    let raw: *const u8 = (&raw_object as *const $object_raw_type).cast::<u8>();
                     for i in 0..raw_size {
                         raw_buffer.push(*raw.add(i));
                     }
@@ -148,29 +164,29 @@ pub fn decode_sysex_response_to_raw(response: &[u8]) -> Result<(Vec<u8>, SysexMe
     // Make a default meta struct to fill.
     let meta = SysexMeta::default();
     let mut meta: rytm_sys::ar_sysex_meta_t = meta.into();
-    let meta_p = &mut meta as *mut rytm_sys::ar_sysex_meta_t;
 
     // The response buffer.
     let mut src_buf = response.as_ptr();
-    let src_buf_p = &mut src_buf as *mut *const u8;
+
+    // u32 is big enough for any possible buffer in this context.
+    #[allow(clippy::cast_possible_truncation)]
     let mut src_buf_size = response.len() as u32;
-    let src_buf_size_p = &mut src_buf_size as *mut u32;
 
     // Will be calculated by the first call to ar_sysex_to_raw.
-    let dst_buf_size = 0; // Big enough for the largest sysex message probably.
-    let dest_buf_size_p = dst_buf_size as *mut u32;
+    let mut dst_buf_size = 0u32;
 
     // The destination buffer, raw buffer.
     let mut dst_buf = vec![0_u8; expected_raw_size];
-    let dst_buf_p = dst_buf.as_mut_slice().as_mut_ptr();
 
     unsafe {
+        // The count of return error codes from `rytm-sys` is far below 255.
+        #[allow(clippy::cast_possible_truncation)]
         let return_code = rytm_sys::ar_sysex_to_raw(
-            dst_buf_p,
-            src_buf_p,
-            src_buf_size_p,
-            dest_buf_size_p,
-            meta_p,
+            dst_buf.as_mut_slice().as_mut_ptr(),
+            addr_of_mut!(src_buf),
+            addr_of_mut!(src_buf_size),
+            addr_of_mut!(dst_buf_size),
+            addr_of_mut!(meta),
         ) as u8;
 
         if return_code != 0 {

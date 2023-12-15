@@ -180,7 +180,7 @@ impl BdAcousticParameters {
                 trig_index,
                 assigned_track as u8,
                 rytm_sys::AR_PLOCK_TYPE_MP6 as u8,
-            )?;
+            );
             return Ok(());
         }
         Err(OrphanTrig)
@@ -199,20 +199,20 @@ impl BdAcousticParameters {
             Ok(Self {
                 parameter_lock_pool: None,
                 assigned_track: track_index,
-                lev: (from_s_u16_t(&raw_sound.synth_param_1) >> 8) as u8,
+                lev: (from_s_u16_t(raw_sound.synth_param_1) >> 8) as u8,
                 tun: scale_u16_to_f32(
-                    from_s_u16_t(&raw_sound.synth_param_2),
+                    from_s_u16_t(raw_sound.synth_param_2),
                     input_tun_min,
                     input_tun_max,
                     output_tun_min,
                     output_tun_max,
                 ),
-                dec: (from_s_u16_t(&raw_sound.synth_param_3) >> 8) as u8,
-                hld: (from_s_u16_t(&raw_sound.synth_param_4) >> 8) as u8,
-                swt: (from_s_u16_t(&raw_sound.synth_param_5) >> 8) as u8,
-                swd: (from_s_u16_t(&raw_sound.synth_param_6) >> 8) as u8,
-                wav: ((from_s_u16_t(&raw_sound.synth_param_7) >> 8) as u8).into(),
-                imp: (from_s_u16_t(&raw_sound.synth_param_8) >> 8) as u8,
+                dec: (from_s_u16_t(raw_sound.synth_param_3) >> 8) as u8,
+                hld: (from_s_u16_t(raw_sound.synth_param_4) >> 8) as u8,
+                swt: (from_s_u16_t(raw_sound.synth_param_5) >> 8) as u8,
+                swd: (from_s_u16_t(raw_sound.synth_param_6) >> 8) as u8,
+                wav: ((from_s_u16_t(raw_sound.synth_param_7) >> 8) as u8).into(),
+                imp: (from_s_u16_t(raw_sound.synth_param_8) >> 8) as u8,
             })
         }
     }

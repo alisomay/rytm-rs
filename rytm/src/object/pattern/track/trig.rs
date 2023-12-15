@@ -1,6 +1,20 @@
+// All casts in this file are intended or safe within the context of this library.
+//
+// One can change `allow` to `warn` to review them if necessary.
+#![allow(
+    clippy::cast_lossless,
+    clippy::cast_possible_truncation,
+    clippy::cast_sign_loss,
+    clippy::cast_possible_wrap
+)]
+
 // TODO: Document PL_SW and PL_EN flags.
+// TODO: Maybe builder..
+
+/// Holds the raw trig flag types
 pub mod flags;
 mod plock_impl;
+/// Holds the trig types.
 pub mod types;
 
 use self::types::{Length, MicroTime, RetrigRate, TrigCondition};
@@ -344,8 +358,13 @@ pub struct Trig {
     fx_track_ref: Option<Rc<RefCell<Track>>>,
 }
 
-// TODO: Maybe builder..
 impl Trig {
+    /// Makes a new trig complying to project defaults.
+    ///
+    /// The trig index and track index are required.
+    ///
+    /// Range `0..=63` for trig index.
+    /// Range `0..=12` for track index.
     #[parameter_range(range = "trig_index:0..=63", range = "track_index:0..=12")]
     pub fn try_default(trig_index: usize, track_index: usize) -> Result<Self, RytmError> {
         let flags: u16 = if trig_index % 2 == 0 {
@@ -374,8 +393,9 @@ impl Trig {
         })
     }
 
+    /// Makes a new trig from raw values.
     #[allow(clippy::too_many_arguments)]
-    pub fn new(
+    pub(crate) fn new(
         index: usize,
         track_index: usize,
         flags: u16,
@@ -428,13 +448,13 @@ impl Trig {
         })
     }
 
-    pub(crate) fn encode_note(&self) -> u8 {
+    pub(crate) const fn encode_note(&self) -> u8 {
         (((self.trig_condition as u8) & 0b0_1000000) << 1) | self.note
     }
 
     #[allow(overflowing_literals)]
-    pub(crate) fn encode_micro_timing(&self) -> u8 {
-        let encoded_byte = crate::util::encode_micro_timing_byte(&self.micro_timing);
+    pub(crate) const fn encode_micro_timing(&self) -> u8 {
+        let encoded_byte = crate::util::encode_micro_timing_byte(self.micro_timing);
         // Shift the micro timing 2 bits to the right to leave space for 2 bits which is a part of encoded trig condition.
         // Then fill those two bits with the trig condition's most significant mid bits.
         //
@@ -443,12 +463,12 @@ impl Trig {
         ((encoded_byte >> 2) | (((self.trig_condition as i8) & 0b0_0110000) << 2)) as u8
     }
 
-    pub(crate) fn encode_retrig_length(&self) -> u8 {
+    pub(crate) const fn encode_retrig_length(&self) -> u8 {
         // Apply the trig condition's least significant mid bit to the retrig length's most significant bit.
         (((self.trig_condition as u8) & 0b0_0001000) << 4) | self.retrig_length as u8
     }
 
-    pub(crate) fn encode_retrig_rate(&self) -> u8 {
+    pub(crate) const fn encode_retrig_rate(&self) -> u8 {
         // Apply the trig condition's least significant 3 bits to the retrig rate's most significant 3 bits.
         (((self.trig_condition as u8) & 0b0_0000111) << 5) | self.retrig_rate as u8
     }
@@ -456,14 +476,14 @@ impl Trig {
     /// Returns the index of the trig.
     ///
     /// Range `0..=63`
-    pub fn index(&self) -> usize {
+    pub const fn index(&self) -> usize {
         self.index
     }
 
     /// Returns the index of the track which this trig belongs to.
     ///
     /// Range `0..=12`
-    pub fn track_index(&self) -> usize {
+    pub const fn track_index(&self) -> usize {
         self.track_index
     }
 
@@ -502,9 +522,8 @@ impl Trig {
     }
 
     /// Sets the micro timing.
-    pub fn set_micro_timing(&mut self, micro_timing: MicroTime) -> Result<(), RytmError> {
+    pub fn set_micro_timing(&mut self, micro_timing: MicroTime) {
         self.micro_timing = micro_timing;
-        Ok(())
     }
 
     /// Sets the note length value.
@@ -516,10 +535,10 @@ impl Trig {
         Ok(())
     }
 
-    /// Sets the note_length
-    pub fn set_note_length(&mut self, note_length: Length) -> Result<(), RytmError> {
+    #[allow(clippy::doc_markdown)]
+    /// Sets the note_length.
+    pub fn set_note_length(&mut self, note_length: Length) {
         self.note_length = note_length;
-        Ok(())
     }
 
     /// Sets the retrig length value.
@@ -532,21 +551,18 @@ impl Trig {
     }
 
     /// Sets the retrig length.
-    pub fn set_retrig_length(&mut self, retrig_length: Length) -> Result<(), RytmError> {
+    pub fn set_retrig_length(&mut self, retrig_length: Length) {
         self.retrig_length = retrig_length;
-        Ok(())
     }
 
     /// Sets the retrig rate.
-    pub fn set_retrig_rate(&mut self, retrig_rate: RetrigRate) -> Result<(), RytmError> {
+    pub fn set_retrig_rate(&mut self, retrig_rate: RetrigRate) {
         self.retrig_rate = retrig_rate;
-        Ok(())
     }
 
     /// Sets the trig condition.
-    pub fn set_trig_condition(&mut self, trig_condition: TrigCondition) -> Result<(), RytmError> {
+    pub fn set_trig_condition(&mut self, trig_condition: TrigCondition) {
         self.trig_condition = trig_condition;
-        Ok(())
     }
 
     /// Sets retrig velocity offset.
@@ -573,79 +589,79 @@ impl Trig {
     /// Returns the note value.
     ///
     /// Follows the midi note convention. C-4 is `0x3C`.
-    pub fn note(&self) -> usize {
+    pub const fn note(&self) -> usize {
         self.note as usize
     }
 
     /// Returns the value of the trig condition.
-    pub fn trig_condition(&self) -> TrigCondition {
+    pub const fn trig_condition(&self) -> TrigCondition {
         self.trig_condition
     }
 
     /// Returns the velocity value.
     ///
     /// Range `1..=127`
-    pub fn velocity(&self) -> usize {
+    pub const fn velocity(&self) -> usize {
         self.velocity as usize
     }
 
     /// Returns the micro timing value.
     ///
     /// Range `-23..=23`
-    pub fn micro_timing_value(&self) -> isize {
+    pub const fn micro_timing_value(&self) -> isize {
         self.micro_timing as isize
     }
 
     /// Returns the micro timing.
-    pub fn micro_timing(&self) -> MicroTime {
+    pub const fn micro_timing(&self) -> MicroTime {
         self.micro_timing
     }
 
     /// Returns the note length value.
     ///
     /// Range `0..=127`
-    pub fn note_length_value(&self) -> usize {
+    pub const fn note_length_value(&self) -> usize {
         self.note_length as usize
     }
 
     /// Returns the note length.
-    pub fn note_length(&self) -> Length {
+    pub const fn note_length(&self) -> Length {
         self.note_length
     }
 
     /// Returns the retrig length value.
     ///
     /// Range `0..=127`
-    pub fn retrig_length_value(&self) -> usize {
+    pub const fn retrig_length_value(&self) -> usize {
         self.retrig_length as usize
     }
 
     /// Returns the retrig length.
-    pub fn retrig_length(&self) -> Length {
+    pub const fn retrig_length(&self) -> Length {
         self.retrig_length
     }
 
     /// Returns the retrig rate.
-    pub fn retrig_rate(&self) -> RetrigRate {
+    pub const fn retrig_rate(&self) -> RetrigRate {
         self.retrig_rate
     }
 
     /// Returns the retrig velocity offset.
     ///
     /// Range `-128..=127`
-    pub fn retrig_velocity_offset(&self) -> isize {
+    pub const fn retrig_velocity_offset(&self) -> isize {
         self.retrig_velocity_offset as isize
     }
 
     /// Returns the sound lock value.
     ///
     /// Range `0..=127`
-    pub fn sound_lock(&self) -> usize {
+    pub const fn sound_lock(&self) -> usize {
         self.sound_lock as usize
     }
 
     /// Returns if this trig is a trig for the FX track.
-    pub fn is_fx_trig(&self) -> bool {
+    pub const fn is_fx_trig(&self) -> bool {
         self.track_index == 12
     }
 
@@ -772,75 +788,4 @@ fn format_trig_flags(trig: &impl HoldsTrigFlags) -> Vec<&str> {
     }
 
     flags
-}
-
-impl Trig {
-    pub(crate) fn default_trig_array(track_index: usize) -> [Trig; 64] {
-        [
-            Trig::try_default(0, track_index).unwrap(),
-            Trig::try_default(1, track_index).unwrap(),
-            Trig::try_default(2, track_index).unwrap(),
-            Trig::try_default(3, track_index).unwrap(),
-            Trig::try_default(4, track_index).unwrap(),
-            Trig::try_default(5, track_index).unwrap(),
-            Trig::try_default(6, track_index).unwrap(),
-            Trig::try_default(7, track_index).unwrap(),
-            Trig::try_default(8, track_index).unwrap(),
-            Trig::try_default(9, track_index).unwrap(),
-            Trig::try_default(10, track_index).unwrap(),
-            Trig::try_default(11, track_index).unwrap(),
-            Trig::try_default(12, track_index).unwrap(),
-            Trig::try_default(13, track_index).unwrap(),
-            Trig::try_default(14, track_index).unwrap(),
-            Trig::try_default(15, track_index).unwrap(),
-            Trig::try_default(16, track_index).unwrap(),
-            Trig::try_default(17, track_index).unwrap(),
-            Trig::try_default(18, track_index).unwrap(),
-            Trig::try_default(19, track_index).unwrap(),
-            Trig::try_default(20, track_index).unwrap(),
-            Trig::try_default(21, track_index).unwrap(),
-            Trig::try_default(22, track_index).unwrap(),
-            Trig::try_default(23, track_index).unwrap(),
-            Trig::try_default(24, track_index).unwrap(),
-            Trig::try_default(25, track_index).unwrap(),
-            Trig::try_default(26, track_index).unwrap(),
-            Trig::try_default(27, track_index).unwrap(),
-            Trig::try_default(28, track_index).unwrap(),
-            Trig::try_default(29, track_index).unwrap(),
-            Trig::try_default(30, track_index).unwrap(),
-            Trig::try_default(31, track_index).unwrap(),
-            Trig::try_default(32, track_index).unwrap(),
-            Trig::try_default(33, track_index).unwrap(),
-            Trig::try_default(34, track_index).unwrap(),
-            Trig::try_default(35, track_index).unwrap(),
-            Trig::try_default(36, track_index).unwrap(),
-            Trig::try_default(37, track_index).unwrap(),
-            Trig::try_default(38, track_index).unwrap(),
-            Trig::try_default(39, track_index).unwrap(),
-            Trig::try_default(40, track_index).unwrap(),
-            Trig::try_default(41, track_index).unwrap(),
-            Trig::try_default(42, track_index).unwrap(),
-            Trig::try_default(43, track_index).unwrap(),
-            Trig::try_default(44, track_index).unwrap(),
-            Trig::try_default(45, track_index).unwrap(),
-            Trig::try_default(46, track_index).unwrap(),
-            Trig::try_default(47, track_index).unwrap(),
-            Trig::try_default(48, track_index).unwrap(),
-            Trig::try_default(49, track_index).unwrap(),
-            Trig::try_default(50, track_index).unwrap(),
-            Trig::try_default(51, track_index).unwrap(),
-            Trig::try_default(52, track_index).unwrap(),
-            Trig::try_default(53, track_index).unwrap(),
-            Trig::try_default(54, track_index).unwrap(),
-            Trig::try_default(55, track_index).unwrap(),
-            Trig::try_default(56, track_index).unwrap(),
-            Trig::try_default(57, track_index).unwrap(),
-            Trig::try_default(58, track_index).unwrap(),
-            Trig::try_default(59, track_index).unwrap(),
-            Trig::try_default(60, track_index).unwrap(),
-            Trig::try_default(61, track_index).unwrap(),
-            Trig::try_default(62, track_index).unwrap(),
-            Trig::try_default(63, track_index).unwrap(),
-        ]
-    }
 }

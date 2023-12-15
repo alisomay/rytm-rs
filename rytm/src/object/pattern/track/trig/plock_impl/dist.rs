@@ -200,7 +200,7 @@ impl Trig {
     pub fn plock_clear_fx_distortion_reverb_post(&self) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             pool.borrow_mut()
-                .clear_fx_basic_plock(self.index, AR_FX_PLOCK_TYPE_DIST_REV as u8)?;
+                .clear_fx_basic_plock(self.index, AR_FX_PLOCK_TYPE_DIST_REV as u8);
             self.disable_fx_trig_if_necessary();
 
             return Ok(());
@@ -212,7 +212,7 @@ impl Trig {
     pub fn plock_clear_fx_distortion_delay_overdrive(&self) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             pool.borrow_mut()
-                .clear_fx_basic_plock(self.index, AR_FX_PLOCK_TYPE_DIST_DOV as u8)?;
+                .clear_fx_basic_plock(self.index, AR_FX_PLOCK_TYPE_DIST_DOV as u8);
             self.disable_fx_trig_if_necessary();
 
             return Ok(());
@@ -224,7 +224,7 @@ impl Trig {
     pub fn plock_clear_fx_distortion_delay_post(&self) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             pool.borrow_mut()
-                .clear_fx_basic_plock(self.index, AR_FX_PLOCK_TYPE_DIST_DELAY as u8)?;
+                .clear_fx_basic_plock(self.index, AR_FX_PLOCK_TYPE_DIST_DELAY as u8);
             self.disable_fx_trig_if_necessary();
 
             return Ok(());
@@ -236,7 +236,7 @@ impl Trig {
     pub fn plock_clear_fx_distortion_amount(&self) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             pool.borrow_mut()
-                .clear_fx_basic_plock(self.index, AR_FX_PLOCK_TYPE_DIST_AMOUNT as u8)?;
+                .clear_fx_basic_plock(self.index, AR_FX_PLOCK_TYPE_DIST_AMOUNT as u8);
             self.disable_fx_trig_if_necessary();
 
             return Ok(());
@@ -248,7 +248,7 @@ impl Trig {
     pub fn plock_clear_fx_distortion_symmetry(&self) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             pool.borrow_mut()
-                .clear_fx_basic_plock(self.index, AR_FX_PLOCK_TYPE_DIST_SYM as u8)?;
+                .clear_fx_basic_plock(self.index, AR_FX_PLOCK_TYPE_DIST_SYM as u8);
             self.disable_fx_trig_if_necessary();
 
             return Ok(());

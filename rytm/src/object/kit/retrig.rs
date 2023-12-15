@@ -52,7 +52,7 @@ impl TrackRetrigMenu {
 
     #[parameter_range(range = "track_index:0..=12")]
     pub(crate) fn try_from_raw(track_index: usize, raw_kit: &ar_kit_t) -> Result<Self, RytmError> {
-        let flags = unsafe { from_s_u16_t(&raw_kit.retrig_always_on) };
+        let flags = unsafe { from_s_u16_t(raw_kit.retrig_always_on) };
         let always_on = flags & (1 << track_index) != 0;
 
         let raw_retrig = raw_kit.retrig[track_index];
@@ -70,7 +70,7 @@ impl TrackRetrigMenu {
         raw_retrig.retrig = self.rate.into();
         raw_retrig.length = self.length.into();
         raw_retrig.vel_curve = self.velocity_curve;
-        let flags = unsafe { from_s_u16_t(&raw_kit.retrig_always_on) };
+        let flags = unsafe { from_s_u16_t(raw_kit.retrig_always_on) };
         let new_flags = if self.always_on {
             flags | (1 << self.track_index)
         } else {
@@ -108,31 +108,31 @@ impl TrackRetrigMenu {
     /// Returns the track index. The track which this setting belongs to.
     ///
     /// Range: `0..=12`
-    pub fn track_index(&self) -> usize {
+    pub const fn track_index(&self) -> usize {
         self.track_index
     }
 
     /// Returns the retrig rate.
-    pub fn rate(&self) -> RetrigRate {
+    pub const fn rate(&self) -> RetrigRate {
         self.rate
     }
 
     /// Returns the retrig length.
-    pub fn length(&self) -> Length {
+    pub const fn length(&self) -> Length {
         self.length
     }
 
     /// Returns the velocity curve.
     ///
     /// Range: `-128..=127`
-    pub fn velocity_curve(&self) -> i8 {
+    pub const fn velocity_curve(&self) -> i8 {
         self.velocity_curve
     }
 
     /// Returns whether the retrig is always on.
     ///
     /// If `true`, the retrig is always on.
-    pub fn always_on(&self) -> bool {
+    pub const fn always_on(&self) -> bool {
         self.always_on
     }
 }

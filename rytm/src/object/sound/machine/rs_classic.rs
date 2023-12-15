@@ -80,34 +80,34 @@ impl RsClassicParameters {
             Ok(Self {
                 parameter_lock_pool: None,
                 assigned_track: track_index,
-                lev: (from_s_u16_t(&raw_sound.synth_param_1) >> 8) as u8,
+                lev: (from_s_u16_t(raw_sound.synth_param_1) >> 8) as u8,
                 t1: scale_u16_to_f32(
-                    from_s_u16_t(&raw_sound.synth_param_2),
+                    from_s_u16_t(raw_sound.synth_param_2),
                     input_tun_min,
                     input_tun_max,
                     output_tun_min,
                     output_tun_max,
                 ),
-                dec: (from_s_u16_t(&raw_sound.synth_param_3) >> 8) as u8,
+                dec: (from_s_u16_t(raw_sound.synth_param_3) >> 8) as u8,
                 bal: u8_to_i8_midpoint_of_u8_input_range(
-                    (from_s_u16_t(&raw_sound.synth_param_4) >> 8) as u8,
+                    (from_s_u16_t(raw_sound.synth_param_4) >> 8) as u8,
                     0,
                     127,
                 ),
                 t2: scale_u16_to_f32(
-                    from_s_u16_t(&raw_sound.synth_param_5),
+                    from_s_u16_t(raw_sound.synth_param_5),
                     input_tun_min,
                     input_tun_max,
                     output_tun_min,
                     output_tun_max,
                 ),
                 sym: u8_to_i8_midpoint_of_u8_input_range(
-                    (from_s_u16_t(&raw_sound.synth_param_6) >> 8) as u8,
+                    (from_s_u16_t(raw_sound.synth_param_6) >> 8) as u8,
                     0,
                     127,
                 ),
-                nol: (from_s_u16_t(&raw_sound.synth_param_7) >> 8) as u8,
-                tic: (from_s_u16_t(&raw_sound.synth_param_8) >> 8) as u8,
+                nol: (from_s_u16_t(raw_sound.synth_param_7) >> 8) as u8,
+                tic: (from_s_u16_t(raw_sound.synth_param_8) >> 8) as u8,
             })
         }
     }

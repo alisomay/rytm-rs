@@ -270,7 +270,7 @@ impl Trig {
     pub fn plock_clear_fx_reverb_pre_delay(&self) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             pool.borrow_mut()
-                .clear_fx_basic_plock(self.index, AR_FX_PLOCK_TYPE_REVERB_PRE as u8)?;
+                .clear_fx_basic_plock(self.index, AR_FX_PLOCK_TYPE_REVERB_PRE as u8);
             self.disable_fx_trig_if_necessary();
 
             return Ok(());
@@ -282,7 +282,7 @@ impl Trig {
     pub fn plock_clear_fx_reverb_decay(&self) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             pool.borrow_mut()
-                .clear_fx_basic_plock(self.index, AR_FX_PLOCK_TYPE_REVERB_DECAY as u8)?;
+                .clear_fx_basic_plock(self.index, AR_FX_PLOCK_TYPE_REVERB_DECAY as u8);
             self.disable_fx_trig_if_necessary();
 
             return Ok(());
@@ -294,7 +294,7 @@ impl Trig {
     pub fn plock_clear_fx_reverb_freq(&self) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             pool.borrow_mut()
-                .clear_fx_basic_plock(self.index, AR_FX_PLOCK_TYPE_REVERB_FREQ as u8)?;
+                .clear_fx_basic_plock(self.index, AR_FX_PLOCK_TYPE_REVERB_FREQ as u8);
             self.disable_fx_trig_if_necessary();
 
             return Ok(());
@@ -306,7 +306,7 @@ impl Trig {
     pub fn plock_clear_fx_reverb_gain(&self) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             pool.borrow_mut()
-                .clear_fx_basic_plock(self.index, AR_FX_PLOCK_TYPE_REVERB_GAIN as u8)?;
+                .clear_fx_basic_plock(self.index, AR_FX_PLOCK_TYPE_REVERB_GAIN as u8);
             self.disable_fx_trig_if_necessary();
 
             return Ok(());
@@ -318,7 +318,7 @@ impl Trig {
     pub fn plock_clear_fx_reverb_hpf(&self) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             pool.borrow_mut()
-                .clear_fx_basic_plock(self.index, AR_FX_PLOCK_TYPE_REVERB_HPF as u8)?;
+                .clear_fx_basic_plock(self.index, AR_FX_PLOCK_TYPE_REVERB_HPF as u8);
             self.disable_fx_trig_if_necessary();
 
             return Ok(());
@@ -330,7 +330,7 @@ impl Trig {
     pub fn plock_clear_fx_reverb_lpf(&self) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             pool.borrow_mut()
-                .clear_fx_basic_plock(self.index, AR_FX_PLOCK_TYPE_REVERB_LPF as u8)?;
+                .clear_fx_basic_plock(self.index, AR_FX_PLOCK_TYPE_REVERB_LPF as u8);
             self.disable_fx_trig_if_necessary();
 
             return Ok(());
@@ -342,7 +342,7 @@ impl Trig {
     pub fn plock_clear_fx_reverb_volume(&self) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             pool.borrow_mut()
-                .clear_fx_basic_plock(self.index, AR_FX_PLOCK_TYPE_REVERB_VOL as u8)?;
+                .clear_fx_basic_plock(self.index, AR_FX_PLOCK_TYPE_REVERB_VOL as u8);
             self.disable_fx_trig_if_necessary();
 
             return Ok(());

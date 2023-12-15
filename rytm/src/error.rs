@@ -1,3 +1,10 @@
+//! Error types for the rytm crate.
+//!
+//! [`SysexConversionError`] is mostly used to bubble up errors from `rytm-sys`.
+
+/// Error type for conversion errors.
+///
+/// This is mostly used for enum types when converting from u8.
 #[derive(thiserror::Error, Debug)]
 #[non_exhaustive]
 pub enum ConversionError {
@@ -9,6 +16,9 @@ pub enum ConversionError {
     ObjectNameNotAscii(String),
 }
 
+/// Error type for parameter errors.
+///
+/// This is mostly used for parameter validation.
 #[derive(thiserror::Error, Debug)]
 #[non_exhaustive]
 pub enum ParameterError {
@@ -26,6 +36,9 @@ pub enum ParameterError {
     },
 }
 
+/// Error type for sysex conversion errors.
+///
+/// It is mostly used to bubble up errors from `rytm-sys`.
 #[derive(thiserror::Error, Debug)]
 #[non_exhaustive]
 pub enum SysexConversionError {
@@ -68,25 +81,26 @@ pub enum SysexConversionError {
 impl From<u8> for SysexConversionError {
     fn from(code: u8) -> Self {
         match code {
-            1 => SysexConversionError::NotASysexMsg,
-            2 => SysexConversionError::ShortRead,
-            3 => SysexConversionError::EndOfMessage,
-            4 => SysexConversionError::Abort,
-            5 => SysexConversionError::InvalidManufacturerId,
-            6 => SysexConversionError::InvalidProductId,
-            7 => SysexConversionError::InvalidDumpMsgId,
-            8 => SysexConversionError::InvalidObjType,
-            9 => SysexConversionError::Chksum,
-            10 => SysexConversionError::Nullptr,
-            11 => SysexConversionError::InvalidObjNr,
-            12 => SysexConversionError::NotAPattern,
-            13 => SysexConversionError::NotAKit,
-            14 => SysexConversionError::NotASound,
-            _ => SysexConversionError::Unknown(code),
+            1 => Self::NotASysexMsg,
+            2 => Self::ShortRead,
+            3 => Self::EndOfMessage,
+            4 => Self::Abort,
+            5 => Self::InvalidManufacturerId,
+            6 => Self::InvalidProductId,
+            7 => Self::InvalidDumpMsgId,
+            8 => Self::InvalidObjType,
+            9 => Self::Chksum,
+            10 => Self::Nullptr,
+            11 => Self::InvalidObjNr,
+            12 => Self::NotAPattern,
+            13 => Self::NotAKit,
+            14 => Self::NotASound,
+            _ => Self::Unknown(code),
         }
     }
 }
 
+/// Wrapper error type for all rytm errors.
 #[derive(thiserror::Error, Debug)]
 #[non_exhaustive]
 pub enum RytmError {

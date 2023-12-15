@@ -1,7 +1,20 @@
+// All casts in this file are intended or safe within the context of this library.
+//
+// One can change `allow` to `warn` to review them if necessary.
+#![allow(
+    clippy::cast_lossless,
+    clippy::cast_possible_truncation,
+    clippy::cast_sign_loss
+)]
+// TODO: Re-check if bpm related casts are accurate.
 // TODO: Correctly represent unset values in pattern, trig, track.
+// TODO: Check if we can get info about if this pattern has a kit assigned and which?
 
 pub(crate) mod plock;
+
+/// Holds the structure to represent a track.
 pub mod track;
+/// Holds the types used in pattern.
 pub mod types;
 
 use self::{
@@ -34,10 +47,7 @@ impl_sysex_compatible!(
     PATTERN_SYSEX_SIZE
 );
 
-// TODO: Check if we can get info about if this pattern has a kit assigned and which?
-/// # Pattern
-///
-/// This structure represents a pattern in the analog rytm.
+/// Represents a pattern in the analog rytm.
 ///
 /// It does not map identically to the structure in the firmware.
 #[derive(Derivative, Clone)]
@@ -115,7 +125,7 @@ pub struct Pattern {
 
     #[derivative(Debug = "ignore")]
     /// Always 0x01, probably a marker for the end of pattern.
-    pub(crate) _unknown_0x332c: u8,
+    pub(crate) __unknown_0x332c: u8,
 }
 
 impl From<&Pattern> for ar_pattern_t {
@@ -146,7 +156,7 @@ impl From<&Pattern> for ar_pattern_t {
             global_quantize: pattern.global_quantize,
             bpm_msb: (bpm >> 8) as u8,
             bpm_lsb: bpm as u8,
-            __unknown332C: pattern._unknown_0x332c,
+            __unknown332C: pattern.__unknown_0x332c,
         }
     }
 }
@@ -172,7 +182,7 @@ impl Pattern {
         let fx_track = Rc::new(RefCell::new(Track::try_from_raw(
             12,
             &raw_pattern.tracks[12],
-            Rc::clone(&parameter_lock_pool),
+            &parameter_lock_pool,
             None,
         )?));
 
@@ -180,13 +190,8 @@ impl Pattern {
             if i == 12 {
                 break;
             }
-            let parameter_lock_pool_ref = Rc::clone(&parameter_lock_pool);
-            tracks[i] = Track::try_from_raw(
-                i,
-                track,
-                parameter_lock_pool_ref,
-                Some(Rc::clone(&fx_track)),
-            )?;
+            tracks[i] =
+                Track::try_from_raw(i, track, &parameter_lock_pool, Some(Rc::clone(&fx_track)))?;
         }
 
         let version = assemble_u32_from_u8_array(&raw_pattern.magic);
@@ -204,7 +209,7 @@ impl Pattern {
             tracks,
             fx_track,
             parameter_lock_pool,
-            master_length: unsafe { from_s_u16_t(&raw_pattern.master_length) },
+            master_length: unsafe { from_s_u16_t(raw_pattern.master_length) },
             master_change,
             kit_number: raw_pattern.kit_number,
             swing_amount: raw_pattern.swing_amount,
@@ -212,7 +217,7 @@ impl Pattern {
             speed: raw_pattern.master_speed.try_into()?,
             global_quantize: raw_pattern.global_quantize,
             bpm,
-            _unknown_0x332c: raw_pattern.__unknown332C,
+            __unknown_0x332c: raw_pattern.__unknown332C,
         })
     }
 
@@ -220,6 +225,7 @@ impl Pattern {
         (self.sysex_meta, self.into())
     }
 
+    /// Makes a new pattern with the project defaults.
     #[parameter_range(range = "index:0..=127")]
     pub fn try_default(index: usize) -> Result<Self, RytmError> {
         Ok(Self {
@@ -237,10 +243,13 @@ impl Pattern {
             speed: Speed::default(),
             global_quantize: 0,
             bpm: 120.0,
-            _unknown_0x332c: 0x01,
+            __unknown_0x332c: 0x01,
         })
     }
 
+    // This function can not panic.
+    #[allow(clippy::missing_panics_doc)]
+    /// Makes a new pattern with the project defaults as if it is in the work buffer..
     pub fn work_buffer_default() -> Self {
         Self {
             sysex_meta: SysexMeta::default_for_pattern_in_work_buffer(None),
@@ -257,7 +266,7 @@ impl Pattern {
             speed: Speed::default(),
             global_quantize: 0,
             bpm: 120.0,
-            _unknown_0x332c: 0x01,
+            __unknown_0x332c: 0x01,
         }
     }
 
@@ -354,7 +363,7 @@ impl Pattern {
     /// Returns a reference to the tracks which this pattern contains.
     ///
     /// 13th element is the FX track.
-    pub fn tracks(&self) -> &[Track] {
+    pub const fn tracks(&self) -> &[Track] {
         &self.tracks
     }
 
@@ -366,7 +375,7 @@ impl Pattern {
     /// - `2` = `2`
     ///
     /// and onwards.
-    pub fn master_length(&self) -> usize {
+    pub const fn master_length(&self) -> usize {
         self.master_length as usize
     }
 
@@ -375,7 +384,7 @@ impl Pattern {
     /// Range `50..=80`
     ///
     /// Range denotes percentage.
-    pub fn swing_amount(&self) -> usize {
+    pub const fn swing_amount(&self) -> usize {
         // Internally, swing amount is stored as 0..=30
         self.swing_amount as usize + 50
     }
@@ -383,28 +392,28 @@ impl Pattern {
     /// Returns the speed for the pattern.
     ///
     /// Check [`Speed`] for options.
-    pub fn speed(&self) -> Speed {
+    pub const fn speed(&self) -> Speed {
         self.speed
     }
 
     /// Returns the global quantize for the pattern.
     ///
     /// Range `0..=127`
-    pub fn global_quantize(&self) -> usize {
+    pub const fn global_quantize(&self) -> usize {
         self.global_quantize as usize
     }
 
     /// Returns the kit number for the pattern.
     ///
     /// Range `0..=127`
-    pub fn kit_number(&self) -> usize {
+    pub const fn kit_number(&self) -> usize {
         self.kit_number as usize
     }
 
     /// Returns the time mode for the pattern.
     ///
     /// Check [`TimeMode`] for options.
-    pub fn time_mode(&self) -> TimeMode {
+    pub const fn time_mode(&self) -> TimeMode {
         self.time_mode
     }
 
@@ -416,7 +425,7 @@ impl Pattern {
     /// - `2` = `2`
     ///
     /// and onwards.
-    pub fn master_change(&self) -> usize {
+    pub const fn master_change(&self) -> usize {
         self.master_change as usize
     }
 
@@ -425,22 +434,22 @@ impl Pattern {
     /// Range `30.0..=300.0`
     ///
     /// This is only effective when pattern level bpm is enabled.
-    pub fn bpm(&self) -> f32 {
+    pub const fn bpm(&self) -> f32 {
         self.bpm
     }
 
     /// Returns the index of the pattern.
-    pub fn index(&self) -> usize {
+    pub const fn index(&self) -> usize {
         self.index
     }
 
     /// Checks if this pattern is the pattern at work buffer.
-    pub fn is_work_buffer_pattern(&self) -> bool {
+    pub const fn is_work_buffer_pattern(&self) -> bool {
         self.sysex_meta.is_targeting_work_buffer()
     }
 
     /// Returns the version of the pattern structure.
-    pub fn structure_version(&self) -> u32 {
+    pub const fn structure_version(&self) -> u32 {
         self.version
     }
 
@@ -450,6 +459,8 @@ impl Pattern {
     }
 
     /// Clears all the parameter locks for the given track in this pattern.
+    ///
+    /// Range `0..=12`
     #[parameter_range(range = "track_index:0..=12")]
     pub fn clear_all_plocks_for_track(&mut self, track_index: u8) -> Result<(), RytmError> {
         self.parameter_lock_pool

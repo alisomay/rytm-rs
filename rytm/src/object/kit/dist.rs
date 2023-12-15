@@ -5,8 +5,10 @@ use crate::{
 use rytm_rs_macro::parameter_range;
 use rytm_sys::ar_kit_t;
 
+// TODO: Fix name confusion
+
 /// Distortion parameters for the kit.
-#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub struct FxDistortion {
     reverb_send: u8,
     delay_overdrive: u8,
@@ -42,7 +44,7 @@ impl TryFrom<&ar_kit_t> for FxDistortion {
 }
 
 impl FxDistortion {
-    pub(crate) fn apply_to_raw_kit(&self, raw_kit: &mut ar_kit_t) {
+    pub(crate) fn apply_to_raw_kit(self, raw_kit: &mut ar_kit_t) {
         raw_kit.fx_dist_reverb_send = self.reverb_send;
         raw_kit.fx_dist_delay_pre_post = self.delay_overdrive;
         raw_kit.fx_dist_reverb_pre_post = self.reverb_post as u8;
@@ -70,9 +72,8 @@ impl FxDistortion {
 
     // TODO: Update doc
     /// Sets the reverb post of the distortion.
-    pub fn set_reverb_post(&mut self, reverb_post: bool) -> Result<(), RytmError> {
+    pub fn set_reverb_post(&mut self, reverb_post: bool) {
         self.reverb_post = reverb_post;
-        Ok(())
     }
 
     /// Sets the amount of the distortion.
@@ -97,34 +98,34 @@ impl FxDistortion {
     /// Returns the reverb send of the distortion.
     ///
     /// Range: `0..=127`
-    pub fn reverb_send(&self) -> usize {
+    pub const fn reverb_send(&self) -> usize {
         self.reverb_send as usize
     }
 
     /// Returns the delay overdrive of the distortion.
     ///
     /// Range: `0..=127`
-    pub fn delay_overdrive(&self) -> usize {
+    pub const fn delay_overdrive(&self) -> usize {
         self.delay_overdrive as usize
     }
 
     /// Returns the reverb post of the distortion.
 
-    pub fn reverb_post(&self) -> bool {
+    pub const fn reverb_post(&self) -> bool {
         self.reverb_post
     }
 
     /// Returns the amount of the distortion.
     ///
     /// Range: `0..=127`
-    pub fn amount(&self) -> usize {
+    pub const fn amount(&self) -> usize {
         self.amount as usize
     }
 
     /// Returns the symmetry of the distortion.
     ///
     /// Range: `-64..=63`
-    pub fn symmetry(&self) -> isize {
+    pub const fn symmetry(&self) -> isize {
         self.symmetry as isize
     }
 }

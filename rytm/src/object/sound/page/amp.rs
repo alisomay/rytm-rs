@@ -1,3 +1,12 @@
+// All casts in this file are intended or safe within the context of this library.
+//
+// One can change `allow` to `warn` to review them if necessary.
+#![allow(
+    clippy::cast_lossless,
+    clippy::cast_possible_truncation,
+    clippy::cast_sign_loss
+)]
+
 use crate::{
     error::{ConversionError, ParameterError, RytmError},
     util::{i8_to_u8_midpoint_of_u8_input_range, u8_to_i8_midpoint_of_u8_input_range},
@@ -50,7 +59,7 @@ impl TryFrom<&ar_sound_t> for Amplitude {
 }
 
 impl Amplitude {
-    pub(crate) fn apply_to_raw_sound(&self, raw_sound: &mut ar_sound_t) {
+    pub(crate) fn apply_to_raw_sound(self, raw_sound: &mut ar_sound_t) {
         raw_sound.amp_attack = self.attack;
         raw_sound.amp_hold = self.hold;
         raw_sound.amp_decay = self.decay;
@@ -138,7 +147,7 @@ impl Amplitude {
     /// Returns the attack of the amplitude envelope.
     ///
     /// Range: `0..=127`
-    pub fn attack(&self) -> usize {
+    pub const fn attack(&self) -> usize {
         self.attack as usize
     }
 
@@ -147,35 +156,35 @@ impl Amplitude {
     /// Range: `0..=127`
     ///
     /// `0` is no hold, `127` is infinite hold.
-    pub fn hold(&self) -> usize {
+    pub const fn hold(&self) -> usize {
         self.hold as usize
     }
 
     /// Returns the decay of the amplitude envelope.
     ///
     ///
-    pub fn decay(&self) -> usize {
+    pub const fn decay(&self) -> usize {
         self.decay as usize
     }
 
     /// Returns the overdrive amount applied to the amplitude.
     ///
     /// Range: `0..=127`
-    pub fn overdrive(&self) -> usize {
+    pub const fn overdrive(&self) -> usize {
         self.overdrive as usize
     }
 
     /// Returns the delay send of the amplitude envelope.
     ///
     /// Range: `0..=127`
-    pub fn delay_send(&self) -> usize {
+    pub const fn delay_send(&self) -> usize {
         self.delay_send as usize
     }
 
     /// Returns the reverb send of the amplitude envelope.
     ///
     /// Range: `0..=127`
-    pub fn reverb_send(&self) -> usize {
+    pub const fn reverb_send(&self) -> usize {
         self.reverb_send as usize
     }
 
@@ -184,14 +193,14 @@ impl Amplitude {
     /// Range: `-64..=63`
     ///
     /// `0` is center, `-64` is hard left, `63` is hard right.
-    pub fn pan(&self) -> usize {
+    pub const fn pan(&self) -> usize {
         self.pan as usize
     }
 
     /// Returns the volume of the amplitude envelope.
     ///
     /// Range: `0..=127`
-    pub fn volume(&self) -> usize {
+    pub const fn volume(&self) -> usize {
         self.volume as usize
     }
 }

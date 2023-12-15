@@ -171,88 +171,88 @@ impl TryFrom<(u8, u8)> for TimeSignature {
 
     fn try_from((num, den): (u8, u8)) -> Result<Self, Self::Error> {
         match (num, den) {
-            (1, 1) => Ok(TimeSignature::_1B1),
-            (2, 1) => Ok(TimeSignature::_2B1),
-            (3, 1) => Ok(TimeSignature::_3B1),
-            (4, 1) => Ok(TimeSignature::_4B1),
-            (5, 1) => Ok(TimeSignature::_5B1),
-            (6, 1) => Ok(TimeSignature::_6B1),
-            (7, 1) => Ok(TimeSignature::_7B1),
-            (8, 1) => Ok(TimeSignature::_8B1),
-            (9, 1) => Ok(TimeSignature::_9B1),
-            (10, 1) => Ok(TimeSignature::_10B1),
-            (11, 1) => Ok(TimeSignature::_11B1),
-            (12, 1) => Ok(TimeSignature::_12B1),
-            (13, 1) => Ok(TimeSignature::_13B1),
-            (14, 1) => Ok(TimeSignature::_14B1),
-            (15, 1) => Ok(TimeSignature::_15B1),
-            (16, 1) => Ok(TimeSignature::_16B1),
-            (1, 2) => Ok(TimeSignature::_1B2),
-            (2, 2) => Ok(TimeSignature::_2B2),
-            (3, 2) => Ok(TimeSignature::_3B2),
-            (4, 2) => Ok(TimeSignature::_4B2),
-            (5, 2) => Ok(TimeSignature::_5B2),
-            (6, 2) => Ok(TimeSignature::_6B2),
-            (7, 2) => Ok(TimeSignature::_7B2),
-            (8, 2) => Ok(TimeSignature::_8B2),
-            (9, 2) => Ok(TimeSignature::_9B2),
-            (10, 2) => Ok(TimeSignature::_10B2),
-            (11, 2) => Ok(TimeSignature::_11B2),
-            (12, 2) => Ok(TimeSignature::_12B2),
-            (13, 2) => Ok(TimeSignature::_13B2),
-            (14, 2) => Ok(TimeSignature::_14B2),
-            (15, 2) => Ok(TimeSignature::_15B2),
-            (16, 2) => Ok(TimeSignature::_16B2),
-            (1, 4) => Ok(TimeSignature::_1B4),
-            (2, 4) => Ok(TimeSignature::_2B4),
-            (3, 4) => Ok(TimeSignature::_3B4),
-            (4, 4) => Ok(TimeSignature::_4B4),
-            (5, 4) => Ok(TimeSignature::_5B4),
-            (6, 4) => Ok(TimeSignature::_6B4),
-            (7, 4) => Ok(TimeSignature::_7B4),
-            (8, 4) => Ok(TimeSignature::_8B4),
-            (9, 4) => Ok(TimeSignature::_9B4),
-            (10, 4) => Ok(TimeSignature::_10B4),
-            (11, 4) => Ok(TimeSignature::_11B4),
-            (12, 4) => Ok(TimeSignature::_12B4),
-            (13, 4) => Ok(TimeSignature::_13B4),
-            (14, 4) => Ok(TimeSignature::_14B4),
-            (15, 4) => Ok(TimeSignature::_15B4),
-            (16, 4) => Ok(TimeSignature::_16B4),
-            (1, 8) => Ok(TimeSignature::_1B8),
-            (2, 8) => Ok(TimeSignature::_2B8),
-            (3, 8) => Ok(TimeSignature::_3B8),
-            (4, 8) => Ok(TimeSignature::_4B8),
-            (5, 8) => Ok(TimeSignature::_5B8),
-            (6, 8) => Ok(TimeSignature::_6B8),
-            (7, 8) => Ok(TimeSignature::_7B8),
-            (8, 8) => Ok(TimeSignature::_8B8),
-            (9, 8) => Ok(TimeSignature::_9B8),
-            (10, 8) => Ok(TimeSignature::_10B8),
-            (11, 8) => Ok(TimeSignature::_11B8),
-            (12, 8) => Ok(TimeSignature::_12B8),
-            (13, 8) => Ok(TimeSignature::_13B8),
-            (14, 8) => Ok(TimeSignature::_14B8),
-            (15, 8) => Ok(TimeSignature::_15B8),
-            (16, 8) => Ok(TimeSignature::_16B8),
-            (1, 16) => Ok(TimeSignature::_1B16),
-            (2, 16) => Ok(TimeSignature::_2B16),
-            (3, 16) => Ok(TimeSignature::_3B16),
-            (4, 16) => Ok(TimeSignature::_4B16),
-            (5, 16) => Ok(TimeSignature::_5B16),
-            (6, 16) => Ok(TimeSignature::_6B16),
-            (7, 16) => Ok(TimeSignature::_7B16),
-            (8, 16) => Ok(TimeSignature::_8B16),
-            (9, 16) => Ok(TimeSignature::_9B16),
-            (10, 16) => Ok(TimeSignature::_10B16),
-            (11, 16) => Ok(TimeSignature::_11B16),
-            (12, 16) => Ok(TimeSignature::_12B16),
-            (13, 16) => Ok(TimeSignature::_13B16),
-            (14, 16) => Ok(TimeSignature::_14B16),
-            (15, 16) => Ok(TimeSignature::_15B16),
-            (16, 16) => Ok(TimeSignature::_16B16),
+            (1, 1) => Ok(Self::_1B1),
+            (2, 1) => Ok(Self::_2B1),
+            (3, 1) => Ok(Self::_3B1),
+            (4, 1) => Ok(Self::_4B1),
+            (5, 1) => Ok(Self::_5B1),
+            (6, 1) => Ok(Self::_6B1),
+            (7, 1) => Ok(Self::_7B1),
+            (8, 1) => Ok(Self::_8B1),
+            (9, 1) => Ok(Self::_9B1),
+            (10, 1) => Ok(Self::_10B1),
+            (11, 1) => Ok(Self::_11B1),
+            (12, 1) => Ok(Self::_12B1),
+            (13, 1) => Ok(Self::_13B1),
+            (14, 1) => Ok(Self::_14B1),
+            (15, 1) => Ok(Self::_15B1),
+            (16, 1) => Ok(Self::_16B1),
+            (1, 2) => Ok(Self::_1B2),
+            (2, 2) => Ok(Self::_2B2),
+            (3, 2) => Ok(Self::_3B2),
+            (4, 2) => Ok(Self::_4B2),
+            (5, 2) => Ok(Self::_5B2),
+            (6, 2) => Ok(Self::_6B2),
+            (7, 2) => Ok(Self::_7B2),
+            (8, 2) => Ok(Self::_8B2),
+            (9, 2) => Ok(Self::_9B2),
+            (10, 2) => Ok(Self::_10B2),
+            (11, 2) => Ok(Self::_11B2),
+            (12, 2) => Ok(Self::_12B2),
+            (13, 2) => Ok(Self::_13B2),
+            (14, 2) => Ok(Self::_14B2),
+            (15, 2) => Ok(Self::_15B2),
+            (16, 2) => Ok(Self::_16B2),
+            (1, 4) => Ok(Self::_1B4),
+            (2, 4) => Ok(Self::_2B4),
+            (3, 4) => Ok(Self::_3B4),
+            (4, 4) => Ok(Self::_4B4),
+            (5, 4) => Ok(Self::_5B4),
+            (6, 4) => Ok(Self::_6B4),
+            (7, 4) => Ok(Self::_7B4),
+            (8, 4) => Ok(Self::_8B4),
+            (9, 4) => Ok(Self::_9B4),
+            (10, 4) => Ok(Self::_10B4),
+            (11, 4) => Ok(Self::_11B4),
+            (12, 4) => Ok(Self::_12B4),
+            (13, 4) => Ok(Self::_13B4),
+            (14, 4) => Ok(Self::_14B4),
+            (15, 4) => Ok(Self::_15B4),
+            (16, 4) => Ok(Self::_16B4),
+            (1, 8) => Ok(Self::_1B8),
+            (2, 8) => Ok(Self::_2B8),
+            (3, 8) => Ok(Self::_3B8),
+            (4, 8) => Ok(Self::_4B8),
+            (5, 8) => Ok(Self::_5B8),
+            (6, 8) => Ok(Self::_6B8),
+            (7, 8) => Ok(Self::_7B8),
+            (8, 8) => Ok(Self::_8B8),
+            (9, 8) => Ok(Self::_9B8),
+            (10, 8) => Ok(Self::_10B8),
+            (11, 8) => Ok(Self::_11B8),
+            (12, 8) => Ok(Self::_12B8),
+            (13, 8) => Ok(Self::_13B8),
+            (14, 8) => Ok(Self::_14B8),
+            (15, 8) => Ok(Self::_15B8),
+            (16, 8) => Ok(Self::_16B8),
+            (1, 16) => Ok(Self::_1B16),
+            (2, 16) => Ok(Self::_2B16),
+            (3, 16) => Ok(Self::_3B16),
+            (4, 16) => Ok(Self::_4B16),
+            (5, 16) => Ok(Self::_5B16),
+            (6, 16) => Ok(Self::_6B16),
+            (7, 16) => Ok(Self::_7B16),
+            (8, 16) => Ok(Self::_8B16),
+            (9, 16) => Ok(Self::_9B16),
+            (10, 16) => Ok(Self::_10B16),
+            (11, 16) => Ok(Self::_11B16),
+            (12, 16) => Ok(Self::_12B16),
+            (13, 16) => Ok(Self::_13B16),
+            (14, 16) => Ok(Self::_14B16),
+            (15, 16) => Ok(Self::_15B16),
+            (16, 16) => Ok(Self::_16B16),
             _ => Err(ConversionError::Range {
-                value: format!("{}/{}", num, den),
+                value: format!("{num}/{den}"),
                 type_name: "TimeSignature".into(),
             }),
         }
@@ -381,9 +381,9 @@ pub enum MidiChannel {
 impl Into<u8> for MidiChannel {
     fn into(self) -> u8 {
         match self {
-            MidiChannel::Channel(channel) => channel as u8,
+            Self::Channel(channel) => channel as u8,
             // We can't do From implementations because 0xFF can mean Auto or Off depending on the context.
-            MidiChannel::Auto | MidiChannel::Off => 0xFF,
+            Self::Auto | Self::Off => 0xFF,
         }
     }
 }
@@ -404,9 +404,9 @@ impl TryFrom<u8> for MidiPortFunction {
 
     fn try_from(value: u8) -> Result<Self, Self::Error> {
         match value {
-            0 => Ok(MidiPortFunction::Midi),
-            1 => Ok(MidiPortFunction::Din24),
-            2 => Ok(MidiPortFunction::Din48),
+            0 => Ok(Self::Midi),
+            1 => Ok(Self::Din24),
+            2 => Ok(Self::Din48),
             _ => Err(ConversionError::Range {
                 value: value.to_string(),
                 type_name: "MidiPortFunction".into(),
@@ -444,10 +444,10 @@ impl TryFrom<u8> for MidiTransportLayer {
 
     fn try_from(value: u8) -> Result<Self, Self::Error> {
         match value {
-            0 => Ok(MidiTransportLayer::Disabled),
-            1 => Ok(MidiTransportLayer::Midi),
-            2 => Ok(MidiTransportLayer::Usb),
-            3 => Ok(MidiTransportLayer::MidiAndUsb),
+            0 => Ok(Self::Disabled),
+            1 => Ok(Self::Midi),
+            2 => Ok(Self::Usb),
+            3 => Ok(Self::MidiAndUsb),
             _ => Err(ConversionError::Range {
                 value: value.to_string(),
                 type_name: "MidiTransportLayer".into(),
@@ -487,9 +487,9 @@ impl TryFrom<u8> for ParameterDestination {
 
     fn try_from(value: u8) -> Result<Self, Self::Error> {
         match value {
-            0 => Ok(ParameterDestination::Internal),
-            1 => Ok(ParameterDestination::InternalAndExternal),
-            2 => Ok(ParameterDestination::External),
+            0 => Ok(Self::Internal),
+            1 => Ok(Self::InternalAndExternal),
+            2 => Ok(Self::External),
             _ => Err(ConversionError::Range {
                 value: value.to_string(),
                 type_name: "ParameterDestination".into(),
@@ -529,10 +529,10 @@ impl TryFrom<u8> for RoutingUsbToMainDb {
 
     fn try_from(value: u8) -> Result<Self, Self::Error> {
         match value {
-            0 => Ok(RoutingUsbToMainDb::Zero),
-            1 => Ok(RoutingUsbToMainDb::PlusSix),
-            2 => Ok(RoutingUsbToMainDb::PlusTwelve),
-            3 => Ok(RoutingUsbToMainDb::PlusEighteen),
+            0 => Ok(Self::Zero),
+            1 => Ok(Self::PlusSix),
+            2 => Ok(Self::PlusTwelve),
+            3 => Ok(Self::PlusEighteen),
             _ => Err(ConversionError::Range {
                 value: value.to_string(),
                 type_name: "RoutingUsbToMainDb".into(),
@@ -567,8 +567,8 @@ impl TryFrom<u8> for MidiParameterOutput {
 
     fn try_from(value: u8) -> Result<Self, Self::Error> {
         match value {
-            0 => Ok(MidiParameterOutput::Nrpn),
-            1 => Ok(MidiParameterOutput::Cc),
+            0 => Ok(Self::Nrpn),
+            1 => Ok(Self::Cc),
             _ => Err(ConversionError::Range {
                 value: value.to_string(),
                 type_name: "MidiParameterOutput".into(),
@@ -601,8 +601,8 @@ impl TryFrom<u8> for MidiPortsOutputChannel {
 
     fn try_from(value: u8) -> Result<Self, Self::Error> {
         match value {
-            0 => Ok(MidiPortsOutputChannel::AutoChannel),
-            1 => Ok(MidiPortsOutputChannel::TrackChannel),
+            0 => Ok(Self::AutoChannel),
+            1 => Ok(Self::TrackChannel),
             _ => Err(ConversionError::Range {
                 value: value.to_string(),
                 type_name: "MidiPortsOutputChannel".into(),
@@ -645,14 +645,14 @@ impl TryFrom<u8> for HardwareTrack {
 
     fn try_from(value: u8) -> Result<Self, Self::Error> {
         match value {
-            0 => Ok(HardwareTrack::_1),
-            1 => Ok(HardwareTrack::_2),
-            2 => Ok(HardwareTrack::_3and4),
-            3 => Ok(HardwareTrack::_5),
-            4 => Ok(HardwareTrack::_6),
-            5 => Ok(HardwareTrack::_7and8),
-            6 => Ok(HardwareTrack::_9and10),
-            7 => Ok(HardwareTrack::_11and12),
+            0 => Ok(Self::_1),
+            1 => Ok(Self::_2),
+            2 => Ok(Self::_3and4),
+            3 => Ok(Self::_5),
+            4 => Ok(Self::_6),
+            5 => Ok(Self::_7and8),
+            6 => Ok(Self::_9and10),
+            7 => Ok(Self::_11and12),
             _ => Err(ConversionError::Range {
                 value: value.to_string(),
                 type_name: "HardwareTrack".into(),
@@ -719,17 +719,17 @@ impl TryFrom<u8> for RoutingUsbInOptions {
     fn try_from(value: u8) -> Result<Self, Self::Error> {
         let flags = value & 0b0000_0011;
         match flags {
-            0 => Ok(RoutingUsbInOptions::PreFx),
-            1 => Ok(RoutingUsbInOptions::PostFx),
+            0 => Ok(Self::PreFx),
+            1 => Ok(Self::PostFx),
             2 => {
-                Ok(RoutingUsbInOptions::VoiceRouting((
+                Ok(Self::VoiceRouting((
                     // Left channel routing
                     ((value & 0b0001_1100) >> 2).try_into()?,
                     // Right channel routing
                     ((value & 0b1110_0000) >> 5).try_into()?,
                 )))
             }
-            3 => Ok(RoutingUsbInOptions::SamplerOnly),
+            3 => Ok(Self::SamplerOnly),
             _ => Err(ConversionError::Range {
                 value: value.to_string(),
                 type_name: "RoutingUsbInOptions".into(),
@@ -745,8 +745,8 @@ impl From<RoutingUsbInOptions> for u8 {
             RoutingUsbInOptions::PostFx => 1,
             RoutingUsbInOptions::VoiceRouting((left_channel_routing, right_channel_routing)) => {
                 let mut flags = 0b0000_0011;
-                flags |= (left_channel_routing as u8) << 2;
-                flags |= (right_channel_routing as u8) << 5;
+                flags |= (left_channel_routing as Self) << 2;
+                flags |= (right_channel_routing as Self) << 5;
                 flags
             }
             RoutingUsbInOptions::SamplerOnly => 3,
@@ -787,17 +787,17 @@ impl TryFrom<u8> for RoutingUsbOutOptions {
     fn try_from(value: u8) -> Result<Self, Self::Error> {
         let flags = value & 0b0000_0001;
         match flags {
-            0 => Ok(RoutingUsbOutOptions::MainOut),
+            0 => Ok(Self::MainOut),
             1 => {
-                Ok(RoutingUsbOutOptions::VoiceRouting((
+                Ok(Self::VoiceRouting((
                     // Left channel routing
                     ((value & 0b0001_1100) >> 2).try_into()?,
                     // Right channel routing
                     ((value & 0b1110_0000) >> 5).try_into()?,
                 )))
             }
-            2 => Ok(RoutingUsbOutOptions::AudioIn),
-            3 => Ok(RoutingUsbOutOptions::Off),
+            2 => Ok(Self::AudioIn),
+            3 => Ok(Self::Off),
             _ => Err(ConversionError::Range {
                 value: value.to_string(),
                 type_name: "RoutingUsbOutOptions".into(),
@@ -812,8 +812,8 @@ impl From<RoutingUsbOutOptions> for u8 {
             RoutingUsbOutOptions::MainOut => 0,
             RoutingUsbOutOptions::VoiceRouting((left_channel_routing, right_channel_routing)) => {
                 let mut flags = 0b0000_0001;
-                flags |= (left_channel_routing as u8) << 2;
-                flags |= (right_channel_routing as u8) << 5;
+                flags |= (left_channel_routing as Self) << 2;
+                flags |= (right_channel_routing as Self) << 5;
                 flags
             }
             RoutingUsbOutOptions::AudioIn => 2,

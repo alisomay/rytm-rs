@@ -3,7 +3,7 @@ use rytm_rs_macro::parameter_range;
 use rytm_sys::ar_kit_t;
 
 /// Reverb parameters for the kit.
-#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub struct FxReverb {
     pre_delay: u8,
     decay: u8,
@@ -44,7 +44,7 @@ impl TryFrom<&ar_kit_t> for FxReverb {
 }
 
 impl FxReverb {
-    pub(crate) fn apply_to_raw_kit(&self, raw_kit: &mut ar_kit_t) {
+    pub(crate) fn apply_to_raw_kit(self, raw_kit: &mut ar_kit_t) {
         raw_kit.fx_reverb_pre = self.pre_delay;
         raw_kit.fx_reverb_decay = self.decay;
         raw_kit.fx_reverb_freq = self.freq;
@@ -121,49 +121,49 @@ impl FxReverb {
     /// Returns the pre delay of the reverb.
     ///
     /// Range: `0..=127`
-    pub fn pre_delay(&self) -> usize {
+    pub const fn pre_delay(&self) -> usize {
         self.pre_delay as usize
     }
 
     /// Returns the decay of the reverb.
     ///
     /// Range: `0..=127`
-    pub fn decay(&self) -> usize {
+    pub const fn decay(&self) -> usize {
         self.decay as usize
     }
 
     /// Returns the frequency of the reverb.
     ///
     /// Range: `0..=127`
-    pub fn freq(&self) -> usize {
+    pub const fn freq(&self) -> usize {
         self.freq as usize
     }
 
     /// Returns the gain of the reverb.
     ///
     /// Range: `0..=127`
-    pub fn gain(&self) -> usize {
+    pub const fn gain(&self) -> usize {
         self.gain as usize
     }
 
     /// Returns the high-pass filter of the reverb.
     ///
     /// Range: `0..=127`
-    pub fn hpf(&self) -> usize {
+    pub const fn hpf(&self) -> usize {
         self.hpf as usize
     }
 
     /// Returns the low-pass filter of the reverb.
     ///
     /// Range: `0..=127`
-    pub fn lpf(&self) -> usize {
+    pub const fn lpf(&self) -> usize {
         self.lpf as usize
     }
 
     /// Returns the volume of the reverb.
     ///
     /// Range: `0..=127`
-    pub fn volume(&self) -> usize {
+    pub const fn volume(&self) -> usize {
         self.volume as usize
     }
 }

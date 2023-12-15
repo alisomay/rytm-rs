@@ -1,4 +1,6 @@
+/// Holds the structures to represent a trig in a track.
 pub mod trig;
+/// Types related to the track.
 pub mod types;
 
 use self::{
@@ -7,6 +9,7 @@ use self::{
 };
 use super::{plock::ParameterLockPool, Length};
 use crate::{
+    defaults::default_trig_array,
     error::{ParameterError, RytmError},
     object::pattern::types::Speed,
     util::{from_s_u16_t, to_s_u16_t_union_b},
@@ -18,7 +21,9 @@ use rytm_sys::ar_pattern_track_t;
 use std::{cell::RefCell, io::Cursor, rc::Rc};
 use trig::Trig;
 
-/// A track in a pattern.
+/// Represents a single track in a pattern.
+///
+/// If the track index is 12 then this is the FX track.
 #[derive(Derivative, Clone)]
 #[derivative(Debug)]
 pub struct Track {
@@ -155,7 +160,7 @@ impl Track {
 
         Ok(Self {
             index,
-            trigs: Trig::default_trig_array(index),
+            trigs: default_trig_array(index),
 
             default_trig_flags: TrigFlags::default(),
             default_trig_note: 60,
@@ -189,16 +194,16 @@ impl Track {
     pub(crate) fn try_from_raw(
         index: usize,
         raw_track: &ar_pattern_track_t,
-        parameter_lock_pool: Rc<RefCell<ParameterLockPool>>,
-        fx_track_ref: Option<Rc<RefCell<Track>>>,
+        parameter_lock_pool: &Rc<RefCell<ParameterLockPool>>,
+        fx_track_ref: Option<Rc<RefCell<Self>>>,
     ) -> Result<Self, RytmError> {
-        let mut trigs: [Trig; 64] = Trig::default_trig_array(index);
+        let mut trigs: [Trig; 64] = default_trig_array(index);
 
         let trig_cursor = Cursor::new(raw_track.trig_bits);
         let mut bit_reader = BitReader::endian(trig_cursor, BigEndian);
 
         for (i, trig) in trigs.iter_mut().enumerate() {
-            let parameter_lock_pool_ref = Rc::clone(&parameter_lock_pool);
+            let parameter_lock_pool_ref = Rc::clone(parameter_lock_pool);
 
             let raw_trig_flags = bit_reader.read::<u16>(14).unwrap();
             *trig = Trig::new(
@@ -223,10 +228,12 @@ impl Track {
         let sends_midi = raw_track.flags_and_speed & 0b1000_0000 != 0;
         let speed: Speed = (raw_track.flags_and_speed & 0b0000_0111).try_into()?;
 
+        #[allow(clippy::no_effect_underscore_binding)]
         // They always seem to be 0.
         let __maybe_useful_flags_from_flags_and_speed = raw_track.flags_and_speed & 0b0111_1000;
-
+        #[allow(clippy::no_effect_underscore_binding)]
         let __maybe_useful_flag_from_default_trig_note = raw_track.default_note & 0b1000_0000;
+
         let default_trig_note = raw_track.default_note & 0b0111_1111;
 
         Ok(Self {
@@ -236,7 +243,7 @@ impl Track {
             default_trig_note,
             default_trig_velocity: raw_track.default_velocity,
             default_trig_note_length: raw_track.default_note_length.try_into()?,
-            default_trig_flags: unsafe { from_s_u16_t(&raw_track.default_trig_flags).into() },
+            default_trig_flags: unsafe { from_s_u16_t(raw_track.default_trig_flags).into() },
             default_trig_probability: raw_track.trig_probability,
 
             number_of_steps: raw_track.num_steps,
@@ -257,7 +264,7 @@ impl Track {
             __maybe_useful_flag_from_default_trig_note,
             __maybe_useful_flags_from_flags_and_speed,
 
-            parameter_lock_pool: Some(Rc::clone(&parameter_lock_pool)),
+            parameter_lock_pool: Some(Rc::clone(parameter_lock_pool)),
             fx_track_ref,
         })
     }
@@ -417,7 +424,7 @@ impl Track {
     /// Returns a reference to the trigs in this track.
     ///
     /// 64 trigs in total.
-    pub fn trigs(&self) -> &[Trig; 64] {
+    pub const fn trigs(&self) -> &[Trig; 64] {
         &self.trigs
     }
 
@@ -426,60 +433,60 @@ impl Track {
     /// Range `0..=127`
     ///
     /// Follows the midi note convention. C-4 is `0x3C`.
-    pub fn default_trig_note(&self) -> usize {
+    pub const fn default_trig_note(&self) -> usize {
         self.default_trig_note as usize
     }
 
     /// Returns the default velocity for any trig in this track.
     ///
     /// Range `0..=127`
-    pub fn default_trig_velocity(&self) -> usize {
+    pub const fn default_trig_velocity(&self) -> usize {
         self.default_trig_velocity as usize
     }
 
     /// Returns the default note length for any trig in this track.
-    pub fn default_trig_note_length(&self) -> Length {
+    pub const fn default_trig_note_length(&self) -> Length {
         self.default_trig_note_length
     }
 
     /// Returns the default trig flags for any trig in this track.
-    pub fn default_trig_flags(&self) -> TrigFlags {
+    pub const fn default_trig_flags(&self) -> TrigFlags {
         self.default_trig_flags
     }
 
     /// Returns the default trig probability for any trig in this track.
     ///
     /// Range `0..=100`
-    pub fn default_trig_probability(&self) -> usize {
+    pub const fn default_trig_probability(&self) -> usize {
         self.default_trig_probability as usize
     }
 
     /// Returns the number of steps in this track.
     ///
     /// Range `1..=64`
-    pub fn number_of_steps(&self) -> usize {
+    pub const fn number_of_steps(&self) -> usize {
         self.number_of_steps as usize
     }
 
     /// Returns the quantize amount for this track.
     ///
     /// Range `0..=127`
-    pub fn quantize_amount(&self) -> usize {
+    pub const fn quantize_amount(&self) -> usize {
         self.quantize_amount as usize
     }
 
     /// Returns whether this track sends MIDI.
-    pub fn sends_midi(&self) -> bool {
+    pub const fn sends_midi(&self) -> bool {
         self.sends_midi
     }
 
     /// Returns the speed for this track.
-    pub fn speed(&self) -> Speed {
+    pub const fn speed(&self) -> Speed {
         self.speed
     }
 
     /// Returns whether this track is in euclidean mode.
-    pub fn euclidean_mode(&self) -> bool {
+    pub const fn euclidean_mode(&self) -> bool {
         self.euclidean_mode
     }
 
@@ -488,7 +495,7 @@ impl Track {
     /// Number of pulses.
     ///
     /// Range `0..=64`
-    pub fn euclidean_pl1(&self) -> usize {
+    pub const fn euclidean_pl1(&self) -> usize {
         self.euclidean_pl1 as usize
     }
 
@@ -497,7 +504,7 @@ impl Track {
     /// Number of pulses.
     ///
     /// Range `0..=64`
-    pub fn euclidean_pl2(&self) -> usize {
+    pub const fn euclidean_pl2(&self) -> usize {
         self.euclidean_pl2 as usize
     }
 
@@ -506,7 +513,7 @@ impl Track {
     /// Range `0..=126`
     ///
     /// Middle point `63`
-    pub fn euclidean_ro1(&self) -> usize {
+    pub const fn euclidean_ro1(&self) -> usize {
         self.euclidean_ro1 as usize
     }
 
@@ -515,7 +522,7 @@ impl Track {
     /// Range `0..=126`
     ///
     /// Middle point `63`
-    pub fn euclidean_ro2(&self) -> usize {
+    pub const fn euclidean_ro2(&self) -> usize {
         self.euclidean_ro2 as usize
     }
 
@@ -524,26 +531,25 @@ impl Track {
     /// Range `0..=126`
     ///
     /// Middle point `63`
-    pub fn euclidean_tro(&self) -> usize {
+    pub const fn euclidean_tro(&self) -> usize {
         self.euclidean_tro as usize
     }
 
     /// Returns the pad scale for this track.
-    pub fn pad_scale(&self) -> PadScale {
+    pub const fn pad_scale(&self) -> PadScale {
         self.pad_scale
     }
 
     /// Returns the root note for this track.
-    pub fn root_note(&self) -> RootNote {
+    pub const fn root_note(&self) -> RootNote {
         self.root_note
     }
 
     /// Clears all the parameter locks for this track.
-    pub fn clear_all_plocks(&self) -> Result<(), RytmError> {
+    pub fn clear_all_plocks(&self) {
         if let Some(pool) = &self.parameter_lock_pool {
             pool.borrow_mut()
                 .clear_all_plocks_for_track(self.index as u8);
         }
-        Ok(())
     }
 }

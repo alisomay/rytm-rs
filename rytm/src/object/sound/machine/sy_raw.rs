@@ -207,7 +207,7 @@ impl SyRawParameters {
                 trig_index,
                 assigned_track as u8,
                 rytm_sys::AR_PLOCK_TYPE_MP6 as u8,
-            )?;
+            );
             return Ok(());
         }
         Err(OrphanTrig)
@@ -253,7 +253,7 @@ impl SyRawParameters {
                 trig_index,
                 assigned_track as u8,
                 rytm_sys::AR_PLOCK_TYPE_MP6 as u8,
-            )?;
+            );
             return Ok(());
         }
         Err(OrphanTrig)
@@ -272,27 +272,27 @@ impl SyRawParameters {
             Ok(Self {
                 parameter_lock_pool: None,
                 assigned_track: track_index,
-                lev: (from_s_u16_t(&raw_sound.synth_param_1) >> 8) as u8,
+                lev: (from_s_u16_t(raw_sound.synth_param_1) >> 8) as u8,
                 tun: scale_u16_to_f32(
-                    from_s_u16_t(&raw_sound.synth_param_2),
+                    from_s_u16_t(raw_sound.synth_param_2),
                     input_tun_min,
                     input_tun_max,
                     output_tun_min,
                     output_tun_max,
                 ),
-                dec2: (from_s_u16_t(&raw_sound.synth_param_3) >> 8) as u8,
+                dec2: (from_s_u16_t(raw_sound.synth_param_3) >> 8) as u8,
                 det: scale_u16_to_f32(
-                    from_s_u16_t(&raw_sound.synth_param_4),
+                    from_s_u16_t(raw_sound.synth_param_4),
                     input_tun_min,
                     input_tun_max,
                     output_tun_min,
                     output_tun_max,
                 ),
-                nlev: (from_s_u16_t(&raw_sound.synth_param_5) >> 8) as u8,
-                wav1: ((from_s_u16_t(&raw_sound.synth_param_6) >> 8) as u8).into(),
-                wav2: ((from_s_u16_t(&raw_sound.synth_param_7) >> 8) as u8).into(),
+                nlev: (from_s_u16_t(raw_sound.synth_param_5) >> 8) as u8,
+                wav1: ((from_s_u16_t(raw_sound.synth_param_6) >> 8) as u8).into(),
+                wav2: ((from_s_u16_t(raw_sound.synth_param_7) >> 8) as u8).into(),
                 bal: u8_to_i8_midpoint_of_u8_input_range(
-                    (from_s_u16_t(&raw_sound.synth_param_8) >> 8) as u8,
+                    (from_s_u16_t(raw_sound.synth_param_8) >> 8) as u8,
                     0,
                     127,
                 ),

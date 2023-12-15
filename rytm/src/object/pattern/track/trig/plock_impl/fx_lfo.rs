@@ -308,7 +308,7 @@ impl Trig {
     pub fn plock_clear_fx_lfo_speed(&self) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             pool.borrow_mut()
-                .clear_fx_basic_plock(self.index, AR_FX_PLOCK_TYPE_LFO_SPEED as u8)?;
+                .clear_fx_basic_plock(self.index, AR_FX_PLOCK_TYPE_LFO_SPEED as u8);
             self.disable_fx_trig_if_necessary();
 
             return Ok(());
@@ -320,7 +320,7 @@ impl Trig {
     pub fn plock_clear_fx_lfo_multiplier(&self) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             pool.borrow_mut()
-                .clear_fx_basic_plock(self.index, AR_FX_PLOCK_TYPE_LFO_MULTIPLY as u8)?;
+                .clear_fx_basic_plock(self.index, AR_FX_PLOCK_TYPE_LFO_MULTIPLY as u8);
             self.disable_fx_trig_if_necessary();
 
             return Ok(());
@@ -332,7 +332,7 @@ impl Trig {
     pub fn plock_clear_fx_lfo_fade(&self) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             pool.borrow_mut()
-                .clear_fx_basic_plock(self.index, AR_FX_PLOCK_TYPE_LFO_FADE as u8)?;
+                .clear_fx_basic_plock(self.index, AR_FX_PLOCK_TYPE_LFO_FADE as u8);
             self.disable_fx_trig_if_necessary();
 
             return Ok(());
@@ -344,7 +344,7 @@ impl Trig {
     pub fn plock_clear_fx_lfo_destination(&self) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             pool.borrow_mut()
-                .clear_fx_basic_plock(self.index, AR_FX_PLOCK_TYPE_LFO_DEST as u8)?;
+                .clear_fx_basic_plock(self.index, AR_FX_PLOCK_TYPE_LFO_DEST as u8);
             self.disable_fx_trig_if_necessary();
 
             return Ok(());
@@ -356,7 +356,7 @@ impl Trig {
     pub fn plock_clear_fx_lfo_waveform(&self) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             pool.borrow_mut()
-                .clear_fx_basic_plock(self.index, AR_FX_PLOCK_TYPE_LFO_WAVEFORM as u8)?;
+                .clear_fx_basic_plock(self.index, AR_FX_PLOCK_TYPE_LFO_WAVEFORM as u8);
             self.disable_fx_trig_if_necessary();
 
             return Ok(());
@@ -368,7 +368,7 @@ impl Trig {
     pub fn plock_clear_fx_lfo_start_phase(&self) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             pool.borrow_mut()
-                .clear_fx_basic_plock(self.index, AR_FX_PLOCK_TYPE_LFO_PHASE as u8)?;
+                .clear_fx_basic_plock(self.index, AR_FX_PLOCK_TYPE_LFO_PHASE as u8);
             self.disable_fx_trig_if_necessary();
 
             return Ok(());
@@ -380,7 +380,7 @@ impl Trig {
     pub fn plock_clear_fx_lfo_mode(&self) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             pool.borrow_mut()
-                .clear_fx_basic_plock(self.index, AR_FX_PLOCK_TYPE_LFO_MOD as u8)?;
+                .clear_fx_basic_plock(self.index, AR_FX_PLOCK_TYPE_LFO_MOD as u8);
             self.disable_fx_trig_if_necessary();
 
             return Ok(());
@@ -392,7 +392,7 @@ impl Trig {
     pub fn plock_clear_fx_lfo_depth(&self) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             pool.borrow_mut()
-                .clear_fx_compound_plock(self.index, AR_FX_PLOCK_TYPE_LFO_DEPTH as u8)?;
+                .clear_fx_compound_plock(self.index, AR_FX_PLOCK_TYPE_LFO_DEPTH as u8);
 
             return Ok(());
         }

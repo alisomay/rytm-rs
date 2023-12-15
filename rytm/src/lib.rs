@@ -1,3 +1,11 @@
+#![warn(clippy::all, clippy::pedantic, clippy::nursery)]
+#![allow(
+    clippy::module_name_repetitions,
+    clippy::wildcard_imports,
+    clippy::similar_names
+)]
+// TODO: Re-check later.
+#![allow(clippy::must_use_candidate)]
 #![doc(
     html_logo_url = "https://raw.githubusercontent.com/alisomay/rytm-rs/main/assets/logo.png",
     html_favicon_url = "https://raw.githubusercontent.com/alisomay/rytm-rs/main/assets/favicon/favicon.ico"
@@ -11,9 +19,7 @@ pub mod object;
 pub mod prelude;
 pub mod query;
 pub(crate) mod sysex;
-
-// TODO: pub(crate) before wrapping up.
-pub mod util;
+pub(crate) mod util;
 
 pub use sysex::{AnySysexType, SysexCompatible, SysexType};
 
@@ -203,19 +209,19 @@ impl RytmProject {
     /// Get all sounds in the pool.
     ///
     /// Total of 128 sounds.
-    pub fn pool_sounds(&self) -> &[Sound] {
+    pub const fn pool_sounds(&self) -> &[Sound] {
         &self.pool_sounds
     }
 
     /// Get all global slots.
     ///
     /// Total of 4 global slots.
-    pub fn globals(&self) -> &[Global] {
+    pub const fn globals(&self) -> &[Global] {
         &self.globals
     }
 
     /// Get the settings.
-    pub fn settings(&self) -> &Settings {
+    pub const fn settings(&self) -> &Settings {
         &self.settings
     }
 
@@ -253,7 +259,7 @@ impl RytmProject {
     }
 
     /// Get the work buffer structures.
-    pub fn work_buffer(&self) -> &RytmProjectWorkBuffer {
+    pub const fn work_buffer(&self) -> &RytmProjectWorkBuffer {
         &self.work_buffer
     }
 
@@ -288,24 +294,24 @@ impl Default for RytmProjectWorkBuffer {
 
 impl RytmProjectWorkBuffer {
     /// Get the pattern in the work buffer.
-    pub fn pattern(&self) -> &Pattern {
+    pub const fn pattern(&self) -> &Pattern {
         &self.pattern
     }
 
     /// Get the kit in the work buffer.
-    pub fn kit(&self) -> &Kit {
+    pub const fn kit(&self) -> &Kit {
         &self.kit
     }
 
     /// Get the sounds in the work buffer.
     ///
     /// Total of 12 sounds for 12 tracks.
-    pub fn sounds(&self) -> &[Sound] {
+    pub const fn sounds(&self) -> &[Sound] {
         &self.sounds
     }
 
     /// Get the global in the work buffer.
-    pub fn global(&self) -> &Global {
+    pub const fn global(&self) -> &Global {
         &self.global
     }
 

@@ -5,7 +5,7 @@ use crate::{
 };
 use rytm_rs_macro::parameter_range;
 
-/// A query for a pattern object.
+/// A query to retrieve a [`Pattern`](crate::object::Pattern) object from rytm.
 pub struct PatternQuery {
     /// Pattern index
     object_number: usize,
@@ -14,6 +14,9 @@ pub struct PatternQuery {
 }
 
 impl PatternQuery {
+    /// Creates a new pattern query.
+    ///
+    /// Accepts a pattern index in the range of `0..=127`.
     #[parameter_range(range = "pattern_index:0..=127")]
     pub fn new(pattern_index: usize) -> Result<Self, RytmError> {
         Ok(Self {
@@ -23,6 +26,11 @@ impl PatternQuery {
         })
     }
 
+    /// Creates a new pattern query.
+    ///
+    /// Accepts a pattern index in the range of `0..=127`.
+    ///
+    /// Accepts a device id in the range of `0..=255`.
     #[parameter_range(range = "pattern_index:0..=127")]
     pub fn new_with_device_id(pattern_index: usize, device_id: u8) -> Result<Self, RytmError> {
         Ok(Self {
@@ -32,7 +40,8 @@ impl PatternQuery {
         })
     }
 
-    pub fn new_targeting_work_buffer() -> Self {
+    /// Creates a new pattern query for the pattern in the work buffer.
+    pub const fn new_targeting_work_buffer() -> Self {
         Self {
             object_number: 0b1000_0000,
             sysex_type: SysexType::Pattern,
@@ -40,7 +49,10 @@ impl PatternQuery {
         }
     }
 
-    pub fn new_targeting_work_buffer_with_device_id(device_id: u8) -> Self {
+    /// Creates a new pattern query for the pattern in the work buffer.
+    ///
+    /// Accepts a device id in the range of `0..=255`.
+    pub const fn new_targeting_work_buffer_with_device_id(device_id: u8) -> Self {
         Self {
             object_number: 0b1000_0000,
             sysex_type: SysexType::Pattern,

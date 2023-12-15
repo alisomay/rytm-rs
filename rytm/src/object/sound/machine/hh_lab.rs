@@ -197,14 +197,14 @@ impl HhLabParameters {
             Ok(Self {
                 parameter_lock_pool: None,
                 assigned_track: track_index,
-                lev: (from_s_u16_t(&raw_sound.synth_param_1) >> 8) as u8,
-                osc1: from_s_u16_t(&raw_sound.synth_param_2),
-                dec: (from_s_u16_t(&raw_sound.synth_param_3) >> 8) as u8,
-                osc2: from_s_u16_t(&raw_sound.synth_param_4),
-                osc3: from_s_u16_t(&raw_sound.synth_param_5),
-                osc4: from_s_u16_t(&raw_sound.synth_param_6),
-                osc5: from_s_u16_t(&raw_sound.synth_param_7),
-                osc6: from_s_u16_t(&raw_sound.synth_param_8),
+                lev: (from_s_u16_t(raw_sound.synth_param_1) >> 8) as u8,
+                osc1: from_s_u16_t(raw_sound.synth_param_2),
+                dec: (from_s_u16_t(raw_sound.synth_param_3) >> 8) as u8,
+                osc2: from_s_u16_t(raw_sound.synth_param_4),
+                osc3: from_s_u16_t(raw_sound.synth_param_5),
+                osc4: from_s_u16_t(raw_sound.synth_param_6),
+                osc5: from_s_u16_t(raw_sound.synth_param_7),
+                osc6: from_s_u16_t(raw_sound.synth_param_8),
             })
         }
     }
@@ -261,7 +261,7 @@ impl HhLabParameters {
                 trig_index,
                 assigned_track as u8,
                 rytm_sys::AR_PLOCK_TYPE_MP0 as u8,
-            )?;
+            );
             return Ok(());
         }
         Err(OrphanTrig)
@@ -317,7 +317,7 @@ impl HhLabParameters {
                 trig_index,
                 assigned_track as u8,
                 rytm_sys::AR_PLOCK_TYPE_MP1 as u8,
-            )?;
+            );
             return Ok(());
         }
         Err(OrphanTrig)
@@ -373,7 +373,7 @@ impl HhLabParameters {
                 trig_index,
                 assigned_track as u8,
                 rytm_sys::AR_PLOCK_TYPE_MP2 as u8,
-            )?;
+            );
             return Ok(());
         }
         Err(OrphanTrig)
@@ -429,7 +429,7 @@ impl HhLabParameters {
                 trig_index,
                 assigned_track as u8,
                 rytm_sys::AR_PLOCK_TYPE_MP3 as u8,
-            )?;
+            );
             return Ok(());
         }
         Err(OrphanTrig)
@@ -485,7 +485,7 @@ impl HhLabParameters {
                 trig_index,
                 assigned_track as u8,
                 rytm_sys::AR_PLOCK_TYPE_MP4 as u8,
-            )?;
+            );
             return Ok(());
         }
         Err(OrphanTrig)
@@ -541,7 +541,7 @@ impl HhLabParameters {
                 trig_index,
                 assigned_track as u8,
                 rytm_sys::AR_PLOCK_TYPE_MP5 as u8,
-            )?;
+            );
             return Ok(());
         }
         Err(OrphanTrig)
@@ -592,7 +592,7 @@ impl HhLabParameters {
                 trig_index,
                 assigned_track as u8,
                 rytm_sys::AR_PLOCK_TYPE_MP6 as u8,
-            )?;
+            );
             return Ok(());
         }
         Err(OrphanTrig)
@@ -643,7 +643,7 @@ impl HhLabParameters {
                 trig_index,
                 assigned_track as u8,
                 rytm_sys::AR_PLOCK_TYPE_MP7 as u8,
-            )?;
+            );
             return Ok(());
         }
         Err(OrphanTrig)

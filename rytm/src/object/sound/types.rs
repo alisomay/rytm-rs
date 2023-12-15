@@ -1,6 +1,14 @@
-use crate::error::ConversionError;
-
+// All casts in this file are intended or safe within the context of this library.
+//
+// One can change `allow` to `warn` to review them if necessary.
+#![allow(
+    clippy::cast_lossless,
+    clippy::cast_possible_truncation,
+    clippy::cast_sign_loss
+)]
+#![allow(clippy::enum_glob_use)]
 use super::machine::MachineParameters;
+use crate::error::ConversionError;
 
 #[allow(unused)]
 mod machines {
@@ -247,7 +255,7 @@ impl std::fmt::Display for MachineType {
             Self::HhLab => "HH_LAB",
             Self::Unset => "UNSET",
         };
-        write!(f, "{}", machine)
+        write!(f, "{machine}")
     }
 }
 

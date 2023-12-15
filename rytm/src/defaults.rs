@@ -1,13 +1,16 @@
 #![allow(unused)]
 
-pub(crate) const PATTERN_MAX_COUNT: usize = 128;
-pub(crate) const POOL_SOUND_MAX_COUNT: usize = 128;
-pub(crate) const KIT_MAX_COUNT: usize = 128;
-pub(crate) const GLOBAL_MAX_COUNT: usize = 4;
-pub(crate) const TRACK_MAX_COUNT: usize = 12;
-pub(crate) const VOICE_MAX_COUNT: usize = 8;
+pub const PATTERN_MAX_COUNT: usize = 128;
+pub const POOL_SOUND_MAX_COUNT: usize = 128;
+pub const KIT_MAX_COUNT: usize = 128;
+pub const GLOBAL_MAX_COUNT: usize = 4;
+pub const TRACK_MAX_COUNT: usize = 12;
+pub const VOICE_MAX_COUNT: usize = 8;
 
-use crate::object::{pattern::track::Track, *};
+use crate::object::{
+    pattern::{track::Track, Trig},
+    *,
+};
 
 pub fn default_work_buffer_sounds() -> [Sound; TRACK_MAX_COUNT] {
     [
@@ -52,6 +55,7 @@ pub fn default_globals() -> [Global; GLOBAL_MAX_COUNT] {
     ]
 }
 
+#[allow(clippy::too_many_lines)]
 pub fn default_pool_sounds() -> [Sound; POOL_SOUND_MAX_COUNT] {
     [
         Sound::try_default(0).unwrap(),
@@ -182,5 +186,105 @@ pub fn default_pool_sounds() -> [Sound; POOL_SOUND_MAX_COUNT] {
         Sound::try_default(125).unwrap(),
         Sound::try_default(126).unwrap(),
         Sound::try_default(127).unwrap(),
+    ]
+}
+
+// TODO: Once these are identified remove these helpers:
+pub const fn default_perf_ctl_array() -> [u8; 48 * 4] {
+    [
+        255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255,
+        255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255,
+        255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255,
+        255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255,
+        255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255,
+        255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255,
+        255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255,
+        255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255,
+        255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255,
+        255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255,
+    ]
+}
+
+pub const fn default_scene_ctl_array() -> [u8; 48 * 4] {
+    [
+        255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255,
+        255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255,
+        255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255,
+        255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255,
+        255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255,
+        255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255,
+        255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255,
+        255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255,
+        255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255,
+        255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255,
+    ]
+}
+
+pub fn default_trig_array(track_index: usize) -> [Trig; 64] {
+    [
+        Trig::try_default(0, track_index).unwrap(),
+        Trig::try_default(1, track_index).unwrap(),
+        Trig::try_default(2, track_index).unwrap(),
+        Trig::try_default(3, track_index).unwrap(),
+        Trig::try_default(4, track_index).unwrap(),
+        Trig::try_default(5, track_index).unwrap(),
+        Trig::try_default(6, track_index).unwrap(),
+        Trig::try_default(7, track_index).unwrap(),
+        Trig::try_default(8, track_index).unwrap(),
+        Trig::try_default(9, track_index).unwrap(),
+        Trig::try_default(10, track_index).unwrap(),
+        Trig::try_default(11, track_index).unwrap(),
+        Trig::try_default(12, track_index).unwrap(),
+        Trig::try_default(13, track_index).unwrap(),
+        Trig::try_default(14, track_index).unwrap(),
+        Trig::try_default(15, track_index).unwrap(),
+        Trig::try_default(16, track_index).unwrap(),
+        Trig::try_default(17, track_index).unwrap(),
+        Trig::try_default(18, track_index).unwrap(),
+        Trig::try_default(19, track_index).unwrap(),
+        Trig::try_default(20, track_index).unwrap(),
+        Trig::try_default(21, track_index).unwrap(),
+        Trig::try_default(22, track_index).unwrap(),
+        Trig::try_default(23, track_index).unwrap(),
+        Trig::try_default(24, track_index).unwrap(),
+        Trig::try_default(25, track_index).unwrap(),
+        Trig::try_default(26, track_index).unwrap(),
+        Trig::try_default(27, track_index).unwrap(),
+        Trig::try_default(28, track_index).unwrap(),
+        Trig::try_default(29, track_index).unwrap(),
+        Trig::try_default(30, track_index).unwrap(),
+        Trig::try_default(31, track_index).unwrap(),
+        Trig::try_default(32, track_index).unwrap(),
+        Trig::try_default(33, track_index).unwrap(),
+        Trig::try_default(34, track_index).unwrap(),
+        Trig::try_default(35, track_index).unwrap(),
+        Trig::try_default(36, track_index).unwrap(),
+        Trig::try_default(37, track_index).unwrap(),
+        Trig::try_default(38, track_index).unwrap(),
+        Trig::try_default(39, track_index).unwrap(),
+        Trig::try_default(40, track_index).unwrap(),
+        Trig::try_default(41, track_index).unwrap(),
+        Trig::try_default(42, track_index).unwrap(),
+        Trig::try_default(43, track_index).unwrap(),
+        Trig::try_default(44, track_index).unwrap(),
+        Trig::try_default(45, track_index).unwrap(),
+        Trig::try_default(46, track_index).unwrap(),
+        Trig::try_default(47, track_index).unwrap(),
+        Trig::try_default(48, track_index).unwrap(),
+        Trig::try_default(49, track_index).unwrap(),
+        Trig::try_default(50, track_index).unwrap(),
+        Trig::try_default(51, track_index).unwrap(),
+        Trig::try_default(52, track_index).unwrap(),
+        Trig::try_default(53, track_index).unwrap(),
+        Trig::try_default(54, track_index).unwrap(),
+        Trig::try_default(55, track_index).unwrap(),
+        Trig::try_default(56, track_index).unwrap(),
+        Trig::try_default(57, track_index).unwrap(),
+        Trig::try_default(58, track_index).unwrap(),
+        Trig::try_default(59, track_index).unwrap(),
+        Trig::try_default(60, track_index).unwrap(),
+        Trig::try_default(61, track_index).unwrap(),
+        Trig::try_default(62, track_index).unwrap(),
+        Trig::try_default(63, track_index).unwrap(),
     ]
 }

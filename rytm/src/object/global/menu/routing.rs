@@ -123,28 +123,22 @@ impl Routing {
     }
 
     /// Sets the `USB IN` routing.
-    pub fn set_usb_in(&mut self, usb_in: RoutingUsbInOptions) -> Result<(), RytmError> {
+    pub fn set_usb_in(&mut self, usb_in: RoutingUsbInOptions) {
         self.usb_in = usb_in;
-        Ok(())
     }
 
     /// Sets the `USB OUT` routing.
-    pub fn set_usb_out(&mut self, usb_out: RoutingUsbOutOptions) -> Result<(), RytmError> {
+    pub fn set_usb_out(&mut self, usb_out: RoutingUsbOutOptions) {
         self.usb_out = usb_out;
-        Ok(())
     }
 
     /// Sets the `USB TO MAIN [dB]` routing.
-    pub fn set_usb_to_main_db(
-        &mut self,
-        usb_to_main_db: RoutingUsbToMainDb,
-    ) -> Result<(), RytmError> {
+    pub fn set_usb_to_main_db(&mut self, usb_to_main_db: RoutingUsbToMainDb) {
         self.usb_to_main_db = usb_to_main_db;
-        Ok(())
     }
 
     /// Returns the raw `ROUTE TO MAIN` flags.
-    pub fn raw_route_to_main_flags(&self) -> u16 {
+    pub const fn raw_route_to_main_flags(&self) -> u16 {
         self.route_to_main_flags
     }
 
@@ -171,12 +165,12 @@ impl Routing {
     }
 
     /// Returns `true` if a track is routed to main.
-    pub fn is_track_routed_to_main(&self, track_index: usize) -> bool {
+    pub const fn is_track_routed_to_main(&self, track_index: usize) -> bool {
         self.route_to_main_flags & (1 << track_index) != 0
     }
 
     /// Returns the raw `SEND TO FX` flags.
-    pub fn raw_send_to_fx_flags(&self) -> u16 {
+    pub const fn raw_send_to_fx_flags(&self) -> u16 {
         self.send_to_fx_flags
     }
 
@@ -203,22 +197,22 @@ impl Routing {
     }
 
     /// Returns `true` if a track is sent to FX.
-    pub fn is_track_sent_to_fx(&self, track_index: usize) -> bool {
+    pub const fn is_track_sent_to_fx(&self, track_index: usize) -> bool {
         self.send_to_fx_flags & (1 << track_index) != 0
     }
 
     /// Returns the `USB IN` routing configuration.
-    pub fn usb_in(&self) -> RoutingUsbInOptions {
+    pub const fn usb_in(&self) -> RoutingUsbInOptions {
         self.usb_in
     }
 
     /// Returns the `USB OUT` routing configuration.
-    pub fn usb_out(&self) -> RoutingUsbOutOptions {
+    pub const fn usb_out(&self) -> RoutingUsbOutOptions {
         self.usb_out
     }
 
     /// Returns the `USB TO MAIN [dB]` value.
-    pub fn usb_to_main_db(&self) -> RoutingUsbToMainDb {
+    pub const fn usb_to_main_db(&self) -> RoutingUsbToMainDb {
         self.usb_to_main_db
     }
 }

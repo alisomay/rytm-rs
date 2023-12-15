@@ -1,3 +1,12 @@
+// All casts in this file are intended or safe within the context of this library.
+//
+// One can change `allow` to `warn` to review them if necessary.
+#![allow(
+    clippy::cast_lossless,
+    clippy::cast_possible_truncation,
+    clippy::cast_sign_loss
+)]
+
 use crate::{
     error::{ConversionError, ParameterError, RytmError},
     util::{
@@ -40,7 +49,7 @@ impl TryFrom<&ar_sound_t> for Sample {
     type Error = ConversionError;
     fn try_from(raw_sound: &ar_sound_t) -> Result<Self, Self::Error> {
         let start = scale_u16_to_f32(
-            unsafe { from_s_u16_t(&raw_sound.sample_start) },
+            unsafe { from_s_u16_t(raw_sound.sample_start) },
             0u16,
             30720u16,
             0f32,
@@ -48,7 +57,7 @@ impl TryFrom<&ar_sound_t> for Sample {
         );
 
         let end = scale_u16_to_f32(
-            unsafe { from_s_u16_t(&raw_sound.sample_end) },
+            unsafe { from_s_u16_t(raw_sound.sample_end) },
             0u16,
             30720u16,
             0f32,
@@ -112,7 +121,7 @@ impl Sample {
 
     /// Unsets the sample slice.
     ///
-    /// Synonym with `SMP OFF``.
+    /// Synonym with `SMP OFF`.
     pub fn unset_slice(&mut self) {
         // TODO: Double check
         self.number = 0xFF;
@@ -146,9 +155,8 @@ impl Sample {
     }
 
     /// Sets the loop flag of the sample.
-    pub fn set_loop_flag(&mut self, loop_flag: bool) -> Result<(), RytmError> {
+    pub fn set_loop_flag(&mut self, loop_flag: bool) {
         self.loop_flag = loop_flag;
-        Ok(())
     }
 
     /// Sets the volume of the sample.
@@ -159,42 +167,42 @@ impl Sample {
     }
 
     // Returns the coarse tune of the sample.
-    pub fn tune(&self) -> isize {
+    pub const fn tune(&self) -> isize {
         self.tune as isize
     }
 
     // Returns the fine tune of the sample.
-    pub fn fine_tune(&self) -> isize {
+    pub const fn fine_tune(&self) -> isize {
         self.fine_tune as isize
     }
 
     // Returns the slice number of the sample.
-    pub fn slice_number(&self) -> usize {
+    pub const fn slice_number(&self) -> usize {
         self.number as usize
     }
 
     // Returns the bit reduction of the sample.
-    pub fn bit_reduction(&self) -> usize {
+    pub const fn bit_reduction(&self) -> usize {
         self.bit_reduction as usize
     }
 
     // Returns the start of the sample.
-    pub fn start(&self) -> f32 {
+    pub const fn start(&self) -> f32 {
         self.start
     }
 
     // Returns the end of the sample.
-    pub fn end(&self) -> f32 {
+    pub const fn end(&self) -> f32 {
         self.end
     }
 
     // Returns the loop flag of the sample.
-    pub fn loop_flag(&self) -> bool {
+    pub const fn loop_flag(&self) -> bool {
         self.loop_flag
     }
 
     // Returns the volume of the sample.
-    pub fn volume(&self) -> usize {
+    pub const fn volume(&self) -> usize {
         self.volume as usize
     }
 }

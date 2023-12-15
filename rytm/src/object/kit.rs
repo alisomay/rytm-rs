@@ -1,9 +1,28 @@
+// All casts in this file are intended or safe within the context of this library.
+//
+// One can change `allow` to `warn` to review them if necessary.
+#![allow(
+    clippy::cast_lossless,
+    clippy::cast_possible_truncation,
+    clippy::cast_sign_loss
+)]
+
+// TODO: Check if we can get info about if this kit is assigned to a pattern.
+// TODO: Add control mod in parts once the pr merge to libanalogrytm is done.
+
+/// Holds the structure to represent compressor fx parameters.
 pub mod comp;
+/// Holds the structure to represent delay fx parameters.
 pub mod delay;
+/// Holds the structure to represent distortion fx parameters.
 pub mod dist;
+/// Holds the structure to represent lfo fx parameters.
 pub mod lfo;
+/// Holds the structure to represent retrig settings scoped to a track.
 pub mod retrig;
+/// Holds the structure to represent reverb fx parameters.
 pub mod reverb;
+/// Holds types relevant to the kit object.
 pub mod types;
 pub(crate) mod unknown;
 
@@ -11,6 +30,7 @@ use self::{
     comp::FxCompressor, delay::FxDelay, dist::FxDistortion, lfo::FxLfo, reverb::FxReverb,
     unknown::KitUnknown,
 };
+use crate::defaults::{default_perf_ctl_array, default_scene_ctl_array};
 use crate::util::{assemble_u32_from_u8_array, break_u32_into_u8_array};
 use crate::AnySysexType;
 use crate::{
@@ -33,7 +53,9 @@ impl_sysex_compatible!(
     KIT_SYSEX_SIZE
 );
 
-// TODO: Check if we can get info about if this kit is assigned to a pattern.
+/// Represents a kit in the analog rytm.
+///
+/// It does not map identically to the structure in the firmware.
 #[derive(Derivative, Clone)]
 #[derivative(Debug)]
 pub struct Kit {
@@ -79,7 +101,7 @@ pub struct Kit {
 
 impl From<&Kit> for ar_kit_t {
     fn from(kit: &Kit) -> Self {
-        let mut raw_kit = ar_kit_t {
+        let mut raw_kit = Self {
             // Version
             __unknown_arr1: break_u32_into_u8_array(kit.version),
             name: kit.name.copy_inner(),
@@ -104,7 +126,7 @@ impl From<&Kit> for ar_kit_t {
         kit.fx_compressor.apply_to_raw_kit(&mut raw_kit);
         kit.fx_lfo.apply_to_raw_kit(&mut raw_kit);
 
-        for retrig_settings in kit.track_retrig_settings.iter() {
+        for retrig_settings in &kit.track_retrig_settings {
             retrig_settings.apply_to_raw_kit(&mut raw_kit);
         }
 
@@ -181,6 +203,9 @@ impl Kit {
         (self.sysex_meta, self.into())
     }
 
+    /// Makes a new kit with the given index complying to project defaults.
+    ///
+    /// Range: `0..=127`
     #[parameter_range(range = "kit_index:0..=127")]
     pub fn try_default(kit_index: usize) -> Result<Self, RytmError> {
         let meta = SysexMeta::try_default_for_kit(kit_index, None)?;
@@ -189,7 +214,7 @@ impl Kit {
             sysex_meta: meta,
             version: 6,
 
-            name: format!("KIT {}", kit_index).try_into()?,
+            name: format!("KIT {kit_index}").try_into()?,
 
             track_levels: [100; 13],
             track_retrig_settings: retrig::TrackRetrigMenu::get_default_for_13_tracks(),
@@ -222,6 +247,8 @@ impl Kit {
         })
     }
 
+    /// Makes a new kit in the work buffer complying to project defaults as if it comes from the work buffer.
+    #[allow(clippy::missing_panics_doc)]
     pub fn work_buffer_default() -> Self {
         Self {
             index: 0,
@@ -263,7 +290,7 @@ impl Kit {
     }
 
     /// Returns the sounds assigned to the kit in the order of the tracks.
-    pub fn sounds(&self) -> &[Sound; 12] {
+    pub const fn sounds(&self) -> &[Sound; 12] {
         &self.sounds
     }
 
@@ -288,7 +315,7 @@ impl Kit {
     /// Range `0..=127`
     #[parameter_range(range = "level:0..=127")]
     pub fn set_all_track_levels(&mut self, level: usize) -> Result<(), RytmError> {
-        for track_level in self.track_levels.iter_mut() {
+        for track_level in &mut self.track_levels {
             *track_level = level as u8;
         }
         Ok(())
@@ -299,6 +326,9 @@ impl Kit {
     /// 12th track is the fx track.
     ///
     /// Maximum range `0..=12`
+    ///
+    /// Level range `0..=127`
+    #[parameter_range(range = "level:0..=127")]
     pub fn set_a_range_of_track_levels(
         &mut self,
         range: std::ops::Range<usize>,
@@ -306,7 +336,7 @@ impl Kit {
     ) -> Result<(), RytmError> {
         if range.end > 12 {
             return Err(RytmError::Parameter(ParameterError::Range {
-                value: format!("{:?}", range),
+                value: format!("{range:?}"),
                 parameter_name: "range".to_string(),
             }));
         }
@@ -323,13 +353,6 @@ impl Kit {
     /// Range `0..=12`
     #[parameter_range(range = "track_index:0..=12")]
     pub fn track_level(&self, track_index: usize) -> Result<usize, RytmError> {
-        if track_index > 12 {
-            return Err(RytmError::Parameter(ParameterError::Range {
-                value: format!("{:?}", track_index),
-                parameter_name: "track_index".to_string(),
-            }));
-        }
-
         Ok(self.track_levels[track_index] as usize)
     }
 
@@ -348,6 +371,12 @@ impl Kit {
     /// 12th track is the fx track.
     ///
     /// Maximum range `0..=12`
+    ///
+    /// Level range `0..=127`
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the range is out of bounds.
     pub fn range_of_track_levels(
         &self,
         range: std::ops::Range<usize>,
@@ -360,7 +389,7 @@ impl Kit {
     }
 
     /// Returns the version of the kit structure.
-    pub fn structure_version(&self) -> u32 {
+    pub const fn structure_version(&self) -> u32 {
         self.version
     }
 
@@ -389,35 +418,4 @@ impl Kit {
     ) -> Result<&mut retrig::TrackRetrigMenu, RytmError> {
         Ok(&mut self.track_retrig_settings[track_index])
     }
-}
-
-// TODO: Once these are identified remove these helpers:
-fn default_perf_ctl_array() -> [u8; 48 * 4] {
-    [
-        255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255,
-        255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255,
-        255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255,
-        255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255,
-        255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255,
-        255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255,
-        255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255,
-        255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255,
-        255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255,
-        255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255,
-    ]
-}
-
-fn default_scene_ctl_array() -> [u8; 48 * 4] {
-    [
-        255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255,
-        255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255,
-        255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255,
-        255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255,
-        255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255,
-        255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255,
-        255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255,
-        255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255,
-        255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255,
-        255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255,
-    ]
 }

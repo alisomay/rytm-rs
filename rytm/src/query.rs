@@ -1,9 +1,41 @@
+//! Query structures for the rytm.
+//!
+//! The structures in this module are used to send sysex queries to the rytm.
+//!
+//! The all implement the `ObjectQuery` trait and there is a blanket implementation for all types which implement `ObjectQuery` to be `SysexCompatible`.
+//!
+//! # Example
+//!
+//! ```
+//! use rytm::prelude::*;
+//!
+//! let query = GlobalQuery::new_targeting_work_buffer();
+//! let sysex = query.as_sysex().unwrap();
+//!
+//! ```
+
+// All casts in this file are intended or safe within the context of this library.
+//
+// One can change `allow` to `warn` to review them if necessary.
+#![allow(
+    clippy::cast_lossless,
+    clippy::cast_possible_truncation,
+    clippy::cast_sign_loss
+)]
+
+/// Holds the global query structure.
 mod global;
+/// Holds the kit query structure.
 mod kit;
+/// Holds the pattern query structure.
 mod pattern;
+/// Holds the raw query structure.
 mod raw;
+/// Holds the settings query structure.
 mod settings;
+/// Holds the song query structure.
 mod song;
+/// Holds the sound query structure.
 mod sound;
 
 pub use global::GlobalQuery;
@@ -65,11 +97,12 @@ impl<T: ObjectQuery> SysexCompatible for T {
         let destination_buffer = buffer.as_mut_slice();
         let meta: rytm_sys::ar_sysex_meta_t = self.as_sysex_meta().into();
 
-        // TODO: Write safety comment.
+        // The count of return error codes from `rytm-sys` is far below 255.
+        #[allow(clippy::cast_possible_truncation)]
         unsafe {
             let return_code = rytm_sys::ar_sysex_request(
                 destination_buffer.as_mut_ptr(),
-                &meta as *const rytm_sys::ar_sysex_meta_t,
+                std::ptr::addr_of!(meta),
             ) as u8;
 
             if return_code != 0 {

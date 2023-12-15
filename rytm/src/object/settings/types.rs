@@ -1,10 +1,6 @@
 use crate::error::ConversionError;
 
-/// FxParameterMenuItem
-///
-/// The six sequential square buttons on the right side of the Analog Rytm MKII.
-///
-/// Fx mode off.
+/// The six sequential square buttons on the right side of the Analog Rytm MKII. Fx mode off.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum ParameterMenuItem {
     #[default]
@@ -20,12 +16,12 @@ impl TryFrom<u8> for ParameterMenuItem {
     type Error = ConversionError;
     fn try_from(value: u8) -> Result<Self, Self::Error> {
         match value {
-            0 => Ok(ParameterMenuItem::Trig),
-            1 => Ok(ParameterMenuItem::Src),
-            2 => Ok(ParameterMenuItem::Smpl),
-            3 => Ok(ParameterMenuItem::Fltr),
-            4 => Ok(ParameterMenuItem::Amp),
-            5 => Ok(ParameterMenuItem::Lfo),
+            0 => Ok(Self::Trig),
+            1 => Ok(Self::Src),
+            2 => Ok(Self::Smpl),
+            3 => Ok(Self::Fltr),
+            4 => Ok(Self::Amp),
+            5 => Ok(Self::Lfo),
             _ => Err(ConversionError::Range {
                 value: value.to_string(),
                 type_name: "ParameterMenuItem".into(),
@@ -47,11 +43,7 @@ impl From<ParameterMenuItem> for u8 {
     }
 }
 
-/// FxParameterMenuItem
-///
-/// The six sequential square buttons on the right side of the Analog Rytm MKII.
-///
-/// Fx mode on.
+/// The six sequential square buttons on the right side of the Analog Rytm MKII. Fx mode on.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum FxParameterMenuItem {
     #[default]
@@ -67,12 +59,12 @@ impl TryFrom<u8> for FxParameterMenuItem {
     type Error = ConversionError;
     fn try_from(value: u8) -> Result<Self, Self::Error> {
         match value {
-            0 => Ok(FxParameterMenuItem::Trig),
-            1 => Ok(FxParameterMenuItem::Delay),
-            2 => Ok(FxParameterMenuItem::Reverb),
-            3 => Ok(FxParameterMenuItem::Dist),
-            4 => Ok(FxParameterMenuItem::Comp),
-            5 => Ok(FxParameterMenuItem::Lfo),
+            0 => Ok(Self::Trig),
+            1 => Ok(Self::Delay),
+            2 => Ok(Self::Reverb),
+            3 => Ok(Self::Dist),
+            4 => Ok(Self::Comp),
+            5 => Ok(Self::Lfo),
             _ => Err(ConversionError::Range {
                 value: value.to_string(),
                 type_name: "FxParameterMenuItem".into(),
@@ -94,8 +86,6 @@ impl From<FxParameterMenuItem> for u8 {
     }
 }
 
-/// SequencerMode
-///
 /// - Normal operation mode is the default mode. In this mode, the sequencer plays the selected pattern in a loop.
 /// - Chain mode is used to chain patterns together into a chain. The chain is played in a loop.
 /// - Song mode is used to chain patterns together into a song. The song is played once from start to finish.
@@ -111,9 +101,9 @@ impl TryFrom<u8> for SequencerMode {
     type Error = ConversionError;
     fn try_from(value: u8) -> Result<Self, Self::Error> {
         match value {
-            0 => Ok(SequencerMode::Normal),
-            1 => Ok(SequencerMode::Chain),
-            2 => Ok(SequencerMode::Song),
+            0 => Ok(Self::Normal),
+            1 => Ok(Self::Chain),
+            2 => Ok(Self::Song),
             _ => Err(ConversionError::Range {
                 value: value.to_string(),
                 type_name: "SequencerMode".into(),
@@ -132,8 +122,6 @@ impl From<SequencerMode> for u8 {
     }
 }
 
-/// Pattern Mode
-///
 /// # Excerpt from the manual
 ///
 /// When changing patterns, different modes affecting the way the active pattern will be changed exist.
@@ -177,10 +165,10 @@ impl TryFrom<u8> for PatternMode {
     type Error = ConversionError;
     fn try_from(value: u8) -> Result<Self, Self::Error> {
         match value {
-            0 => Ok(PatternMode::Sequential),
-            1 => Ok(PatternMode::DirectStart),
-            2 => Ok(PatternMode::DirectJump),
-            3 => Ok(PatternMode::TempJump),
+            0 => Ok(Self::Sequential),
+            1 => Ok(Self::DirectStart),
+            2 => Ok(Self::DirectJump),
+            3 => Ok(Self::TempJump),
             _ => Err(ConversionError::Range {
                 value: value.to_string(),
                 type_name: "PatternMode".into(),
@@ -200,8 +188,6 @@ impl From<PatternMode> for u8 {
     }
 }
 
-/// SampleRecorderSource
-///
 /// # Excerpt from the manual
 ///
 /// Source selects between different audio sources to sample from.
@@ -243,21 +229,21 @@ impl TryFrom<u8> for SampleRecorderSource {
     type Error = ConversionError;
     fn try_from(value: u8) -> Result<Self, Self::Error> {
         match value {
-            0 => Ok(SampleRecorderSource::AudLPlusR),
-            1 => Ok(SampleRecorderSource::AudL),
-            2 => Ok(SampleRecorderSource::AudR),
-            3 => Ok(SampleRecorderSource::Bd),
-            4 => Ok(SampleRecorderSource::Sd),
-            5 => Ok(SampleRecorderSource::RsCp),
-            6 => Ok(SampleRecorderSource::Bt),
-            7 => Ok(SampleRecorderSource::Lt),
-            8 => Ok(SampleRecorderSource::MtHt),
-            9 => Ok(SampleRecorderSource::ChOh),
-            10 => Ok(SampleRecorderSource::CyCb),
-            11 => Ok(SampleRecorderSource::Main),
-            12 => Ok(SampleRecorderSource::UsbL),
-            13 => Ok(SampleRecorderSource::UsbR),
-            14 => Ok(SampleRecorderSource::UsbLPlusR),
+            0 => Ok(Self::AudLPlusR),
+            1 => Ok(Self::AudL),
+            2 => Ok(Self::AudR),
+            3 => Ok(Self::Bd),
+            4 => Ok(Self::Sd),
+            5 => Ok(Self::RsCp),
+            6 => Ok(Self::Bt),
+            7 => Ok(Self::Lt),
+            8 => Ok(Self::MtHt),
+            9 => Ok(Self::ChOh),
+            10 => Ok(Self::CyCb),
+            11 => Ok(Self::Main),
+            12 => Ok(Self::UsbL),
+            13 => Ok(Self::UsbR),
+            14 => Ok(Self::UsbLPlusR),
             _ => Err(ConversionError::Range {
                 value: value.to_string(),
                 type_name: "SampleRecorderSource".into(),
@@ -288,8 +274,6 @@ impl From<SampleRecorderSource> for u8 {
     }
 }
 
-/// SampleRecorderRecordingLength
-///
 /// # Excerpt from the manual
 ///
 /// Record Length sets the length of the sampling. With a setting of 1–128 steps, the sampling length is
@@ -319,15 +303,15 @@ impl TryFrom<u8> for SampleRecorderRecordingLength {
     type Error = ConversionError;
     fn try_from(value: u8) -> Result<Self, Self::Error> {
         match value {
-            0 => Ok(SampleRecorderRecordingLength::_1Step),
-            1 => Ok(SampleRecorderRecordingLength::_2Steps),
-            2 => Ok(SampleRecorderRecordingLength::_4Steps),
-            3 => Ok(SampleRecorderRecordingLength::_8Steps),
-            4 => Ok(SampleRecorderRecordingLength::_16Steps),
-            5 => Ok(SampleRecorderRecordingLength::_32Steps),
-            6 => Ok(SampleRecorderRecordingLength::_64Steps),
-            7 => Ok(SampleRecorderRecordingLength::_128Steps),
-            8 => Ok(SampleRecorderRecordingLength::Max),
+            0 => Ok(Self::_1Step),
+            1 => Ok(Self::_2Steps),
+            2 => Ok(Self::_4Steps),
+            3 => Ok(Self::_8Steps),
+            4 => Ok(Self::_16Steps),
+            5 => Ok(Self::_32Steps),
+            6 => Ok(Self::_64Steps),
+            7 => Ok(Self::_128Steps),
+            8 => Ok(Self::Max),
             _ => Err(ConversionError::Range {
                 value: value.to_string(),
                 type_name: "SampleRecorderRecordingLength".into(),

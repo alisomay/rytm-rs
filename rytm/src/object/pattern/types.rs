@@ -35,7 +35,7 @@ impl From<Speed> for u8 {
             Speed::X1B4 => AR_SPEED_1B4X,
             Speed::X1B8 => AR_SPEED_1B8X,
         };
-        speed as u8
+        speed as Self
     }
 }
 
@@ -43,13 +43,13 @@ impl TryFrom<u8> for Speed {
     type Error = ConversionError;
     fn try_from(speed: u8) -> Result<Self, Self::Error> {
         match speed as u32 {
-            AR_SPEED_1X => Ok(Speed::X1),
-            AR_SPEED_2X => Ok(Speed::X2),
-            AR_SPEED_3B2X => Ok(Speed::X3B2),
-            AR_SPEED_3B4X => Ok(Speed::X3B4),
-            AR_SPEED_1B2X => Ok(Speed::X1B2),
-            AR_SPEED_1B4X => Ok(Speed::X1B4),
-            AR_SPEED_1B8X => Ok(Speed::X1B8),
+            AR_SPEED_1X => Ok(Self::X1),
+            AR_SPEED_2X => Ok(Self::X2),
+            AR_SPEED_3B2X => Ok(Self::X3B2),
+            AR_SPEED_3B4X => Ok(Self::X3B4),
+            AR_SPEED_1B2X => Ok(Self::X1B2),
+            AR_SPEED_1B4X => Ok(Self::X1B4),
+            AR_SPEED_1B8X => Ok(Self::X1B8),
             _ => Err(ConversionError::Range {
                 value: speed.to_string(),
                 type_name: "Speed".into(),
@@ -79,8 +79,8 @@ impl TryFrom<u8> for TimeMode {
     type Error = ConversionError;
     fn try_from(mode: u8) -> Result<Self, Self::Error> {
         match mode {
-            0 => Ok(TimeMode::Normal),
-            1 => Ok(TimeMode::Advanced),
+            0 => Ok(Self::Normal),
+            1 => Ok(Self::Advanced),
             _ => Err(ConversionError::Range {
                 value: mode.to_string(),
                 type_name: "TimeMode".into(),

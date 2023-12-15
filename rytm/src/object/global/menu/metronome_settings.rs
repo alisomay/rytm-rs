@@ -39,7 +39,7 @@ impl TryFrom<&ar_global_t> for MetronomeSettings {
 }
 
 impl MetronomeSettings {
-    pub(crate) fn apply_to_raw_global(&self, raw_global: &mut ar_global_t) {
+    pub(crate) fn apply_to_raw_global(self, raw_global: &mut ar_global_t) {
         raw_global.click_active = self.active as u8;
         raw_global.click_time_sig_num = self.time_signature.numerator() as u8;
         raw_global.click_time_sig_den = self.time_signature.denominator() as u8;
@@ -77,12 +77,12 @@ impl MetronomeSettings {
     }
 
     /// Returns `true` if the metronome is active.
-    pub fn is_active(&self) -> bool {
+    pub const fn is_active(&self) -> bool {
         self.active
     }
 
     /// Returns the time signature of the metronome.
-    pub fn time_signature(&self) -> TimeSignature {
+    pub const fn time_signature(&self) -> TimeSignature {
         self.time_signature
     }
 
@@ -91,12 +91,12 @@ impl MetronomeSettings {
     /// Range: `0..=16`
     ///
     /// Numbers represent bars, `0` bars means no pre-roll.
-    pub fn pre_roll_bars(&self) -> usize {
+    pub const fn pre_roll_bars(&self) -> usize {
         self.pre_roll_bars as usize
     }
 
     /// Returns the volume of the metronome.
-    pub fn volume(&self) -> usize {
+    pub const fn volume(&self) -> usize {
         self.volume as usize
     }
 }

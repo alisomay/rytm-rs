@@ -63,7 +63,7 @@ impl XtClassicParameters {
         self.parameter_lock_pool = Some(pool);
     }
 
-    pub fn default_for_lt() -> Self {
+    pub const fn default_for_lt() -> Self {
         Self {
             lev: 100,
             tun: 34,
@@ -78,7 +78,7 @@ impl XtClassicParameters {
         }
     }
 
-    pub fn default_for_mt() -> Self {
+    pub const fn default_for_mt() -> Self {
         Self {
             lev: 100,
             tun: 44,
@@ -93,7 +93,7 @@ impl XtClassicParameters {
         }
     }
 
-    pub fn default_for_ht() -> Self {
+    pub const fn default_for_ht() -> Self {
         Self {
             lev: 100,
             tun: 50,
@@ -121,19 +121,19 @@ impl XtClassicParameters {
             Ok(Self {
                 parameter_lock_pool: None,
                 assigned_track: track_index,
-                lev: (from_s_u16_t(&raw_sound.synth_param_1) >> 8) as u8,
+                lev: (from_s_u16_t(raw_sound.synth_param_1) >> 8) as u8,
                 tun: u8_to_i8_midpoint_of_u8_input_range(
-                    (from_s_u16_t(&raw_sound.synth_param_2) >> 8) as u8,
+                    (from_s_u16_t(raw_sound.synth_param_2) >> 8) as u8,
                     0,
                     127,
                 ),
-                dec: (from_s_u16_t(&raw_sound.synth_param_3) >> 8) as u8,
-                swd: (from_s_u16_t(&raw_sound.synth_param_4) >> 8) as u8,
-                swt: (from_s_u16_t(&raw_sound.synth_param_5) >> 8) as u8,
-                nod: (from_s_u16_t(&raw_sound.synth_param_6) >> 8) as u8,
-                nol: (from_s_u16_t(&raw_sound.synth_param_7) >> 8) as u8,
+                dec: (from_s_u16_t(raw_sound.synth_param_3) >> 8) as u8,
+                swd: (from_s_u16_t(raw_sound.synth_param_4) >> 8) as u8,
+                swt: (from_s_u16_t(raw_sound.synth_param_5) >> 8) as u8,
+                nod: (from_s_u16_t(raw_sound.synth_param_6) >> 8) as u8,
+                nol: (from_s_u16_t(raw_sound.synth_param_7) >> 8) as u8,
                 ton: u8_to_i8_midpoint_of_u8_input_range(
-                    (from_s_u16_t(&raw_sound.synth_param_8) >> 8) as u8,
+                    (from_s_u16_t(raw_sound.synth_param_8) >> 8) as u8,
                     0,
                     127,
                 ),

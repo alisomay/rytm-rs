@@ -1,3 +1,13 @@
+// All casts in this file are intended or safe within the context of this library.
+//
+// One can change `allow` to `warn` to review them if necessary.
+#![allow(
+    clippy::cast_lossless,
+    clippy::cast_possible_truncation,
+    clippy::cast_sign_loss,
+    clippy::cast_possible_wrap
+)]
+
 use super::types::{MachineType, SoundModTarget, SoundSettingsChromaticMode};
 use crate::error::{ConversionError, ParameterError, RytmError};
 use rytm_rs_macro::parameter_range;
@@ -285,123 +295,123 @@ impl SoundSettings {
     }
 
     /// Returns the machine type of the sound.
-    pub fn machine(&self) -> MachineType {
+    pub const fn machine(&self) -> MachineType {
         self.machine_type
     }
 
     /// Returns the chromatic mode of the sound.
-    pub fn chromatic_mode(&self) -> SoundSettingsChromaticMode {
+    pub const fn chromatic_mode(&self) -> SoundSettingsChromaticMode {
         self.chromatic_mode
     }
 
     /// Returns the env reset filter switch of the sound.
-    pub fn env_reset_filter(&self) -> bool {
+    pub const fn env_reset_filter(&self) -> bool {
         self.env_reset_filter
     }
 
     /// Returns the velocity to volume switch of the sound.
-    pub fn velocity_to_volume(&self) -> bool {
+    pub const fn velocity_to_volume(&self) -> bool {
         self.velocity_to_volume
     }
 
     /// Returns the legacy fx send switch of the sound.
-    pub fn legacy_fx_send(&self) -> bool {
+    pub const fn legacy_fx_send(&self) -> bool {
         self.legacy_fx_send
     }
 
     /// Returns the velocity modulation amount 1 of the sound.
     ///
     /// Range: `-127..=128`
-    pub fn velocity_modulation_amt_1(&self) -> isize {
+    pub const fn velocity_modulation_amt_1(&self) -> isize {
         self.velocity_modulation_amt_1 as isize
     }
 
     /// Returns the velocity modulation target 1 of the sound.
-    pub fn velocity_modulation_target_1(&self) -> SoundModTarget {
+    pub const fn velocity_modulation_target_1(&self) -> SoundModTarget {
         self.velocity_modulation_target_1
     }
 
     /// Returns the velocity modulation amount 2 of the sound.
     ///    
     /// Range: `-127..=128`
-    pub fn velocity_modulation_amt_2(&self) -> isize {
+    pub const fn velocity_modulation_amt_2(&self) -> isize {
         self.velocity_modulation_amt_2 as isize
     }
 
     /// Returns the velocity modulation target 2 of the sound.
-    pub fn velocity_modulation_target_2(&self) -> SoundModTarget {
+    pub const fn velocity_modulation_target_2(&self) -> SoundModTarget {
         self.velocity_modulation_target_2
     }
 
     /// Returns the velocity modulation amount 3 of the sound.
     ///
     /// Range: `-127..=128`
-    pub fn velocity_modulation_amt_3(&self) -> isize {
+    pub const fn velocity_modulation_amt_3(&self) -> isize {
         self.velocity_modulation_amt_3 as isize
     }
 
     /// Returns the velocity modulation target 3 of the sound.
-    pub fn velocity_modulation_target_3(&self) -> SoundModTarget {
+    pub const fn velocity_modulation_target_3(&self) -> SoundModTarget {
         self.velocity_modulation_target_3
     }
 
     /// Returns the velocity modulation amount 4 of the sound
     ///
-    /// Range: `-127..=128.
-    pub fn velocity_modulation_amt_4(&self) -> isize {
+    /// Range: `-127..=128`
+    pub const fn velocity_modulation_amt_4(&self) -> isize {
         self.velocity_modulation_amt_4 as isize
     }
 
     /// Returns the velocity modulation target 4 of the sound.
-    pub fn velocity_modulation_target_4(&self) -> SoundModTarget {
+    pub const fn velocity_modulation_target_4(&self) -> SoundModTarget {
         self.velocity_modulation_target_4
     }
 
     /// Returns the after touch modulation amount 1 of the sound.
     ///
-    /// Range: `-127..=128.
-    pub fn after_touch_modulation_amt_1(&self) -> isize {
+    /// Range: `-127..=128`
+    pub const fn after_touch_modulation_amt_1(&self) -> isize {
         self.after_touch_modulation_amt_1 as isize
     }
 
     /// Returns the after touch modulation target 1 of the sound.
-    pub fn after_touch_modulation_target_1(&self) -> SoundModTarget {
+    pub const fn after_touch_modulation_target_1(&self) -> SoundModTarget {
         self.after_touch_modulation_target_1
     }
 
     /// Returns the after touch modulation amount 2 of the sound.
     ///
-    /// Range: `-127..=128.
-    pub fn after_touch_modulation_amt_2(&self) -> isize {
+    /// Range: `-127..=128`
+    pub const fn after_touch_modulation_amt_2(&self) -> isize {
         self.after_touch_modulation_amt_2 as isize
     }
 
     /// Returns the after touch modulation target 2 of the sound.
-    pub fn after_touch_modulation_target_2(&self) -> SoundModTarget {
+    pub const fn after_touch_modulation_target_2(&self) -> SoundModTarget {
         self.after_touch_modulation_target_2
     }
 
     /// Returns the after touch modulation amount 3 of the sound.
     ///
-    /// Range: `-127..=128.
-    pub fn after_touch_modulation_amt_3(&self) -> isize {
+    /// Range: `-127..=128`
+    pub const fn after_touch_modulation_amt_3(&self) -> isize {
         self.after_touch_modulation_amt_3 as isize
     }
 
     /// Returns the after touch modulation target 3 of the sound.
-    pub fn after_touch_modulation_target_3(&self) -> SoundModTarget {
+    pub const fn after_touch_modulation_target_3(&self) -> SoundModTarget {
         self.after_touch_modulation_target_3
     }
 
     /// Returns the after touch modulation amount 4 of the sound.
     ///
-    /// Range: `-127..=128.
-    pub fn after_touch_modulation_amt_4(&self) -> isize {
+    /// Range: `-127..=128`
+    pub const fn after_touch_modulation_amt_4(&self) -> isize {
         self.after_touch_modulation_amt_4 as isize
     }
 
     /// Returns the after touch modulation target 4 of the sound.
-    pub fn after_touch_modulation_target_4(&self) -> SoundModTarget {
+    pub const fn after_touch_modulation_target_4(&self) -> SoundModTarget {
         self.after_touch_modulation_target_4
     }
 
@@ -414,9 +424,7 @@ impl SoundSettings {
                 2 => MachineType::RsHard,
                 3 => MachineType::CpClassic,
                 4 => MachineType::BtClassic,
-                5 => MachineType::XtClassic,
-                6 => MachineType::XtClassic,
-                7 => MachineType::XtClassic,
+                5..=7 => MachineType::XtClassic,
                 8 => MachineType::ChClassic,
                 9 => MachineType::OhClassic,
                 10 => MachineType::CyClassic,

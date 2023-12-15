@@ -1,3 +1,5 @@
+// All casts in this file are intended or safe within the context of this library.
+#![allow(clippy::cast_possible_truncation)]
 use rytm_sys::{
     AR_TRIG_ACCENT, AR_TRIG_ENABLE, AR_TRIG_ENV_PL_EN, AR_TRIG_ENV_PL_SW, AR_TRIG_LFO_PL_EN,
     AR_TRIG_LFO_PL_SW, AR_TRIG_MUTE, AR_TRIG_RETRIG, AR_TRIG_SLIDE, AR_TRIG_SMP_PL_EN,

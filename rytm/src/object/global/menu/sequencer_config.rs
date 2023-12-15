@@ -30,9 +30,8 @@ impl TryFrom<&ar_global_t> for SequencerConfig {
     }
 }
 
-// TODO: Document
 impl SequencerConfig {
-    pub(crate) fn apply_to_raw_global(&self, raw_global: &mut ar_global_t) {
+    pub(crate) fn apply_to_raw_global(self, raw_global: &mut ar_global_t) {
         raw_global.kit_reload_on_chg = self.kit_reload_on_chg as u8;
         raw_global.quantize_live_rec = self.quantize_live_rec as u8;
         raw_global.auto_trk_switch = self.auto_trk_switch as u8;
@@ -50,15 +49,15 @@ impl SequencerConfig {
         self.auto_trk_switch = auto_trk_switch;
     }
 
-    pub fn kit_reload_on_chg(&self) -> bool {
+    pub const fn kit_reload_on_chg(&self) -> bool {
         self.kit_reload_on_chg
     }
 
-    pub fn quantize_live_rec(&self) -> bool {
+    pub const fn quantize_live_rec(&self) -> bool {
         self.quantize_live_rec
     }
 
-    pub fn auto_trk_switch(&self) -> bool {
+    pub const fn auto_trk_switch(&self) -> bool {
         self.auto_trk_switch
     }
 }

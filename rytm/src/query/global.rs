@@ -5,7 +5,7 @@ use crate::{
 };
 use rytm_rs_macro::parameter_range;
 
-/// A query for a global object.
+/// A query to retrieve a [`Global`](crate::object::Global) object from rytm.
 pub struct GlobalQuery {
     /// Global slot
     object_number: usize,
@@ -14,6 +14,9 @@ pub struct GlobalQuery {
 }
 
 impl GlobalQuery {
+    /// Creates a new global query for a global slot.
+    ///
+    /// Accepts a global slot in the range of `0..=3`.
     #[parameter_range(range = "global_slot:0..=3")]
     pub fn new(global_slot: usize) -> Result<Self, RytmError> {
         Ok(Self {
@@ -23,6 +26,11 @@ impl GlobalQuery {
         })
     }
 
+    /// Creates a new global query for a global slot.
+    ///
+    /// Accepts a global slot in the range of `0..=3`.
+    ///
+    /// Accepts a device id in the range of `0..=255`.
     #[parameter_range(range = "global_slot:0..=3")]
     pub fn new_with_device_id(global_slot: usize, device_id: u8) -> Result<Self, RytmError> {
         Ok(Self {
@@ -32,7 +40,8 @@ impl GlobalQuery {
         })
     }
 
-    pub fn new_targeting_work_buffer() -> Self {
+    /// Creates a new global query for the global in the work buffer.
+    pub const fn new_targeting_work_buffer() -> Self {
         Self {
             object_number: 0b1000_0000,
             sysex_type: SysexType::Global,
@@ -40,7 +49,10 @@ impl GlobalQuery {
         }
     }
 
-    pub fn new_targeting_work_buffer_with_device_id(device_id: u8) -> Self {
+    /// Creates a new global query for the global in the work buffer.
+    ///
+    /// Accepts a device id in the range of `0..=255`.
+    pub const fn new_targeting_work_buffer_with_device_id(device_id: u8) -> Self {
         Self {
             object_number: 0b1000_0000,
             sysex_type: SysexType::Global,

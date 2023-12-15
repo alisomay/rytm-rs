@@ -10,7 +10,8 @@ pub struct RawQuery {
 }
 
 impl RawQuery {
-    pub fn new(sysex_type: u8, object_number: u16) -> Self {
+    /// Creates a new raw query.
+    pub const fn new(sysex_type: u8, object_number: u16) -> Self {
         Self {
             sysex_type,
             device_id: 0,
@@ -18,7 +19,8 @@ impl RawQuery {
         }
     }
 
-    pub fn new_with_device_id(sysex_type: u8, device_id: u8, object_number: u16) -> Self {
+    /// Creates a new raw query with a device id.
+    pub const fn new_with_device_id(sysex_type: u8, device_id: u8, object_number: u16) -> Self {
         Self {
             sysex_type,
             device_id,
