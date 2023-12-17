@@ -12,7 +12,7 @@ use crate::{
 use derivative::Derivative;
 use rytm_rs_macro::{machine_parameters, parameter_range};
 use rytm_sys::ar_sound_t;
-use std::{cell::RefCell, rc::Rc};
+use std::sync::{Arc, Mutex};
 
 #[machine_parameters(
  lev: "0..=127" #1,
@@ -38,7 +38,7 @@ pub struct SyChipParameters {
     spd: SyChipSpeed,
 
     #[derivative(Debug = "ignore")]
-    parameter_lock_pool: Option<Rc<RefCell<ParameterLockPool>>>,
+    parameter_lock_pool: Option<Arc<Mutex<ParameterLockPool>>>,
     assigned_track: Option<usize>,
 }
 
@@ -60,7 +60,7 @@ impl Default for SyChipParameters {
 }
 
 impl SyChipParameters {
-    pub(crate) fn link_parameter_lock_pool(&mut self, pool: Rc<RefCell<ParameterLockPool>>) {
+    pub(crate) fn link_parameter_lock_pool(&mut self, pool: Arc<Mutex<ParameterLockPool>>) {
         self.parameter_lock_pool = Some(pool);
     }
 
@@ -88,7 +88,7 @@ impl SyChipParameters {
     pub fn plock_set_wav(&self, wav: SyChipWaveform, trig_index: usize) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             let assigned_track = self.assigned_track.ok_or(OrphanTrig)?;
-            pool.borrow_mut().set_basic_plock(
+            pool.lock().unwrap().set_basic_plock(
                 trig_index,
                 assigned_track as u8,
                 rytm_sys::AR_PLOCK_TYPE_MP6 as u8,
@@ -103,7 +103,7 @@ impl SyChipParameters {
     pub fn plock_get_wav(&self, trig_index: usize) -> Result<Option<SyChipWaveform>, RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             let assigned_track = self.assigned_track.ok_or(OrphanTrig)?;
-            let wav = pool.borrow_mut().get_basic_plock(
+            let wav = pool.lock().unwrap().get_basic_plock(
                 trig_index,
                 assigned_track as u8,
                 rytm_sys::AR_PLOCK_TYPE_MP6 as u8,
@@ -120,7 +120,7 @@ impl SyChipParameters {
     pub fn plock_clear_wav(&self, trig_index: usize) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             let assigned_track = self.assigned_track.ok_or(OrphanTrig)?;
-            pool.borrow_mut().clear_basic_plock(
+            pool.lock().unwrap().clear_basic_plock(
                 trig_index,
                 assigned_track as u8,
                 rytm_sys::AR_PLOCK_TYPE_MP6 as u8,
@@ -145,7 +145,7 @@ impl SyChipParameters {
     pub fn plock_set_spd(&self, spd: SyChipSpeed, trig_index: usize) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             let assigned_track = self.assigned_track.ok_or(OrphanTrig)?;
-            pool.borrow_mut().set_basic_plock(
+            pool.lock().unwrap().set_basic_plock(
                 trig_index,
                 assigned_track as u8,
                 rytm_sys::AR_PLOCK_TYPE_MP7 as u8,
@@ -160,7 +160,7 @@ impl SyChipParameters {
     pub fn plock_get_spd(&self, trig_index: usize) -> Result<Option<SyChipSpeed>, RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             let assigned_track = self.assigned_track.ok_or(OrphanTrig)?;
-            let spd = pool.borrow_mut().get_basic_plock(
+            let spd = pool.lock().unwrap().get_basic_plock(
                 trig_index,
                 assigned_track as u8,
                 rytm_sys::AR_PLOCK_TYPE_MP7 as u8,
@@ -177,7 +177,7 @@ impl SyChipParameters {
     pub fn plock_clear_spd(&self, trig_index: usize) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             let assigned_track = self.assigned_track.ok_or(OrphanTrig)?;
-            pool.borrow_mut().clear_basic_plock(
+            pool.lock().unwrap().clear_basic_plock(
                 trig_index,
                 assigned_track as u8,
                 rytm_sys::AR_PLOCK_TYPE_MP7 as u8,

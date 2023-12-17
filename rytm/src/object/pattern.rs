@@ -33,7 +33,7 @@ use crate::{util::break_u32_into_u8_array, AnySysexType};
 use derivative::Derivative;
 use rytm_rs_macro::parameter_range;
 use rytm_sys::{ar_pattern_raw_to_syx, ar_pattern_t, ar_pattern_track_t, ar_sysex_meta_t};
-use std::{cell::RefCell, rc::Rc};
+use std::sync::{Arc, Mutex};
 pub use track::{
     trig::{types::*, Trig},
     types::*,
@@ -66,10 +66,10 @@ pub struct Pattern {
     /// 12 tracks of analog rytm excluding the FX track.
     tracks: [Track; 12],
     /// Fx Track
-    fx_track: Rc<RefCell<Track>>,
+    fx_track: Arc<Mutex<Track>>,
     /// Parameter Lock Pool
     #[derivative(Debug = "ignore")]
-    parameter_lock_pool: Rc<RefCell<ParameterLockPool>>,
+    parameter_lock_pool: Arc<Mutex<ParameterLockPool>>,
     /// Master Length
     ///
     /// Range `1..=1024`
@@ -134,7 +134,7 @@ impl From<&Pattern> for ar_pattern_t {
 
         for (i, track) in pattern.tracks.iter().enumerate() {
             if i == 12 {
-                let borrow = pattern.fx_track.borrow();
+                let borrow = pattern.fx_track.lock().unwrap();
                 tracks[i] = (&*borrow).into();
                 break;
             }
@@ -145,7 +145,7 @@ impl From<&Pattern> for ar_pattern_t {
         Self {
             magic: break_u32_into_u8_array(pattern.version),
             tracks,
-            plock_seqs: pattern.parameter_lock_pool.borrow().as_raw(),
+            plock_seqs: pattern.parameter_lock_pool.lock().unwrap().as_raw(),
             master_length: to_s_u16_t_union_b(pattern.master_length),
             master_chg_msb: (pattern.master_change >> 8) as u8,
             master_chg_lsb: pattern.master_change as u8,
@@ -175,11 +175,11 @@ impl Pattern {
 
         let mut tracks: [Track; 12] = default_tracks();
 
-        let parameter_lock_pool = Rc::new(RefCell::new(ParameterLockPool::from_raw(
+        let parameter_lock_pool = Arc::new(Mutex::new(ParameterLockPool::from_raw(
             raw_pattern.plock_seqs,
         )));
 
-        let fx_track = Rc::new(RefCell::new(Track::try_from_raw(
+        let fx_track = Arc::new(Mutex::new(Track::try_from_raw(
             12,
             &raw_pattern.tracks[12],
             &parameter_lock_pool,
@@ -191,7 +191,7 @@ impl Pattern {
                 break;
             }
             tracks[i] =
-                Track::try_from_raw(i, track, &parameter_lock_pool, Some(Rc::clone(&fx_track)))?;
+                Track::try_from_raw(i, track, &parameter_lock_pool, Some(Arc::clone(&fx_track)))?;
         }
 
         let version = assemble_u32_from_u8_array(&raw_pattern.magic);
@@ -233,8 +233,8 @@ impl Pattern {
             index,
             version: 5,
             tracks: default_tracks(),
-            fx_track: Rc::new(RefCell::new(Track::try_default(12).unwrap())),
-            parameter_lock_pool: Rc::new(RefCell::new(ParameterLockPool::default())),
+            fx_track: Arc::new(Mutex::new(Track::try_default(12).unwrap())),
+            parameter_lock_pool: Arc::new(Mutex::new(ParameterLockPool::default())),
             master_length: 16,
             master_change: 1,
             kit_number: 0,
@@ -256,8 +256,8 @@ impl Pattern {
             index: 0,
             version: 5,
             tracks: default_tracks(),
-            fx_track: Rc::new(RefCell::new(Track::try_default(12).unwrap())),
-            parameter_lock_pool: Rc::new(RefCell::new(ParameterLockPool::default())),
+            fx_track: Arc::new(Mutex::new(Track::try_default(12).unwrap())),
+            parameter_lock_pool: Arc::new(Mutex::new(ParameterLockPool::default())),
             master_length: 16,
             master_change: 1,
             kit_number: 0,
@@ -455,7 +455,7 @@ impl Pattern {
 
     /// Clears all the parameter locks for this pattern.
     pub fn clear_all_plocks(&mut self) {
-        self.parameter_lock_pool.borrow_mut().clear_all_plocks();
+        self.parameter_lock_pool.lock().unwrap().clear_all_plocks();
     }
 
     /// Clears all the parameter locks for the given track in this pattern.
@@ -464,7 +464,8 @@ impl Pattern {
     #[parameter_range(range = "track_index:0..=12")]
     pub fn clear_all_plocks_for_track(&mut self, track_index: u8) -> Result<(), RytmError> {
         self.parameter_lock_pool
-            .borrow_mut()
+            .lock()
+            .unwrap()
             .clear_all_plocks_for_track(track_index);
 
         Ok(())

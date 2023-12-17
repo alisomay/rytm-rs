@@ -19,7 +19,7 @@ impl Trig {
     #[parameter_range(range = "lfo_speed:-64..=63")]
     pub fn plock_set_lfo_speed(&self, lfo_speed: isize) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
-            pool.borrow_mut().set_basic_plock(
+            pool.lock().unwrap().set_basic_plock(
                 self.index,
                 self.track_index as u8,
                 rytm_sys::AR_PLOCK_TYPE_LFO_SPEED as u8,
@@ -34,7 +34,7 @@ impl Trig {
     /// Sets a parameter lock for the LFO multiplier.
     pub fn plock_set_lfo_multiplier(&self, lfo_multiplier: LfoMultiplier) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
-            pool.borrow_mut().set_basic_plock(
+            pool.lock().unwrap().set_basic_plock(
                 self.index,
                 self.track_index as u8,
                 rytm_sys::AR_PLOCK_TYPE_LFO_MULTIPLY as u8,
@@ -52,7 +52,7 @@ impl Trig {
     #[parameter_range(range = "lfo_fade:-64..=63")]
     pub fn plock_set_lfo_fade(&self, lfo_fade: isize) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
-            pool.borrow_mut().set_basic_plock(
+            pool.lock().unwrap().set_basic_plock(
                 self.index,
                 self.track_index as u8,
                 rytm_sys::AR_PLOCK_TYPE_LFO_FADE as u8,
@@ -70,7 +70,7 @@ impl Trig {
         lfo_destination: LfoDestination,
     ) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
-            pool.borrow_mut().set_basic_plock(
+            pool.lock().unwrap().set_basic_plock(
                 self.index,
                 self.track_index as u8,
                 rytm_sys::AR_PLOCK_TYPE_LFO_DEST as u8,
@@ -85,7 +85,7 @@ impl Trig {
     /// Sets a parameter lock for the LFO waveform.
     pub fn plock_set_lfo_waveform(&self, lfo_waveform: LfoWaveform) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
-            pool.borrow_mut().set_basic_plock(
+            pool.lock().unwrap().set_basic_plock(
                 self.index,
                 self.track_index as u8,
                 rytm_sys::AR_PLOCK_TYPE_LFO_WAVEFORM as u8,
@@ -103,7 +103,7 @@ impl Trig {
     #[parameter_range(range = "lfo_start_phase:0..=127")]
     pub fn plock_set_lfo_start_phase(&self, lfo_start_phase: usize) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
-            pool.borrow_mut().set_basic_plock(
+            pool.lock().unwrap().set_basic_plock(
                 self.index,
                 self.track_index as u8,
                 rytm_sys::AR_PLOCK_TYPE_LFO_PHASE as u8,
@@ -118,7 +118,7 @@ impl Trig {
     /// Sets a parameter lock for the LFO mode.
     pub fn plock_set_lfo_mode(&self, lfo_mode: LfoMode) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
-            pool.borrow_mut().set_basic_plock(
+            pool.lock().unwrap().set_basic_plock(
                 self.index,
                 self.track_index as u8,
                 rytm_sys::AR_PLOCK_TYPE_LFO_TRIGMODE as u8,
@@ -138,7 +138,7 @@ impl Trig {
         if let Some(ref pool) = self.parameter_lock_pool {
             let depth = scale_f32_to_u16(lfo_depth, -128f32, 127.99f32, 0u16, 32767u16);
 
-            pool.borrow_mut().set_compound_plock(
+            pool.lock().unwrap().set_compound_plock(
                 self.index,
                 self.track_index as u8,
                 rytm_sys::AR_PLOCK_TYPE_LFO_DEPTH as u8,
@@ -155,7 +155,7 @@ impl Trig {
     /// Range `-64..=63`
     pub fn plock_get_lfo_speed(&self) -> Result<Option<isize>, RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
-            let value = pool.borrow_mut().get_basic_plock(
+            let value = pool.lock().unwrap().get_basic_plock(
                 self.index,
                 self.track_index as u8,
                 rytm_sys::AR_PLOCK_TYPE_LFO_SPEED as u8,
@@ -175,7 +175,7 @@ impl Trig {
     /// Gets the parameter lock for the LFO multiplier.
     pub fn plock_get_lfo_multiplier(&self) -> Result<Option<LfoMultiplier>, RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
-            let value = pool.borrow_mut().get_basic_plock(
+            let value = pool.lock().unwrap().get_basic_plock(
                 self.index,
                 self.track_index as u8,
                 rytm_sys::AR_PLOCK_TYPE_LFO_MULTIPLY as u8,
@@ -195,7 +195,7 @@ impl Trig {
     /// Range `-64..=63`
     pub fn plock_get_lfo_fade(&self) -> Result<Option<isize>, RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
-            let value = pool.borrow_mut().get_basic_plock(
+            let value = pool.lock().unwrap().get_basic_plock(
                 self.index,
                 self.track_index as u8,
                 rytm_sys::AR_PLOCK_TYPE_LFO_FADE as u8,
@@ -215,7 +215,7 @@ impl Trig {
     /// Gets the parameter lock for the LFO destination.
     pub fn plock_get_lfo_destination(&self) -> Result<Option<LfoDestination>, RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
-            let value = pool.borrow_mut().get_basic_plock(
+            let value = pool.lock().unwrap().get_basic_plock(
                 self.index,
                 self.track_index as u8,
                 rytm_sys::AR_PLOCK_TYPE_LFO_DEST as u8,
@@ -233,7 +233,7 @@ impl Trig {
     /// Gets the parameter lock for the LFO waveform.
     pub fn plock_get_lfo_waveform(&self) -> Result<Option<LfoWaveform>, RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
-            let value = pool.borrow_mut().get_basic_plock(
+            let value = pool.lock().unwrap().get_basic_plock(
                 self.index,
                 self.track_index as u8,
                 rytm_sys::AR_PLOCK_TYPE_LFO_WAVEFORM as u8,
@@ -253,7 +253,7 @@ impl Trig {
     /// Range `0..=127`
     pub fn plock_get_lfo_start_phase(&self) -> Result<Option<usize>, RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
-            let value = pool.borrow_mut().get_basic_plock(
+            let value = pool.lock().unwrap().get_basic_plock(
                 self.index,
                 self.track_index as u8,
                 rytm_sys::AR_PLOCK_TYPE_LFO_PHASE as u8,
@@ -271,7 +271,7 @@ impl Trig {
     /// Gets the parameter lock for the LFO mode.
     pub fn plock_get_lfo_mode(&self) -> Result<Option<LfoMode>, RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
-            let value = pool.borrow_mut().get_basic_plock(
+            let value = pool.lock().unwrap().get_basic_plock(
                 self.index,
                 self.track_index as u8,
                 rytm_sys::AR_PLOCK_TYPE_LFO_TRIGMODE as u8,
@@ -291,7 +291,7 @@ impl Trig {
     /// Range `-128.0..=127.99`
     pub fn plock_get_lfo_depth(&self) -> Result<Option<f32>, RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
-            let value = pool.borrow_mut().get_compound_plock(
+            let value = pool.lock().unwrap().get_compound_plock(
                 self.index,
                 self.track_index as u8,
                 rytm_sys::AR_PLOCK_TYPE_LFO_DEPTH as u8,
@@ -311,7 +311,7 @@ impl Trig {
     /// Clears the parameter lock for the LFO speed.
     pub fn plock_clear_lfo_speed(&self) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
-            pool.borrow_mut().clear_basic_plock(
+            pool.lock().unwrap().clear_basic_plock(
                 self.index,
                 self.track_index as u8,
                 rytm_sys::AR_PLOCK_TYPE_LFO_SPEED as u8,
@@ -325,7 +325,7 @@ impl Trig {
     /// Clears the parameter lock for the LFO multiplier.
     pub fn plock_clear_lfo_multiplier(&self) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
-            pool.borrow_mut().clear_basic_plock(
+            pool.lock().unwrap().clear_basic_plock(
                 self.index,
                 self.track_index as u8,
                 rytm_sys::AR_PLOCK_TYPE_LFO_MULTIPLY as u8,
@@ -339,7 +339,7 @@ impl Trig {
     /// Clears the parameter lock for the LFO fade.
     pub fn plock_clear_lfo_fade(&self) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
-            pool.borrow_mut().clear_basic_plock(
+            pool.lock().unwrap().clear_basic_plock(
                 self.index,
                 self.track_index as u8,
                 rytm_sys::AR_PLOCK_TYPE_LFO_FADE as u8,
@@ -353,7 +353,7 @@ impl Trig {
     /// Clears the parameter lock for the LFO destination.
     pub fn plock_clear_lfo_destination(&self) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
-            pool.borrow_mut().clear_basic_plock(
+            pool.lock().unwrap().clear_basic_plock(
                 self.index,
                 self.track_index as u8,
                 rytm_sys::AR_PLOCK_TYPE_LFO_DEST as u8,
@@ -367,7 +367,7 @@ impl Trig {
     /// Clears the parameter lock for the LFO waveform.
     pub fn plock_clear_lfo_waveform(&self) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
-            pool.borrow_mut().clear_basic_plock(
+            pool.lock().unwrap().clear_basic_plock(
                 self.index,
                 self.track_index as u8,
                 rytm_sys::AR_PLOCK_TYPE_LFO_WAVEFORM as u8,
@@ -381,7 +381,7 @@ impl Trig {
     /// Clears the parameter lock for the LFO start phase.
     pub fn plock_clear_lfo_start_phase(&self) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
-            pool.borrow_mut().clear_basic_plock(
+            pool.lock().unwrap().clear_basic_plock(
                 self.index,
                 self.track_index as u8,
                 rytm_sys::AR_PLOCK_TYPE_LFO_PHASE as u8,
@@ -395,7 +395,7 @@ impl Trig {
     /// Clears the parameter lock for the LFO mode.
     pub fn plock_clear_lfo_mode(&self) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
-            pool.borrow_mut().clear_basic_plock(
+            pool.lock().unwrap().clear_basic_plock(
                 self.index,
                 self.track_index as u8,
                 rytm_sys::AR_PLOCK_TYPE_LFO_TRIGMODE as u8,
@@ -409,7 +409,7 @@ impl Trig {
     /// Clears the parameter lock for the LFO depth.
     pub fn plock_clear_lfo_depth(&self) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
-            pool.borrow_mut().clear_compound_plock(
+            pool.lock().unwrap().clear_compound_plock(
                 self.index,
                 self.track_index as u8,
                 rytm_sys::AR_PLOCK_TYPE_LFO_DEPTH as u8,

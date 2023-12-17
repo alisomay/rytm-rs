@@ -110,7 +110,7 @@ pub use sd_classic::*;
 pub use sd_fm::*;
 pub use sd_hard::*;
 pub use sd_natural::*;
-use std::{cell::RefCell, rc::Rc};
+use std::sync::{Arc, Mutex};
 pub use sy_chip::*;
 pub use sy_dual_vco::*;
 pub use sy_raw::*;
@@ -431,7 +431,7 @@ impl MachineParameters {
 
     pub(crate) fn link_parameter_lock_pool(
         &mut self,
-        parameter_lock_pool: Rc<RefCell<ParameterLockPool>>,
+        parameter_lock_pool: Arc<Mutex<ParameterLockPool>>,
     ) {
         match self {
             Self::BdHard(bd_hard) => bd_hard.link_parameter_lock_pool(parameter_lock_pool),

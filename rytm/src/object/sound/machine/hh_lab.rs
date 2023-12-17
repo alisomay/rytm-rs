@@ -7,7 +7,7 @@ use crate::{
 use derivative::Derivative;
 use rytm_rs_macro::parameter_range;
 use rytm_sys::ar_sound_t;
-use std::{cell::RefCell, rc::Rc};
+use std::sync::{Arc, Mutex};
 
 /// Parameters for the `HhLab` machine.
 #[derive(Derivative, Clone)]
@@ -23,7 +23,7 @@ pub struct HhLabParameters {
     osc6: u16,
 
     #[derivative(Debug = "ignore")]
-    parameter_lock_pool: Option<Rc<RefCell<ParameterLockPool>>>,
+    parameter_lock_pool: Option<Arc<Mutex<ParameterLockPool>>>,
     assigned_track: Option<usize>,
 }
 
@@ -45,7 +45,7 @@ impl Default for HhLabParameters {
 }
 
 impl HhLabParameters {
-    pub(crate) fn link_parameter_lock_pool(&mut self, pool: Rc<RefCell<ParameterLockPool>>) {
+    pub(crate) fn link_parameter_lock_pool(&mut self, pool: Arc<Mutex<ParameterLockPool>>) {
         self.parameter_lock_pool = Some(pool);
     }
 
@@ -219,7 +219,7 @@ impl HhLabParameters {
         if let Some(ref pool) = self.parameter_lock_pool {
             let assigned_track = self.assigned_track.ok_or(OrphanTrig)?;
 
-            pool.borrow_mut().set_basic_plock(
+            pool.lock().unwrap().set_basic_plock(
                 trig_index,
                 assigned_track as u8,
                 rytm_sys::AR_PLOCK_TYPE_MP0 as u8,
@@ -238,7 +238,7 @@ impl HhLabParameters {
         if let Some(ref pool) = self.parameter_lock_pool {
             let assigned_track = self.assigned_track.ok_or(OrphanTrig)?;
 
-            let lev = pool.borrow_mut().get_basic_plock(
+            let lev = pool.lock().unwrap().get_basic_plock(
                 trig_index,
                 assigned_track as u8,
                 rytm_sys::AR_PLOCK_TYPE_MP0 as u8,
@@ -257,7 +257,7 @@ impl HhLabParameters {
     pub fn plock_clear_lev(&self, trig_index: usize) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             let assigned_track = self.assigned_track.ok_or(OrphanTrig)?;
-            pool.borrow_mut().clear_basic_plock(
+            pool.lock().unwrap().clear_basic_plock(
                 trig_index,
                 assigned_track as u8,
                 rytm_sys::AR_PLOCK_TYPE_MP0 as u8,
@@ -275,7 +275,7 @@ impl HhLabParameters {
         if let Some(ref pool) = self.parameter_lock_pool {
             let assigned_track = self.assigned_track.ok_or(OrphanTrig)?;
 
-            pool.borrow_mut().set_compound_plock(
+            pool.lock().unwrap().set_compound_plock(
                 trig_index,
                 assigned_track as u8,
                 rytm_sys::AR_PLOCK_TYPE_MP1 as u8,
@@ -294,7 +294,7 @@ impl HhLabParameters {
         if let Some(ref pool) = self.parameter_lock_pool {
             let assigned_track = self.assigned_track.ok_or(OrphanTrig)?;
 
-            let osc1 = pool.borrow_mut().get_compound_plock(
+            let osc1 = pool.lock().unwrap().get_compound_plock(
                 trig_index,
                 assigned_track as u8,
                 rytm_sys::AR_PLOCK_TYPE_MP1 as u8,
@@ -313,7 +313,7 @@ impl HhLabParameters {
     pub fn plock_clear_osc1(&self, trig_index: usize) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             let assigned_track = self.assigned_track.ok_or(OrphanTrig)?;
-            pool.borrow_mut().clear_compound_plock(
+            pool.lock().unwrap().clear_compound_plock(
                 trig_index,
                 assigned_track as u8,
                 rytm_sys::AR_PLOCK_TYPE_MP1 as u8,
@@ -331,7 +331,7 @@ impl HhLabParameters {
         if let Some(ref pool) = self.parameter_lock_pool {
             let assigned_track = self.assigned_track.ok_or(OrphanTrig)?;
 
-            pool.borrow_mut().set_basic_plock(
+            pool.lock().unwrap().set_basic_plock(
                 trig_index,
                 assigned_track as u8,
                 rytm_sys::AR_PLOCK_TYPE_MP2 as u8,
@@ -350,7 +350,7 @@ impl HhLabParameters {
         if let Some(ref pool) = self.parameter_lock_pool {
             let assigned_track = self.assigned_track.ok_or(OrphanTrig)?;
 
-            let dec = pool.borrow_mut().get_basic_plock(
+            let dec = pool.lock().unwrap().get_basic_plock(
                 trig_index,
                 assigned_track as u8,
                 rytm_sys::AR_PLOCK_TYPE_MP2 as u8,
@@ -369,7 +369,7 @@ impl HhLabParameters {
     pub fn plock_clear_dec(&self, trig_index: usize) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             let assigned_track = self.assigned_track.ok_or(OrphanTrig)?;
-            pool.borrow_mut().clear_basic_plock(
+            pool.lock().unwrap().clear_basic_plock(
                 trig_index,
                 assigned_track as u8,
                 rytm_sys::AR_PLOCK_TYPE_MP2 as u8,
@@ -387,7 +387,7 @@ impl HhLabParameters {
         if let Some(ref pool) = self.parameter_lock_pool {
             let assigned_track = self.assigned_track.ok_or(OrphanTrig)?;
 
-            pool.borrow_mut().set_compound_plock(
+            pool.lock().unwrap().set_compound_plock(
                 trig_index,
                 assigned_track as u8,
                 rytm_sys::AR_PLOCK_TYPE_MP3 as u8,
@@ -406,7 +406,7 @@ impl HhLabParameters {
         if let Some(ref pool) = self.parameter_lock_pool {
             let assigned_track = self.assigned_track.ok_or(OrphanTrig)?;
 
-            let osc2 = pool.borrow_mut().get_compound_plock(
+            let osc2 = pool.lock().unwrap().get_compound_plock(
                 trig_index,
                 assigned_track as u8,
                 rytm_sys::AR_PLOCK_TYPE_MP3 as u8,
@@ -425,7 +425,7 @@ impl HhLabParameters {
     pub fn plock_clear_osc2(&self, trig_index: usize) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             let assigned_track = self.assigned_track.ok_or(OrphanTrig)?;
-            pool.borrow_mut().clear_compound_plock(
+            pool.lock().unwrap().clear_compound_plock(
                 trig_index,
                 assigned_track as u8,
                 rytm_sys::AR_PLOCK_TYPE_MP3 as u8,
@@ -443,7 +443,7 @@ impl HhLabParameters {
         if let Some(ref pool) = self.parameter_lock_pool {
             let assigned_track = self.assigned_track.ok_or(OrphanTrig)?;
 
-            pool.borrow_mut().set_compound_plock(
+            pool.lock().unwrap().set_compound_plock(
                 trig_index,
                 assigned_track as u8,
                 rytm_sys::AR_PLOCK_TYPE_MP4 as u8,
@@ -462,7 +462,7 @@ impl HhLabParameters {
         if let Some(ref pool) = self.parameter_lock_pool {
             let assigned_track = self.assigned_track.ok_or(OrphanTrig)?;
 
-            let osc3 = pool.borrow_mut().get_compound_plock(
+            let osc3 = pool.lock().unwrap().get_compound_plock(
                 trig_index,
                 assigned_track as u8,
                 rytm_sys::AR_PLOCK_TYPE_MP4 as u8,
@@ -481,7 +481,7 @@ impl HhLabParameters {
     pub fn plock_clear_osc3(&self, trig_index: usize) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             let assigned_track = self.assigned_track.ok_or(OrphanTrig)?;
-            pool.borrow_mut().clear_compound_plock(
+            pool.lock().unwrap().clear_compound_plock(
                 trig_index,
                 assigned_track as u8,
                 rytm_sys::AR_PLOCK_TYPE_MP4 as u8,
@@ -499,7 +499,7 @@ impl HhLabParameters {
         if let Some(ref pool) = self.parameter_lock_pool {
             let assigned_track = self.assigned_track.ok_or(OrphanTrig)?;
 
-            pool.borrow_mut().set_compound_plock(
+            pool.lock().unwrap().set_compound_plock(
                 trig_index,
                 assigned_track as u8,
                 rytm_sys::AR_PLOCK_TYPE_MP5 as u8,
@@ -518,7 +518,7 @@ impl HhLabParameters {
         if let Some(ref pool) = self.parameter_lock_pool {
             let assigned_track = self.assigned_track.ok_or(OrphanTrig)?;
 
-            let osc4 = pool.borrow_mut().get_compound_plock(
+            let osc4 = pool.lock().unwrap().get_compound_plock(
                 trig_index,
                 assigned_track as u8,
                 rytm_sys::AR_PLOCK_TYPE_MP5 as u8,
@@ -537,7 +537,7 @@ impl HhLabParameters {
     pub fn plock_clear_osc4(&self, trig_index: usize) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             let assigned_track = self.assigned_track.ok_or(OrphanTrig)?;
-            pool.borrow_mut().clear_compound_plock(
+            pool.lock().unwrap().clear_compound_plock(
                 trig_index,
                 assigned_track as u8,
                 rytm_sys::AR_PLOCK_TYPE_MP5 as u8,
@@ -554,7 +554,7 @@ impl HhLabParameters {
     pub fn plock_set_osc5(&self, osc5: usize, trig_index: usize) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             let assigned_track = self.assigned_track.ok_or(OrphanTrig)?;
-            pool.borrow_mut().set_compound_plock(
+            pool.lock().unwrap().set_compound_plock(
                 trig_index,
                 assigned_track as u8,
                 rytm_sys::AR_PLOCK_TYPE_MP6 as u8,
@@ -571,7 +571,7 @@ impl HhLabParameters {
     pub fn plock_get_osc5(&self, trig_index: usize) -> Result<Option<usize>, RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             let assigned_track = self.assigned_track.ok_or(OrphanTrig)?;
-            let osc5 = pool.borrow_mut().get_compound_plock(
+            let osc5 = pool.lock().unwrap().get_compound_plock(
                 trig_index,
                 assigned_track as u8,
                 rytm_sys::AR_PLOCK_TYPE_MP6 as u8,
@@ -588,7 +588,7 @@ impl HhLabParameters {
     pub fn plock_clear_osc5(&self, trig_index: usize) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             let assigned_track = self.assigned_track.ok_or(OrphanTrig)?;
-            pool.borrow_mut().clear_compound_plock(
+            pool.lock().unwrap().clear_compound_plock(
                 trig_index,
                 assigned_track as u8,
                 rytm_sys::AR_PLOCK_TYPE_MP6 as u8,
@@ -605,7 +605,7 @@ impl HhLabParameters {
     pub fn plock_set_osc6(&self, osc6: usize, trig_index: usize) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             let assigned_track = self.assigned_track.ok_or(OrphanTrig)?;
-            pool.borrow_mut().set_compound_plock(
+            pool.lock().unwrap().set_compound_plock(
                 trig_index,
                 assigned_track as u8,
                 rytm_sys::AR_PLOCK_TYPE_MP7 as u8,
@@ -622,7 +622,7 @@ impl HhLabParameters {
     pub fn plock_get_osc6(&self, trig_index: usize) -> Result<Option<usize>, RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             let assigned_track = self.assigned_track.ok_or(OrphanTrig)?;
-            let osc6 = pool.borrow_mut().get_compound_plock(
+            let osc6 = pool.lock().unwrap().get_compound_plock(
                 trig_index,
                 assigned_track as u8,
                 rytm_sys::AR_PLOCK_TYPE_MP7 as u8,
@@ -639,7 +639,7 @@ impl HhLabParameters {
     pub fn plock_clear_osc6(&self, trig_index: usize) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             let assigned_track = self.assigned_track.ok_or(OrphanTrig)?;
-            pool.borrow_mut().clear_compound_plock(
+            pool.lock().unwrap().clear_compound_plock(
                 trig_index,
                 assigned_track as u8,
                 rytm_sys::AR_PLOCK_TYPE_MP7 as u8,

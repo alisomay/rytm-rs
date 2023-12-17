@@ -27,9 +27,8 @@ use derivative::Derivative;
 use flags::*;
 use rytm_rs_macro::parameter_range;
 use std::{
-    cell::RefCell,
     ops::{Deref, DerefMut},
-    rc::Rc,
+    sync::{Arc, Mutex},
 };
 
 use super::Track;
@@ -352,10 +351,10 @@ pub struct Trig {
     sound_lock: u8,
 
     #[derivative(Debug = "ignore")]
-    parameter_lock_pool: Option<Rc<RefCell<ParameterLockPool>>>,
+    parameter_lock_pool: Option<Arc<Mutex<ParameterLockPool>>>,
 
     #[derivative(Debug = "ignore")]
-    fx_track_ref: Option<Rc<RefCell<Track>>>,
+    fx_track_ref: Option<Arc<Mutex<Track>>>,
 }
 
 impl Trig {
@@ -407,8 +406,8 @@ impl Trig {
         retrig_length: u8,
         retrig_velocity_offset: i8,
         sound_lock: u8,
-        parameter_lock_pool: Rc<RefCell<ParameterLockPool>>,
-        fx_track_ref: Option<Rc<RefCell<Track>>>,
+        parameter_lock_pool: Arc<Mutex<ParameterLockPool>>,
+        fx_track_ref: Option<Arc<Mutex<Track>>>,
     ) -> Result<Self, RytmError> {
         let trig_condition_msb = note & 0b1000_0000;
         let note = note & 0b0111_1111;
@@ -671,7 +670,7 @@ impl Trig {
     pub(crate) fn enable_fx_trig_if_necessary(&self) {
         // Enable fx trig if this method is called on a non-fx trig.
         if let Some(ref fx_track_ref) = self.fx_track_ref {
-            let mut borrow = fx_track_ref.borrow_mut();
+            let mut borrow = fx_track_ref.lock().unwrap();
             let fx_trig = &mut borrow.trigs_mut()[self.index];
             fx_trig.set_trig_enable(true);
         }
@@ -683,7 +682,7 @@ impl Trig {
     pub(crate) fn disable_fx_trig_if_necessary(&self) {
         // Disable fx trig if this method is called on a non-fx trig.
         if let Some(ref fx_track_ref) = self.fx_track_ref {
-            let mut borrow = fx_track_ref.borrow_mut();
+            let mut borrow = fx_track_ref.lock().unwrap();
             let fx_trig = &mut borrow.trigs_mut()[self.index];
             fx_trig.set_trig_enable(false);
         }

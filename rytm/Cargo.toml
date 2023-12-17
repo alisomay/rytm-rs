@@ -21,7 +21,8 @@ exclude = [
 thiserror = "1"
 rytm-sys = "0.1"
 bitstream-io = "2.2.0"
-rytm-rs-macro = "0.1"
+rytm-rs-macro = { path = "../rytm-macro" }
+# rytm-rs-macro = "0.1"
 derivative = "2.2.0"
 embed-doc-image = "0.1.4"
 

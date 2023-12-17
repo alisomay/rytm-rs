@@ -18,7 +18,10 @@ use bitstream_io::{BigEndian, BitRead, BitReader, BitWrite, BitWriter};
 use derivative::Derivative;
 use rytm_rs_macro::parameter_range;
 use rytm_sys::ar_pattern_track_t;
-use std::{cell::RefCell, io::Cursor, rc::Rc};
+use std::{
+    io::Cursor,
+    sync::{Arc, Mutex},
+};
 use trig::Trig;
 
 /// Represents a single track in a pattern.
@@ -68,11 +71,11 @@ pub struct Track {
     pub(crate) __maybe_useful_flags_from_flags_and_speed: u8,
 
     #[derivative(Debug = "ignore")]
-    parameter_lock_pool: Option<Rc<RefCell<ParameterLockPool>>>,
+    parameter_lock_pool: Option<Arc<Mutex<ParameterLockPool>>>,
 
     #[derivative(Debug = "ignore")]
     #[allow(dead_code)]
-    fx_track_ref: Option<Rc<RefCell<Track>>>,
+    fx_track_ref: Option<Arc<Mutex<Track>>>,
 }
 
 impl From<&Track> for ar_pattern_track_t {
@@ -155,7 +158,7 @@ impl Track {
         let fx_track_ref = if index == 12 {
             None
         } else {
-            Some(Rc::new(RefCell::new(Self::try_default(12)?)))
+            Some(Arc::new(Mutex::new(Self::try_default(12)?)))
         };
 
         Ok(Self {
@@ -194,8 +197,8 @@ impl Track {
     pub(crate) fn try_from_raw(
         index: usize,
         raw_track: &ar_pattern_track_t,
-        parameter_lock_pool: &Rc<RefCell<ParameterLockPool>>,
-        fx_track_ref: Option<Rc<RefCell<Self>>>,
+        parameter_lock_pool: &Arc<Mutex<ParameterLockPool>>,
+        fx_track_ref: Option<Arc<Mutex<Self>>>,
     ) -> Result<Self, RytmError> {
         let mut trigs: [Trig; 64] = default_trig_array(index);
 
@@ -203,7 +206,7 @@ impl Track {
         let mut bit_reader = BitReader::endian(trig_cursor, BigEndian);
 
         for (i, trig) in trigs.iter_mut().enumerate() {
-            let parameter_lock_pool_ref = Rc::clone(parameter_lock_pool);
+            let parameter_lock_pool_ref = Arc::clone(parameter_lock_pool);
 
             let raw_trig_flags = bit_reader.read::<u16>(14).unwrap();
             *trig = Trig::new(
@@ -221,7 +224,7 @@ impl Track {
                 raw_track.retrig_velocity_offsets[i],
                 raw_track.sound_locks[i],
                 parameter_lock_pool_ref,
-                fx_track_ref.as_ref().map(Rc::clone),
+                fx_track_ref.as_ref().map(Arc::clone),
             )?;
         }
 
@@ -264,7 +267,7 @@ impl Track {
             __maybe_useful_flag_from_default_trig_note,
             __maybe_useful_flags_from_flags_and_speed,
 
-            parameter_lock_pool: Some(Rc::clone(parameter_lock_pool)),
+            parameter_lock_pool: Some(Arc::clone(parameter_lock_pool)),
             fx_track_ref,
         })
     }
@@ -548,7 +551,8 @@ impl Track {
     /// Clears all the parameter locks for this track.
     pub fn clear_all_plocks(&self) {
         if let Some(pool) = &self.parameter_lock_pool {
-            pool.borrow_mut()
+            pool.lock()
+                .unwrap()
                 .clear_all_plocks_for_track(self.index as u8);
         }
     }

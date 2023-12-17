@@ -27,7 +27,7 @@ use crate::{util::assemble_u32_from_u8_array, AnySysexType};
 use derivative::Derivative;
 use rytm_rs_macro::parameter_range;
 use rytm_sys::{ar_sound_raw_to_syx, ar_sound_t, ar_sysex_meta_t};
-use std::{cell::RefCell, rc::Rc};
+use std::sync::{Arc, Mutex};
 
 /// An enum to understand where the sound is coming from.
 ///
@@ -93,7 +93,7 @@ pub struct Sound {
     __unknown: SoundUnknown,
 
     #[derivative(Debug = "ignore")]
-    pub parameter_lock_pool: Option<Rc<RefCell<ParameterLockPool>>>,
+    pub parameter_lock_pool: Option<Arc<Mutex<ParameterLockPool>>>,
 }
 
 impl From<&Sound> for ar_sound_t {
@@ -133,7 +133,7 @@ impl Sound {
     /// Calling this method on a pool sound will result in an error.
     pub fn link_parameter_lock_pool(
         &mut self,
-        parameter_lock_pool: Rc<RefCell<ParameterLockPool>>,
+        parameter_lock_pool: Arc<Mutex<ParameterLockPool>>,
     ) -> Result<(), RytmError> {
         if self.is_pool_sound() {
             return Err(ParameterError::Compatibility {
@@ -144,7 +144,7 @@ impl Sound {
             .into());
         }
         self.parameter_lock_pool = Some(parameter_lock_pool);
-        let parameter_lock_pool_ref = Rc::clone(self.parameter_lock_pool.as_ref().unwrap());
+        let parameter_lock_pool_ref = Arc::clone(self.parameter_lock_pool.as_ref().unwrap());
         self.machine_parameters
             .link_parameter_lock_pool(parameter_lock_pool_ref);
         Ok(())

@@ -58,7 +58,7 @@ use crate::{
 };
 
 /// A trait which is implemented by all structures which can be converted to rytm sysex query messages.
-pub trait ObjectQuery {
+pub trait ObjectQuery: SysexCompatible {
     /// Returns the sysex type of the object.
     fn sysex_type(&self) -> AnySysexType;
 
@@ -73,7 +73,7 @@ pub trait ObjectQuery {
         SysexMeta {
             container_version: 0x0101,
             dev_id: self.device_id(),
-            obj_type: self.sysex_type().into(),
+            obj_type: ObjectQuery::sysex_type(self).into(),
             obj_nr: self.obj_nr(),
             // Calculated in libanalogrytm, they're dummy values here in this state.
             chksum: 0,
@@ -89,7 +89,7 @@ pub trait ObjectQuery {
 
 impl<T: ObjectQuery> SysexCompatible for T {
     fn sysex_type(&self) -> AnySysexType {
-        self.sysex_type()
+        ObjectQuery::sysex_type(self)
     }
 
     fn as_sysex(&self) -> Result<Vec<u8>, RytmError> {

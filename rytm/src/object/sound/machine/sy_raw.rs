@@ -12,7 +12,7 @@ use crate::{
 use derivative::Derivative;
 use rytm_rs_macro::{machine_parameters, parameter_range};
 use rytm_sys::ar_sound_t;
-use std::{cell::RefCell, rc::Rc};
+use std::sync::{Arc, Mutex};
 
 #[derive(Debug, Default, Clone, Copy)]
 pub enum SyRawWaveform1 {
@@ -119,7 +119,7 @@ pub struct SyRawParameters {
     bal: i8,
 
     #[derivative(Debug = "ignore")]
-    parameter_lock_pool: Option<Rc<RefCell<ParameterLockPool>>>,
+    parameter_lock_pool: Option<Arc<Mutex<ParameterLockPool>>>,
     assigned_track: Option<usize>,
 }
 
@@ -141,7 +141,7 @@ impl Default for SyRawParameters {
 }
 
 impl SyRawParameters {
-    pub(crate) fn link_parameter_lock_pool(&mut self, pool: Rc<RefCell<ParameterLockPool>>) {
+    pub(crate) fn link_parameter_lock_pool(&mut self, pool: Arc<Mutex<ParameterLockPool>>) {
         self.parameter_lock_pool = Some(pool);
     }
 
@@ -178,7 +178,7 @@ impl SyRawParameters {
     pub fn plock_set_wav1(&self, wav1: SyRawWaveform1, trig_index: usize) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             let assigned_track = self.assigned_track.ok_or(OrphanTrig)?;
-            pool.borrow_mut().set_basic_plock(
+            pool.lock().unwrap().set_basic_plock(
                 trig_index,
                 assigned_track as u8,
                 rytm_sys::AR_PLOCK_TYPE_MP6 as u8,
@@ -193,7 +193,7 @@ impl SyRawParameters {
     pub fn plock_get_wav1(&self, trig_index: usize) -> Result<Option<SyRawWaveform1>, RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             let assigned_track = self.assigned_track.ok_or(OrphanTrig)?;
-            let wav1 = pool.borrow_mut().get_basic_plock(
+            let wav1 = pool.lock().unwrap().get_basic_plock(
                 trig_index,
                 assigned_track as u8,
                 rytm_sys::AR_PLOCK_TYPE_MP6 as u8,
@@ -210,7 +210,7 @@ impl SyRawParameters {
     pub fn plock_clear_wav1(&self, trig_index: usize) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             let assigned_track = self.assigned_track.ok_or(OrphanTrig)?;
-            pool.borrow_mut().clear_basic_plock(
+            pool.lock().unwrap().clear_basic_plock(
                 trig_index,
                 assigned_track as u8,
                 rytm_sys::AR_PLOCK_TYPE_MP6 as u8,
@@ -224,7 +224,7 @@ impl SyRawParameters {
     pub fn plock_set_wav2(&self, wav2: SyRawWaveform2, trig_index: usize) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             let assigned_track = self.assigned_track.ok_or(OrphanTrig)?;
-            pool.borrow_mut().set_basic_plock(
+            pool.lock().unwrap().set_basic_plock(
                 trig_index,
                 assigned_track as u8,
                 rytm_sys::AR_PLOCK_TYPE_MP6 as u8,
@@ -239,7 +239,7 @@ impl SyRawParameters {
     pub fn plock_get_wav2(&self, trig_index: usize) -> Result<Option<SyRawWaveform2>, RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             let assigned_track = self.assigned_track.ok_or(OrphanTrig)?;
-            let wav2 = pool.borrow_mut().get_basic_plock(
+            let wav2 = pool.lock().unwrap().get_basic_plock(
                 trig_index,
                 assigned_track as u8,
                 rytm_sys::AR_PLOCK_TYPE_MP6 as u8,
@@ -256,7 +256,7 @@ impl SyRawParameters {
     pub fn plock_clear_wav2(&self, trig_index: usize) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             let assigned_track = self.assigned_track.ok_or(OrphanTrig)?;
-            pool.borrow_mut().clear_basic_plock(
+            pool.lock().unwrap().clear_basic_plock(
                 trig_index,
                 assigned_track as u8,
                 rytm_sys::AR_PLOCK_TYPE_MP6 as u8,

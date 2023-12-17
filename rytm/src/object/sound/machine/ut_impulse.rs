@@ -7,7 +7,7 @@ use crate::{
 use derivative::Derivative;
 use rytm_rs_macro::{machine_parameters, parameter_range};
 use rytm_sys::ar_sound_t;
-use std::{cell::RefCell, rc::Rc};
+use std::sync::{Arc, Mutex};
 
 #[machine_parameters(
  lev: "0..=127" #1,
@@ -29,7 +29,7 @@ pub struct UtImpulseParameters {
     pol: u8,
 
     #[derivative(Debug = "ignore")]
-    parameter_lock_pool: Option<Rc<RefCell<ParameterLockPool>>>,
+    parameter_lock_pool: Option<Arc<Mutex<ParameterLockPool>>>,
     assigned_track: Option<usize>,
 }
 
@@ -47,7 +47,7 @@ impl Default for UtImpulseParameters {
 }
 
 impl UtImpulseParameters {
-    pub(crate) fn link_parameter_lock_pool(&mut self, pool: Rc<RefCell<ParameterLockPool>>) {
+    pub(crate) fn link_parameter_lock_pool(&mut self, pool: Arc<Mutex<ParameterLockPool>>) {
         self.parameter_lock_pool = Some(pool);
     }
 

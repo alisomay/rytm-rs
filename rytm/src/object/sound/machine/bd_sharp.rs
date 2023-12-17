@@ -9,7 +9,7 @@ use crate::{
 use derivative::Derivative;
 use rytm_rs_macro::{machine_parameters, parameter_range};
 use rytm_sys::ar_sound_t;
-use std::{cell::RefCell, rc::Rc};
+use std::sync::{Arc, Mutex};
 
 #[derive(Debug, Default, Clone, Copy)]
 pub enum BdSharpWaveform {
@@ -95,7 +95,7 @@ pub struct BdSharpParameters {
     tic: u8,
 
     #[derivative(Debug = "ignore")]
-    parameter_lock_pool: Option<Rc<RefCell<ParameterLockPool>>>,
+    parameter_lock_pool: Option<Arc<Mutex<ParameterLockPool>>>,
     assigned_track: Option<usize>,
 }
 
@@ -117,7 +117,7 @@ impl Default for BdSharpParameters {
 }
 
 impl BdSharpParameters {
-    pub(crate) fn link_parameter_lock_pool(&mut self, pool: Rc<RefCell<ParameterLockPool>>) {
+    pub(crate) fn link_parameter_lock_pool(&mut self, pool: Arc<Mutex<ParameterLockPool>>) {
         self.parameter_lock_pool = Some(pool);
     }
 
@@ -143,7 +143,7 @@ impl BdSharpParameters {
     pub fn plock_set_wav(&self, wav: BdSharpWaveform, trig_index: usize) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             let assigned_track = self.assigned_track.ok_or(OrphanTrig)?;
-            pool.borrow_mut().set_basic_plock(
+            pool.lock().unwrap().set_basic_plock(
                 trig_index,
                 assigned_track as u8,
                 rytm_sys::AR_PLOCK_TYPE_MP6 as u8,
@@ -158,7 +158,7 @@ impl BdSharpParameters {
     pub fn plock_get_wav(&self, trig_index: usize) -> Result<Option<BdSharpWaveform>, RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             let assigned_track = self.assigned_track.ok_or(OrphanTrig)?;
-            let wav = pool.borrow_mut().get_basic_plock(
+            let wav = pool.lock().unwrap().get_basic_plock(
                 trig_index,
                 assigned_track as u8,
                 rytm_sys::AR_PLOCK_TYPE_MP6 as u8,
@@ -175,7 +175,7 @@ impl BdSharpParameters {
     pub fn plock_clear_wav(&self, trig_index: usize) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             let assigned_track = self.assigned_track.ok_or(OrphanTrig)?;
-            pool.borrow_mut().clear_basic_plock(
+            pool.lock().unwrap().clear_basic_plock(
                 trig_index,
                 assigned_track as u8,
                 rytm_sys::AR_PLOCK_TYPE_MP6 as u8,
