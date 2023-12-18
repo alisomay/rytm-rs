@@ -38,7 +38,7 @@ pub enum RootNote {
 
 impl From<RootNote> for u8 {
     fn from(note: RootNote) -> Self {
-        let note = match note {
+        match note {
             RootNote::C => 0,
             RootNote::CSharp => 1,
             RootNote::D => 2,
@@ -51,31 +51,33 @@ impl From<RootNote> for u8 {
             RootNote::A => 9,
             RootNote::BFlat => 10,
             RootNote::B => 11,
-        };
-
-        PAD_SCALE_ROOT_NOTE_BASE + note
+        }
     }
 }
 
 impl TryFrom<u8> for RootNote {
     type Error = ConversionError;
 
+    // TODO:
+    // When a pattern is sent (or maybe something else happens) the notes are between 0 and 11
+    // But by default they are between 96 and 108
+    // This indicates probably a flag encoding somewhere in the data.
+    // I'm a bit lazy to figure out what it is, so I'm just going to do a quick hack here.
+    // But if a lost flag is waiting to be discovered in this context one can start analyzing this behaviour.
     fn try_from(note: u8) -> Result<Self, Self::Error> {
-        let note = note - PAD_SCALE_ROOT_NOTE_BASE;
-
         match note {
-            0 => Ok(Self::C),
-            1 => Ok(Self::CSharp),
-            2 => Ok(Self::D),
-            3 => Ok(Self::EFlat),
-            4 => Ok(Self::E),
-            5 => Ok(Self::F),
-            6 => Ok(Self::FSharp),
-            7 => Ok(Self::G),
-            8 => Ok(Self::GSharp),
-            9 => Ok(Self::A),
-            10 => Ok(Self::BFlat),
-            11 => Ok(Self::B),
+            0 | 96 => Ok(Self::C),
+            1 | 97 => Ok(Self::CSharp),
+            2 | 98 => Ok(Self::D),
+            3 | 99 => Ok(Self::EFlat),
+            4 | 100 => Ok(Self::E),
+            5 | 101 => Ok(Self::F),
+            6 | 102 => Ok(Self::FSharp),
+            7 | 103 => Ok(Self::G),
+            8 | 104 => Ok(Self::GSharp),
+            9 | 105 => Ok(Self::A),
+            10 | 107 => Ok(Self::BFlat),
+            11 | 108 => Ok(Self::B),
             _ => Err(ConversionError::Range {
                 value: note.to_string(),
                 type_name: "RootNote".into(),
