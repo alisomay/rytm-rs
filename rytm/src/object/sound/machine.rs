@@ -110,6 +110,7 @@ pub use sd_classic::*;
 pub use sd_fm::*;
 pub use sd_hard::*;
 pub use sd_natural::*;
+use serde::{Deserialize, Serialize};
 use std::sync::{Arc, Mutex};
 pub use sy_chip::*;
 pub use sy_dual_vco::*;
@@ -123,7 +124,7 @@ pub use xt_classic::*;
 /// Every machine has distinct parameters and ranges for those parameters.
 ///
 /// Not every machine can be assigned to every track.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum MachineParameters {
     BdHard(BdHardParameters),
     BdClassic(BdClassicParameters),

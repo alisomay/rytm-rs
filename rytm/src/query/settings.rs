@@ -1,6 +1,7 @@
 use super::ObjectQuery;
 use crate::sysex::{AnySysexType, SysexType};
 
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 /// A query to retrieve a [`Settings`](crate::object::Settings) object from rytm.
 pub struct SettingsQuery {
     sysex_type: SysexType,

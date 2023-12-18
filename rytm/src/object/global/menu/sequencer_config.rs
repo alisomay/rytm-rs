@@ -1,8 +1,9 @@
 use crate::error::ConversionError;
 use rytm_sys::ar_global_t;
+use serde::{Deserialize, Serialize};
 
 /// Sequencer configuration.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 pub struct SequencerConfig {
     kit_reload_on_chg: bool,
     quantize_live_rec: bool,

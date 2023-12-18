@@ -7,10 +7,11 @@ use crate::{
 use derivative::Derivative;
 use rytm_rs_macro::parameter_range;
 use rytm_sys::ar_sound_t;
+use serde::{Deserialize, Serialize};
 use std::sync::{Arc, Mutex};
 
 /// Parameters for the `HhLab` machine.
-#[derive(Derivative, Clone)]
+#[derive(Derivative, Clone, Serialize, Deserialize)]
 #[derivative(Debug)]
 pub struct HhLabParameters {
     lev: u8,
@@ -23,6 +24,7 @@ pub struct HhLabParameters {
     osc6: u16,
 
     #[derivative(Debug = "ignore")]
+    #[serde(skip)]
     parameter_lock_pool: Option<Arc<Mutex<ParameterLockPool>>>,
     assigned_track: Option<usize>,
 }

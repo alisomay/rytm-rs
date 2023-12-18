@@ -1,3 +1,5 @@
+use serde::{Deserialize, Serialize};
+
 use crate::error::ConversionError;
 
 /// Represents the name of an object.
@@ -5,7 +7,7 @@ use crate::error::ConversionError;
 /// This can currently be a sound name or a kit name.
 ///
 /// The name is represented as a fixed length array of 15 bytes (ASCII).
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Serialize, Deserialize)]
 pub(crate) struct ObjectName([u8; 15]);
 
 impl ObjectName {

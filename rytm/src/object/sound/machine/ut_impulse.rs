@@ -7,6 +7,7 @@ use crate::{
 use derivative::Derivative;
 use rytm_rs_macro::{machine_parameters, parameter_range};
 use rytm_sys::ar_sound_t;
+use serde::{Deserialize, Serialize};
 use std::sync::{Arc, Mutex};
 
 #[machine_parameters(
@@ -20,7 +21,7 @@ use std::sync::{Arc, Mutex};
  pol: "0..=1" #8,
 )]
 /// Parameters for the `UtImpulse` machine.
-#[derive(Derivative, Clone)]
+#[derive(Derivative, Clone, Serialize, Deserialize)]
 #[derivative(Debug)]
 pub struct UtImpulseParameters {
     lev: u8,
@@ -29,6 +30,7 @@ pub struct UtImpulseParameters {
     pol: u8,
 
     #[derivative(Debug = "ignore")]
+    #[serde(skip)]
     parameter_lock_pool: Option<Arc<Mutex<ParameterLockPool>>>,
     assigned_track: Option<usize>,
 }

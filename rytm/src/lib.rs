@@ -215,6 +215,7 @@ pub mod query;
 pub(crate) mod sysex;
 pub(crate) mod util;
 
+use serde::{Deserialize, Serialize};
 pub use sysex::{AnySysexType, SysexCompatible, SysexType};
 
 use self::error::RytmError;
@@ -230,15 +231,17 @@ use object::{
 
 use defaults::*;
 use rytm_sys::{ar_global_t, ar_kit_t, ar_pattern_t, ar_settings_t, ar_sound_t};
+use serde_big_array::BigArray;
 use sysex::decode_sysex_response_to_raw;
 
 /// [`RytmProject`] represents the state of the analog rytm.
 ///
 /// It contains all structures scoped to an Analog Rytm MKII FW 1.70 project.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct RytmProject {
     work_buffer: RytmProjectWorkBuffer,
     patterns: Vec<Pattern>,
+    #[serde(with = "BigArray")]
     pool_sounds: [Sound; POOL_SOUND_MAX_COUNT],
     kits: Vec<Kit>,
     globals: [Global; GLOBAL_MAX_COUNT],
@@ -466,7 +469,7 @@ impl RytmProject {
 /// [`RytmProjectWorkBuffer`] represents the state of the analog rytm work buffer.
 ///
 /// It contains all structures scoped to an Analog Rytm MKII FW 1.70 project work buffer.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct RytmProjectWorkBuffer {
     pattern: Pattern,
     kit: Kit,

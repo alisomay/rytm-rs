@@ -13,9 +13,10 @@ use crate::{
 };
 use rytm_rs_macro::parameter_range;
 use rytm_sys::ar_sound_t;
+use serde::{Deserialize, Serialize};
 
 /// Represents parameters in the amp page of a sound.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 pub struct Amplitude {
     attack: u8,
     hold: u8,

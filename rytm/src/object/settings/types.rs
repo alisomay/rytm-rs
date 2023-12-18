@@ -1,7 +1,11 @@
+use serde::{Deserialize, Serialize};
+
 use crate::error::ConversionError;
 
 /// The six sequential square buttons on the right side of the Analog Rytm MKII. Fx mode off.
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(
+    Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize,
+)]
 pub enum ParameterMenuItem {
     #[default]
     Trig,
@@ -44,7 +48,9 @@ impl From<ParameterMenuItem> for u8 {
 }
 
 /// The six sequential square buttons on the right side of the Analog Rytm MKII. Fx mode on.
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(
+    Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize,
+)]
 pub enum FxParameterMenuItem {
     #[default]
     Trig,
@@ -89,7 +95,9 @@ impl From<FxParameterMenuItem> for u8 {
 /// - Normal operation mode is the default mode. In this mode, the sequencer plays the selected pattern in a loop.
 /// - Chain mode is used to chain patterns together into a chain. The chain is played in a loop.
 /// - Song mode is used to chain patterns together into a song. The song is played once from start to finish.
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(
+    Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize,
+)]
 pub enum SequencerMode {
     #[default]
     Normal,
@@ -152,7 +160,9 @@ impl From<SequencerMode> for u8 {
 /// A01 > A03 > A04 > A02. When the chain is playing, and you are in TEMP JUMP mode, change pattern to
 /// A16 while pattern A03 is playing. The pattern will immediately change to A16 and once A16 has ended
 /// then the chain will continue to play from pattern A04.
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(
+    Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize,
+)]
 pub enum PatternMode {
     #[default]
     Sequential,
@@ -205,7 +215,9 @@ impl From<PatternMode> for u8 {
 /// audio from the USB input.
 /// - USB R sets the input source to sample external audio from only the right channel of the incoming
 /// audio from the USB input.
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(
+    Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize,
+)]
 pub enum SampleRecorderSource {
     #[default]
     AudLPlusR,
@@ -285,7 +297,9 @@ impl From<SampleRecorderSource> for u8 {
 /// it will take longer than the maximum sampling time. If the device cannot record the entire
 /// set length, this is shown by two exclamation marks next to the sample memory time on the
 /// screen.
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(
+    Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize,
+)]
 pub enum SampleRecorderRecordingLength {
     _1Step,
     _2Steps,

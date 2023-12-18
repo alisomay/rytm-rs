@@ -3,9 +3,12 @@ use rytm_sys::{
     AR_SPEED_1B2X, AR_SPEED_1B4X, AR_SPEED_1B8X, AR_SPEED_1X, AR_SPEED_2X, AR_SPEED_3B2X,
     AR_SPEED_3B4X,
 };
+use serde::{Deserialize, Serialize};
 
 /// The speed of a pattern.
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(
+    Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize,
+)]
 pub enum Speed {
     #[default]
     /// 1x
@@ -59,7 +62,9 @@ impl TryFrom<u8> for Speed {
 }
 
 /// The time mode of a pattern.
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(
+    Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize,
+)]
 pub enum TimeMode {
     #[default]
     Normal,

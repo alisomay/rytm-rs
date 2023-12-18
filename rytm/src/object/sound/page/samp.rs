@@ -16,9 +16,10 @@ use crate::{
 };
 use rytm_rs_macro::parameter_range;
 use rytm_sys::ar_sound_t;
+use serde::{Deserialize, Serialize};
 
 /// Represents parameters in the sample page of a sound.
-#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Serialize, Deserialize)]
 pub struct Sample {
     tune: i8,
     fine_tune: i8,

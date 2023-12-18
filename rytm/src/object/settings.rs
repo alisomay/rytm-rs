@@ -25,6 +25,7 @@ use crate::{
 use derivative::Derivative;
 use rytm_rs_macro::parameter_range;
 use rytm_sys::{ar_settings_raw_to_syx, ar_settings_t, ar_sysex_meta_t};
+use serde::{Deserialize, Serialize};
 use unknown::SettingsUnknown;
 
 impl_sysex_compatible!(
@@ -40,7 +41,7 @@ impl_sysex_compatible!(
 /// It does not map identically to the relevant structure in the firmware.
 ///
 /// Settings may not be a familiar structure for all, to understand what kind of settings are available, please check the methods of this struct.
-#[derive(Derivative, Clone, Copy)]
+#[derive(Derivative, Clone, Copy, Serialize, Deserialize)]
 #[derivative(Debug)]
 pub struct Settings {
     #[derivative(Debug = "ignore")]

@@ -26,6 +26,7 @@ use crate::{
 use derivative::Derivative;
 use flags::*;
 use rytm_rs_macro::parameter_range;
+use serde::{Deserialize, Serialize};
 use std::{
     ops::{Deref, DerefMut},
     sync::{Arc, Mutex},
@@ -258,7 +259,7 @@ pub trait HoldsTrigFlags {
     }
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Serialize, Deserialize)]
 /// A struct that holds the trig flags.
 pub struct TrigFlags(u16);
 
@@ -317,7 +318,7 @@ impl HoldsTrigFlags for TrigFlags {
     }
 }
 
-#[derive(Derivative, Clone)]
+#[derive(Derivative, Clone, Serialize, Deserialize)]
 #[derivative(Debug)]
 pub struct Trig {
     track_index: usize,
@@ -351,10 +352,12 @@ pub struct Trig {
     sound_lock: u8,
 
     #[derivative(Debug = "ignore")]
-    parameter_lock_pool: Option<Arc<Mutex<ParameterLockPool>>>,
+    #[serde(skip)]
+    pub(crate) parameter_lock_pool: Option<Arc<Mutex<ParameterLockPool>>>,
 
     #[derivative(Debug = "ignore")]
-    fx_track_ref: Option<Arc<Mutex<Track>>>,
+    #[serde(skip)]
+    pub(crate) fx_track_ref: Option<Arc<Mutex<Track>>>,
 }
 
 impl Trig {

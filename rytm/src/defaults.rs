@@ -7,6 +7,8 @@ pub const GLOBAL_MAX_COUNT: usize = 4;
 pub const TRACK_MAX_COUNT: usize = 12;
 pub const VOICE_MAX_COUNT: usize = 8;
 
+use std::sync::{Arc, Mutex};
+
 use crate::object::{
     pattern::{track::Track, Trig},
     *,
@@ -29,20 +31,96 @@ pub fn default_work_buffer_sounds() -> [Sound; TRACK_MAX_COUNT] {
     ]
 }
 
-pub fn default_tracks() -> [Track; TRACK_MAX_COUNT] {
+pub fn default_tracks(
+    owner_pattern_index: usize,
+    is_owner_pattern_work_buffer: bool,
+    fx_track_ref: Option<Arc<Mutex<Track>>>,
+) -> [Track; TRACK_MAX_COUNT] {
     [
-        Track::try_default(0).unwrap(),
-        Track::try_default(1).unwrap(),
-        Track::try_default(2).unwrap(),
-        Track::try_default(3).unwrap(),
-        Track::try_default(4).unwrap(),
-        Track::try_default(5).unwrap(),
-        Track::try_default(6).unwrap(),
-        Track::try_default(7).unwrap(),
-        Track::try_default(8).unwrap(),
-        Track::try_default(9).unwrap(),
-        Track::try_default(10).unwrap(),
-        Track::try_default(11).unwrap(),
+        Track::try_default(
+            0,
+            owner_pattern_index,
+            is_owner_pattern_work_buffer,
+            fx_track_ref.clone(),
+        )
+        .unwrap(),
+        Track::try_default(
+            1,
+            owner_pattern_index,
+            is_owner_pattern_work_buffer,
+            fx_track_ref.clone(),
+        )
+        .unwrap(),
+        Track::try_default(
+            2,
+            owner_pattern_index,
+            is_owner_pattern_work_buffer,
+            fx_track_ref.clone(),
+        )
+        .unwrap(),
+        Track::try_default(
+            3,
+            owner_pattern_index,
+            is_owner_pattern_work_buffer,
+            fx_track_ref.clone(),
+        )
+        .unwrap(),
+        Track::try_default(
+            4,
+            owner_pattern_index,
+            is_owner_pattern_work_buffer,
+            fx_track_ref.clone(),
+        )
+        .unwrap(),
+        Track::try_default(
+            5,
+            owner_pattern_index,
+            is_owner_pattern_work_buffer,
+            fx_track_ref.clone(),
+        )
+        .unwrap(),
+        Track::try_default(
+            6,
+            owner_pattern_index,
+            is_owner_pattern_work_buffer,
+            fx_track_ref.clone(),
+        )
+        .unwrap(),
+        Track::try_default(
+            7,
+            owner_pattern_index,
+            is_owner_pattern_work_buffer,
+            fx_track_ref.clone(),
+        )
+        .unwrap(),
+        Track::try_default(
+            8,
+            owner_pattern_index,
+            is_owner_pattern_work_buffer,
+            fx_track_ref.clone(),
+        )
+        .unwrap(),
+        Track::try_default(
+            9,
+            owner_pattern_index,
+            is_owner_pattern_work_buffer,
+            fx_track_ref.clone(),
+        )
+        .unwrap(),
+        Track::try_default(
+            10,
+            owner_pattern_index,
+            is_owner_pattern_work_buffer,
+            fx_track_ref.clone(),
+        )
+        .unwrap(),
+        Track::try_default(
+            11,
+            owner_pattern_index,
+            is_owner_pattern_work_buffer,
+            fx_track_ref,
+        )
+        .unwrap(),
     ]
 }
 

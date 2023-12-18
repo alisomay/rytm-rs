@@ -9,9 +9,12 @@ use crate::{
 use derivative::Derivative;
 use rytm_rs_macro::parameter_range;
 use rytm_sys::ar_global_t;
+use serde::{Deserialize, Serialize};
 
 /// Represents the `Midi Config` menu.
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(
+    Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize,
+)]
 pub struct MidiConfig {
     sync: Sync,
     port_config: PortConfig,
@@ -70,7 +73,7 @@ impl MidiConfig {
 // It is better to do it a struct because of consistency.
 #[allow(clippy::struct_excessive_bools)]
 /// Represents the `Sync` menu in `Midi Config` menu.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 pub struct Sync {
     clock_receive: bool,
     clock_send: bool,
@@ -179,7 +182,7 @@ impl Sync {
 }
 
 /// Represents the `Port Config` menu in `Midi Config` menu.
-#[derive(Derivative, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Derivative, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 #[derivative(Debug)]
 pub struct PortConfig {
     out_port_func: MidiPortFunction,
@@ -413,7 +416,7 @@ impl PortConfig {
 }
 
 /// Represents the `Channels` menu in `Midi Config` menu.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 pub struct Channels {
     auto_channel: MidiChannel,
     track_channels: [MidiChannel; 12],

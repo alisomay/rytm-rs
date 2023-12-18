@@ -1,7 +1,9 @@
 use rytm_sys::ar_kit_t;
+use serde::{Deserialize, Serialize};
+use serde_big_array::BigArray;
 
 /// Unknown fields for kit
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 pub struct KitUnknown {
     pub __pad_name: u8,             /* @0x000C */
     pub __unknown_09d9: [u8; 0x4],  /* @0x07C6..0x07C9 */
@@ -9,7 +11,8 @@ pub struct KitUnknown {
     pub __unknown_09d7: u8,         /* @0x09D7 (scene_id MSB?) */
 
     pub __unknown_arr2: [u8; 0x4], /* @0x09D9..0x09DD */
-    pub __unknown_arr6: [u8; 35],  /* @0x0A0F..0x0A31 */
+    #[serde(with = "BigArray")]
+    pub __unknown_arr6: [u8; 35], /* @0x0A0F..0x0A31 */
 
     pub __unused_pad1: u8,  /* @0x07CB   */
     pub __unused_pad2: u8,  /* @0x07CD   */

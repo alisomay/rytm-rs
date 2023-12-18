@@ -1,7 +1,10 @@
 use crate::{error::ConversionError, object::sound::types::sound_mod_target};
+use serde::{Deserialize, Serialize};
 
 /// Targets for modulation comes from control in.
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(
+    Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize,
+)]
 pub enum ControlInModTarget {
     /// No target.
     #[default]
@@ -156,7 +159,9 @@ impl From<ControlInModTarget> for u8 {
 }
 
 /// Destination of an LFO.
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(
+    Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize,
+)]
 pub enum FxLfoDestination {
     #[default]
     Unset,
@@ -263,7 +268,9 @@ impl From<FxLfoDestination> for u8 {
 }
 
 /// On the grid delay time.
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(
+    Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize,
+)]
 pub enum FxDelayTimeOnTheGrid {
     _128th,
     _64th,
@@ -307,7 +314,9 @@ impl From<FxDelayTimeOnTheGrid> for u8 {
 }
 
 /// Compressor attack type
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(
+    Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize,
+)]
 pub enum FxCompAttack {
     /// 0.03
     #[default]
@@ -360,7 +369,9 @@ impl TryFrom<u8> for FxCompAttack {
 }
 
 /// Compressor release type
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(
+    Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize,
+)]
 pub enum FxCompRelease {
     /// 0.1
     _0_1,
@@ -417,7 +428,9 @@ impl TryFrom<u8> for FxCompRelease {
 }
 
 /// Compressor ratio type
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(
+    Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize,
+)]
 pub enum FxCompRatio {
     #[default]
     /// 1:2
@@ -458,7 +471,9 @@ impl TryFrom<u8> for FxCompRatio {
 }
 
 /// Compressor side chain eq type
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(
+    Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize,
+)]
 pub enum FxCompSideChainEq {
     Off,
     #[default]

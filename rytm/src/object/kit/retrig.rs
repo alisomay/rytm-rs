@@ -5,9 +5,10 @@ use crate::{
 };
 use rytm_rs_macro::parameter_range;
 use rytm_sys::ar_kit_t;
+use serde::{Deserialize, Serialize};
 
 /// Represents the retrig settings for a track.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 pub struct TrackRetrigMenu {
     track_index: usize,
     rate: RetrigRate,

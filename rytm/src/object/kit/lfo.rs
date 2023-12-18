@@ -9,9 +9,10 @@ use crate::{
 };
 use rytm_rs_macro::parameter_range;
 use rytm_sys::ar_kit_t;
+use serde::{Deserialize, Serialize};
 
 /// Lfo parameters for the fx.
-#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Serialize, Deserialize)]
 pub struct FxLfo {
     speed: i8,
     multiplier: LfoMultiplier,

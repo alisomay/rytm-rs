@@ -9,6 +9,7 @@
 #![allow(clippy::enum_glob_use)]
 use super::machine::MachineParameters;
 use crate::error::ConversionError;
+use serde::{Deserialize, Serialize};
 
 #[allow(unused)]
 mod machines {
@@ -176,7 +177,9 @@ pub(crate) mod sound_mod_target {
 }
 
 /// Machine type of a sound.
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(
+    Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize,
+)]
 pub enum MachineType {
     BdHard,
     BdClassic,
@@ -394,7 +397,9 @@ impl From<MachineParameters> for MachineType {
 }
 
 /// Destination of an LFO.
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(
+    Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize,
+)]
 pub enum LfoDestination {
     #[default]
     Unset,
@@ -520,7 +525,9 @@ impl From<LfoDestination> for u8 {
 }
 
 /// Targets for sound modulation.
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(
+    Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize,
+)]
 pub enum SoundModTarget {
     /// No target.
     #[default]
@@ -706,7 +713,9 @@ impl From<SoundModTarget> for u8 {
     }
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(
+    Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize,
+)]
 /// Filter type of a filter.
 pub enum FilterType {
     #[default]
@@ -753,7 +762,9 @@ impl From<FilterType> for u8 {
 }
 
 /// Multiplier for an LFO.
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(
+    Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize,
+)]
 pub enum LfoMultiplier {
     /// x1
     X1,
@@ -874,7 +885,9 @@ impl From<LfoMultiplier> for u8 {
 }
 
 /// The shape of an LFO wave.
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(
+    Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize,
+)]
 pub enum LfoWaveform {
     #[default]
     Tri,
@@ -920,7 +933,9 @@ impl From<LfoWaveform> for u8 {
 }
 
 /// The mode of an LFO.
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(
+    Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize,
+)]
 pub enum LfoMode {
     #[default]
     Free,
@@ -960,7 +975,9 @@ impl From<LfoMode> for u8 {
 }
 
 /// The chromatic mode of a sound.
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(
+    Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize,
+)]
 pub enum SoundSettingsChromaticMode {
     Off,
     Synth,

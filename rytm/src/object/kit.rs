@@ -44,6 +44,8 @@ use crate::{
 use derivative::Derivative;
 use rytm_rs_macro::parameter_range;
 use rytm_sys::{ar_kit_raw_to_syx, ar_kit_t, ar_sysex_meta_t};
+use serde::{Deserialize, Serialize};
+use serde_big_array::BigArray;
 
 impl_sysex_compatible!(
     Kit,
@@ -56,7 +58,7 @@ impl_sysex_compatible!(
 /// Represents a kit in the analog rytm.
 ///
 /// It does not map identically to the structure in the firmware.
-#[derive(Derivative, Clone)]
+#[derive(Derivative, Clone, Serialize, Deserialize)]
 #[derivative(Debug)]
 pub struct Kit {
     #[derivative(Debug = "ignore")]
@@ -87,8 +89,10 @@ pub struct Kit {
     //
     // ---- TODO: ----
     #[derivative(Debug = "ignore")]
+    #[serde(with = "BigArray")]
     pub(crate) perf_ctl: [u8; 48 * 4], /* @0x0842..0x0901 */
     #[derivative(Debug = "ignore")]
+    #[serde(with = "BigArray")]
     pub(crate) scene_ctl: [u8; 48 * 4], /* @0x0917..0x09D6 */
     // 0..=11 device 0..=11
     #[derivative(Debug = "ignore")]

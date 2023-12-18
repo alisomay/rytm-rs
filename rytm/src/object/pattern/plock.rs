@@ -1,5 +1,49 @@
 use crate::{error::RytmError, util::stable_partition, RytmError::ParameterLockMemoryFull};
 use derivative::Derivative;
+use serde::{Deserialize, Serialize};
+use serde_big_array::BigArray;
+
+#[derive(Derivative, Clone, Copy, Serialize, Deserialize)]
+#[derivative(Debug)]
+pub struct PlockSeq {
+    pub track_nr: u8,
+    pub plock_type: u8,
+
+    #[serde(with = "BigArray")]
+    pub data: [u8; 64],
+}
+
+impl Default for PlockSeq {
+    fn default() -> Self {
+        Self {
+            track_nr: 0xFF,
+            plock_type: 0xFF,
+            // This is not project default in AR but I think it is more sound.
+            // The project default is 0x00 in AR.
+            data: [0xFF; 64],
+        }
+    }
+}
+
+impl From<rytm_sys::ar_plock_seq_t> for PlockSeq {
+    fn from(raw: rytm_sys::ar_plock_seq_t) -> Self {
+        Self {
+            track_nr: raw.track_nr,
+            plock_type: raw.plock_type,
+            data: raw.data,
+        }
+    }
+}
+
+impl From<&PlockSeq> for rytm_sys::ar_plock_seq_t {
+    fn from(plock_seq: &PlockSeq) -> Self {
+        Self {
+            track_nr: plock_seq.track_nr,
+            plock_type: plock_seq.plock_type,
+            data: plock_seq.data,
+        }
+    }
+}
 
 /// Wrapper type for the parameter lock pool.
 ///
@@ -8,31 +52,57 @@ use derivative::Derivative;
 /// Has a total of 72 slots for 72 different parameter locks.
 ///
 /// Each slot can hold 64 parameter lock values which corresponds to the 64 possible trigs in a pattern.
-#[derive(Derivative, Clone, Copy)]
+#[derive(Derivative, Clone, Serialize, Deserialize)]
 #[derivative(Debug)]
 pub struct ParameterLockPool {
-    pub inner: [rytm_sys::ar_plock_seq_t; 72],
+    pub owner_pattern_index: usize,
+    pub inner: Vec<PlockSeq>,
+    pub is_owner_pattern_work_buffer: bool,
 }
 
 impl Default for ParameterLockPool {
     fn default() -> Self {
+        let mut inner = Vec::with_capacity(72);
+        for _ in 0..72 {
+            inner.push(PlockSeq::default());
+        }
+
         Self {
-            inner: [rytm_sys::ar_plock_seq_t::default(); 72],
+            owner_pattern_index: 0,
+            inner,
+            is_owner_pattern_work_buffer: false,
         }
     }
 }
 
 impl ParameterLockPool {
-    pub const fn as_raw(&self) -> [rytm_sys::ar_plock_seq_t; 72] {
+    pub fn as_raw(&self) -> [rytm_sys::ar_plock_seq_t; 72] {
         self.inner
+            .iter()
+            .map(std::convert::Into::into)
+            .collect::<Vec<_>>()
+            .try_into()
+            .expect("This can not fail until we change the size of 72 anywhere.")
     }
 
     // This type is around 4kb in size, copying is indeed inefficient.
     // But until now it didn't create any practical problems.
     // If we see a slowdown in the future we can change this.
-    #[allow(clippy::large_types_passed_by_value)]
-    pub const fn from_raw(raw: [rytm_sys::ar_plock_seq_t; 72]) -> Self {
-        Self { inner: raw }
+    pub fn from_raw(
+        raw: &[rytm_sys::ar_plock_seq_t; 72],
+        owner_pattern_index: usize,
+        is_owner_pattern_work_buffer: bool,
+    ) -> Self {
+        let inner = raw
+            .iter()
+            .map(|plock_seq| (*plock_seq).into())
+            .collect::<Vec<_>>();
+
+        Self {
+            owner_pattern_index,
+            inner,
+            is_owner_pattern_work_buffer,
+        }
     }
 
     pub fn set_basic_plock(
