@@ -15,8 +15,11 @@ use rytm_sys::{
     AR_PADSCALE_SUPER_LOCRIAN, AR_PADSCALE_ULTRAPHRYGIAN, AR_PADSCALE_WHOLE_HALF_DIMINISHED,
     AR_PADSCALE_WHOLE_TONE,
 };
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(
+    Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize,
+)]
 pub enum RootNote {
     #[default]
     C,
@@ -81,7 +84,9 @@ impl TryFrom<u8> for RootNote {
     }
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(
+    Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize,
+)]
 pub enum PadScale {
     #[default]
     Chromatic,

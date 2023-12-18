@@ -1,7 +1,8 @@
 use rytm_sys::ar_global_t;
+use serde::{Deserialize, Serialize};
 
 /// Unknown fields for global
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 pub struct GlobalUnknown {
     pub __unknown0x09_0x0a: [u8; 2],
     pub __unknown0x31: u8,

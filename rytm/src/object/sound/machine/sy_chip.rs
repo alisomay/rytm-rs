@@ -12,6 +12,7 @@ use crate::{
 use derivative::Derivative;
 use rytm_rs_macro::{machine_parameters, parameter_range};
 use rytm_sys::ar_sound_t;
+use serde::{Deserialize, Serialize};
 use std::sync::{Arc, Mutex};
 
 #[machine_parameters(
@@ -25,7 +26,7 @@ use std::sync::{Arc, Mutex};
  // #8 spd: (manual impl)  (0=128T,1=128,2=64T,3=128d,4=64,5=32T,6=64d,7=32,8=16T,9=32d,10=16,11=8T,12=16d,13=8,14=4T,15=8d,16=4,17=2T,18=4d,19=2,20=1T,21=2d,22=1,23=1d,24=1.0Hz,25=1.56Hz,26=1.88Hz,27=2Hz,28=3.13Hz,29=3.75Hz,30=4Hz,31=5Hz,32=6.25Hz,33=7.5Hz,34=10Hz,35=12.5Hz,36=15Hz,37=20Hz,38=25Hz,39=30Hz,40=40Hz,41=50Hz,42=60Hz,43=75Hz,44=100Hz,45=120Hz,46=150Hz,47=180Hz,48=200Hz,49=240Hz,50=250Hz,51=300Hz,52=350Hz,53=360Hz,54=400Hz,55=420Hz,56=480Hz,57=240 5Hz,58=200 5Hz,59=150 5Hz,60=120 5Hz,61=100 5Hz,62=60 5Hz,63=50 5Hz,64=30 5Hz,65=25 5Hz)
 )]
 /// Parameters for the `SyChip` machine.
-#[derive(Derivative, Clone)]
+#[derive(Derivative, Clone, Serialize, Deserialize)]
 #[derivative(Debug)]
 pub struct SyChipParameters {
     lev: u8,
@@ -38,6 +39,7 @@ pub struct SyChipParameters {
     spd: SyChipSpeed,
 
     #[derivative(Debug = "ignore")]
+    #[serde(skip)]
     parameter_lock_pool: Option<Arc<Mutex<ParameterLockPool>>>,
     assigned_track: Option<usize>,
 }
@@ -232,7 +234,7 @@ impl SyChipParameters {
     }
 }
 
-#[derive(Debug, Default, Clone, Copy)]
+#[derive(Debug, Default, Clone, Copy, Serialize, Deserialize)]
 pub enum SyChipWaveform {
     Sin,
     Asin,
@@ -347,7 +349,7 @@ impl From<SyChipWaveform> for u8 {
     }
 }
 
-#[derive(Debug, Default, Clone, Copy)]
+#[derive(Debug, Default, Clone, Copy, Serialize, Deserialize)]
 pub enum SyChipSpeed {
     _128T,
     _128,

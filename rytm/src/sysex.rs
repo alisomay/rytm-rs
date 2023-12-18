@@ -13,6 +13,7 @@ pub mod types;
 
 use crate::error::{RytmError, SysexConversionError};
 use rytm_sys::{ar_global_t, ar_kit_t, ar_pattern_t, ar_settings_t, ar_sound_t};
+use serde::{Deserialize, Serialize};
 use std::ptr::addr_of_mut;
 pub use types::*;
 
@@ -40,7 +41,7 @@ pub const GLOBAL_RAW_SIZE: usize = std::mem::size_of::<ar_global_t>();
 /// Meta type for sysex messages.
 ///
 /// Can represent known and unknown sysex types.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum AnySysexType {
     Known(SysexType),
     Unknown(u8),

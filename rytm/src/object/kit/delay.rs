@@ -5,9 +5,10 @@ use crate::{
 };
 use rytm_rs_macro::parameter_range;
 use rytm_sys::ar_kit_t;
+use serde::{Deserialize, Serialize};
 
 /// Delay parameters for the kit.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
 pub struct FxDelay {
     time: u8,
     ping_pong: bool,

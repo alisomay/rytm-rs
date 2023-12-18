@@ -678,6 +678,9 @@ fn usage() {
 
 #[test]
 fn stuff() {
+    let mut rytm = RytmProject::default();
+    let ser = serde_json::to_string(&rytm).unwrap();
+    std::fs::write("proj.json", ser).unwrap();
     // let out = get_connection_to_rytm();
     // let (_conn_in, rx) = make_input_message_forwarder();
 

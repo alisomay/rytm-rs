@@ -14,6 +14,7 @@ use derivative::Derivative;
 use menu::*;
 use rytm_rs_macro::parameter_range;
 use rytm_sys::{ar_global_raw_to_syx, ar_global_t, ar_sysex_meta_t};
+use serde::{Deserialize, Serialize};
 
 impl_sysex_compatible!(
     Global,
@@ -28,7 +29,7 @@ impl_sysex_compatible!(
 /// It does not map identically to the structure in the firmware.
 ///
 /// Globals are global settings which you may found in the settings menu of the device.
-#[derive(Derivative, Clone, Copy)]
+#[derive(Derivative, Clone, Copy, Serialize, Deserialize)]
 #[derivative(Debug)]
 pub struct Global {
     #[derivative(Debug = "ignore")]

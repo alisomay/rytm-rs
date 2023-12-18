@@ -5,6 +5,7 @@ use crate::{
 };
 use rytm_rs_macro::parameter_range;
 
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 /// A query to retrieve a [`Pattern`](crate::object::Pattern) object from rytm.
 pub struct PatternQuery {
     /// Pattern index

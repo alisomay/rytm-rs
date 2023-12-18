@@ -1,7 +1,8 @@
 use rytm_sys::ar_sound_t;
+use serde::{Deserialize, Serialize};
 
 /// Unknown fields for sound
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 pub struct SoundUnknown {
     pub __unknown_arr1: [u8; 12], /* @0x0000 reads BE EF BA CE 00 00 00 04 00 00 00 00 */
     pub __pad_name: u8,           /* @0x000C */

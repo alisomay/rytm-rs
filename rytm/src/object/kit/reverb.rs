@@ -1,9 +1,10 @@
 use crate::error::{ConversionError, ParameterError, RytmError};
 use rytm_rs_macro::parameter_range;
 use rytm_sys::ar_kit_t;
+use serde::{Deserialize, Serialize};
 
 /// Reverb parameters for the kit.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
 pub struct FxReverb {
     pre_delay: u8,
     decay: u8,

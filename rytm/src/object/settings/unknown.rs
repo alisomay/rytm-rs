@@ -1,7 +1,9 @@
 use rytm_sys::ar_settings_t;
+use serde::{Deserialize, Serialize};
+use serde_big_array::BigArray;
 
 /// Unknown fields for settings
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 pub struct SettingsUnknown {
     /// Always the duplicate of selected_track
     pub __selected_track_duplicate: u8,
@@ -11,6 +13,7 @@ pub struct SettingsUnknown {
     pub __unknown0x000e_0x0014: [u8; 7],
     ///  @0x0017..0x0019 All zeros.
     pub __unknown0x0017_0x0019: [u8; 3],
+    #[serde(with = "BigArray")]
     /// The response continues with the repeating 16 byte pattern of 0xFF_FF_FF_FF 0x00_00_00_00 0x00_00_00_00 0x00_00_00_00
     /// The repeating pattern repeats 128 times. Total length of 2048 bytes.
     pub __unknown0x001f: [u8; 16 * 128],

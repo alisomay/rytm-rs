@@ -12,9 +12,10 @@ use super::types::{MachineType, SoundModTarget, SoundSettingsChromaticMode};
 use crate::error::{ConversionError, ParameterError, RytmError};
 use rytm_rs_macro::parameter_range;
 use rytm_sys::ar_sound_t;
+use serde::{Deserialize, Serialize};
 
 /// A sound's settings.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 
 pub struct SoundSettings {
     pub(crate) machine_type: MachineType,

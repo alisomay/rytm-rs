@@ -17,9 +17,10 @@ use crate::{
 };
 use rytm_rs_macro::parameter_range;
 use rytm_sys::ar_sound_t;
+use serde::{Deserialize, Serialize};
 
 /// Represents parameters in the lfo page of a sound.
-#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Serialize, Deserialize)]
 pub struct Lfo {
     speed: i8,
     multiplier: LfoMultiplier,

@@ -4,6 +4,7 @@ use crate::{
 };
 use rytm_rs_macro::parameter_range;
 use rytm_sys::ar_sysex_meta_t;
+use serde::{Deserialize, Serialize};
 
 mod sysex_id {
     #![allow(clippy::cast_possible_truncation)]
@@ -44,7 +45,9 @@ mod sysex_id {
 /// The type of a sysex message.
 ///
 /// Can represent known sysex types.
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(
+    Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize,
+)]
 pub enum SysexType {
     Pattern,
     Kit,
@@ -110,7 +113,9 @@ impl TryFrom<u8> for SysexType {
 }
 
 /// Contains the metadata of a sysex message.
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(
+    Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize,
+)]
 pub struct SysexMeta {
     pub container_version: u16,
     pub dev_id: u8,

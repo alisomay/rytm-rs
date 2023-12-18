@@ -8,6 +8,7 @@ use crate::{
 use derivative::Derivative;
 use rytm_rs_macro::{machine_parameters, parameter_range};
 use rytm_sys::ar_sound_t;
+use serde::{Deserialize, Serialize};
 use std::sync::{Arc, Mutex};
 
 #[machine_parameters(
@@ -21,7 +22,7 @@ use std::sync::{Arc, Mutex};
     fmt:  "-32.0..=32.0" #8,
 )]
 /// Parameters for the `BdFm` machine.
-#[derive(Derivative, Clone)]
+#[derive(Derivative, Clone, Serialize, Deserialize)]
 #[derivative(Debug)]
 pub struct BdFmParameters {
     lev: u8,
@@ -34,6 +35,7 @@ pub struct BdFmParameters {
     fmt: f32,
 
     #[derivative(Debug = "ignore")]
+    #[serde(skip)]
     parameter_lock_pool: Option<Arc<Mutex<ParameterLockPool>>>,
     assigned_track: Option<usize>,
 }

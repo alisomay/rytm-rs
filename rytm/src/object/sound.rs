@@ -1,3 +1,4 @@
+pub(crate) mod de;
 /// All structures related to machines and their parameters.
 pub mod machine;
 /// Holds the page settings of the sound. Like `[AMP]`, `[FLT]`, `[LFO]`, `[SAMP]` on the device.
@@ -21,18 +22,22 @@ use crate::{
     impl_sysex_compatible,
     object::types::ObjectName,
     sysex::{SysexCompatible, SysexMeta, SysexType, SOUND_SYSEX_SIZE},
+    util::arc_mutex_owner,
     ParameterError,
 };
 use crate::{util::assemble_u32_from_u8_array, AnySysexType};
 use derivative::Derivative;
 use rytm_rs_macro::parameter_range;
 use rytm_sys::{ar_sound_raw_to_syx, ar_sound_t, ar_sysex_meta_t};
+use serde::{Deserialize, Serialize};
 use std::sync::{Arc, Mutex};
 
 /// An enum to understand where the sound is coming from.
 ///
 /// The sound can be a pool sound, the work buffer or as a part of a kit.
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(
+    Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize,
+)]
 pub enum SoundType {
     Pool,
     #[default]
@@ -51,7 +56,7 @@ impl_sysex_compatible!(
 /// Represents a sound in the analog rytm.
 ///
 /// This structure does not map identically to the relevant structure in the firmware.
-#[derive(Derivative, Clone)]
+#[derive(Derivative, Clone, Serialize)]
 #[derivative(Debug)]
 pub struct Sound {
     #[derivative(Debug = "ignore")]
@@ -93,7 +98,8 @@ pub struct Sound {
     __unknown: SoundUnknown,
 
     #[derivative(Debug = "ignore")]
-    pub parameter_lock_pool: Option<Arc<Mutex<ParameterLockPool>>>,
+    #[serde(serialize_with = "arc_mutex_owner::opt_serialize")]
+    pub(crate) parameter_lock_pool: Option<Arc<Mutex<ParameterLockPool>>>,
 }
 
 impl From<&Sound> for ar_sound_t {

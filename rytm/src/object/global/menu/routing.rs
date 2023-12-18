@@ -4,9 +4,10 @@ use crate::{
 };
 use rytm_rs_macro::parameter_range;
 use rytm_sys::ar_global_t;
+use serde::{Deserialize, Serialize};
 
 /// Represents the routing menu.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 pub struct Routing {
     route_to_main_flags: u16,
     send_to_fx_flags: u16,

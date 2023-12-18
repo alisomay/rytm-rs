@@ -18,6 +18,8 @@ use bitstream_io::{BigEndian, BitRead, BitReader, BitWrite, BitWriter};
 use derivative::Derivative;
 use rytm_rs_macro::parameter_range;
 use rytm_sys::ar_pattern_track_t;
+use serde::Serialize;
+use serde_big_array::BigArray;
 use std::{
     io::Cursor,
     sync::{Arc, Mutex},
@@ -27,32 +29,36 @@ use trig::Trig;
 /// Represents a single track in a pattern.
 ///
 /// If the track index is 12 then this is the FX track.
-#[derive(Derivative, Clone)]
+#[derive(Derivative, Clone, Serialize)]
 #[derivative(Debug)]
 pub struct Track {
-    index: usize,
-    trigs: [Trig; 64],
+    pub(crate) is_owner_pattern_work_buffer: bool,
+    pub(crate) owner_pattern_index: usize,
+    pub(crate) index: usize,
 
-    default_trig_flags: TrigFlags,
-    default_trig_note: u8,
-    default_trig_velocity: u8,
-    default_trig_note_length: Length,
-    default_trig_probability: u8,
+    #[serde(serialize_with = "BigArray::serialize")]
+    pub(crate) trigs: [Trig; 64],
 
-    number_of_steps: u8,
-    quantize_amount: u8,
-    sends_midi: bool,
-    speed: Speed,
+    pub(crate) default_trig_flags: TrigFlags,
+    pub(crate) default_trig_note: u8,
+    pub(crate) default_trig_velocity: u8,
+    pub(crate) default_trig_note_length: Length,
+    pub(crate) default_trig_probability: u8,
 
-    euclidean_mode: bool,
-    euclidean_pl1: u8,
-    euclidean_pl2: u8,
-    euclidean_ro1: u8,
-    euclidean_ro2: u8,
-    euclidean_tro: u8,
+    pub(crate) number_of_steps: u8,
+    pub(crate) quantize_amount: u8,
+    pub(crate) sends_midi: bool,
+    pub(crate) speed: Speed,
 
-    pad_scale: PadScale,
-    root_note: RootNote,
+    pub(crate) euclidean_mode: bool,
+    pub(crate) euclidean_pl1: u8,
+    pub(crate) euclidean_pl2: u8,
+    pub(crate) euclidean_ro1: u8,
+    pub(crate) euclidean_ro2: u8,
+    pub(crate) euclidean_tro: u8,
+
+    pub(crate) pad_scale: PadScale,
+    pub(crate) root_note: RootNote,
 
     /// MSB of default_trig_note.
     ///
@@ -71,11 +77,13 @@ pub struct Track {
     pub(crate) __maybe_useful_flags_from_flags_and_speed: u8,
 
     #[derivative(Debug = "ignore")]
-    parameter_lock_pool: Option<Arc<Mutex<ParameterLockPool>>>,
+    #[serde(skip)]
+    pub(crate) parameter_lock_pool: Option<Arc<Mutex<ParameterLockPool>>>,
 
     #[derivative(Debug = "ignore")]
     #[allow(dead_code)]
-    fx_track_ref: Option<Arc<Mutex<Track>>>,
+    #[serde(skip)]
+    pub(crate) fx_track_ref: Option<Arc<Mutex<Track>>>,
 }
 
 impl From<&Track> for ar_pattern_track_t {
@@ -153,15 +161,16 @@ impl From<&Track> for ar_pattern_track_t {
 }
 
 impl Track {
-    #[parameter_range(range = "index:0..=12")]
-    pub(crate) fn try_default(index: usize) -> Result<Self, RytmError> {
-        let fx_track_ref = if index == 12 {
-            None
-        } else {
-            Some(Arc::new(Mutex::new(Self::try_default(12)?)))
-        };
-
+    #[parameter_range(range = "index:0..=12", range = "owner_pattern_index:0..=127")]
+    pub(crate) fn try_default(
+        index: usize,
+        owner_pattern_index: usize,
+        is_owner_pattern_work_buffer: bool,
+        fx_track_ref: Option<Arc<Mutex<Self>>>,
+    ) -> Result<Self, RytmError> {
         Ok(Self {
+            owner_pattern_index,
+            is_owner_pattern_work_buffer,
             index,
             trigs: default_trig_array(index),
 
@@ -239,7 +248,11 @@ impl Track {
 
         let default_trig_note = raw_track.default_note & 0b0111_1111;
 
+        let plock_pool = parameter_lock_pool.lock().unwrap();
+
         Ok(Self {
+            is_owner_pattern_work_buffer: plock_pool.is_owner_pattern_work_buffer,
+            owner_pattern_index: plock_pool.owner_pattern_index,
             index,
             trigs,
 

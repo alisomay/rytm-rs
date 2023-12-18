@@ -1,7 +1,11 @@
+use serde::{Deserialize, Serialize};
+
 use crate::error::ConversionError;
 
 /// Micro timing of a trig.
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(
+    Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize,
+)]
 pub enum MicroTime {
     /// `-23/384`
     N23B384,
@@ -215,7 +219,9 @@ impl From<&MicroTime> for isize {
 }
 
 /// Length type which can be used for note lengths and retrig lengths.
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(
+    Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize,
+)]
 pub enum Length {
     /// `1/128`
     _128th,
@@ -761,7 +767,9 @@ impl TryFrom<u8> for Length {
 }
 
 /// Retrig rate of a trig.
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(
+    Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize,
+)]
 pub enum RetrigRate {
     /// `1/1`
     _1B1,
@@ -854,7 +862,9 @@ impl From<RetrigRate> for u8 {
     }
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(
+    Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize,
+)]
 /// Trig condition of a trig.
 pub enum TrigCondition {
     /// 1% probability.

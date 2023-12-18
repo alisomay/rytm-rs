@@ -11,6 +11,7 @@ use crate::{
 use derivative::Derivative;
 use rytm_rs_macro::{machine_parameters, parameter_range};
 use rytm_sys::ar_sound_t;
+use serde::{Deserialize, Serialize};
 use std::sync::{Arc, Mutex};
 
 #[machine_parameters(
@@ -24,7 +25,7 @@ use std::sync::{Arc, Mutex};
  bal: "-64..=63" #8,
 )]
 /// Parameters for the `SdClassic` machine.
-#[derive(Derivative, Clone)]
+#[derive(Derivative, Clone, Serialize, Deserialize)]
 #[derivative(Debug)]
 pub struct SdClassicParameters {
     lev: u8,
@@ -37,6 +38,7 @@ pub struct SdClassicParameters {
     bal: i8,
 
     #[derivative(Debug = "ignore")]
+    #[serde(skip)]
     parameter_lock_pool: Option<Arc<Mutex<ParameterLockPool>>>,
     assigned_track: Option<usize>,
 }

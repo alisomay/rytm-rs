@@ -1,7 +1,10 @@
 use crate::error::ConversionError;
+use serde::{Deserialize, Serialize};
 
 /// An enum which represents a time signature in the metronome settings menu.
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(
+    Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize,
+)]
 pub enum TimeSignature {
     /// 1/1
     _1B1,
@@ -369,7 +372,9 @@ impl TimeSignature {
 /// An enum which represents a midi channel in the global menu.
 ///
 /// It can be either a specific channel, the auto channel or off.
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(
+    Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize,
+)]
 pub enum MidiChannel {
     Channel(usize),
     #[default]
@@ -402,7 +407,9 @@ impl TryInto<u8> for MidiChannel {
 /// An enum which represents a midi port function in the midi config menu.
 ///
 /// It can be either midi, din24 or din48.
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(
+    Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize,
+)]
 pub enum MidiPortFunction {
     #[default]
     Midi,
@@ -441,7 +448,9 @@ impl From<MidiPortFunction> for u8 {
 /// Midi data can be transported via the physical midi port, usb port or both.
 ///
 /// It can also be disabled.
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(
+    Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize,
+)]
 pub enum MidiTransportLayer {
     Disabled,
     Midi,
@@ -485,7 +494,9 @@ impl From<MidiTransportLayer> for u8 {
 /// - Internal means that the parameter value is not sent to the external world.
 /// - External means that the parameter value is sent to the external world but not to the internal world.
 /// - Internal and external means that the parameter value is sent to both the internal and external world.
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(
+    Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize,
+)]
 pub enum ParameterDestination {
     Internal,
     #[default]
@@ -526,7 +537,9 @@ impl From<ParameterDestination> for u8 {
 /// `USB TO MAIN [dB]` sets the amount of amplification of the sound that is streamed over USB to the
 /// Analog Rytm MKII’s main out when used with a class compliant audio device. (0 dB–+18 dB) This parameter
 /// is only available when `USB CONFIG` is set to `USB AUDIO/MIDI`.
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(
+    Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize,
+)]
 pub enum RoutingUsbToMainDb {
     #[default]
     Zero,
@@ -566,7 +579,9 @@ impl From<RoutingUsbToMainDb> for u8 {
 /// An enum which represents the type of midi parameter output in the midi config menu.
 ///
 /// It can be either `NRPN` or `CC`.
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(
+    Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize,
+)]
 pub enum MidiParameterOutput {
     Nrpn,
     #[default]
@@ -600,7 +615,9 @@ impl From<MidiParameterOutput> for u8 {
 /// An enum which represents the channels used for midi parameter output through the midi ports.
 ///
 /// It can be either the auto channel or the track channel.
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(
+    Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize,
+)]
 pub enum MidiPortsOutputChannel {
     #[default]
     AutoChannel,
@@ -638,7 +655,9 @@ impl From<MidiPortsOutputChannel> for u8 {
 /// - Also it has 8 outputs and they correspond to the voices.
 ///
 /// This enum is used to represent the voices coupled by pad numbers.
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(
+    Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize,
+)]
 pub enum HardwareTrack {
     #[default]
     _1,
@@ -714,7 +733,9 @@ impl From<HardwareTrack> for u8 {
 /// MKII’s tracks, you must place a note trig on the selected track(s) and start the sequencer.
 /// This is needed to trigger and open the track’s envelope and let the audio through. For
 /// continuous processing, set the trig’s LEN parameter to INF.
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(
+    Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize,
+)]
 pub enum RoutingUsbInOptions {
     #[default]
     PreFx,
@@ -782,7 +803,9 @@ impl From<RoutingUsbInOptions> for u8 {
 /// - `AUDIO IN` the outgoing audio is routed straight from the Analog Rytm MKII’s audio inputs to the class
 /// compliant device.
 /// `OFF` no audio is sent to the class compliant device.
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(
+    Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize,
+)]
 pub enum RoutingUsbOutOptions {
     #[default]
     MainOut,
