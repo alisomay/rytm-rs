@@ -27,6 +27,7 @@ It is thoroughly [documented](https://docs.rs/rytm-rs/latest/rytm_rs/#), to get 
 - Different methods provided for setting, getting, clearing parameter locks exhaustively and available in `Trig` struct.
 - All 34 machine types are represented including parameter lock setters getters and clearers.
 - All getters and setters use the actual range of values on the device not the internal ranges which are used in the sysex protocol.
+- Serialization and deserialization of the project to and from `JSON` is provided. But that was experimental actually and I don't think it is useful since a serialized project is around 32mb which is too large.
 
 ## Purpose
 
