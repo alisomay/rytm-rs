@@ -16,6 +16,24 @@ pub enum ParameterMenuItem {
     Lfo,
 }
 
+impl TryFrom<&str> for ParameterMenuItem {
+    type Error = ConversionError;
+    fn try_from(parameter_menu_item: &str) -> Result<Self, Self::Error> {
+        match parameter_menu_item {
+            "trig" => Ok(Self::Trig),
+            "src" => Ok(Self::Src),
+            "smpl" => Ok(Self::Smpl),
+            "fltr" => Ok(Self::Fltr),
+            "amp" => Ok(Self::Amp),
+            "lfo" => Ok(Self::Lfo),
+            _ => Err(ConversionError::Range {
+                value: parameter_menu_item.to_string(),
+                type_name: "ParameterMenuItem".into(),
+            }),
+        }
+    }
+}
+
 impl TryFrom<u8> for ParameterMenuItem {
     type Error = ConversionError;
     fn try_from(value: u8) -> Result<Self, Self::Error> {
@@ -61,6 +79,24 @@ pub enum FxParameterMenuItem {
     Lfo,
 }
 
+impl TryFrom<&str> for FxParameterMenuItem {
+    type Error = ConversionError;
+    fn try_from(fx_parameter_menu_item: &str) -> Result<Self, Self::Error> {
+        match fx_parameter_menu_item {
+            "trig" => Ok(Self::Trig),
+            "delay" => Ok(Self::Delay),
+            "reverb" => Ok(Self::Reverb),
+            "dist" => Ok(Self::Dist),
+            "comp" => Ok(Self::Comp),
+            "lfo" => Ok(Self::Lfo),
+            _ => Err(ConversionError::Range {
+                value: fx_parameter_menu_item.to_string(),
+                type_name: "FxParameterMenuItem".into(),
+            }),
+        }
+    }
+}
+
 impl TryFrom<u8> for FxParameterMenuItem {
     type Error = ConversionError;
     fn try_from(value: u8) -> Result<Self, Self::Error> {
@@ -103,6 +139,21 @@ pub enum SequencerMode {
     Normal,
     Chain,
     Song,
+}
+
+impl TryFrom<&str> for SequencerMode {
+    type Error = ConversionError;
+    fn try_from(sequencer_mode: &str) -> Result<Self, Self::Error> {
+        match sequencer_mode {
+            "normal" => Ok(Self::Normal),
+            "chain" => Ok(Self::Chain),
+            "song" => Ok(Self::Song),
+            _ => Err(ConversionError::Range {
+                value: sequencer_mode.to_string(),
+                type_name: "SequencerMode".into(),
+            }),
+        }
+    }
 }
 
 impl TryFrom<u8> for SequencerMode {
@@ -171,6 +222,22 @@ pub enum PatternMode {
     TempJump,
 }
 
+impl TryFrom<&str> for PatternMode {
+    type Error = ConversionError;
+    fn try_from(pattern_mode: &str) -> Result<Self, Self::Error> {
+        match pattern_mode {
+            "sequential" => Ok(Self::Sequential),
+            "direct_start" => Ok(Self::DirectStart),
+            "direct_jump" => Ok(Self::DirectJump),
+            "temp_jump" => Ok(Self::TempJump),
+            _ => Err(ConversionError::Range {
+                value: pattern_mode.to_string(),
+                type_name: "PatternMode".into(),
+            }),
+        }
+    }
+}
+
 impl TryFrom<u8> for PatternMode {
     type Error = ConversionError;
     fn try_from(value: u8) -> Result<Self, Self::Error> {
@@ -235,6 +302,33 @@ pub enum SampleRecorderSource {
     UsbL,
     UsbR,
     UsbLPlusR,
+}
+
+impl TryFrom<&str> for SampleRecorderSource {
+    type Error = ConversionError;
+    fn try_from(sample_recorder_source: &str) -> Result<Self, Self::Error> {
+        match sample_recorder_source {
+            "audl+r" => Ok(Self::AudLPlusR),
+            "audl" => Ok(Self::AudL),
+            "audr" => Ok(Self::AudR),
+            "bd" => Ok(Self::Bd),
+            "sd" => Ok(Self::Sd),
+            "rs/cp" => Ok(Self::RsCp),
+            "bt" => Ok(Self::Bt),
+            "lt" => Ok(Self::Lt),
+            "mt/ht" => Ok(Self::MtHt),
+            "ch/oh" => Ok(Self::ChOh),
+            "cy/cb" => Ok(Self::CyCb),
+            "main" => Ok(Self::Main),
+            "usbl" => Ok(Self::UsbL),
+            "usbr" => Ok(Self::UsbR),
+            "usbl+r" => Ok(Self::UsbLPlusR),
+            _ => Err(ConversionError::Range {
+                value: sample_recorder_source.to_string(),
+                type_name: "SampleRecorderSource".into(),
+            }),
+        }
+    }
 }
 
 impl TryFrom<u8> for SampleRecorderSource {
@@ -311,6 +405,27 @@ pub enum SampleRecorderRecordingLength {
     _128Steps,
     #[default]
     Max,
+}
+
+impl TryFrom<&str> for SampleRecorderRecordingLength {
+    type Error = ConversionError;
+    fn try_from(sample_recorder_recording_length: &str) -> Result<Self, Self::Error> {
+        match sample_recorder_recording_length {
+            "1step" => Ok(Self::_1Step),
+            "2steps" => Ok(Self::_2Steps),
+            "4steps" => Ok(Self::_4Steps),
+            "8steps" => Ok(Self::_8Steps),
+            "16steps" => Ok(Self::_16Steps),
+            "32steps" => Ok(Self::_32Steps),
+            "64steps" => Ok(Self::_64Steps),
+            "128steps" => Ok(Self::_128Steps),
+            "max" => Ok(Self::Max),
+            _ => Err(ConversionError::Range {
+                value: sample_recorder_recording_length.to_string(),
+                type_name: "SampleRecorderRecordingLength".into(),
+            }),
+        }
+    }
 }
 
 impl TryFrom<u8> for SampleRecorderRecordingLength {

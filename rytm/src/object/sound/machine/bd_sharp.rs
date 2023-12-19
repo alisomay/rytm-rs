@@ -29,6 +29,30 @@ pub enum BdSharpWaveform {
     SqrB,
 }
 
+impl TryFrom<&str> for BdSharpWaveform {
+    type Error = ConversionError;
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        match value {
+            "sina" => Ok(Self::SinA),
+            "sinb" => Ok(Self::SinB),
+            "asina" => Ok(Self::AsinA),
+            "asinb" => Ok(Self::AsinB),
+            "tria" => Ok(Self::TriA),
+            "trib" => Ok(Self::TriB),
+            "ssawa" => Ok(Self::SsawA),
+            "ssawb" => Ok(Self::SsawB),
+            "sawa" => Ok(Self::SawA),
+            "sawb" => Ok(Self::SawB),
+            "sqra" => Ok(Self::SqrA),
+            "sqrb" => Ok(Self::SqrB),
+            _ => Err(ConversionError::Range {
+                value: value.to_string(),
+                type_name: "BdSharpWaveform".into(),
+            }),
+        }
+    }
+}
+
 impl TryFrom<u8> for BdSharpWaveform {
     type Error = ConversionError;
     fn try_from(value: u8) -> Result<Self, Self::Error> {

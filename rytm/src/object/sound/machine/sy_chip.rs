@@ -269,6 +269,60 @@ pub enum SyChipWaveform {
     /// Pulse width is a percentage from 1 to 99.
     Percentage(usize),
 }
+impl TryFrom<&str> for SyChipWaveform {
+    type Error = ConversionError;
+    fn try_from(wav: &str) -> Result<Self, Self::Error> {
+        match wav {
+            "sin" => Ok(Self::Sin),
+            "asin" => Ok(Self::Asin),
+            "tri" => Ok(Self::Tri),
+            "ssaw" => Ok(Self::Ssaw),
+            "saw" => Ok(Self::Saw),
+            "sqr" => Ok(Self::Sqr),
+            "noise" => Ok(Self::Noise),
+            "anm1" => Ok(Self::Anm1),
+            "anm2" => Ok(Self::Anm2),
+            "anm3" => Ok(Self::Anm3),
+            "anm4" => Ok(Self::Anm4),
+            "anm5" => Ok(Self::Anm5),
+            "pwm+" => Ok(Self::PwmPlus),
+            "pwm-" => Ok(Self::PwmMinus),
+            "trib" => Ok(Self::TriB),
+            "tri+" => Ok(Self::TriPlus),
+            "tri++" => Ok(Self::TriPlusPlus),
+            "trix" => Ok(Self::TriX),
+            "sawb" => Ok(Self::SawB),
+            "saw+" => Ok(Self::SawPlus),
+            "saw++" => Ok(Self::SawPlusPlus),
+            "sawx" => Ok(Self::SawX),
+            "sqrb" => Ok(Self::SqrB),
+            "sqr+" => Ok(Self::SqrPlus),
+            "sqr++" => Ok(Self::SqrPlusPlus),
+            "sqrx" => Ok(Self::SqrX),
+            "tbl1" => Ok(Self::Tbl1),
+            "tbl2" => Ok(Self::Tbl2),
+            "tbl3" => Ok(Self::Tbl3),
+            wav if !wav.is_empty() => {
+                let (value, _) = wav.split_once('%').ok_or_else(|| ConversionError::Range {
+                    value: wav.to_string(),
+                    type_name: "SyChipWaveform".into(),
+                })?;
+                let wav = value.parse::<usize>()?;
+                if !(1..=99).contains(&wav) {
+                    return Err(ConversionError::Range {
+                        value: wav.to_string(),
+                        type_name: "SyChipWaveform".into(),
+                    });
+                }
+                Ok(Self::Percentage(wav))
+            }
+            _ => Err(ConversionError::Range {
+                value: wav.to_string(),
+                type_name: "SyChipWaveform".into(),
+            }),
+        }
+    }
+}
 
 impl TryFrom<u8> for SyChipWaveform {
     type Error = ConversionError;
@@ -418,6 +472,84 @@ pub enum SyChipSpeed {
     _50S,
     _30S,
     _25S,
+}
+
+impl TryFrom<&str> for SyChipSpeed {
+    type Error = ConversionError;
+    fn try_from(spd: &str) -> Result<Self, Self::Error> {
+        match spd {
+            "128t" => Ok(Self::_128T),
+            "128" => Ok(Self::_128),
+            "64t" => Ok(Self::_64T),
+            "128d" => Ok(Self::_128D),
+            "64" => Ok(Self::_64),
+            "32t" => Ok(Self::_32T),
+            "64d" => Ok(Self::_64D),
+            "32" => Ok(Self::_32),
+            "16t" => Ok(Self::_16T),
+            "32d" => Ok(Self::_32D),
+            "16" => Ok(Self::_16),
+            "8t" => Ok(Self::_8T),
+            "16d" => Ok(Self::_16D),
+            "8" => Ok(Self::_8),
+            "4t" => Ok(Self::_4T),
+            "8d" => Ok(Self::_8D),
+            "4" => Ok(Self::_4),
+            "2t" => Ok(Self::_2T),
+            "4d" => Ok(Self::_4D),
+            "2" => Ok(Self::_2),
+            "1t" => Ok(Self::_1T),
+            "2d" => Ok(Self::_2D),
+            "1" => Ok(Self::_1),
+            "1d" => Ok(Self::_1D),
+            "1.0hz" => Ok(Self::_1_0Hz),
+            "1.56hz" => Ok(Self::_1_56Hz),
+            "1.88hz" => Ok(Self::_1_88Hz),
+            "2hz" => Ok(Self::_2Hz),
+            "3.13hz" => Ok(Self::_3_13Hz),
+            "3.75hz" => Ok(Self::_3_75Hz),
+            "4hz" => Ok(Self::_4Hz),
+            "5hz" => Ok(Self::_5Hz),
+            "6.25hz" => Ok(Self::_6_25Hz),
+            "7.5hz" => Ok(Self::_7_5Hz),
+            "10hz" => Ok(Self::_10Hz),
+            "12.5hz" => Ok(Self::_12_5Hz),
+            "15hz" => Ok(Self::_15Hz),
+            "20hz" => Ok(Self::_20Hz),
+            "25hz" => Ok(Self::_25Hz),
+            "30hz" => Ok(Self::_30Hz),
+            "40hz" => Ok(Self::_40Hz),
+            "50hz" => Ok(Self::_50Hz),
+            "60hz" => Ok(Self::_60Hz),
+            "75hz" => Ok(Self::_75Hz),
+            "100hz" => Ok(Self::_100Hz),
+            "120hz" => Ok(Self::_120Hz),
+            "150hz" => Ok(Self::_150Hz),
+            "180hz" => Ok(Self::_180Hz),
+            "200hz" => Ok(Self::_200Hz),
+            "240hz" => Ok(Self::_240Hz),
+            "250hz" => Ok(Self::_250Hz),
+            "300hz" => Ok(Self::_300Hz),
+            "350hz" => Ok(Self::_350Hz),
+            "360hz" => Ok(Self::_360Hz),
+            "400hz" => Ok(Self::_400Hz),
+            "420hz" => Ok(Self::_420Hz),
+            "480hz" => Ok(Self::_480Hz),
+            "240s" => Ok(Self::_240S),
+            "200s" => Ok(Self::_200S),
+            "150s" => Ok(Self::_150S),
+            "120s" => Ok(Self::_120S),
+            "100s" => Ok(Self::_100S),
+            "60s" => Ok(Self::_60S),
+            "50s" => Ok(Self::_50S),
+            "30s" => Ok(Self::_30S),
+            "25s" => Ok(Self::_25S),
+            _ => Err(ConversionError::Range {
+                value: spd.to_string(),
+                type_name: "SyChipSpeed".into(),
+            }),
+        }
+    }
 }
 
 impl TryFrom<u8> for SyChipSpeed {

@@ -169,6 +169,99 @@ pub enum TimeSignature {
     _16B16,
 }
 
+impl TryFrom<&str> for TimeSignature {
+    type Error = ConversionError;
+
+    fn try_from(ts: &str) -> Result<Self, Self::Error> {
+        match ts {
+            "1/1" => Ok(Self::_1B1),
+            "2/1" => Ok(Self::_2B1),
+            "3/1" => Ok(Self::_3B1),
+            "4/1" => Ok(Self::_4B1),
+            "5/1" => Ok(Self::_5B1),
+            "6/1" => Ok(Self::_6B1),
+            "7/1" => Ok(Self::_7B1),
+            "8/1" => Ok(Self::_8B1),
+            "9/1" => Ok(Self::_9B1),
+            "10/1" => Ok(Self::_10B1),
+            "11/1" => Ok(Self::_11B1),
+            "12/1" => Ok(Self::_12B1),
+            "13/1" => Ok(Self::_13B1),
+            "14/1" => Ok(Self::_14B1),
+            "15/1" => Ok(Self::_15B1),
+            "16/1" => Ok(Self::_16B1),
+            "1/2" => Ok(Self::_1B2),
+            "2/2" => Ok(Self::_2B2),
+            "3/2" => Ok(Self::_3B2),
+            "4/2" => Ok(Self::_4B2),
+            "5/2" => Ok(Self::_5B2),
+            "6/2" => Ok(Self::_6B2),
+            "7/2" => Ok(Self::_7B2),
+            "8/2" => Ok(Self::_8B2),
+            "9/2" => Ok(Self::_9B2),
+            "10/2" => Ok(Self::_10B2),
+            "11/2" => Ok(Self::_11B2),
+            "12/2" => Ok(Self::_12B2),
+            "13/2" => Ok(Self::_13B2),
+            "14/2" => Ok(Self::_14B2),
+            "15/2" => Ok(Self::_15B2),
+            "16/2" => Ok(Self::_16B2),
+            "1/4" => Ok(Self::_1B4),
+            "2/4" => Ok(Self::_2B4),
+            "3/4" => Ok(Self::_3B4),
+            "4/4" => Ok(Self::_4B4),
+            "5/4" => Ok(Self::_5B4),
+            "6/4" => Ok(Self::_6B4),
+            "7/4" => Ok(Self::_7B4),
+            "8/4" => Ok(Self::_8B4),
+            "9/4" => Ok(Self::_9B4),
+            "10/4" => Ok(Self::_10B4),
+            "11/4" => Ok(Self::_11B4),
+            "12/4" => Ok(Self::_12B4),
+            "13/4" => Ok(Self::_13B4),
+            "14/4" => Ok(Self::_14B4),
+            "15/4" => Ok(Self::_15B4),
+            "16/4" => Ok(Self::_16B4),
+            "1/8" => Ok(Self::_1B8),
+            "2/8" => Ok(Self::_2B8),
+            "3/8" => Ok(Self::_3B8),
+            "4/8" => Ok(Self::_4B8),
+            "5/8" => Ok(Self::_5B8),
+            "6/8" => Ok(Self::_6B8),
+            "7/8" => Ok(Self::_7B8),
+            "8/8" => Ok(Self::_8B8),
+            "9/8" => Ok(Self::_9B8),
+            "10/8" => Ok(Self::_10B8),
+            "11/8" => Ok(Self::_11B8),
+            "12/8" => Ok(Self::_12B8),
+            "13/8" => Ok(Self::_13B8),
+            "14/8" => Ok(Self::_14B8),
+            "15/8" => Ok(Self::_15B8),
+            "16/8" => Ok(Self::_16B8),
+            "1/16" => Ok(Self::_1B16),
+            "2/16" => Ok(Self::_2B16),
+            "3/16" => Ok(Self::_3B16),
+            "4/16" => Ok(Self::_4B16),
+            "5/16" => Ok(Self::_5B16),
+            "6/16" => Ok(Self::_6B16),
+            "7/16" => Ok(Self::_7B16),
+            "8/16" => Ok(Self::_8B16),
+            "9/16" => Ok(Self::_9B16),
+            "10/16" => Ok(Self::_10B16),
+            "11/16" => Ok(Self::_11B16),
+            "12/16" => Ok(Self::_12B16),
+            "13/16" => Ok(Self::_13B16),
+            "14/16" => Ok(Self::_14B16),
+            "15/16" => Ok(Self::_15B16),
+            "16/16" => Ok(Self::_16B16),
+            _ => Err(ConversionError::Range {
+                value: ts.to_string(),
+                type_name: "TimeSignature".into(),
+            }),
+        }
+    }
+}
+
 impl TryFrom<(u8, u8)> for TimeSignature {
     type Error = ConversionError;
 
@@ -382,6 +475,34 @@ pub enum MidiChannel {
     Off,
 }
 
+impl TryFrom<&str> for MidiChannel {
+    type Error = ConversionError;
+
+    fn try_from(channel: &str) -> Result<Self, Self::Error> {
+        match channel {
+            "auto" => Ok(Self::Auto),
+            "off" => Ok(Self::Off),
+            _ => {
+                // TODO: Maybe a new parse error type?
+                let channel = channel
+                    .parse::<usize>()
+                    .map_err(|err| ConversionError::Range {
+                        value: channel.to_string(),
+                        type_name: "MidiChannel".into(),
+                    })?;
+                if channel > 15 {
+                    Err(ConversionError::Range {
+                        value: channel.to_string(),
+                        type_name: "MidiChannel".into(),
+                    })
+                } else {
+                    Ok(Self::Channel(channel))
+                }
+            }
+        }
+    }
+}
+
 // Since auto and off are the same value depending on context it is wise not to expose From implementation here.
 #[allow(clippy::from_over_into, clippy::cast_possible_truncation)]
 impl TryInto<u8> for MidiChannel {
@@ -415,6 +536,22 @@ pub enum MidiPortFunction {
     Midi,
     Din24,
     Din48,
+}
+
+impl TryFrom<&str> for MidiPortFunction {
+    type Error = ConversionError;
+
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        match value {
+            "midi" => Ok(Self::Midi),
+            "din24" => Ok(Self::Din24),
+            "din48" => Ok(Self::Din48),
+            _ => Err(ConversionError::Range {
+                value: value.to_string(),
+                type_name: "MidiPortFunction".into(),
+            }),
+        }
+    }
 }
 
 impl TryFrom<u8> for MidiPortFunction {
@@ -457,6 +594,23 @@ pub enum MidiTransportLayer {
     Usb,
     #[default]
     MidiAndUsb,
+}
+
+impl TryFrom<&str> for MidiTransportLayer {
+    type Error = ConversionError;
+
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        match value {
+            "disabled" => Ok(Self::Disabled),
+            "midi" => Ok(Self::Midi),
+            "usb" => Ok(Self::Usb),
+            "midi+usb" => Ok(Self::MidiAndUsb),
+            _ => Err(ConversionError::Range {
+                value: value.to_string(),
+                type_name: "MidiTransportLayer".into(),
+            }),
+        }
+    }
 }
 
 impl TryFrom<u8> for MidiTransportLayer {
@@ -504,6 +658,22 @@ pub enum ParameterDestination {
     External,
 }
 
+impl TryFrom<&str> for ParameterDestination {
+    type Error = ConversionError;
+
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        match value {
+            "int" => Ok(Self::Internal),
+            "int+ext" => Ok(Self::InternalAndExternal),
+            "ext" => Ok(Self::External),
+            _ => Err(ConversionError::Range {
+                value: value.to_string(),
+                type_name: "ParameterDestination".into(),
+            }),
+        }
+    }
+}
+
 impl TryFrom<u8> for ParameterDestination {
     type Error = ConversionError;
 
@@ -548,6 +718,23 @@ pub enum RoutingUsbToMainDb {
     PlusEighteen,
 }
 
+impl TryFrom<&str> for RoutingUsbToMainDb {
+    type Error = ConversionError;
+
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        match value {
+            "0db" => Ok(Self::Zero),
+            "+6db" => Ok(Self::PlusSix),
+            "+12db" => Ok(Self::PlusTwelve),
+            "+18db" => Ok(Self::PlusEighteen),
+            _ => Err(ConversionError::Range {
+                value: value.to_string(),
+                type_name: "RoutingUsbToMainDb".into(),
+            }),
+        }
+    }
+}
+
 impl TryFrom<u8> for RoutingUsbToMainDb {
     type Error = ConversionError;
 
@@ -588,6 +775,21 @@ pub enum MidiParameterOutput {
     Cc,
 }
 
+impl TryFrom<&str> for MidiParameterOutput {
+    type Error = ConversionError;
+
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        match value {
+            "nrpn" => Ok(Self::Nrpn),
+            "cc" => Ok(Self::Cc),
+            _ => Err(ConversionError::Range {
+                value: value.to_string(),
+                type_name: "MidiParameterOutput".into(),
+            }),
+        }
+    }
+}
+
 impl TryFrom<u8> for MidiParameterOutput {
     type Error = ConversionError;
 
@@ -622,6 +824,21 @@ pub enum MidiPortsOutputChannel {
     #[default]
     AutoChannel,
     TrackChannel,
+}
+
+impl TryFrom<&str> for MidiPortsOutputChannel {
+    type Error = ConversionError;
+
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        match value {
+            "auto" => Ok(Self::AutoChannel),
+            "track" => Ok(Self::TrackChannel),
+            _ => Err(ConversionError::Range {
+                value: value.to_string(),
+                type_name: "MidiPortsOutputChannel".into(),
+            }),
+        }
+    }
 }
 
 impl TryFrom<u8> for MidiPortsOutputChannel {
@@ -668,6 +885,27 @@ pub enum HardwareTrack {
     _7and8,
     _9and10,
     _11and12,
+}
+
+impl TryFrom<&str> for HardwareTrack {
+    type Error = ConversionError;
+
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        match value {
+            "1" => Ok(Self::_1),
+            "2" => Ok(Self::_2),
+            "3:4" => Ok(Self::_3and4),
+            "5" => Ok(Self::_5),
+            "6" => Ok(Self::_6),
+            "7:8" => Ok(Self::_7and8),
+            "9:10" => Ok(Self::_9and10),
+            "11L12" => Ok(Self::_11and12),
+            _ => Err(ConversionError::Range {
+                value: value.to_string(),
+                type_name: "HardwareTrack".into(),
+            }),
+        }
+    }
 }
 
 impl TryFrom<u8> for HardwareTrack {
@@ -745,6 +983,239 @@ pub enum RoutingUsbInOptions {
     SamplerOnly,
 }
 
+impl TryFrom<&str> for RoutingUsbInOptions {
+    type Error = ConversionError;
+
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        match value {
+            "pre-fx" => Ok(Self::PreFx),
+            "post-fx" => Ok(Self::PostFx),
+            "1" => Ok(Self::VoiceRouting((HardwareTrack::_1, HardwareTrack::_1))),
+            "2" => Ok(Self::VoiceRouting((HardwareTrack::_2, HardwareTrack::_2))),
+            "3:4" => Ok(Self::VoiceRouting((
+                HardwareTrack::_3and4,
+                HardwareTrack::_3and4,
+            ))),
+            "5" => Ok(Self::VoiceRouting((HardwareTrack::_5, HardwareTrack::_5))),
+            "6" => Ok(Self::VoiceRouting((HardwareTrack::_6, HardwareTrack::_6))),
+            "7:8" => Ok(Self::VoiceRouting((
+                HardwareTrack::_7and8,
+                HardwareTrack::_7and8,
+            ))),
+            "9:10" => Ok(Self::VoiceRouting((
+                HardwareTrack::_9and10,
+                HardwareTrack::_9and10,
+            ))),
+            "11:12" => Ok(Self::VoiceRouting((
+                HardwareTrack::_11and12,
+                HardwareTrack::_11and12,
+            ))),
+
+            // A smart way to handle all permutations of this..
+            "l:1r:2" => Ok(Self::VoiceRouting((HardwareTrack::_1, HardwareTrack::_2))),
+            "l:1r:3:4" => Ok(Self::VoiceRouting((
+                HardwareTrack::_1,
+                HardwareTrack::_3and4,
+            ))),
+            "l:1r:5" => Ok(Self::VoiceRouting((HardwareTrack::_1, HardwareTrack::_5))),
+            "l:1r:6" => Ok(Self::VoiceRouting((HardwareTrack::_1, HardwareTrack::_6))),
+            "l:1r:7:8" => Ok(Self::VoiceRouting((
+                HardwareTrack::_1,
+                HardwareTrack::_7and8,
+            ))),
+            "l:1r:9:10" => Ok(Self::VoiceRouting((
+                HardwareTrack::_1,
+                HardwareTrack::_9and10,
+            ))),
+            "l:1r:11:12" => Ok(Self::VoiceRouting((
+                HardwareTrack::_1,
+                HardwareTrack::_11and12,
+            ))),
+
+            "l:2r:1" => Ok(Self::VoiceRouting((HardwareTrack::_2, HardwareTrack::_1))),
+            "l:2r:3:4" => Ok(Self::VoiceRouting((
+                HardwareTrack::_2,
+                HardwareTrack::_3and4,
+            ))),
+            "l:2r:5" => Ok(Self::VoiceRouting((HardwareTrack::_2, HardwareTrack::_5))),
+            "l:2r:6" => Ok(Self::VoiceRouting((HardwareTrack::_2, HardwareTrack::_6))),
+            "l:2r:7:8" => Ok(Self::VoiceRouting((
+                HardwareTrack::_2,
+                HardwareTrack::_7and8,
+            ))),
+            "l:2r:9:10" => Ok(Self::VoiceRouting((
+                HardwareTrack::_2,
+                HardwareTrack::_9and10,
+            ))),
+            "l:2r:11:12" => Ok(Self::VoiceRouting((
+                HardwareTrack::_2,
+                HardwareTrack::_11and12,
+            ))),
+
+            "l:3:4r:1" => Ok(Self::VoiceRouting((
+                HardwareTrack::_3and4,
+                HardwareTrack::_1,
+            ))),
+            "l:3:4r:2" => Ok(Self::VoiceRouting((
+                HardwareTrack::_3and4,
+                HardwareTrack::_2,
+            ))),
+            "l:3:4r:5" => Ok(Self::VoiceRouting((
+                HardwareTrack::_3and4,
+                HardwareTrack::_5,
+            ))),
+            "l:3:4r:6" => Ok(Self::VoiceRouting((
+                HardwareTrack::_3and4,
+                HardwareTrack::_6,
+            ))),
+            "l:3:4r:7:8" => Ok(Self::VoiceRouting((
+                HardwareTrack::_3and4,
+                HardwareTrack::_7and8,
+            ))),
+            "l:3:4r:9:10" => Ok(Self::VoiceRouting((
+                HardwareTrack::_3and4,
+                HardwareTrack::_9and10,
+            ))),
+            "l:3:4r:11:12" => Ok(Self::VoiceRouting((
+                HardwareTrack::_3and4,
+                HardwareTrack::_11and12,
+            ))),
+
+            "l:5r:1" => Ok(Self::VoiceRouting((HardwareTrack::_5, HardwareTrack::_1))),
+            "l:5r:2" => Ok(Self::VoiceRouting((HardwareTrack::_5, HardwareTrack::_2))),
+            "l:5r:3:4" => Ok(Self::VoiceRouting((
+                HardwareTrack::_5,
+                HardwareTrack::_3and4,
+            ))),
+            "l:5r:6" => Ok(Self::VoiceRouting((HardwareTrack::_5, HardwareTrack::_6))),
+            "l:5r:7:8" => Ok(Self::VoiceRouting((
+                HardwareTrack::_5,
+                HardwareTrack::_7and8,
+            ))),
+            "l:5r:9:10" => Ok(Self::VoiceRouting((
+                HardwareTrack::_5,
+                HardwareTrack::_9and10,
+            ))),
+            "l:5r:11:12" => Ok(Self::VoiceRouting((
+                HardwareTrack::_5,
+                HardwareTrack::_11and12,
+            ))),
+
+            "l:6r:1" => Ok(Self::VoiceRouting((HardwareTrack::_6, HardwareTrack::_1))),
+            "l:6r:2" => Ok(Self::VoiceRouting((HardwareTrack::_6, HardwareTrack::_2))),
+            "l:6r:3:4" => Ok(Self::VoiceRouting((
+                HardwareTrack::_6,
+                HardwareTrack::_3and4,
+            ))),
+            "l:6r:5" => Ok(Self::VoiceRouting((HardwareTrack::_6, HardwareTrack::_5))),
+            "l:6r:7:8" => Ok(Self::VoiceRouting((
+                HardwareTrack::_6,
+                HardwareTrack::_7and8,
+            ))),
+            "l:6r:9:10" => Ok(Self::VoiceRouting((
+                HardwareTrack::_6,
+                HardwareTrack::_9and10,
+            ))),
+            "l:6r:11:12" => Ok(Self::VoiceRouting((
+                HardwareTrack::_6,
+                HardwareTrack::_11and12,
+            ))),
+
+            "l:7:8r:1" => Ok(Self::VoiceRouting((
+                HardwareTrack::_7and8,
+                HardwareTrack::_1,
+            ))),
+            "l:7:8r:2" => Ok(Self::VoiceRouting((
+                HardwareTrack::_7and8,
+                HardwareTrack::_2,
+            ))),
+            "l:7:8r:3:4" => Ok(Self::VoiceRouting((
+                HardwareTrack::_7and8,
+                HardwareTrack::_3and4,
+            ))),
+            "l:7:8r:5" => Ok(Self::VoiceRouting((
+                HardwareTrack::_7and8,
+                HardwareTrack::_5,
+            ))),
+            "l:7:8r:6" => Ok(Self::VoiceRouting((
+                HardwareTrack::_7and8,
+                HardwareTrack::_6,
+            ))),
+            "l:7:8r:9:10" => Ok(Self::VoiceRouting((
+                HardwareTrack::_7and8,
+                HardwareTrack::_9and10,
+            ))),
+            "l:7:8r:11:12" => Ok(Self::VoiceRouting((
+                HardwareTrack::_7and8,
+                HardwareTrack::_11and12,
+            ))),
+
+            "l:9:10r:1" => Ok(Self::VoiceRouting((
+                HardwareTrack::_9and10,
+                HardwareTrack::_1,
+            ))),
+            "l:9:10r:2" => Ok(Self::VoiceRouting((
+                HardwareTrack::_9and10,
+                HardwareTrack::_2,
+            ))),
+            "l:9:10r:3:4" => Ok(Self::VoiceRouting((
+                HardwareTrack::_9and10,
+                HardwareTrack::_3and4,
+            ))),
+            "l:9:10r:5" => Ok(Self::VoiceRouting((
+                HardwareTrack::_9and10,
+                HardwareTrack::_5,
+            ))),
+            "l:9:10r:6" => Ok(Self::VoiceRouting((
+                HardwareTrack::_9and10,
+                HardwareTrack::_6,
+            ))),
+            "l:9:10r:7:8" => Ok(Self::VoiceRouting((
+                HardwareTrack::_9and10,
+                HardwareTrack::_7and8,
+            ))),
+            "l:9:10r:11:12" => Ok(Self::VoiceRouting((
+                HardwareTrack::_9and10,
+                HardwareTrack::_11and12,
+            ))),
+
+            "l:11:12r:1" => Ok(Self::VoiceRouting((
+                HardwareTrack::_11and12,
+                HardwareTrack::_1,
+            ))),
+            "l:11:12r:2" => Ok(Self::VoiceRouting((
+                HardwareTrack::_11and12,
+                HardwareTrack::_2,
+            ))),
+            "l:11:12r:3:4" => Ok(Self::VoiceRouting((
+                HardwareTrack::_11and12,
+                HardwareTrack::_3and4,
+            ))),
+            "l:11:12r:5" => Ok(Self::VoiceRouting((
+                HardwareTrack::_11and12,
+                HardwareTrack::_5,
+            ))),
+            "l:11:12r:6" => Ok(Self::VoiceRouting((
+                HardwareTrack::_11and12,
+                HardwareTrack::_6,
+            ))),
+            "l:11:12r:7:8" => Ok(Self::VoiceRouting((
+                HardwareTrack::_11and12,
+                HardwareTrack::_7and8,
+            ))),
+            "l:11:12r:9:10" => Ok(Self::VoiceRouting((
+                HardwareTrack::_11and12,
+                HardwareTrack::_9and10,
+            ))),
+            "sampleronly" => Ok(Self::SamplerOnly),
+            _ => Err(ConversionError::Range {
+                value: value.to_string(),
+                type_name: "RoutingUsbInOptions".into(),
+            }),
+        }
+    }
+}
+
 impl TryFrom<u8> for RoutingUsbInOptions {
     type Error = ConversionError;
 
@@ -813,6 +1284,239 @@ pub enum RoutingUsbOutOptions {
     VoiceRouting((HardwareTrack, HardwareTrack)),
     AudioIn,
     Off,
+}
+
+impl TryFrom<&str> for RoutingUsbOutOptions {
+    type Error = ConversionError;
+
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        match value {
+            "mainout" => Ok(Self::MainOut),
+            "1" => Ok(Self::VoiceRouting((HardwareTrack::_1, HardwareTrack::_1))),
+            "2" => Ok(Self::VoiceRouting((HardwareTrack::_2, HardwareTrack::_2))),
+            "3:4" => Ok(Self::VoiceRouting((
+                HardwareTrack::_3and4,
+                HardwareTrack::_3and4,
+            ))),
+            "5" => Ok(Self::VoiceRouting((HardwareTrack::_5, HardwareTrack::_5))),
+            "6" => Ok(Self::VoiceRouting((HardwareTrack::_6, HardwareTrack::_6))),
+            "7:8" => Ok(Self::VoiceRouting((
+                HardwareTrack::_7and8,
+                HardwareTrack::_7and8,
+            ))),
+            "9:10" => Ok(Self::VoiceRouting((
+                HardwareTrack::_9and10,
+                HardwareTrack::_9and10,
+            ))),
+            "11:12" => Ok(Self::VoiceRouting((
+                HardwareTrack::_11and12,
+                HardwareTrack::_11and12,
+            ))),
+
+            // A smart way to handle all permutations of this..
+            "l:1r:2" => Ok(Self::VoiceRouting((HardwareTrack::_1, HardwareTrack::_2))),
+            "l:1r:3:4" => Ok(Self::VoiceRouting((
+                HardwareTrack::_1,
+                HardwareTrack::_3and4,
+            ))),
+            "l:1r:5" => Ok(Self::VoiceRouting((HardwareTrack::_1, HardwareTrack::_5))),
+            "l:1r:6" => Ok(Self::VoiceRouting((HardwareTrack::_1, HardwareTrack::_6))),
+            "l:1r:7:8" => Ok(Self::VoiceRouting((
+                HardwareTrack::_1,
+                HardwareTrack::_7and8,
+            ))),
+            "l:1r:9:10" => Ok(Self::VoiceRouting((
+                HardwareTrack::_1,
+                HardwareTrack::_9and10,
+            ))),
+            "l:1r:11:12" => Ok(Self::VoiceRouting((
+                HardwareTrack::_1,
+                HardwareTrack::_11and12,
+            ))),
+
+            "l:2r:1" => Ok(Self::VoiceRouting((HardwareTrack::_2, HardwareTrack::_1))),
+            "l:2r:3:4" => Ok(Self::VoiceRouting((
+                HardwareTrack::_2,
+                HardwareTrack::_3and4,
+            ))),
+            "l:2r:5" => Ok(Self::VoiceRouting((HardwareTrack::_2, HardwareTrack::_5))),
+            "l:2r:6" => Ok(Self::VoiceRouting((HardwareTrack::_2, HardwareTrack::_6))),
+            "l:2r:7:8" => Ok(Self::VoiceRouting((
+                HardwareTrack::_2,
+                HardwareTrack::_7and8,
+            ))),
+            "l:2r:9:10" => Ok(Self::VoiceRouting((
+                HardwareTrack::_2,
+                HardwareTrack::_9and10,
+            ))),
+            "l:2r:11:12" => Ok(Self::VoiceRouting((
+                HardwareTrack::_2,
+                HardwareTrack::_11and12,
+            ))),
+
+            "l:3:4r:1" => Ok(Self::VoiceRouting((
+                HardwareTrack::_3and4,
+                HardwareTrack::_1,
+            ))),
+            "l:3:4r:2" => Ok(Self::VoiceRouting((
+                HardwareTrack::_3and4,
+                HardwareTrack::_2,
+            ))),
+            "l:3:4r:5" => Ok(Self::VoiceRouting((
+                HardwareTrack::_3and4,
+                HardwareTrack::_5,
+            ))),
+            "l:3:4r:6" => Ok(Self::VoiceRouting((
+                HardwareTrack::_3and4,
+                HardwareTrack::_6,
+            ))),
+            "l:3:4r:7:8" => Ok(Self::VoiceRouting((
+                HardwareTrack::_3and4,
+                HardwareTrack::_7and8,
+            ))),
+            "l:3:4r:9:10" => Ok(Self::VoiceRouting((
+                HardwareTrack::_3and4,
+                HardwareTrack::_9and10,
+            ))),
+            "l:3:4r:11:12" => Ok(Self::VoiceRouting((
+                HardwareTrack::_3and4,
+                HardwareTrack::_11and12,
+            ))),
+
+            "l:5r:1" => Ok(Self::VoiceRouting((HardwareTrack::_5, HardwareTrack::_1))),
+            "l:5r:2" => Ok(Self::VoiceRouting((HardwareTrack::_5, HardwareTrack::_2))),
+            "l:5r:3:4" => Ok(Self::VoiceRouting((
+                HardwareTrack::_5,
+                HardwareTrack::_3and4,
+            ))),
+            "l:5r:6" => Ok(Self::VoiceRouting((HardwareTrack::_5, HardwareTrack::_6))),
+            "l:5r:7:8" => Ok(Self::VoiceRouting((
+                HardwareTrack::_5,
+                HardwareTrack::_7and8,
+            ))),
+            "l:5r:9:10" => Ok(Self::VoiceRouting((
+                HardwareTrack::_5,
+                HardwareTrack::_9and10,
+            ))),
+            "l:5r:11:12" => Ok(Self::VoiceRouting((
+                HardwareTrack::_5,
+                HardwareTrack::_11and12,
+            ))),
+
+            "l:6r:1" => Ok(Self::VoiceRouting((HardwareTrack::_6, HardwareTrack::_1))),
+            "l:6r:2" => Ok(Self::VoiceRouting((HardwareTrack::_6, HardwareTrack::_2))),
+            "l:6r:3:4" => Ok(Self::VoiceRouting((
+                HardwareTrack::_6,
+                HardwareTrack::_3and4,
+            ))),
+            "l:6r:5" => Ok(Self::VoiceRouting((HardwareTrack::_6, HardwareTrack::_5))),
+            "l:6r:7:8" => Ok(Self::VoiceRouting((
+                HardwareTrack::_6,
+                HardwareTrack::_7and8,
+            ))),
+            "l:6r:9:10" => Ok(Self::VoiceRouting((
+                HardwareTrack::_6,
+                HardwareTrack::_9and10,
+            ))),
+            "l:6r:11:12" => Ok(Self::VoiceRouting((
+                HardwareTrack::_6,
+                HardwareTrack::_11and12,
+            ))),
+
+            "l:7:8r:1" => Ok(Self::VoiceRouting((
+                HardwareTrack::_7and8,
+                HardwareTrack::_1,
+            ))),
+            "l:7:8r:2" => Ok(Self::VoiceRouting((
+                HardwareTrack::_7and8,
+                HardwareTrack::_2,
+            ))),
+            "l:7:8r:3:4" => Ok(Self::VoiceRouting((
+                HardwareTrack::_7and8,
+                HardwareTrack::_3and4,
+            ))),
+            "l:7:8r:5" => Ok(Self::VoiceRouting((
+                HardwareTrack::_7and8,
+                HardwareTrack::_5,
+            ))),
+            "l:7:8r:6" => Ok(Self::VoiceRouting((
+                HardwareTrack::_7and8,
+                HardwareTrack::_6,
+            ))),
+            "l:7:8r:9:10" => Ok(Self::VoiceRouting((
+                HardwareTrack::_7and8,
+                HardwareTrack::_9and10,
+            ))),
+            "l:7:8r:11:12" => Ok(Self::VoiceRouting((
+                HardwareTrack::_7and8,
+                HardwareTrack::_11and12,
+            ))),
+
+            "l:9:10r:1" => Ok(Self::VoiceRouting((
+                HardwareTrack::_9and10,
+                HardwareTrack::_1,
+            ))),
+            "l:9:10r:2" => Ok(Self::VoiceRouting((
+                HardwareTrack::_9and10,
+                HardwareTrack::_2,
+            ))),
+            "l:9:10r:3:4" => Ok(Self::VoiceRouting((
+                HardwareTrack::_9and10,
+                HardwareTrack::_3and4,
+            ))),
+            "l:9:10r:5" => Ok(Self::VoiceRouting((
+                HardwareTrack::_9and10,
+                HardwareTrack::_5,
+            ))),
+            "l:9:10r:6" => Ok(Self::VoiceRouting((
+                HardwareTrack::_9and10,
+                HardwareTrack::_6,
+            ))),
+            "l:9:10r:7:8" => Ok(Self::VoiceRouting((
+                HardwareTrack::_9and10,
+                HardwareTrack::_7and8,
+            ))),
+            "l:9:10r:11:12" => Ok(Self::VoiceRouting((
+                HardwareTrack::_9and10,
+                HardwareTrack::_11and12,
+            ))),
+
+            "l:11:12r:1" => Ok(Self::VoiceRouting((
+                HardwareTrack::_11and12,
+                HardwareTrack::_1,
+            ))),
+            "l:11:12r:2" => Ok(Self::VoiceRouting((
+                HardwareTrack::_11and12,
+                HardwareTrack::_2,
+            ))),
+            "l:11:12r:3:4" => Ok(Self::VoiceRouting((
+                HardwareTrack::_11and12,
+                HardwareTrack::_3and4,
+            ))),
+            "l:11:12r:5" => Ok(Self::VoiceRouting((
+                HardwareTrack::_11and12,
+                HardwareTrack::_5,
+            ))),
+            "l:11:12r:6" => Ok(Self::VoiceRouting((
+                HardwareTrack::_11and12,
+                HardwareTrack::_6,
+            ))),
+            "l:11:12r:7:8" => Ok(Self::VoiceRouting((
+                HardwareTrack::_11and12,
+                HardwareTrack::_7and8,
+            ))),
+            "l:11:12r:9:10" => Ok(Self::VoiceRouting((
+                HardwareTrack::_11and12,
+                HardwareTrack::_9and10,
+            ))),
+            "audio in" => Ok(Self::AudioIn),
+            "off" => Ok(Self::Off),
+            _ => Err(ConversionError::Range {
+                value: value.to_string(),
+                type_name: "RoutingUsbOutOptions".into(),
+            }),
+        }
+    }
 }
 
 impl TryFrom<u8> for RoutingUsbOutOptions {

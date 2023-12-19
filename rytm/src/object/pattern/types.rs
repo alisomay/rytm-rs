@@ -27,6 +27,25 @@ pub enum Speed {
     X1B8,
 }
 
+impl TryFrom<&str> for Speed {
+    type Error = ConversionError;
+    fn try_from(speed: &str) -> Result<Self, Self::Error> {
+        match speed {
+            "1x" => Ok(Self::X1),
+            "2x" => Ok(Self::X2),
+            "3/2x" => Ok(Self::X3B2),
+            "3/4x" => Ok(Self::X3B4),
+            "1/2x" => Ok(Self::X1B2),
+            "1/4x" => Ok(Self::X1B4),
+            "1/8x" => Ok(Self::X1B8),
+            _ => Err(ConversionError::Range {
+                value: speed.to_string(),
+                type_name: "Speed".into(),
+            }),
+        }
+    }
+}
+
 impl From<Speed> for u8 {
     fn from(speed: Speed) -> Self {
         let speed = match speed {
@@ -69,6 +88,20 @@ pub enum TimeMode {
     #[default]
     Normal,
     Advanced,
+}
+
+impl TryFrom<&str> for TimeMode {
+    type Error = ConversionError;
+    fn try_from(mode: &str) -> Result<Self, Self::Error> {
+        match mode {
+            "normal" => Ok(Self::Normal),
+            "advanced" => Ok(Self::Advanced),
+            _ => Err(ConversionError::Range {
+                value: mode.to_string(),
+                type_name: "TimeMode".into(),
+            }),
+        }
+    }
 }
 
 impl From<TimeMode> for u8 {

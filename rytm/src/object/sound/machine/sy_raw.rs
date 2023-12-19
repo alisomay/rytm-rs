@@ -27,6 +27,25 @@ pub enum SyRawWaveform1 {
     Ring,
 }
 
+impl TryFrom<&str> for SyRawWaveform1 {
+    type Error = ConversionError;
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        match value {
+            "sin" => Ok(Self::Sin),
+            "asin" => Ok(Self::Asin),
+            "tri" => Ok(Self::Tri),
+            "ssaw" => Ok(Self::Ssaw),
+            "asaw" => Ok(Self::Asaw),
+            "saw" => Ok(Self::Saw),
+            "ring" => Ok(Self::Ring),
+            _ => Err(ConversionError::Range {
+                value: value.to_string(),
+                type_name: "SyRawWaveform1".into(),
+            }),
+        }
+    }
+}
+
 impl TryFrom<u8> for SyRawWaveform1 {
     type Error = ConversionError;
     fn try_from(value: u8) -> Result<Self, Self::Error> {
@@ -67,6 +86,22 @@ pub enum SyRawWaveform2 {
     SsawA,
     SineB,
     SsawB,
+}
+
+impl TryFrom<&str> for SyRawWaveform2 {
+    type Error = ConversionError;
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        match value {
+            "sineA" => Ok(Self::SineA),
+            "ssawA" => Ok(Self::SsawA),
+            "sineB" => Ok(Self::SineB),
+            "ssawB" => Ok(Self::SsawB),
+            _ => Err(ConversionError::Range {
+                value: value.to_string(),
+                type_name: "SyRawWaveform2".into(),
+            }),
+        }
+    }
 }
 
 impl TryFrom<u8> for SyRawWaveform2 {

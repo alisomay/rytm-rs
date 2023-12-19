@@ -36,6 +36,30 @@ pub enum RootNote {
     B,
 }
 
+impl TryFrom<&str> for RootNote {
+    type Error = ConversionError;
+    fn try_from(note: &str) -> Result<Self, Self::Error> {
+        match note.to_ascii_lowercase().as_str() {
+            "c" => Ok(Self::C),
+            "c#" => Ok(Self::CSharp),
+            "d" => Ok(Self::D),
+            "eb" => Ok(Self::EFlat),
+            "e" => Ok(Self::E),
+            "f" => Ok(Self::F),
+            "f#" => Ok(Self::FSharp),
+            "g" => Ok(Self::G),
+            "g#" => Ok(Self::GSharp),
+            "a" => Ok(Self::A),
+            "bb" => Ok(Self::BFlat),
+            "b" => Ok(Self::B),
+            _ => Err(ConversionError::Range {
+                value: note.to_string(),
+                type_name: "RootNote".into(),
+            }),
+        }
+    }
+}
+
 impl From<RootNote> for u8 {
     fn from(note: RootNote) -> Self {
         match note {
@@ -127,6 +151,54 @@ pub enum PadScale {
     Oriental,
     Ionian25,
     LocrianBb3Bb7,
+}
+
+impl TryFrom<&str> for PadScale {
+    type Error = ConversionError;
+    fn try_from(scale: &str) -> Result<Self, Self::Error> {
+        match scale.to_ascii_lowercase().as_str() {
+            "chromatic" => Ok(Self::Chromatic),
+            "ionianmajor" => Ok(Self::IonianMajor),
+            "dorian" => Ok(Self::Dorian),
+            "phrygian" => Ok(Self::Phrygian),
+            "lydian" => Ok(Self::Lydian),
+            "mixolydian" => Ok(Self::Mixolydian),
+            "aeolianminor" => Ok(Self::AeolianMinor),
+            "locrian" => Ok(Self::Locrian),
+            "pentatonicminor" => Ok(Self::PentatonicMinor),
+            "pentatonicmajor" => Ok(Self::PentatonicMajor),
+            "melodicminor" => Ok(Self::MelodicMinor),
+            "harmonicminor" => Ok(Self::HarmonicMinor),
+            "wholetone" => Ok(Self::WholeTone),
+            "blues" => Ok(Self::Blues),
+            "combominor" => Ok(Self::ComboMinor),
+            "persian" => Ok(Self::Persian),
+            "iwato" => Ok(Self::Iwato),
+            "insen" => Ok(Self::InSen),
+            "hirajoshi" => Ok(Self::Hirajoshi),
+            "pelog" => Ok(Self::Pelog),
+            "phrygiandominant" => Ok(Self::PhrygianDominant),
+            "wholehalfdiminished" => Ok(Self::WholeHalfDiminished),
+            "halfwholediminished" => Ok(Self::HalfWholeDiminished),
+            "spanish" => Ok(Self::Spanish),
+            "majorlocrian" => Ok(Self::MajorLocrian),
+            "superlocrian" => Ok(Self::SuperLocrian),
+            "dorianb2" => Ok(Self::DorianB2),
+            "lydianaugmented" => Ok(Self::LydianAugmented),
+            "lydiandominant" => Ok(Self::LydianDominant),
+            "doubleharmonicmajor" => Ok(Self::DoubleHarmonicMajor),
+            "lydian26" => Ok(Self::Lydian26),
+            "ultraphrygian" => Ok(Self::Ultraphrygian),
+            "hungarianminor" => Ok(Self::HungarianMinor),
+            "oriental" => Ok(Self::Oriental),
+            "ionian25" => Ok(Self::Ionian25),
+            "locrianbb3bb7" => Ok(Self::LocrianBb3Bb7),
+            _ => Err(ConversionError::Range {
+                value: scale.to_string(),
+                type_name: "PadScale".into(),
+            }),
+        }
+    }
 }
 
 impl From<PadScale> for u8 {

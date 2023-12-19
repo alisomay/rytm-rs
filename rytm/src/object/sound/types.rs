@@ -219,6 +219,55 @@ pub enum MachineType {
     Unset,
 }
 
+// bdhard, bdclassic, sdhard ..
+impl TryFrom<&str> for MachineType {
+    type Error = ConversionError;
+    fn try_from(machine: &str) -> Result<Self, Self::Error> {
+        use MachineType::*;
+        match machine {
+            "bdhard" => Ok(BdHard),
+            "bdclassic" => Ok(BdClassic),
+            "sdhard" => Ok(SdHard),
+            "sdclassic" => Ok(SdClassic),
+            "rshard" => Ok(RsHard),
+            "rsclassic" => Ok(RsClassic),
+            "cpclassic" => Ok(CpClassic),
+            "btclassic" => Ok(BtClassic),
+            "xtclassic" => Ok(XtClassic),
+            "chclassic" => Ok(ChClassic),
+            "ohclassic" => Ok(OhClassic),
+            "cyclassic" => Ok(CyClassic),
+            "cbclassic" => Ok(CbClassic),
+            "bdfm" => Ok(BdFm),
+            "sdfm" => Ok(SdFm),
+            "utnoise" => Ok(UtNoise),
+            "utimpulse" => Ok(UtImpulse),
+            "chmetallic" => Ok(ChMetallic),
+            "ohmetallic" => Ok(OhMetallic),
+            "cymetallic" => Ok(CyMetallic),
+            "cbmetallic" => Ok(CbMetallic),
+            "bdplastic" => Ok(BdPlastic),
+            "bdsilky" => Ok(BdSilky),
+            "sdnatural" => Ok(SdNatural),
+            "hhbasic" => Ok(HhBasic),
+            "cyride" => Ok(CyRide),
+            "bdsharp" => Ok(BdSharp),
+            "disable" => Ok(Disable),
+            "sydualvco" => Ok(SyDualVco),
+            "sychip" => Ok(SyChip),
+            "bdacoustic" => Ok(BdAcoustic),
+            "sdacoustic" => Ok(SdAcoustic),
+            "syraw" => Ok(SyRaw),
+            "hhlab" => Ok(HhLab),
+            "unset" => Ok(Unset),
+            _ => Err(ConversionError::Range {
+                value: machine.to_string(),
+                type_name: "Machine".to_string(),
+            }),
+        }
+    }
+}
+
 impl std::fmt::Display for MachineType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let machine = match self {
@@ -437,6 +486,52 @@ pub enum LfoDestination {
     AmpReverbSend,
 }
 
+impl TryFrom<&str> for LfoDestination {
+    type Error = ConversionError;
+    fn try_from(destination: &str) -> Result<Self, Self::Error> {
+        use LfoDestination::*;
+        match destination {
+            "syn1" => Ok(Syn1),
+            "syn2" => Ok(Syn2),
+            "syn3" => Ok(Syn3),
+            "syn4" => Ok(Syn4),
+            "syn5" => Ok(Syn5),
+            "syn6" => Ok(Syn6),
+            "syn7" => Ok(Syn7),
+            "syn8" => Ok(Syn8),
+            "sampletune" => Ok(SampleTune),
+            "samplefinetune" => Ok(SampleFineTune),
+            "sampleslice" => Ok(SampleSlice),
+            "samplebitreduction" => Ok(SampleBitReduction),
+            "samplestart" => Ok(SampleStart),
+            "sampleend" => Ok(SampleEnd),
+            "sampleloop" => Ok(SampleLoop),
+            "samplelevel" => Ok(SampleLevel),
+            "filterenvelope" => Ok(FilterEnvelope),
+            "filterattack" => Ok(FilterAttack),
+            "filterdecay" => Ok(FilterDecay),
+            "filtersustain" => Ok(FilterSustain),
+            "filterrelease" => Ok(FilterRelease),
+            "filterfrequency" => Ok(FilterFrequency),
+            "filterresonance" => Ok(FilterResonance),
+            "ampattack" => Ok(AmpAttack),
+            "amphold" => Ok(AmpHold),
+            "ampdecay" => Ok(AmpDecay),
+            "ampoverdrive" => Ok(AmpOverdrive),
+            "ampvolume" => Ok(AmpVolume),
+            "amppan" => Ok(AmpPan),
+            "ampaccent" => Ok(AmpAccent),
+            "ampdelaysend" => Ok(AmpDelaySend),
+            "ampreverb_send" => Ok(AmpReverbSend),
+            "unset" => Ok(Unset),
+            _ => Err(ConversionError::Range {
+                value: destination.to_string(),
+                type_name: "LfoDestination".to_string(),
+            }),
+        }
+    }
+}
+
 impl TryFrom<u8> for LfoDestination {
     type Error = ConversionError;
     fn try_from(value: u8) -> Result<Self, Self::Error> {
@@ -612,6 +707,59 @@ pub enum SoundModTarget {
     AmpReverbSend,
 }
 
+impl TryFrom<&str> for SoundModTarget {
+    type Error = ConversionError;
+    fn try_from(target: &str) -> Result<Self, Self::Error> {
+        use SoundModTarget::*;
+        match target {
+            "unset" => Ok(Unset),
+            "lfomultiplier" => Ok(LfoMultiplier),
+            "lfowaveform" => Ok(LfoWaveform),
+            "lfotrigmode" => Ok(LfoTrigMode),
+            "lfospeed" => Ok(LfoSpeed),
+            "lfofade" => Ok(LfoFade),
+            "lfophase" => Ok(LfoPhase),
+            "lfodepth" => Ok(LfoDepth),
+            "syn1" => Ok(Syn1),
+            "syn2" => Ok(Syn2),
+            "syn3" => Ok(Syn3),
+            "syn4" => Ok(Syn4),
+            "syn5" => Ok(Syn5),
+            "syn6" => Ok(Syn6),
+            "syn7" => Ok(Syn7),
+            "syn8" => Ok(Syn8),
+            "sampletune" => Ok(SampleTune),
+            "samplefinetune" => Ok(SampleFineTune),
+            "sampleslice" => Ok(SampleSlice),
+            "samplebitreduction" => Ok(SampleBitReduction),
+            "samplestart" => Ok(SampleStart),
+            "sampleend" => Ok(SampleEnd),
+            "sampleloop" => Ok(SampleLoop),
+            "samplelevel" => Ok(SampleLevel),
+            "filterenvelope" => Ok(FilterEnvelope),
+            "filterattack" => Ok(FilterAttack),
+            "filterdecay" => Ok(FilterDecay),
+            "filtersustain" => Ok(FilterSustain),
+            "filterrelease" => Ok(FilterRelease),
+            "filterfrequency" => Ok(FilterFrequency),
+            "filterresonance" => Ok(FilterResonance),
+            "ampattack" => Ok(AmpAttack),
+            "amphold" => Ok(AmpHold),
+            "ampdecay" => Ok(AmpDecay),
+            "ampoverdrive" => Ok(AmpOverdrive),
+            "ampvolume" => Ok(AmpVolume),
+            "amppan" => Ok(AmpPan),
+            "ampaccent" => Ok(AmpAccent),
+            "ampdelaysend" => Ok(AmpDelaySend),
+            "ampreverbsend" => Ok(AmpReverbSend),
+            _ => Err(ConversionError::Range {
+                value: target.to_string(),
+                type_name: "SoundModTarget".to_string(),
+            }),
+        }
+    }
+}
+
 impl TryFrom<u8> for SoundModTarget {
     type Error = ConversionError;
     fn try_from(value: u8) -> Result<Self, Self::Error> {
@@ -728,6 +876,26 @@ pub enum FilterType {
     Pk,
 }
 
+impl TryFrom<&str> for FilterType {
+    type Error = ConversionError;
+    fn try_from(filter: &str) -> Result<Self, Self::Error> {
+        use FilterType::*;
+        match filter {
+            "lp2" => Ok(Lp2),
+            "lp1" => Ok(Lp1),
+            "bp" => Ok(Bp),
+            "hp1" => Ok(Hp1),
+            "hp2" => Ok(Hp2),
+            "bs" => Ok(Bs),
+            "pk" => Ok(Pk),
+            _ => Err(ConversionError::Range {
+                value: filter.to_string(),
+                type_name: "FilterType".to_string(),
+            }),
+        }
+    }
+}
+
 impl TryFrom<u8> for FilterType {
     type Error = ConversionError;
     fn try_from(value: u8) -> Result<Self, Self::Error> {
@@ -817,6 +985,43 @@ pub enum LfoMultiplier {
     _D2k,
 }
 
+impl TryFrom<&str> for LfoMultiplier {
+    type Error = ConversionError;
+    fn try_from(multiplier: &str) -> Result<Self, Self::Error> {
+        use LfoMultiplier::*;
+        match multiplier {
+            "x1" => Ok(X1),
+            "x2" => Ok(X2),
+            "x4" => Ok(X4),
+            "x8" => Ok(X8),
+            "x16" => Ok(X16),
+            "x32" => Ok(X32),
+            "x64" => Ok(X64),
+            "x128" => Ok(X128),
+            "x256" => Ok(X256),
+            "x512" => Ok(X512),
+            "x1k" => Ok(X1k),
+            "x2k" => Ok(X2k),
+            ".1" => Ok(_D1),
+            ".2" => Ok(_D2),
+            ".4" => Ok(_D4),
+            ".8" => Ok(_D8),
+            ".16" => Ok(_D16),
+            ".32" => Ok(_D32),
+            ".64" => Ok(_D64),
+            ".128" => Ok(_D128),
+            ".256" => Ok(_D256),
+            ".512" => Ok(_D512),
+            ".1k" => Ok(_D1k),
+            ".2k" => Ok(_D2k),
+            _ => Err(ConversionError::Range {
+                value: multiplier.to_string(),
+                type_name: "LfoMultiplier".to_string(),
+            }),
+        }
+    }
+}
+
 impl TryFrom<u8> for LfoMultiplier {
     type Error = ConversionError;
     fn try_from(value: u8) -> Result<Self, Self::Error> {
@@ -899,6 +1104,26 @@ pub enum LfoWaveform {
     Rnd,
 }
 
+impl TryFrom<&str> for LfoWaveform {
+    type Error = ConversionError;
+    fn try_from(waveform: &str) -> Result<Self, Self::Error> {
+        use LfoWaveform::*;
+        match waveform {
+            "tri" => Ok(Tri),
+            "sin" => Ok(Sin),
+            "sqr" => Ok(Sqr),
+            "saw" => Ok(Saw),
+            "exp" => Ok(Exp),
+            "rmp" => Ok(Rmp),
+            "rnd" => Ok(Rnd),
+            _ => Err(ConversionError::Range {
+                value: waveform.to_string(),
+                type_name: "LfoWaveform".to_string(),
+            }),
+        }
+    }
+}
+
 impl TryFrom<u8> for LfoWaveform {
     type Error = ConversionError;
     fn try_from(value: u8) -> Result<Self, Self::Error> {
@@ -945,6 +1170,24 @@ pub enum LfoMode {
     Half,
 }
 
+impl TryFrom<&str> for LfoMode {
+    type Error = ConversionError;
+    fn try_from(mode: &str) -> Result<Self, Self::Error> {
+        use LfoMode::*;
+        match mode {
+            "free" => Ok(Free),
+            "trig" => Ok(Trig),
+            "hold" => Ok(Hold),
+            "one" => Ok(One),
+            "half" => Ok(Half),
+            _ => Err(ConversionError::Range {
+                value: mode.to_string(),
+                type_name: "LfoMode".to_string(),
+            }),
+        }
+    }
+}
+
 impl TryFrom<u8> for LfoMode {
     type Error = ConversionError;
     fn try_from(value: u8) -> Result<Self, Self::Error> {
@@ -984,6 +1227,24 @@ pub enum SoundSettingsChromaticMode {
     Sample,
     #[default]
     SynthAndSample,
+}
+
+impl TryFrom<&str> for SoundSettingsChromaticMode {
+    type Error = ConversionError;
+    fn try_from(mode: &str) -> Result<Self, Self::Error> {
+        use SoundSettingsChromaticMode::*;
+        // TODO: Double check naming
+        match mode {
+            "off" => Ok(Off),
+            "syn" => Ok(Synth),
+            "samp" => Ok(Sample),
+            "syn+samp" => Ok(SynthAndSample),
+            _ => Err(ConversionError::Range {
+                value: mode.to_string(),
+                type_name: "SoundSettingsChromaticMode".to_string(),
+            }),
+        }
+    }
 }
 
 impl TryFrom<u8> for SoundSettingsChromaticMode {

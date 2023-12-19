@@ -14,6 +14,8 @@ pub enum ConversionError {
     ObjectNameTooLong(String, usize),
     #[error("Conversion error: The object name you have provided \"{0}\" contains non-ascii characters.")]
     ObjectNameNotAscii(String),
+    #[error("Conversion error: The input value in the string needs to represent an integer.")]
+    ParseIntError(#[from] std::num::ParseIntError),
 }
 
 /// Error type for parameter errors.

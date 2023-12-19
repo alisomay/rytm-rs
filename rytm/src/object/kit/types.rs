@@ -73,6 +73,50 @@ pub enum ControlInModTarget {
     AmpReverbSend,
 }
 
+impl TryFrom<&str> for ControlInModTarget {
+    type Error = ConversionError;
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        match value {
+            "unset" => Ok(Self::Unset),
+            "lfomultiplier" => Ok(Self::LfoMultiplier),
+            "lfowaveform" => Ok(Self::LfoWaveform),
+            "lfotrigmode" => Ok(Self::LfoTrigMode),
+            "lfospeed" => Ok(Self::LfoSpeed),
+            "lfofade" => Ok(Self::LfoFade),
+            "lfophase" => Ok(Self::LfoPhase),
+            "lfodepth" => Ok(Self::LfoDepth),
+            "sampletune" => Ok(Self::SampleTune),
+            "samplefinetune" => Ok(Self::SampleFineTune),
+            "sampleslice" => Ok(Self::SampleSlice),
+            "samplebitreduction" => Ok(Self::SampleBitReduction),
+            "samplestart" => Ok(Self::SampleStart),
+            "sampleend" => Ok(Self::SampleEnd),
+            "sampleloop" => Ok(Self::SampleLoop),
+            "samplelevel" => Ok(Self::SampleLevel),
+            "filterenvelope" => Ok(Self::FilterEnvelope),
+            "filterattack" => Ok(Self::FilterAttack),
+            "filterdecay" => Ok(Self::FilterDecay),
+            "filtersustain" => Ok(Self::FilterSustain),
+            "filterrelease" => Ok(Self::FilterRelease),
+            "filterfrequency" => Ok(Self::FilterFrequency),
+            "filterresonance" => Ok(Self::FilterResonance),
+            "ampattack" => Ok(Self::AmpAttack),
+            "amphold" => Ok(Self::AmpHold),
+            "ampdecay" => Ok(Self::AmpDecay),
+            "ampoverdrive" => Ok(Self::AmpOverdrive),
+            "ampvolume" => Ok(Self::AmpVolume),
+            "amppan" => Ok(Self::AmpPan),
+            "ampaccent" => Ok(Self::AmpAccent),
+            "ampdelaysend" => Ok(Self::AmpDelaySend),
+            "ampreverbsend" => Ok(Self::AmpReverbSend),
+            _ => Err(ConversionError::Range {
+                value: value.to_string(),
+                type_name: "ControlInModTarget".to_string(),
+            }),
+        }
+    }
+}
+
 impl TryFrom<u8> for ControlInModTarget {
     type Error = ConversionError;
     fn try_from(value: u8) -> Result<Self, Self::Error> {
@@ -193,6 +237,45 @@ pub enum FxLfoDestination {
     CompressorVolume,
 }
 
+impl TryFrom<&str> for FxLfoDestination {
+    type Error = ConversionError;
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        match value {
+            "unset" => Ok(Self::Unset),
+            "delaytime" => Ok(Self::DelayTime),
+            "delaypingpong" => Ok(Self::DelayPingPong),
+            "delaystereowidth" => Ok(Self::DelayStereoWidth),
+            "delayfeedback" => Ok(Self::DelayFeedback),
+            "delayhpfilter" => Ok(Self::DelayHpFilter),
+            "delaylpfilter" => Ok(Self::DelayLpFilter),
+            "delayreverbsend" => Ok(Self::DelayReverbSend),
+            "delaymixvolume" => Ok(Self::DelayMixVolume),
+            "delayoverdrive" => Ok(Self::DelayOverdrive),
+            "reverbpredelay" => Ok(Self::ReverbPreDelay),
+            "reverbdecay" => Ok(Self::ReverbDecay),
+            "reverbshelvingfreq" => Ok(Self::ReverbShelvingFreq),
+            "reverbshelvinggain" => Ok(Self::ReverbShelvingGain),
+            "reverbhpfilter" => Ok(Self::ReverbHpFilter),
+            "reverblpfilter" => Ok(Self::ReverbLpFilter),
+            "reverbmixvolume" => Ok(Self::ReverbMixVolume),
+            "distortionamount" => Ok(Self::DistortionAmount),
+            "distortionsymmetry" => Ok(Self::DistortionSymmetry),
+            "compressorthreshold" => Ok(Self::CompressorThreshold),
+            "compressorattack" => Ok(Self::CompressorAttack),
+            "compressorrelease" => Ok(Self::CompressorRelease),
+            "compressorratio" => Ok(Self::CompressorRatio),
+            "compressorsidechaineq" => Ok(Self::CompressorSideChainEq),
+            "compressormakeupgain" => Ok(Self::CompressorMakeUpGain),
+            "compressordrywetmix" => Ok(Self::CompressorDryWetMix),
+            "compressorvolume" => Ok(Self::CompressorVolume),
+            _ => Err(ConversionError::Range {
+                value: value.to_string(),
+                type_name: "FxLfoDestination".to_string(),
+            }),
+        }
+    }
+}
+
 impl TryFrom<u8> for FxLfoDestination {
     type Error = ConversionError;
     fn try_from(value: u8) -> Result<Self, Self::Error> {
@@ -290,6 +373,33 @@ pub enum FxDelayTimeOnTheGrid {
     NotOnTheGrid(u8),
 }
 
+impl TryFrom<&str> for FxDelayTimeOnTheGrid {
+    type Error = ConversionError;
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        // Ignore not on the grid.
+        match value {
+            "128th" => Ok(Self::_128th),
+            "64th" => Ok(Self::_64th),
+            "64thdotted" => Ok(Self::_64thDotted),
+            "32nd" => Ok(Self::_32nd),
+            "32nddotted" => Ok(Self::_32ndDotted),
+            "16th" => Ok(Self::_16th),
+            "16thdotted" => Ok(Self::_16thDotted),
+            "8th" => Ok(Self::_8th),
+            "8thdotted" => Ok(Self::_8thDotted),
+            "quarter" => Ok(Self::Quarter),
+            "quarterdotted" => Ok(Self::QuarterDotted),
+            "half" => Ok(Self::Half),
+            "halfdotted" => Ok(Self::HalfDotted),
+            "whole" => Ok(Self::Whole),
+            _ => Err(ConversionError::Range {
+                value: value.to_string(),
+                type_name: "FxDelayTimeOnTheGrid".to_string(),
+            }),
+        }
+    }
+}
+
 // Double check.
 impl From<FxDelayTimeOnTheGrid> for u8 {
     fn from(value: FxDelayTimeOnTheGrid) -> Self {
@@ -333,6 +443,25 @@ pub enum FxCompAttack {
     _10,
     /// 30
     _30,
+}
+
+impl TryFrom<&str> for FxCompAttack {
+    type Error = ConversionError;
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        match value {
+            "0.03" => Ok(Self::_0_03),
+            "0.1" => Ok(Self::_0_1),
+            "0.3" => Ok(Self::_0_3),
+            "1" => Ok(Self::_1),
+            "3" => Ok(Self::_3),
+            "10" => Ok(Self::_10),
+            "30" => Ok(Self::_30),
+            _ => Err(ConversionError::Range {
+                value: value.to_string(),
+                type_name: "FxCompAttack".to_string(),
+            }),
+        }
+    }
 }
 
 impl From<FxCompAttack> for u8 {
@@ -392,6 +521,26 @@ pub enum FxCompRelease {
     A2,
 }
 
+impl TryFrom<&str> for FxCompRelease {
+    type Error = ConversionError;
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        match value {
+            "0.1" => Ok(Self::_0_1),
+            "0.2" => Ok(Self::_0_2),
+            "0.4" => Ok(Self::_0_4),
+            "0.6" => Ok(Self::_0_6),
+            "1" => Ok(Self::_1),
+            "2" => Ok(Self::_2),
+            "A1" => Ok(Self::A1),
+            "A2" => Ok(Self::A2),
+            _ => Err(ConversionError::Range {
+                value: value.to_string(),
+                type_name: "FxCompRelease".to_string(),
+            }),
+        }
+    }
+}
+
 impl From<FxCompRelease> for u8 {
     fn from(value: FxCompRelease) -> Self {
         match value {
@@ -443,6 +592,22 @@ pub enum FxCompRatio {
     Max,
 }
 
+impl TryFrom<&str> for FxCompRatio {
+    type Error = ConversionError;
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        match value {
+            "1:2" => Ok(Self::_1B2),
+            "1:4" => Ok(Self::_1B4),
+            "1:8" => Ok(Self::_1B8),
+            "max" => Ok(Self::Max),
+            _ => Err(ConversionError::Range {
+                value: value.to_string(),
+                type_name: "FxCompRatio".to_string(),
+            }),
+        }
+    }
+}
+
 impl From<FxCompRatio> for u8 {
     fn from(value: FxCompRatio) -> Self {
         match value {
@@ -480,6 +645,22 @@ pub enum FxCompSideChainEq {
     Lpf,
     Hpf,
     Hit,
+}
+
+impl TryFrom<&str> for FxCompSideChainEq {
+    type Error = ConversionError;
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        match value {
+            "off" => Ok(Self::Off),
+            "lpf" => Ok(Self::Lpf),
+            "hpf" => Ok(Self::Hpf),
+            "hit" => Ok(Self::Hit),
+            _ => Err(ConversionError::Range {
+                value: value.to_string(),
+                type_name: "FxCompSideChainEq".to_string(),
+            }),
+        }
+    }
 }
 
 impl From<FxCompSideChainEq> for u8 {
