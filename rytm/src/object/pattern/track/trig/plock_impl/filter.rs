@@ -19,7 +19,6 @@ impl Trig {
                 rytm_sys::AR_PLOCK_TYPE_FLT_ATTACK as u8,
                 filter_attack as u8,
             )?;
-
             return Ok(());
         }
         Err(OrphanTrig)

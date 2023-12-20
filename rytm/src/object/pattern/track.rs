@@ -569,4 +569,14 @@ impl Track {
                 .clear_all_plocks_for_track(self.index as u8);
         }
     }
+
+    /// Returns the index of this track.
+    pub const fn index(&self) -> usize {
+        self.index
+    }
+
+    /// Returns the index of the pattern that owns this track.
+    pub const fn owner_pattern_index(&self) -> usize {
+        self.owner_pattern_index
+    }
 }

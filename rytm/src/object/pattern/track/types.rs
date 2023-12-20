@@ -60,6 +60,25 @@ impl TryFrom<&str> for RootNote {
     }
 }
 
+impl From<RootNote> for &str {
+    fn from(note: RootNote) -> Self {
+        match note {
+            RootNote::C => "c",
+            RootNote::CSharp => "c#",
+            RootNote::D => "d",
+            RootNote::EFlat => "eb",
+            RootNote::E => "e",
+            RootNote::F => "f",
+            RootNote::FSharp => "f#",
+            RootNote::G => "g",
+            RootNote::GSharp => "g#",
+            RootNote::A => "a",
+            RootNote::BFlat => "bb",
+            RootNote::B => "b",
+        }
+    }
+}
+
 impl From<RootNote> for u8 {
     fn from(note: RootNote) -> Self {
         match note {
@@ -197,6 +216,49 @@ impl TryFrom<&str> for PadScale {
                 value: scale.to_string(),
                 type_name: "PadScale".into(),
             }),
+        }
+    }
+}
+
+impl From<PadScale> for &str {
+    fn from(scale: PadScale) -> Self {
+        match scale {
+            PadScale::Chromatic => "chromatic",
+            PadScale::IonianMajor => "ionianmajor",
+            PadScale::Dorian => "dorian",
+            PadScale::Phrygian => "phrygian",
+            PadScale::Lydian => "lydian",
+            PadScale::Mixolydian => "mixolydian",
+            PadScale::AeolianMinor => "aeolianminor",
+            PadScale::Locrian => "locrian",
+            PadScale::PentatonicMinor => "pentatonicminor",
+            PadScale::PentatonicMajor => "pentatonicmajor",
+            PadScale::MelodicMinor => "melodicminor",
+            PadScale::HarmonicMinor => "harmonicminor",
+            PadScale::WholeTone => "wholetone",
+            PadScale::Blues => "blues",
+            PadScale::ComboMinor => "combominor",
+            PadScale::Persian => "persian",
+            PadScale::Iwato => "iwato",
+            PadScale::InSen => "insen",
+            PadScale::Hirajoshi => "hirajoshi",
+            PadScale::Pelog => "pelog",
+            PadScale::PhrygianDominant => "phrygiandominant",
+            PadScale::WholeHalfDiminished => "wholehalfdiminished",
+            PadScale::HalfWholeDiminished => "halfwholediminished",
+            PadScale::Spanish => "spanish",
+            PadScale::MajorLocrian => "majorlocrian",
+            PadScale::SuperLocrian => "superlocrian",
+            PadScale::DorianB2 => "dorianb2",
+            PadScale::LydianAugmented => "lydianaugmented",
+            PadScale::LydianDominant => "lydiandominant",
+            PadScale::DoubleHarmonicMajor => "doubleharmonicmajor",
+            PadScale::Lydian26 => "lydian26",
+            PadScale::Ultraphrygian => "ultraphrygian",
+            PadScale::HungarianMinor => "hungarianminor",
+            PadScale::Oriental => "oriental",
+            PadScale::Ionian25 => "ionian25",
+            PadScale::LocrianBb3Bb7 => "locrianbb3bb7",
         }
     }
 }

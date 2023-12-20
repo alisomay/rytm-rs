@@ -268,6 +268,49 @@ impl TryFrom<&str> for MachineType {
     }
 }
 
+impl From<MachineType> for &str {
+    fn from(machine: MachineType) -> Self {
+        use MachineType::*;
+        match machine {
+            BdHard => "bdhard",
+            BdClassic => "bdclassic",
+            SdHard => "sdhard",
+            SdClassic => "sdclassic",
+            RsHard => "rshard",
+            RsClassic => "rsclassic",
+            CpClassic => "cpclassic",
+            BtClassic => "btclassic",
+            XtClassic => "xtclassic",
+            ChClassic => "chclassic",
+            OhClassic => "ohclassic",
+            CyClassic => "cyclassic",
+            CbClassic => "cbclassic",
+            BdFm => "bdfm",
+            SdFm => "sdfm",
+            UtNoise => "utnoise",
+            UtImpulse => "utimpulse",
+            ChMetallic => "chmetallic",
+            OhMetallic => "ohmetallic",
+            CyMetallic => "cymetallic",
+            CbMetallic => "cbmetallic",
+            BdPlastic => "bdplastic",
+            BdSilky => "bdsilky",
+            SdNatural => "sdnatural",
+            HhBasic => "hhbasic",
+            CyRide => "cyride",
+            BdSharp => "bdsharp",
+            Disable => "disable",
+            SyDualVco => "sydualvco",
+            SyChip => "sychip",
+            BdAcoustic => "bdacoustic",
+            SdAcoustic => "sdacoustic",
+            SyRaw => "syraw",
+            HhLab => "hhlab",
+            Unset => "unset",
+        }
+    }
+}
+
 impl std::fmt::Display for MachineType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let machine = match self {
@@ -532,6 +575,47 @@ impl TryFrom<&str> for LfoDestination {
     }
 }
 
+impl From<LfoDestination> for &str {
+    fn from(destination: LfoDestination) -> Self {
+        use LfoDestination::*;
+        match destination {
+            Syn1 => "syn1",
+            Syn2 => "syn2",
+            Syn3 => "syn3",
+            Syn4 => "syn4",
+            Syn5 => "syn5",
+            Syn6 => "syn6",
+            Syn7 => "syn7",
+            Syn8 => "syn8",
+            SampleTune => "sampletune",
+            SampleFineTune => "samplefinetune",
+            SampleSlice => "sampleslice",
+            SampleBitReduction => "samplebitreduction",
+            SampleStart => "samplestart",
+            SampleEnd => "sampleend",
+            SampleLoop => "sampleloop",
+            SampleLevel => "samplelevel",
+            FilterEnvelope => "filterenvelope",
+            FilterAttack => "filterattack",
+            FilterDecay => "filterdecay",
+            FilterSustain => "filtersustain",
+            FilterRelease => "filterrelease",
+            FilterFrequency => "filterfrequency",
+            FilterResonance => "filterresonance",
+            AmpAttack => "ampattack",
+            AmpHold => "amphold",
+            AmpDecay => "ampdecay",
+            AmpOverdrive => "ampoverdrive",
+            AmpVolume => "ampvolume",
+            AmpPan => "amppan",
+            AmpAccent => "ampaccent",
+            AmpDelaySend => "ampdelaysend",
+            AmpReverbSend => "ampreverb_send",
+            Unset => "unset",
+        }
+    }
+}
+
 impl TryFrom<u8> for LfoDestination {
     type Error = ConversionError;
     fn try_from(value: u8) -> Result<Self, Self::Error> {
@@ -760,6 +844,54 @@ impl TryFrom<&str> for SoundModTarget {
     }
 }
 
+impl From<SoundModTarget> for &str {
+    fn from(target: SoundModTarget) -> Self {
+        use SoundModTarget::*;
+        match target {
+            Unset => "unset",
+            LfoMultiplier => "lfomultiplier",
+            LfoWaveform => "lfowaveform",
+            LfoTrigMode => "lfotrigmode",
+            LfoSpeed => "lfospeed",
+            LfoFade => "lfofade",
+            LfoPhase => "lfophase",
+            LfoDepth => "lfodepth",
+            Syn1 => "syn1",
+            Syn2 => "syn2",
+            Syn3 => "syn3",
+            Syn4 => "syn4",
+            Syn5 => "syn5",
+            Syn6 => "syn6",
+            Syn7 => "syn7",
+            Syn8 => "syn8",
+            SampleTune => "sampletune",
+            SampleFineTune => "samplefinetune",
+            SampleSlice => "sampleslice",
+            SampleBitReduction => "samplebitreduction",
+            SampleStart => "samplestart",
+            SampleEnd => "sampleend",
+            SampleLoop => "sampleloop",
+            SampleLevel => "samplelevel",
+            FilterEnvelope => "filterenvelope",
+            FilterAttack => "filterattack",
+            FilterDecay => "filterdecay",
+            FilterSustain => "filtersustain",
+            FilterRelease => "filterrelease",
+            FilterFrequency => "filterfrequency",
+            FilterResonance => "filterresonance",
+            AmpAttack => "ampattack",
+            AmpHold => "amphold",
+            AmpDecay => "ampdecay",
+            AmpOverdrive => "ampoverdrive",
+            AmpVolume => "ampvolume",
+            AmpPan => "amppan",
+            AmpAccent => "ampaccent",
+            AmpDelaySend => "ampdelaysend",
+            AmpReverbSend => "ampreverbsend",
+        }
+    }
+}
+
 impl TryFrom<u8> for SoundModTarget {
     type Error = ConversionError;
     fn try_from(value: u8) -> Result<Self, Self::Error> {
@@ -896,6 +1028,21 @@ impl TryFrom<&str> for FilterType {
     }
 }
 
+impl From<FilterType> for &str {
+    fn from(filter: FilterType) -> Self {
+        use FilterType::*;
+        match filter {
+            Lp2 => "lp2",
+            Lp1 => "lp1",
+            Bp => "bp",
+            Hp1 => "hp1",
+            Hp2 => "hp2",
+            Bs => "bs",
+            Pk => "pk",
+        }
+    }
+}
+
 impl TryFrom<u8> for FilterType {
     type Error = ConversionError;
     fn try_from(value: u8) -> Result<Self, Self::Error> {
@@ -1022,6 +1169,38 @@ impl TryFrom<&str> for LfoMultiplier {
     }
 }
 
+impl From<LfoMultiplier> for &str {
+    fn from(multiplier: LfoMultiplier) -> Self {
+        use LfoMultiplier::*;
+        match multiplier {
+            X1 => "x1",
+            X2 => "x2",
+            X4 => "x4",
+            X8 => "x8",
+            X16 => "x16",
+            X32 => "x32",
+            X64 => "x64",
+            X128 => "x128",
+            X256 => "x256",
+            X512 => "x512",
+            X1k => "x1k",
+            X2k => "x2k",
+            _D1 => ".1",
+            _D2 => ".2",
+            _D4 => ".4",
+            _D8 => ".8",
+            _D16 => ".16",
+            _D32 => ".32",
+            _D64 => ".64",
+            _D128 => ".128",
+            _D256 => ".256",
+            _D512 => ".512",
+            _D1k => ".1k",
+            _D2k => ".2k",
+        }
+    }
+}
+
 impl TryFrom<u8> for LfoMultiplier {
     type Error = ConversionError;
     fn try_from(value: u8) -> Result<Self, Self::Error> {
@@ -1124,6 +1303,21 @@ impl TryFrom<&str> for LfoWaveform {
     }
 }
 
+impl From<LfoWaveform> for &str {
+    fn from(waveform: LfoWaveform) -> Self {
+        use LfoWaveform::*;
+        match waveform {
+            Tri => "tri",
+            Sin => "sin",
+            Sqr => "sqr",
+            Saw => "saw",
+            Exp => "exp",
+            Rmp => "rmp",
+            Rnd => "rnd",
+        }
+    }
+}
+
 impl TryFrom<u8> for LfoWaveform {
     type Error = ConversionError;
     fn try_from(value: u8) -> Result<Self, Self::Error> {
@@ -1188,6 +1382,19 @@ impl TryFrom<&str> for LfoMode {
     }
 }
 
+impl From<LfoMode> for &str {
+    fn from(mode: LfoMode) -> Self {
+        use LfoMode::*;
+        match mode {
+            Free => "free",
+            Trig => "trig",
+            Hold => "hold",
+            One => "one",
+            Half => "half",
+        }
+    }
+}
+
 impl TryFrom<u8> for LfoMode {
     type Error = ConversionError;
     fn try_from(value: u8) -> Result<Self, Self::Error> {
@@ -1243,6 +1450,18 @@ impl TryFrom<&str> for SoundSettingsChromaticMode {
                 value: mode.to_string(),
                 type_name: "SoundSettingsChromaticMode".to_string(),
             }),
+        }
+    }
+}
+
+impl From<SoundSettingsChromaticMode> for &str {
+    fn from(mode: SoundSettingsChromaticMode) -> Self {
+        use SoundSettingsChromaticMode::*;
+        match mode {
+            Off => "off",
+            Synth => "syn",
+            Sample => "samp",
+            SynthAndSample => "syn+samp",
         }
     }
 }

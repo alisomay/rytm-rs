@@ -79,8 +79,8 @@ impl FxDelay {
     /// Range: `0..=127`
 
     #[parameter_range(range = "time:0..=127")]
-    pub fn set_time(&mut self, time: u8) -> Result<(), RytmError> {
-        self.time = time;
+    pub fn set_time(&mut self, time: usize) -> Result<(), RytmError> {
+        self.time = time as u8;
         Ok(())
     }
 
@@ -97,10 +97,9 @@ impl FxDelay {
     /// Sets the stereo width of the delay.
     ///
     /// Range: `-64..=63`
-
     #[parameter_range(range = "stereo_width:-64..=63")]
-    pub fn set_stereo_width(&mut self, stereo_width: i8) -> Result<(), RytmError> {
-        self.stereo_width = stereo_width;
+    pub fn set_stereo_width(&mut self, stereo_width: isize) -> Result<(), RytmError> {
+        self.stereo_width = stereo_width as i8;
         Ok(())
     }
 
@@ -108,8 +107,8 @@ impl FxDelay {
     ///
     /// Range: `0..=`198`
     #[parameter_range(range = "feedback:0..=198")]
-    pub fn set_feedback(&mut self, feedback: u8) -> Result<(), RytmError> {
-        self.feedback = feedback;
+    pub fn set_feedback(&mut self, feedback: usize) -> Result<(), RytmError> {
+        self.feedback = feedback as u8;
         Ok(())
     }
 
@@ -117,8 +116,8 @@ impl FxDelay {
     ///
     /// Range: `0..=127`
     #[parameter_range(range = "hpf:0..=127")]
-    pub fn set_hpf(&mut self, hpf: u8) -> Result<(), RytmError> {
-        self.hpf = hpf;
+    pub fn set_hpf(&mut self, hpf: usize) -> Result<(), RytmError> {
+        self.hpf = hpf as u8;
         Ok(())
     }
 
@@ -126,8 +125,8 @@ impl FxDelay {
     ///
     /// Range: `0..=127`
     #[parameter_range(range = "lpf:0..=127")]
-    pub fn set_lpf(&mut self, lpf: u8) -> Result<(), RytmError> {
-        self.lpf = lpf;
+    pub fn set_lpf(&mut self, lpf: usize) -> Result<(), RytmError> {
+        self.lpf = lpf as u8;
         Ok(())
     }
 
@@ -135,8 +134,8 @@ impl FxDelay {
     ///
     /// Range: `0..=127`
     #[parameter_range(range = "reverb_send:0..=127")]
-    pub fn set_reverb_send(&mut self, reverb_send: u8) -> Result<(), RytmError> {
-        self.reverb_send = reverb_send;
+    pub fn set_reverb_send(&mut self, reverb_send: usize) -> Result<(), RytmError> {
+        self.reverb_send = reverb_send as u8;
         Ok(())
     }
 
@@ -144,8 +143,8 @@ impl FxDelay {
     ///
     /// Range: `0..=127`
     #[parameter_range(range = "volume:0..=127")]
-    pub fn set_volume(&mut self, volume: u8) -> Result<(), RytmError> {
-        self.volume = volume;
+    pub fn set_volume(&mut self, volume: usize) -> Result<(), RytmError> {
+        self.volume = volume as u8;
         Ok(())
     }
 

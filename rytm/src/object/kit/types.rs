@@ -117,6 +117,45 @@ impl TryFrom<&str> for ControlInModTarget {
     }
 }
 
+impl From<ControlInModTarget> for &str {
+    fn from(value: ControlInModTarget) -> Self {
+        match value {
+            ControlInModTarget::Unset => "unset",
+            ControlInModTarget::LfoMultiplier => "lfomultiplier",
+            ControlInModTarget::LfoWaveform => "lfowaveform",
+            ControlInModTarget::LfoTrigMode => "lfotrigmode",
+            ControlInModTarget::LfoSpeed => "lfospeed",
+            ControlInModTarget::LfoFade => "lfofade",
+            ControlInModTarget::LfoPhase => "lfophase",
+            ControlInModTarget::LfoDepth => "lfodepth",
+            ControlInModTarget::SampleTune => "sampletune",
+            ControlInModTarget::SampleFineTune => "samplefinetune",
+            ControlInModTarget::SampleSlice => "sampleslice",
+            ControlInModTarget::SampleBitReduction => "samplebitreduction",
+            ControlInModTarget::SampleStart => "samplestart",
+            ControlInModTarget::SampleEnd => "sampleend",
+            ControlInModTarget::SampleLoop => "sampleloop",
+            ControlInModTarget::SampleLevel => "samplelevel",
+            ControlInModTarget::FilterEnvelope => "filterenvelope",
+            ControlInModTarget::FilterAttack => "filterattack",
+            ControlInModTarget::FilterDecay => "filterdecay",
+            ControlInModTarget::FilterSustain => "filtersustain",
+            ControlInModTarget::FilterRelease => "filterrelease",
+            ControlInModTarget::FilterFrequency => "filterfrequency",
+            ControlInModTarget::FilterResonance => "filterresonance",
+            ControlInModTarget::AmpAttack => "ampattack",
+            ControlInModTarget::AmpHold => "amphold",
+            ControlInModTarget::AmpDecay => "ampdecay",
+            ControlInModTarget::AmpOverdrive => "ampoverdrive",
+            ControlInModTarget::AmpVolume => "ampvolume",
+            ControlInModTarget::AmpPan => "amppan",
+            ControlInModTarget::AmpAccent => "ampaccent",
+            ControlInModTarget::AmpDelaySend => "ampdelaysend",
+            ControlInModTarget::AmpReverbSend => "ampreverbsend",
+        }
+    }
+}
+
 impl TryFrom<u8> for ControlInModTarget {
     type Error = ConversionError;
     fn try_from(value: u8) -> Result<Self, Self::Error> {
@@ -276,6 +315,40 @@ impl TryFrom<&str> for FxLfoDestination {
     }
 }
 
+impl From<FxLfoDestination> for &str {
+    fn from(value: FxLfoDestination) -> Self {
+        match value {
+            FxLfoDestination::Unset => "unset",
+            FxLfoDestination::DelayTime => "delaytime",
+            FxLfoDestination::DelayPingPong => "delaypingpong",
+            FxLfoDestination::DelayStereoWidth => "delaystereowidth",
+            FxLfoDestination::DelayFeedback => "delayfeedback",
+            FxLfoDestination::DelayHpFilter => "delayhpfilter",
+            FxLfoDestination::DelayLpFilter => "delaylpfilter",
+            FxLfoDestination::DelayReverbSend => "delayreverbsend",
+            FxLfoDestination::DelayMixVolume => "delaymixvolume",
+            FxLfoDestination::DelayOverdrive => "delayoverdrive",
+            FxLfoDestination::ReverbPreDelay => "reverbpredelay",
+            FxLfoDestination::ReverbDecay => "reverbdecay",
+            FxLfoDestination::ReverbShelvingFreq => "reverbshelvingfreq",
+            FxLfoDestination::ReverbShelvingGain => "reverbshelvinggain",
+            FxLfoDestination::ReverbHpFilter => "reverbhpfilter",
+            FxLfoDestination::ReverbLpFilter => "reverblpfilter",
+            FxLfoDestination::ReverbMixVolume => "reverbmixvolume",
+            FxLfoDestination::DistortionAmount => "distortionamount",
+            FxLfoDestination::DistortionSymmetry => "distortionsymmetry",
+            FxLfoDestination::CompressorThreshold => "compressorthreshold",
+            FxLfoDestination::CompressorAttack => "compressorattack",
+            FxLfoDestination::CompressorRelease => "compressorrelease",
+            FxLfoDestination::CompressorRatio => "compressorratio",
+            FxLfoDestination::CompressorSideChainEq => "compressorsidechaineq",
+            FxLfoDestination::CompressorMakeUpGain => "compressormakeupgain",
+            FxLfoDestination::CompressorDryWetMix => "compressordrywetmix",
+            FxLfoDestination::CompressorVolume => "compressorvolume",
+        }
+    }
+}
+
 impl TryFrom<u8> for FxLfoDestination {
     type Error = ConversionError;
     fn try_from(value: u8) -> Result<Self, Self::Error> {
@@ -400,6 +473,30 @@ impl TryFrom<&str> for FxDelayTimeOnTheGrid {
     }
 }
 
+impl From<FxDelayTimeOnTheGrid> for &str {
+    fn from(value: FxDelayTimeOnTheGrid) -> Self {
+        match value {
+            FxDelayTimeOnTheGrid::_128th => "128th",
+            FxDelayTimeOnTheGrid::_64th => "64th",
+            FxDelayTimeOnTheGrid::_64thDotted => "64thdotted",
+            FxDelayTimeOnTheGrid::_32nd => "32nd",
+            FxDelayTimeOnTheGrid::_32ndDotted => "32nddotted",
+            FxDelayTimeOnTheGrid::_16th => "16th",
+            FxDelayTimeOnTheGrid::_16thDotted => "16thdotted",
+            FxDelayTimeOnTheGrid::_8th => "8th",
+            FxDelayTimeOnTheGrid::_8thDotted => "8thdotted",
+            FxDelayTimeOnTheGrid::Quarter => "quarter",
+            FxDelayTimeOnTheGrid::QuarterDotted => "quarterdotted",
+            FxDelayTimeOnTheGrid::Half => "half",
+            FxDelayTimeOnTheGrid::HalfDotted => "halfdotted",
+            FxDelayTimeOnTheGrid::Whole => "whole",
+            FxDelayTimeOnTheGrid::NotOnTheGrid(val) => {
+                panic!("Not on the grid delay time: {}", val)
+            }
+        }
+    }
+}
+
 // Double check.
 impl From<FxDelayTimeOnTheGrid> for u8 {
     fn from(value: FxDelayTimeOnTheGrid) -> Self {
@@ -460,6 +557,20 @@ impl TryFrom<&str> for FxCompAttack {
                 value: value.to_string(),
                 type_name: "FxCompAttack".to_string(),
             }),
+        }
+    }
+}
+
+impl From<FxCompAttack> for &str {
+    fn from(value: FxCompAttack) -> Self {
+        match value {
+            FxCompAttack::_0_03 => "0.03",
+            FxCompAttack::_0_1 => "0.1",
+            FxCompAttack::_0_3 => "0.3",
+            FxCompAttack::_1 => "1",
+            FxCompAttack::_3 => "3",
+            FxCompAttack::_10 => "10",
+            FxCompAttack::_30 => "30",
         }
     }
 }
@@ -541,6 +652,21 @@ impl TryFrom<&str> for FxCompRelease {
     }
 }
 
+impl From<FxCompRelease> for &str {
+    fn from(value: FxCompRelease) -> Self {
+        match value {
+            FxCompRelease::_0_1 => "0.1",
+            FxCompRelease::_0_2 => "0.2",
+            FxCompRelease::_0_4 => "0.4",
+            FxCompRelease::_0_6 => "0.6",
+            FxCompRelease::_1 => "1",
+            FxCompRelease::_2 => "2",
+            FxCompRelease::A1 => "A1",
+            FxCompRelease::A2 => "A2",
+        }
+    }
+}
+
 impl From<FxCompRelease> for u8 {
     fn from(value: FxCompRelease) -> Self {
         match value {
@@ -608,6 +734,17 @@ impl TryFrom<&str> for FxCompRatio {
     }
 }
 
+impl From<FxCompRatio> for &str {
+    fn from(value: FxCompRatio) -> Self {
+        match value {
+            FxCompRatio::_1B2 => "1:2",
+            FxCompRatio::_1B4 => "1:4",
+            FxCompRatio::_1B8 => "1:8",
+            FxCompRatio::Max => "max",
+        }
+    }
+}
+
 impl From<FxCompRatio> for u8 {
     fn from(value: FxCompRatio) -> Self {
         match value {
@@ -659,6 +796,17 @@ impl TryFrom<&str> for FxCompSideChainEq {
                 value: value.to_string(),
                 type_name: "FxCompSideChainEq".to_string(),
             }),
+        }
+    }
+}
+
+impl From<FxCompSideChainEq> for &str {
+    fn from(value: FxCompSideChainEq) -> Self {
+        match value {
+            FxCompSideChainEq::Off => "off",
+            FxCompSideChainEq::Lpf => "lpf",
+            FxCompSideChainEq::Hpf => "hpf",
+            FxCompSideChainEq::Hit => "hit",
         }
     }
 }

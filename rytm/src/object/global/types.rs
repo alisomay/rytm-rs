@@ -262,6 +262,93 @@ impl TryFrom<&str> for TimeSignature {
     }
 }
 
+impl From<TimeSignature> for &str {
+    fn from(ts: TimeSignature) -> Self {
+        match ts {
+            TimeSignature::_1B1 => "1/1",
+            TimeSignature::_2B1 => "2/1",
+            TimeSignature::_3B1 => "3/1",
+            TimeSignature::_4B1 => "4/1",
+            TimeSignature::_5B1 => "5/1",
+            TimeSignature::_6B1 => "6/1",
+            TimeSignature::_7B1 => "7/1",
+            TimeSignature::_8B1 => "8/1",
+            TimeSignature::_9B1 => "9/1",
+            TimeSignature::_10B1 => "10/1",
+            TimeSignature::_11B1 => "11/1",
+            TimeSignature::_12B1 => "12/1",
+            TimeSignature::_13B1 => "13/1",
+            TimeSignature::_14B1 => "14/1",
+            TimeSignature::_15B1 => "15/1",
+            TimeSignature::_16B1 => "16/1",
+            TimeSignature::_1B2 => "1/2",
+            TimeSignature::_2B2 => "2/2",
+            TimeSignature::_3B2 => "3/2",
+            TimeSignature::_4B2 => "4/2",
+            TimeSignature::_5B2 => "5/2",
+            TimeSignature::_6B2 => "6/2",
+            TimeSignature::_7B2 => "7/2",
+            TimeSignature::_8B2 => "8/2",
+            TimeSignature::_9B2 => "9/2",
+            TimeSignature::_10B2 => "10/2",
+            TimeSignature::_11B2 => "11/2",
+            TimeSignature::_12B2 => "12/2",
+            TimeSignature::_13B2 => "13/2",
+            TimeSignature::_14B2 => "14/2",
+            TimeSignature::_15B2 => "15/2",
+            TimeSignature::_16B2 => "16/2",
+            TimeSignature::_1B4 => "1/4",
+            TimeSignature::_2B4 => "2/4",
+            TimeSignature::_3B4 => "3/4",
+            TimeSignature::_4B4 => "4/4",
+            TimeSignature::_5B4 => "5/4",
+            TimeSignature::_6B4 => "6/4",
+            TimeSignature::_7B4 => "7/4",
+            TimeSignature::_8B4 => "8/4",
+            TimeSignature::_9B4 => "9/4",
+            TimeSignature::_10B4 => "10/4",
+            TimeSignature::_11B4 => "11/4",
+            TimeSignature::_12B4 => "12/4",
+            TimeSignature::_13B4 => "13/4",
+            TimeSignature::_14B4 => "14/4",
+            TimeSignature::_15B4 => "15/4",
+            TimeSignature::_16B4 => "16/4",
+            TimeSignature::_1B8 => "1/8",
+            TimeSignature::_2B8 => "2/8",
+            TimeSignature::_3B8 => "3/8",
+            TimeSignature::_4B8 => "4/8",
+            TimeSignature::_5B8 => "5/8",
+            TimeSignature::_6B8 => "6/8",
+            TimeSignature::_7B8 => "7/8",
+            TimeSignature::_8B8 => "8/8",
+            TimeSignature::_9B8 => "9/8",
+            TimeSignature::_10B8 => "10/8",
+            TimeSignature::_11B8 => "11/8",
+            TimeSignature::_12B8 => "12/8",
+            TimeSignature::_13B8 => "13/8",
+            TimeSignature::_14B8 => "14/8",
+            TimeSignature::_15B8 => "15/8",
+            TimeSignature::_16B8 => "16/8",
+            TimeSignature::_1B16 => "1/16",
+            TimeSignature::_2B16 => "2/16",
+            TimeSignature::_3B16 => "3/16",
+            TimeSignature::_4B16 => "4/16",
+            TimeSignature::_5B16 => "5/16",
+            TimeSignature::_6B16 => "6/16",
+            TimeSignature::_7B16 => "7/16",
+            TimeSignature::_8B16 => "8/16",
+            TimeSignature::_9B16 => "9/16",
+            TimeSignature::_10B16 => "10/16",
+            TimeSignature::_11B16 => "11/16",
+            TimeSignature::_12B16 => "12/16",
+            TimeSignature::_13B16 => "13/16",
+            TimeSignature::_14B16 => "14/16",
+            TimeSignature::_15B16 => "15/16",
+            TimeSignature::_16B16 => "16/16",
+        }
+    }
+}
+
 impl TryFrom<(u8, u8)> for TimeSignature {
     type Error = ConversionError;
 
@@ -503,6 +590,34 @@ impl TryFrom<&str> for MidiChannel {
     }
 }
 
+impl From<MidiChannel> for &str {
+    fn from(mc: MidiChannel) -> Self {
+        match mc {
+            MidiChannel::Channel(channel) => match channel {
+                0 => "1",
+                1 => "2",
+                2 => "3",
+                3 => "4",
+                4 => "5",
+                5 => "6",
+                6 => "7",
+                7 => "8",
+                8 => "9",
+                9 => "10",
+                10 => "11",
+                11 => "12",
+                12 => "13",
+                13 => "14",
+                14 => "15",
+                15 => "16",
+                _ => unreachable!("This is theoretically possible and maybe handled but I think it is not needed right now. Check From implementation for MidiChannel if you encounter this error and open an issue."),
+            },
+            MidiChannel::Auto => "auto",
+            MidiChannel::Off => "off",
+        }
+    }
+}
+
 // Since auto and off are the same value depending on context it is wise not to expose From implementation here.
 #[allow(clippy::from_over_into, clippy::cast_possible_truncation)]
 impl TryInto<u8> for MidiChannel {
@@ -550,6 +665,16 @@ impl TryFrom<&str> for MidiPortFunction {
                 value: value.to_string(),
                 type_name: "MidiPortFunction".into(),
             }),
+        }
+    }
+}
+
+impl From<MidiPortFunction> for &str {
+    fn from(pf: MidiPortFunction) -> Self {
+        match pf {
+            MidiPortFunction::Midi => "midi",
+            MidiPortFunction::Din24 => "din24",
+            MidiPortFunction::Din48 => "din48",
         }
     }
 }
@@ -609,6 +734,17 @@ impl TryFrom<&str> for MidiTransportLayer {
                 value: value.to_string(),
                 type_name: "MidiTransportLayer".into(),
             }),
+        }
+    }
+}
+
+impl From<MidiTransportLayer> for &str {
+    fn from(mtl: MidiTransportLayer) -> Self {
+        match mtl {
+            MidiTransportLayer::Disabled => "disabled",
+            MidiTransportLayer::Midi => "midi",
+            MidiTransportLayer::Usb => "usb",
+            MidiTransportLayer::MidiAndUsb => "midi+usb",
         }
     }
 }
@@ -674,6 +810,16 @@ impl TryFrom<&str> for ParameterDestination {
     }
 }
 
+impl From<ParameterDestination> for &str {
+    fn from(pd: ParameterDestination) -> Self {
+        match pd {
+            ParameterDestination::Internal => "int",
+            ParameterDestination::InternalAndExternal => "int+ext",
+            ParameterDestination::External => "ext",
+        }
+    }
+}
+
 impl TryFrom<u8> for ParameterDestination {
     type Error = ConversionError;
 
@@ -735,6 +881,17 @@ impl TryFrom<&str> for RoutingUsbToMainDb {
     }
 }
 
+impl From<RoutingUsbToMainDb> for &str {
+    fn from(value: RoutingUsbToMainDb) -> Self {
+        match value {
+            RoutingUsbToMainDb::Zero => "0db",
+            RoutingUsbToMainDb::PlusSix => "+6db",
+            RoutingUsbToMainDb::PlusTwelve => "+12db",
+            RoutingUsbToMainDb::PlusEighteen => "+18db",
+        }
+    }
+}
+
 impl TryFrom<u8> for RoutingUsbToMainDb {
     type Error = ConversionError;
 
@@ -790,6 +947,15 @@ impl TryFrom<&str> for MidiParameterOutput {
     }
 }
 
+impl From<MidiParameterOutput> for &str {
+    fn from(mpo: MidiParameterOutput) -> Self {
+        match mpo {
+            MidiParameterOutput::Nrpn => "nrpn",
+            MidiParameterOutput::Cc => "cc",
+        }
+    }
+}
+
 impl TryFrom<u8> for MidiParameterOutput {
     type Error = ConversionError;
 
@@ -837,6 +1003,15 @@ impl TryFrom<&str> for MidiPortsOutputChannel {
                 value: value.to_string(),
                 type_name: "MidiPortsOutputChannel".into(),
             }),
+        }
+    }
+}
+
+impl From<MidiPortsOutputChannel> for &str {
+    fn from(mpoc: MidiPortsOutputChannel) -> Self {
+        match mpoc {
+            MidiPortsOutputChannel::AutoChannel => "auto",
+            MidiPortsOutputChannel::TrackChannel => "track",
         }
     }
 }
@@ -899,11 +1074,26 @@ impl TryFrom<&str> for HardwareTrack {
             "6" => Ok(Self::_6),
             "7:8" => Ok(Self::_7and8),
             "9:10" => Ok(Self::_9and10),
-            "11L12" => Ok(Self::_11and12),
+            "11:12" => Ok(Self::_11and12),
             _ => Err(ConversionError::Range {
                 value: value.to_string(),
                 type_name: "HardwareTrack".into(),
             }),
+        }
+    }
+}
+
+impl From<HardwareTrack> for &str {
+    fn from(ht: HardwareTrack) -> Self {
+        match ht {
+            HardwareTrack::_1 => "1",
+            HardwareTrack::_2 => "2",
+            HardwareTrack::_3and4 => "3:4",
+            HardwareTrack::_5 => "5",
+            HardwareTrack::_6 => "6",
+            HardwareTrack::_7and8 => "7:8",
+            HardwareTrack::_9and10 => "9:10",
+            HardwareTrack::_11and12 => "11:12",
         }
     }
 }
@@ -1216,6 +1406,84 @@ impl TryFrom<&str> for RoutingUsbInOptions {
     }
 }
 
+impl From<RoutingUsbInOptions> for &str {
+    fn from(value: RoutingUsbInOptions) -> Self {
+        match value {
+            RoutingUsbInOptions::PreFx => "pre-fx",
+            RoutingUsbInOptions::PostFx => "post-fx",
+            RoutingUsbInOptions::VoiceRouting((left_channel_routing, right_channel_routing)) => {
+                match (left_channel_routing, right_channel_routing) {
+                    (HardwareTrack::_1, HardwareTrack::_1) => "1",
+                    (HardwareTrack::_2, HardwareTrack::_2) => "2",
+                    (HardwareTrack::_3and4, HardwareTrack::_3and4) => "3:4",
+                    (HardwareTrack::_5, HardwareTrack::_5) => "5",
+                    (HardwareTrack::_6, HardwareTrack::_6) => "6",
+                    (HardwareTrack::_7and8, HardwareTrack::_7and8) => "7:8",
+                    (HardwareTrack::_9and10, HardwareTrack::_9and10) => "9:10",
+                    (HardwareTrack::_11and12, HardwareTrack::_11and12) => "11:12",
+                    (HardwareTrack::_1, HardwareTrack::_2) => "l:1r:2",
+                    (HardwareTrack::_1, HardwareTrack::_3and4) => "l:1r:3:4",
+                    (HardwareTrack::_1, HardwareTrack::_5) => "l:1r:5",
+                    (HardwareTrack::_1, HardwareTrack::_6) => "l:1r:6",
+                    (HardwareTrack::_1, HardwareTrack::_7and8) => "l:1r:7:8",
+                    (HardwareTrack::_1, HardwareTrack::_9and10) => "l:1r:9:10",
+                    (HardwareTrack::_1, HardwareTrack::_11and12) => "l:1r:11:12",
+                    (HardwareTrack::_2, HardwareTrack::_1) => "l:2r:1",
+                    (HardwareTrack::_2, HardwareTrack::_3and4) => "l:2r:3:4",
+                    (HardwareTrack::_2, HardwareTrack::_5) => "l:2r:5",
+                    (HardwareTrack::_2, HardwareTrack::_6) => "l:2r:6",
+                    (HardwareTrack::_2, HardwareTrack::_7and8) => "l:2r:7:8",
+                    (HardwareTrack::_2, HardwareTrack::_9and10) => "l:2r:9:10",
+                    (HardwareTrack::_2, HardwareTrack::_11and12) => "l:2r:11:12",
+                    (HardwareTrack::_3and4, HardwareTrack::_1) => "l:3:4r:1",
+                    (HardwareTrack::_3and4, HardwareTrack::_2) => "l:3:4r:2",
+                    (HardwareTrack::_3and4, HardwareTrack::_5) => "l:3:4r:5",
+                    (HardwareTrack::_3and4, HardwareTrack::_6) => "l:3:4r:6",
+                    (HardwareTrack::_3and4, HardwareTrack::_7and8) => "l:3:4r:7:8",
+                    (HardwareTrack::_3and4, HardwareTrack::_9and10) => "l:3:4r:9:10",
+                    (HardwareTrack::_3and4, HardwareTrack::_11and12) => "l:3:4r:11:12",
+                    (HardwareTrack::_5, HardwareTrack::_1) => "l:5r:1",
+                    (HardwareTrack::_5, HardwareTrack::_2) => "l:5r:2",
+                    (HardwareTrack::_5, HardwareTrack::_3and4) => "l:5r:3:4",
+                    (HardwareTrack::_5, HardwareTrack::_6) => "l:5r:6",
+                    (HardwareTrack::_5, HardwareTrack::_7and8) => "l:5r:7:8",
+                    (HardwareTrack::_5, HardwareTrack::_9and10) => "l:5r:9:10",
+                    (HardwareTrack::_5, HardwareTrack::_11and12) => "l:5r:11:12",
+                    (HardwareTrack::_6, HardwareTrack::_1) => "l:6r:1",
+                    (HardwareTrack::_6, HardwareTrack::_2) => "l:6r:2",
+                    (HardwareTrack::_6, HardwareTrack::_3and4) => "l:6r:3:4",
+                    (HardwareTrack::_6, HardwareTrack::_5) => "l:6r:5",
+                    (HardwareTrack::_6, HardwareTrack::_7and8) => "l:6r:7:8",
+                    (HardwareTrack::_6, HardwareTrack::_9and10) => "l:6r:9:10",
+                    (HardwareTrack::_6, HardwareTrack::_11and12) => "l:6r:11:12",
+                    (HardwareTrack::_7and8, HardwareTrack::_1) => "l:7:8r:1",
+                    (HardwareTrack::_7and8, HardwareTrack::_2) => "l:7:8r:2",
+                    (HardwareTrack::_7and8, HardwareTrack::_3and4) => "l:7:8r:3:4",
+                    (HardwareTrack::_7and8, HardwareTrack::_5) => "l:7:8r:5",
+                    (HardwareTrack::_7and8, HardwareTrack::_6) => "l:7:8r:6",
+                    (HardwareTrack::_7and8, HardwareTrack::_9and10) => "l:7:8r:9:10",
+                    (HardwareTrack::_7and8, HardwareTrack::_11and12) => "l:7:8r:11:12",
+                    (HardwareTrack::_9and10, HardwareTrack::_1) => "l:9:10r:1",
+                    (HardwareTrack::_9and10, HardwareTrack::_2) => "l:9:10r:2",
+                    (HardwareTrack::_9and10, HardwareTrack::_3and4) => "l:9:10r:3:4",
+                    (HardwareTrack::_9and10, HardwareTrack::_5) => "l:9:10r:5",
+                    (HardwareTrack::_9and10, HardwareTrack::_6) => "l:9:10r:6",
+                    (HardwareTrack::_9and10, HardwareTrack::_7and8) => "l:9:10r:7:8",
+                    (HardwareTrack::_9and10, HardwareTrack::_11and12) => "l:9:10r:11:12",
+                    (HardwareTrack::_11and12, HardwareTrack::_1) => "l:11:12r:1",
+                    (HardwareTrack::_11and12, HardwareTrack::_2) => "l:11:12r:2",
+                    (HardwareTrack::_11and12, HardwareTrack::_3and4) => "l:11:12r:3:4",
+                    (HardwareTrack::_11and12, HardwareTrack::_5) => "l:11:12r:5",
+                    (HardwareTrack::_11and12, HardwareTrack::_6) => "l:11:12r:6",
+                    (HardwareTrack::_11and12, HardwareTrack::_7and8) => "l:11:12r:7:8",
+                    (HardwareTrack::_11and12, HardwareTrack::_9and10) => "l:11:12r:9:10",
+                }
+            }
+            RoutingUsbInOptions::SamplerOnly => "sampleronly",
+        }
+    }
+}
+
 impl TryFrom<u8> for RoutingUsbInOptions {
     type Error = ConversionError;
 
@@ -1515,6 +1783,84 @@ impl TryFrom<&str> for RoutingUsbOutOptions {
                 value: value.to_string(),
                 type_name: "RoutingUsbOutOptions".into(),
             }),
+        }
+    }
+}
+
+impl From<RoutingUsbOutOptions> for &str {
+    fn from(value: RoutingUsbOutOptions) -> Self {
+        match value {
+            RoutingUsbOutOptions::MainOut => "mainout",
+            RoutingUsbOutOptions::VoiceRouting((left_channel_routing, right_channel_routing)) => {
+                match (left_channel_routing, right_channel_routing) {
+                    (HardwareTrack::_1, HardwareTrack::_1) => "1",
+                    (HardwareTrack::_2, HardwareTrack::_2) => "2",
+                    (HardwareTrack::_3and4, HardwareTrack::_3and4) => "3:4",
+                    (HardwareTrack::_5, HardwareTrack::_5) => "5",
+                    (HardwareTrack::_6, HardwareTrack::_6) => "6",
+                    (HardwareTrack::_7and8, HardwareTrack::_7and8) => "7:8",
+                    (HardwareTrack::_9and10, HardwareTrack::_9and10) => "9:10",
+                    (HardwareTrack::_11and12, HardwareTrack::_11and12) => "11:12",
+                    (HardwareTrack::_1, HardwareTrack::_2) => "l:1r:2",
+                    (HardwareTrack::_1, HardwareTrack::_3and4) => "l:1r:3:4",
+                    (HardwareTrack::_1, HardwareTrack::_5) => "l:1r:5",
+                    (HardwareTrack::_1, HardwareTrack::_6) => "l:1r:6",
+                    (HardwareTrack::_1, HardwareTrack::_7and8) => "l:1r:7:8",
+                    (HardwareTrack::_1, HardwareTrack::_9and10) => "l:1r:9:10",
+                    (HardwareTrack::_1, HardwareTrack::_11and12) => "l:1r:11:12",
+                    (HardwareTrack::_2, HardwareTrack::_1) => "l:2r:1",
+                    (HardwareTrack::_2, HardwareTrack::_3and4) => "l:2r:3:4",
+                    (HardwareTrack::_2, HardwareTrack::_5) => "l:2r:5",
+                    (HardwareTrack::_2, HardwareTrack::_6) => "l:2r:6",
+                    (HardwareTrack::_2, HardwareTrack::_7and8) => "l:2r:7:8",
+                    (HardwareTrack::_2, HardwareTrack::_9and10) => "l:2r:9:10",
+                    (HardwareTrack::_2, HardwareTrack::_11and12) => "l:2r:11:12",
+                    (HardwareTrack::_3and4, HardwareTrack::_1) => "l:3:4r:1",
+                    (HardwareTrack::_3and4, HardwareTrack::_2) => "l:3:4r:2",
+                    (HardwareTrack::_3and4, HardwareTrack::_5) => "l:3:4r:5",
+                    (HardwareTrack::_3and4, HardwareTrack::_6) => "l:3:4r:6",
+                    (HardwareTrack::_3and4, HardwareTrack::_7and8) => "l:3:4r:7:8",
+                    (HardwareTrack::_3and4, HardwareTrack::_9and10) => "l:3:4r:9:10",
+                    (HardwareTrack::_3and4, HardwareTrack::_11and12) => "l:3:4r:11:12",
+                    (HardwareTrack::_5, HardwareTrack::_1) => "l:5r:1",
+                    (HardwareTrack::_5, HardwareTrack::_2) => "l:5r:2",
+                    (HardwareTrack::_5, HardwareTrack::_3and4) => "l:5r:3:4",
+                    (HardwareTrack::_5, HardwareTrack::_6) => "l:5r:6",
+                    (HardwareTrack::_5, HardwareTrack::_7and8) => "l:5r:7:8",
+                    (HardwareTrack::_5, HardwareTrack::_9and10) => "l:5r:9:10",
+                    (HardwareTrack::_5, HardwareTrack::_11and12) => "l:5r:11:12",
+                    (HardwareTrack::_6, HardwareTrack::_1) => "l:6r:1",
+                    (HardwareTrack::_6, HardwareTrack::_2) => "l:6r:2",
+                    (HardwareTrack::_6, HardwareTrack::_3and4) => "l:6r:3:4",
+                    (HardwareTrack::_6, HardwareTrack::_5) => "l:6r:5",
+                    (HardwareTrack::_6, HardwareTrack::_7and8) => "l:6r:7:8",
+                    (HardwareTrack::_6, HardwareTrack::_9and10) => "l:6r:9:10",
+                    (HardwareTrack::_6, HardwareTrack::_11and12) => "l:6r:11:12",
+                    (HardwareTrack::_7and8, HardwareTrack::_1) => "l:7:8r:1",
+                    (HardwareTrack::_7and8, HardwareTrack::_2) => "l:7:8r:2",
+                    (HardwareTrack::_7and8, HardwareTrack::_3and4) => "l:7:8r:3:4",
+                    (HardwareTrack::_7and8, HardwareTrack::_5) => "l:7:8r:5",
+                    (HardwareTrack::_7and8, HardwareTrack::_6) => "l:7:8r:6",
+                    (HardwareTrack::_7and8, HardwareTrack::_9and10) => "l:7:8r:9:10",
+                    (HardwareTrack::_7and8, HardwareTrack::_11and12) => "l:7:8r:11:12",
+                    (HardwareTrack::_9and10, HardwareTrack::_1) => "l:9:10r:1",
+                    (HardwareTrack::_9and10, HardwareTrack::_2) => "l:9:10r:2",
+                    (HardwareTrack::_9and10, HardwareTrack::_3and4) => "l:9:10r:3:4",
+                    (HardwareTrack::_9and10, HardwareTrack::_5) => "l:9:10r:5",
+                    (HardwareTrack::_9and10, HardwareTrack::_6) => "l:9:10r:6",
+                    (HardwareTrack::_9and10, HardwareTrack::_7and8) => "l:9:10r:7:8",
+                    (HardwareTrack::_9and10, HardwareTrack::_11and12) => "l:9:10r:11:12",
+                    (HardwareTrack::_11and12, HardwareTrack::_1) => "l:11:12r:1",
+                    (HardwareTrack::_11and12, HardwareTrack::_2) => "l:11:12r:2",
+                    (HardwareTrack::_11and12, HardwareTrack::_3and4) => "l:11:12r:3:4",
+                    (HardwareTrack::_11and12, HardwareTrack::_5) => "l:11:12r:5",
+                    (HardwareTrack::_11and12, HardwareTrack::_6) => "l:11:12r:6",
+                    (HardwareTrack::_11and12, HardwareTrack::_7and8) => "l:11:12r:7:8",
+                    (HardwareTrack::_11and12, HardwareTrack::_9and10) => "l:11:12r:9:10",
+                }
+            }
+            RoutingUsbOutOptions::AudioIn => "audio in",
+            RoutingUsbOutOptions::Off => "off",
         }
     }
 }

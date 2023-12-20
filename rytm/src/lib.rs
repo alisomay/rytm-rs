@@ -215,6 +215,8 @@ pub mod query;
 pub(crate) mod sysex;
 pub(crate) mod util;
 
+use std::sync::Arc;
+
 use serde::{Deserialize, Serialize};
 pub use sysex::{AnySysexType, SysexCompatible, SysexType};
 
@@ -316,6 +318,28 @@ impl RytmProject {
                     unsafe { &*(raw.as_mut_ptr() as *const ar_pattern_t) };
                 let pattern = Pattern::try_from_raw(meta, raw_pattern)?;
 
+                // Once a pattern is retrieved it's parameter lock pool will be linked to the kit we assume that it uses.
+                // This doesn't mean the kit is updated, it can be as well out of sync from the device but it's the best we can do.
+                // It is the responsibility of the user to update the kit if it is out of sync.
+
+                // For the work buffer pattern, the kit number might return 0xFF which indicates that a kit is not set for the pattern.
+                // Then we link the pool to the work buffer kit.
+
+                // TODO: We need to double check the behaviour here to have consistent behaviour.
+
+                // This is the current strategy:
+
+                let kit_number = pattern.kit_number();
+
+                if kit_number == 0xFF {
+                    self.work_buffer_mut()
+                        .kit_mut()
+                        .link_parameter_lock_pool(&pattern.parameter_lock_pool);
+                } else {
+                    self.kits_mut()[kit_number]
+                        .link_parameter_lock_pool(&pattern.parameter_lock_pool);
+                }
+
                 if meta.is_targeting_work_buffer() {
                     self.work_buffer.pattern = pattern;
                     return Ok(());
@@ -328,11 +352,29 @@ impl RytmProject {
 
             SysexType::Kit => {
                 let raw_kit: &ar_kit_t = unsafe { &*(raw.as_mut_ptr() as *const ar_kit_t) };
-                let kit = Kit::try_from_raw(meta, raw_kit)?;
+                let mut kit = Kit::try_from_raw(meta, raw_kit)?;
+
+                // When a kit is received, we check the existing patterns to see if any of them is linked to the kit.
+                // For a kit which is not a work buffer kit, we'll check pattern kit numbers for this.
+
+                // TODO: Is kit number 0 indexed?
+                // TODO: Check if this works for work buffers really.
 
                 if meta.is_targeting_work_buffer() {
+                    for pattern in self.patterns() {
+                        if pattern.kit_number() == 0xFF {
+                            kit.link_parameter_lock_pool(&pattern.parameter_lock_pool);
+                        }
+                    }
+
                     self.work_buffer.kit = kit;
                     return Ok(());
+                }
+
+                for pattern in self.patterns() {
+                    if pattern.kit_number() == kit.index() {
+                        kit.link_parameter_lock_pool(&pattern.parameter_lock_pool);
+                    }
                 }
 
                 self.kits[(meta.obj_nr & 0b0111_1111) as usize] = kit;
@@ -342,6 +384,8 @@ impl RytmProject {
             SysexType::Sound => {
                 let raw_sound: &ar_sound_t = unsafe { &*(raw.as_mut_ptr() as *const ar_sound_t) };
                 let sound = Sound::try_from_raw(meta, raw_sound, None)?;
+
+                // TODO: About parameter lock pools, for work buffer sounds can we derive a linkage?
 
                 match sound.sound_type() {
                     SoundType::Pool => {

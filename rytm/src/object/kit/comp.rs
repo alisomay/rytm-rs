@@ -64,8 +64,8 @@ impl FxCompressor {
     ///
     /// Range: `0..=127`
     #[parameter_range(range = "threshold:0..=127")]
-    pub fn set_threshold(&mut self, threshold: u8) -> Result<(), RytmError> {
-        self.threshold = threshold;
+    pub fn set_threshold(&mut self, threshold: usize) -> Result<(), RytmError> {
+        self.threshold = threshold as u8;
         Ok(())
     }
 
@@ -93,8 +93,8 @@ impl FxCompressor {
     ///
     /// Range: `0..=127`
     #[parameter_range(range = "gain:0..=127")]
-    pub fn set_gain(&mut self, gain: u8) -> Result<(), RytmError> {
-        self.gain = gain;
+    pub fn set_gain(&mut self, gain: usize) -> Result<(), RytmError> {
+        self.gain = gain as u8;
         Ok(())
     }
 
@@ -102,8 +102,8 @@ impl FxCompressor {
     ///
     /// Range: `0..=127`
     #[parameter_range(range = "mix:0..=127")]
-    pub fn set_mix(&mut self, mix: u8) -> Result<(), RytmError> {
-        self.mix = mix;
+    pub fn set_mix(&mut self, mix: usize) -> Result<(), RytmError> {
+        self.mix = mix as u8;
         Ok(())
     }
 
@@ -111,8 +111,8 @@ impl FxCompressor {
     ///
     /// Range: `0..=127`
     #[parameter_range(range = "volume:0..=127")]
-    pub fn set_volume(&mut self, volume: u8) -> Result<(), RytmError> {
-        self.volume = volume;
+    pub fn set_volume(&mut self, volume: usize) -> Result<(), RytmError> {
+        self.volume = volume as u8;
         Ok(())
     }
 

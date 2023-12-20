@@ -94,8 +94,8 @@ impl TrackRetrigMenu {
     ///
     /// Range: `-128..=127`
     #[parameter_range(range = "velocity_curve:-128..=127")]
-    pub fn set_velocity_curve(&mut self, velocity_curve: i8) -> Result<(), RytmError> {
-        self.velocity_curve = velocity_curve;
+    pub fn set_velocity_curve(&mut self, velocity_curve: isize) -> Result<(), RytmError> {
+        self.velocity_curve = velocity_curve as i8;
         Ok(())
     }
 

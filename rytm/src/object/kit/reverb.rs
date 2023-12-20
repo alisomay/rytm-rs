@@ -59,8 +59,8 @@ impl FxReverb {
     ///
     /// Range: `0..=127`
     #[parameter_range(range = "pre_delay:0..=127")]
-    pub fn set_pre_delay(&mut self, pre_delay: u8) -> Result<(), RytmError> {
-        self.pre_delay = pre_delay;
+    pub fn set_pre_delay(&mut self, pre_delay: usize) -> Result<(), RytmError> {
+        self.pre_delay = pre_delay as u8;
         Ok(())
     }
 
@@ -70,8 +70,8 @@ impl FxReverb {
     ///
     /// `127` is infinite decay.
     #[parameter_range(range = "decay:0..=127")]
-    pub fn set_decay(&mut self, decay: u8) -> Result<(), RytmError> {
-        self.decay = decay;
+    pub fn set_decay(&mut self, decay: usize) -> Result<(), RytmError> {
+        self.decay = decay as u8;
         Ok(())
     }
 
@@ -79,8 +79,8 @@ impl FxReverb {
     ///
     /// Range: `0..=127`
     #[parameter_range(range = "freq:0..=127")]
-    pub fn set_freq(&mut self, freq: u8) -> Result<(), RytmError> {
-        self.freq = freq;
+    pub fn set_freq(&mut self, freq: usize) -> Result<(), RytmError> {
+        self.freq = freq as u8;
         Ok(())
     }
 
@@ -88,8 +88,8 @@ impl FxReverb {
     ///
     /// Range: `0..=127`
     #[parameter_range(range = "gain:0..=127")]
-    pub fn set_gain(&mut self, gain: u8) -> Result<(), RytmError> {
-        self.gain = gain;
+    pub fn set_gain(&mut self, gain: usize) -> Result<(), RytmError> {
+        self.gain = gain as u8;
         Ok(())
     }
 
@@ -97,8 +97,8 @@ impl FxReverb {
     ///
     /// Range: `0..=127`
     #[parameter_range(range = "hpf:0..=127")]
-    pub fn set_hpf(&mut self, hpf: u8) -> Result<(), RytmError> {
-        self.hpf = hpf;
+    pub fn set_hpf(&mut self, hpf: usize) -> Result<(), RytmError> {
+        self.hpf = hpf as u8;
         Ok(())
     }
 
@@ -106,16 +106,16 @@ impl FxReverb {
     ///
     /// Range: `0..=127`
     #[parameter_range(range = "lpf:0..=127")]
-    pub fn set_lpf(&mut self, lpf: u8) -> Result<(), RytmError> {
-        self.lpf = lpf;
+    pub fn set_lpf(&mut self, lpf: usize) -> Result<(), RytmError> {
+        self.lpf = lpf as u8;
         Ok(())
     }
     /// Sets the volume of the reverb.
     ///
     /// Range: `0..=127`
     #[parameter_range(range = "volume:0..=127")]
-    pub fn set_volume(&mut self, volume: u8) -> Result<(), RytmError> {
-        self.volume = volume;
+    pub fn set_volume(&mut self, volume: usize) -> Result<(), RytmError> {
+        self.volume = volume as u8;
         Ok(())
     }
 

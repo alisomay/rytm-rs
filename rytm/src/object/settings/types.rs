@@ -34,6 +34,19 @@ impl TryFrom<&str> for ParameterMenuItem {
     }
 }
 
+impl From<ParameterMenuItem> for &str {
+    fn from(parameter_menu_item: ParameterMenuItem) -> Self {
+        match parameter_menu_item {
+            ParameterMenuItem::Trig => "trig",
+            ParameterMenuItem::Src => "src",
+            ParameterMenuItem::Smpl => "smpl",
+            ParameterMenuItem::Fltr => "fltr",
+            ParameterMenuItem::Amp => "amp",
+            ParameterMenuItem::Lfo => "lfo",
+        }
+    }
+}
+
 impl TryFrom<u8> for ParameterMenuItem {
     type Error = ConversionError;
     fn try_from(value: u8) -> Result<Self, Self::Error> {
@@ -97,6 +110,19 @@ impl TryFrom<&str> for FxParameterMenuItem {
     }
 }
 
+impl From<FxParameterMenuItem> for &str {
+    fn from(fx_parameter_menu_item: FxParameterMenuItem) -> Self {
+        match fx_parameter_menu_item {
+            FxParameterMenuItem::Trig => "trig",
+            FxParameterMenuItem::Delay => "delay",
+            FxParameterMenuItem::Reverb => "reverb",
+            FxParameterMenuItem::Dist => "dist",
+            FxParameterMenuItem::Comp => "comp",
+            FxParameterMenuItem::Lfo => "lfo",
+        }
+    }
+}
+
 impl TryFrom<u8> for FxParameterMenuItem {
     type Error = ConversionError;
     fn try_from(value: u8) -> Result<Self, Self::Error> {
@@ -152,6 +178,16 @@ impl TryFrom<&str> for SequencerMode {
                 value: sequencer_mode.to_string(),
                 type_name: "SequencerMode".into(),
             }),
+        }
+    }
+}
+
+impl From<SequencerMode> for &str {
+    fn from(sequencer_mode: SequencerMode) -> Self {
+        match sequencer_mode {
+            SequencerMode::Normal => "normal",
+            SequencerMode::Chain => "chain",
+            SequencerMode::Song => "song",
         }
     }
 }
@@ -227,13 +263,24 @@ impl TryFrom<&str> for PatternMode {
     fn try_from(pattern_mode: &str) -> Result<Self, Self::Error> {
         match pattern_mode {
             "sequential" => Ok(Self::Sequential),
-            "direct_start" => Ok(Self::DirectStart),
-            "direct_jump" => Ok(Self::DirectJump),
-            "temp_jump" => Ok(Self::TempJump),
+            "directstart" => Ok(Self::DirectStart),
+            "directjump" => Ok(Self::DirectJump),
+            "tempjump" => Ok(Self::TempJump),
             _ => Err(ConversionError::Range {
                 value: pattern_mode.to_string(),
                 type_name: "PatternMode".into(),
             }),
+        }
+    }
+}
+
+impl From<PatternMode> for &str {
+    fn from(pattern_mode: PatternMode) -> Self {
+        match pattern_mode {
+            PatternMode::Sequential => "sequential",
+            PatternMode::DirectStart => "directstart",
+            PatternMode::DirectJump => "directjump",
+            PatternMode::TempJump => "tempjump",
         }
     }
 }
@@ -331,6 +378,28 @@ impl TryFrom<&str> for SampleRecorderSource {
     }
 }
 
+impl From<SampleRecorderSource> for &str {
+    fn from(sample_recorder_source: SampleRecorderSource) -> Self {
+        match sample_recorder_source {
+            SampleRecorderSource::AudLPlusR => "audl+r",
+            SampleRecorderSource::AudL => "audl",
+            SampleRecorderSource::AudR => "audr",
+            SampleRecorderSource::Bd => "bd",
+            SampleRecorderSource::Sd => "sd",
+            SampleRecorderSource::RsCp => "rs/cp",
+            SampleRecorderSource::Bt => "bt",
+            SampleRecorderSource::Lt => "lt",
+            SampleRecorderSource::MtHt => "mt/ht",
+            SampleRecorderSource::ChOh => "ch/oh",
+            SampleRecorderSource::CyCb => "cy/cb",
+            SampleRecorderSource::Main => "main",
+            SampleRecorderSource::UsbL => "usbl",
+            SampleRecorderSource::UsbR => "usbr",
+            SampleRecorderSource::UsbLPlusR => "usbl+r",
+        }
+    }
+}
+
 impl TryFrom<u8> for SampleRecorderSource {
     type Error = ConversionError;
     fn try_from(value: u8) -> Result<Self, Self::Error> {
@@ -424,6 +493,22 @@ impl TryFrom<&str> for SampleRecorderRecordingLength {
                 value: sample_recorder_recording_length.to_string(),
                 type_name: "SampleRecorderRecordingLength".into(),
             }),
+        }
+    }
+}
+
+impl From<SampleRecorderRecordingLength> for &str {
+    fn from(sample_recorder_recording_length: SampleRecorderRecordingLength) -> Self {
+        match sample_recorder_recording_length {
+            SampleRecorderRecordingLength::_1Step => "1step",
+            SampleRecorderRecordingLength::_2Steps => "2steps",
+            SampleRecorderRecordingLength::_4Steps => "4steps",
+            SampleRecorderRecordingLength::_8Steps => "8steps",
+            SampleRecorderRecordingLength::_16Steps => "16steps",
+            SampleRecorderRecordingLength::_32Steps => "32steps",
+            SampleRecorderRecordingLength::_64Steps => "64steps",
+            SampleRecorderRecordingLength::_128Steps => "128steps",
+            SampleRecorderRecordingLength::Max => "max",
         }
     }
 }

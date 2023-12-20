@@ -117,6 +117,13 @@ impl FxLfo {
         Ok(())
     }
 
+    /// Sets the depth of the LFO.
+    #[parameter_range(range = "depth:-128.0..=127.99")]
+    pub fn set_depth(&mut self, depth: f32) -> Result<(), RytmError> {
+        self.depth = depth;
+        Ok(())
+    }
+
     /// Sets the mode of the LFO.
     pub fn set_mode(&mut self, mode: LfoMode) {
         self.mode = mode;

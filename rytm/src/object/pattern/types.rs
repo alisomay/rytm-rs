@@ -46,6 +46,20 @@ impl TryFrom<&str> for Speed {
     }
 }
 
+impl From<Speed> for &str {
+    fn from(speed: Speed) -> Self {
+        match speed {
+            Speed::X1 => "1x",
+            Speed::X2 => "2x",
+            Speed::X3B2 => "3/2x",
+            Speed::X3B4 => "3/4x",
+            Speed::X1B2 => "1/2x",
+            Speed::X1B4 => "1/4x",
+            Speed::X1B8 => "1/8x",
+        }
+    }
+}
+
 impl From<Speed> for u8 {
     fn from(speed: Speed) -> Self {
         let speed = match speed {
@@ -100,6 +114,15 @@ impl TryFrom<&str> for TimeMode {
                 value: mode.to_string(),
                 type_name: "TimeMode".into(),
             }),
+        }
+    }
+}
+
+impl From<TimeMode> for &str {
+    fn from(mode: TimeMode) -> Self {
+        match mode {
+            TimeMode::Normal => "normal",
+            TimeMode::Advanced => "advanced",
         }
     }
 }

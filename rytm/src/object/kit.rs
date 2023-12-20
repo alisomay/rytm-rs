@@ -26,6 +26,8 @@ pub mod reverb;
 pub mod types;
 pub(crate) mod unknown;
 
+use std::sync::{Arc, Mutex};
+
 use self::{
     comp::FxCompressor, delay::FxDelay, dist::FxDistortion, lfo::FxLfo, reverb::FxReverb,
     unknown::KitUnknown,
@@ -46,6 +48,8 @@ use rytm_rs_macro::parameter_range;
 use rytm_sys::{ar_kit_raw_to_syx, ar_kit_t, ar_sysex_meta_t};
 use serde::{Deserialize, Serialize};
 use serde_big_array::BigArray;
+
+use super::pattern::plock::ParameterLockPool;
 
 impl_sysex_compatible!(
     Kit,
@@ -293,6 +297,21 @@ impl Kit {
         }
     }
 
+    /// Sets the name of the kit.
+    ///
+    /// # Errors
+    ///
+    /// The name must be ASCII and have a length of 15 characters or less. Other cases will result in an error.
+    pub fn set_name(&mut self, name: &str) -> Result<(), RytmError> {
+        self.name = name.try_into()?;
+        Ok(())
+    }
+
+    /// Returns the name of the kit.
+    pub fn name(&self) -> &str {
+        self.name.as_str()
+    }
+
     /// Returns the sounds assigned to the kit in the order of the tracks.
     pub const fn sounds(&self) -> &[Sound; 12] {
         &self.sounds
@@ -421,5 +440,72 @@ impl Kit {
         track_index: usize,
     ) -> Result<&mut retrig::TrackRetrigMenu, RytmError> {
         Ok(&mut self.track_retrig_settings[track_index])
+    }
+
+    /// Gets the fx delay parameters.
+    pub const fn fx_delay(&self) -> &FxDelay {
+        &self.fx_delay
+    }
+
+    /// Gets the fx delay parameters mutably.
+    pub fn fx_delay_mut(&mut self) -> &mut FxDelay {
+        &mut self.fx_delay
+    }
+
+    /// Gets the fx distortion parameters.
+    pub const fn fx_distortion(&self) -> &FxDistortion {
+        &self.fx_distortion
+    }
+
+    /// Gets the fx distortion parameters mutably.
+    pub fn fx_distortion_mut(&mut self) -> &mut FxDistortion {
+        &mut self.fx_distortion
+    }
+
+    /// Gets the fx reverb parameters.
+    pub const fn fx_reverb(&self) -> &FxReverb {
+        &self.fx_reverb
+    }
+
+    /// Gets the fx reverb parameters mutably.
+    pub fn fx_reverb_mut(&mut self) -> &mut FxReverb {
+        &mut self.fx_reverb
+    }
+
+    /// Gets the fx compressor parameters.
+    pub const fn fx_compressor(&self) -> &FxCompressor {
+        &self.fx_compressor
+    }
+
+    /// Gets the fx compressor parameters mutably.
+    pub fn fx_compressor_mut(&mut self) -> &mut FxCompressor {
+        &mut self.fx_compressor
+    }
+
+    /// Gets the fx lfo parameters.
+    pub const fn fx_lfo(&self) -> &FxLfo {
+        &self.fx_lfo
+    }
+
+    /// Gets the fx lfo parameters mutably.
+    pub fn fx_lfo_mut(&mut self) -> &mut FxLfo {
+        &mut self.fx_lfo
+    }
+
+    /// Returns the index of the kit.
+    pub const fn index(&self) -> usize {
+        self.index
+    }
+
+    // TODO: Comment
+    pub fn link_parameter_lock_pool(
+        &mut self,
+        parameter_lock_pool: &Arc<Mutex<ParameterLockPool>>,
+    ) {
+        for sound in self.sounds_mut() {
+            sound
+                .link_parameter_lock_pool(Arc::clone(parameter_lock_pool))
+                .unwrap();
+        }
     }
 }
