@@ -146,41 +146,49 @@ impl Lfo {
     }
 
     /// Returns the speed of the LFO.
+    ///
+    /// Range: `-64..=63`
     pub const fn speed(&self) -> isize {
         self.speed as isize
     }
 
     /// Returns the multiplier of the LFO.
-    pub const fn multiplier(&self) -> &LfoMultiplier {
-        &self.multiplier
+    pub const fn multiplier(&self) -> LfoMultiplier {
+        self.multiplier
     }
 
     /// Returns the fade of the LFO.
+    ///
+    /// Range: `-64..=63`
     pub const fn fade(&self) -> isize {
         self.fade as isize
     }
 
     /// Returns the destination of the LFO.
-    pub const fn destination(&self) -> &LfoDestination {
-        &self.destination
+    pub const fn destination(&self) -> LfoDestination {
+        self.destination
     }
 
     /// Returns the waveform of the LFO.
-    pub const fn waveform(&self) -> &LfoWaveform {
-        &self.waveform
+    pub const fn waveform(&self) -> LfoWaveform {
+        self.waveform
     }
 
     /// Returns the start phase of the LFO.
+    ///
+    /// Range: `0..=127`
     pub const fn start_phase_or_slew(&self) -> usize {
         self.start_phase_or_slew as usize
     }
 
     /// Returns the mode of the LFO.
-    pub const fn mode(&self) -> &LfoMode {
-        &self.mode
+    pub const fn mode(&self) -> LfoMode {
+        self.mode
     }
 
     /// Returns the depth of the LFO.
+    ///
+    /// Range: `-128.0..=127.99`
     pub const fn depth(&self) -> f32 {
         self.depth
     }

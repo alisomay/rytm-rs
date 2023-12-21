@@ -105,6 +105,8 @@ impl Sample {
     }
 
     /// Sets the fine tune of the sample.
+    ///
+    /// Range: `-64..=63`
     #[parameter_range(range = "fine_tune:-64..=63")]
     pub fn set_fine_tune(&mut self, fine_tune: isize) -> Result<(), RytmError> {
         self.fine_tune = fine_tune as i8;
@@ -161,48 +163,64 @@ impl Sample {
     }
 
     /// Sets the volume of the sample.
+    ///
+    /// Range: `0..=127`
     #[parameter_range(range = "volume:0..=127")]
     pub fn set_volume(&mut self, volume: usize) -> Result<(), RytmError> {
         self.volume = volume as u8;
         Ok(())
     }
 
-    // Returns the coarse tune of the sample.
+    /// Returns the coarse tune of the sample.
+    ///
+    /// Range: `-24..=24`
     pub const fn tune(&self) -> isize {
         self.tune as isize
     }
 
-    // Returns the fine tune of the sample.
+    /// Returns the fine tune of the sample.
+    ///
+    /// Range: `-64..=63`
     pub const fn fine_tune(&self) -> isize {
         self.fine_tune as isize
     }
 
-    // Returns the slice number of the sample.
+    /// Returns the slice number of the sample.
+    ///
+    /// Range: `0..=127`
     pub const fn slice_number(&self) -> usize {
         self.number as usize
     }
 
-    // Returns the bit reduction of the sample.
+    /// Returns the bit reduction of the sample.
+    ///
+    /// Range: `0..=127`
     pub const fn bit_reduction(&self) -> usize {
         self.bit_reduction as usize
     }
 
-    // Returns the start of the sample.
+    /// Returns the start of the sample.
+    ///
+    /// Range: `0.0..=120.0`
     pub const fn start(&self) -> f32 {
         self.start
     }
 
-    // Returns the end of the sample.
+    /// Returns the end of the sample.
+    ///
+    /// Range: `0.0..=120.0`
     pub const fn end(&self) -> f32 {
         self.end
     }
 
-    // Returns the loop flag of the sample.
+    /// Returns the loop flag of the sample.
     pub const fn loop_flag(&self) -> bool {
         self.loop_flag
     }
 
-    // Returns the volume of the sample.
+    /// Returns the volume of the sample.
+    ///
+    /// Range: `0..=127`
     pub const fn volume(&self) -> usize {
         self.volume as usize
     }

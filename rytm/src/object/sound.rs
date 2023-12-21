@@ -269,8 +269,8 @@ impl Sound {
     ///
     /// Range: `0..=127`
     #[parameter_range(range = "accent_level:0..=127")]
-    pub fn set_accent_level(&mut self, accent_level: u8) -> Result<(), RytmError> {
-        self.accent_level = accent_level;
+    pub fn set_accent_level(&mut self, accent_level: usize) -> Result<(), RytmError> {
+        self.accent_level = accent_level as u8;
         Ok(())
     }
 
@@ -511,5 +511,15 @@ impl Sound {
         self.settings_mut().machine_type = machine_type;
         self.machine_parameters = machine_type.into();
         Ok(())
+    }
+
+    /// Returns the machine type of the sound.
+    pub const fn machine_type(&self) -> MachineType {
+        self.settings().machine_type
+    }
+
+    /// Returns the index of the sound.
+    pub const fn index(&self) -> usize {
+        self.index
     }
 }
