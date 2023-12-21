@@ -134,6 +134,13 @@ impl SysexMeta {
         self.obj_nr >= 128
     }
 
+    pub const fn get_normalized_object_index(&self) -> usize {
+        if self.is_targeting_work_buffer() {
+            return (self.obj_nr & 0b0111_1111) as usize;
+        }
+        self.obj_nr as usize
+    }
+
     /// Returns the object type of the sysex message.
     pub fn object_type(&self) -> Result<SysexType, RytmError> {
         Ok(self.obj_type.try_into()?)

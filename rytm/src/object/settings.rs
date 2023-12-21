@@ -455,6 +455,12 @@ impl Settings {
         unmuted_sound_indexes
     }
 
+    /// Returns if a sound is muted by sound index.
+    #[parameter_range(range = "sound_index:0..=11")]
+    pub fn is_sound_muted(&self, sound_index: usize) -> Result<bool, RytmError> {
+        Ok(self.mute_flags & (1 << sound_index) != 0)
+    }
+
     /// Returns the fixed velocity enable state.
     pub const fn fixed_velocity_enabled(&self) -> bool {
         self.fixed_velocity_enable

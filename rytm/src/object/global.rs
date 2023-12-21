@@ -77,12 +77,7 @@ impl Global {
         sysex_meta: SysexMeta,
         raw_global: &ar_global_t,
     ) -> Result<Self, RytmError> {
-        let slot_number = if sysex_meta.is_targeting_work_buffer() {
-            // TODO: Double check
-            0
-        } else {
-            sysex_meta.obj_nr as usize
-        };
+        let slot_number = sysex_meta.get_normalized_object_index();
 
         Ok(Self {
             index: slot_number,
@@ -136,5 +131,55 @@ impl Global {
     /// Returns the version of the global structure.
     pub const fn structure_version(&self) -> u32 {
         self.version
+    }
+
+    /// Checks if this global is the global at work buffer.
+    pub const fn is_work_buffer(&self) -> bool {
+        self.sysex_meta.is_targeting_work_buffer()
+    }
+
+    /// Returns the global slot index.
+    pub const fn index(&self) -> usize {
+        self.index
+    }
+
+    /// Returns the metronome settings.
+    pub const fn metronome_settings(&self) -> &MetronomeSettings {
+        &self.metronome_settings
+    }
+
+    /// Returns the metronome settings mutably.
+    pub fn metronome_settings_mut(&mut self) -> &mut MetronomeSettings {
+        &mut self.metronome_settings
+    }
+
+    /// Returns the midi config.
+    pub const fn midi_config(&self) -> &MidiConfig {
+        &self.midi_config
+    }
+
+    /// Returns the midi config mutably.
+    pub fn midi_config_mut(&mut self) -> &mut MidiConfig {
+        &mut self.midi_config
+    }
+
+    /// Returns the sequencer config.
+    pub const fn sequencer_config(&self) -> &SequencerConfig {
+        &self.sequencer_config
+    }
+
+    /// Returns the sequencer config mutably.
+    pub fn sequencer_config_mut(&mut self) -> &mut SequencerConfig {
+        &mut self.sequencer_config
+    }
+
+    /// Returns the routing.
+    pub const fn routing(&self) -> &Routing {
+        &self.routing
+    }
+
+    /// Returns the routing mutably.
+    pub fn routing_mut(&mut self) -> &mut Routing {
+        &mut self.routing
     }
 }

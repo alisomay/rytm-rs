@@ -60,7 +60,7 @@ pub struct Pattern {
     /// Index of this pattern.
     ///
     /// Range `0..=127` or 0 for the pattern at work buffer.
-    index: usize,
+    pub(crate) index: usize,
     /// Version of the pattern structure.
     version: u32,
     /// Fx Track
@@ -91,6 +91,7 @@ pub struct Pattern {
     /// Pattern Kit Number
     ///
     /// Range `0..=127`
+    /// Unset 0xFF
     kit_number: u8,
     /// Pattern Swing Amount
     ///
@@ -173,11 +174,7 @@ impl Pattern {
         raw_pattern: &ar_pattern_t,
     ) -> Result<Self, RytmError> {
         let is_targeting_work_buffer = sysex_meta.is_targeting_work_buffer();
-        let index = if is_targeting_work_buffer {
-            0
-        } else {
-            sysex_meta.obj_nr as usize
-        };
+        let index = sysex_meta.get_normalized_object_index();
 
         let parameter_lock_pool = Arc::new(Mutex::new(ParameterLockPool::from_raw(
             &raw_pattern.plock_seqs,
@@ -235,23 +232,30 @@ impl Pattern {
         (self.sysex_meta, self.into())
     }
 
-    //     owner_pattern_index: usize,
-    // is_owner_pattern_work_buffer: bool,
-    // fx_track_ref: Option<Arc<Mutex<Track>>>,
-
     /// Makes a new pattern with the project defaults.
     #[parameter_range(range = "index:0..=127")]
     pub fn try_default(index: usize) -> Result<Self, RytmError> {
-        let fx_track = Arc::new(Mutex::new(
-            Track::try_default(12, index, false, None).unwrap(),
-        ));
+        let parameter_lock_pool = Arc::new(Mutex::new(ParameterLockPool::default()));
+
+        let mut fx_track = Track::try_default(12, index, false, None).unwrap();
+        fx_track.parameter_lock_pool = Some(Arc::clone(&parameter_lock_pool));
+        let fx_track = Arc::new(Mutex::new(fx_track));
+
+        let mut tracks = default_tracks(0, true, Some(Arc::clone(&fx_track)));
+        for track in &mut tracks {
+            track.parameter_lock_pool = Some(Arc::clone(&parameter_lock_pool));
+            for trig in track.trigs_mut() {
+                trig.parameter_lock_pool = Some(Arc::clone(&parameter_lock_pool));
+            }
+        }
+
         Ok(Self {
             sysex_meta: SysexMeta::try_default_for_pattern(index, None)?,
             index,
             version: 5,
-            tracks: default_tracks(index, false, Some(Arc::clone(&fx_track))),
+            tracks,
             fx_track,
-            parameter_lock_pool: Arc::new(Mutex::new(ParameterLockPool::default())),
+            parameter_lock_pool,
             master_length: 16,
             master_change: 1,
             kit_number: 0,
@@ -268,15 +272,27 @@ impl Pattern {
     #[allow(clippy::missing_panics_doc)]
     /// Makes a new pattern with the project defaults as if it is in the work buffer..
     pub fn work_buffer_default() -> Self {
-        let fx_track = Arc::new(Mutex::new(Track::try_default(12, 0, true, None).unwrap()));
+        let parameter_lock_pool = Arc::new(Mutex::new(ParameterLockPool::default()));
+
+        let mut fx_track = Track::try_default(12, 0, true, None).unwrap();
+        fx_track.parameter_lock_pool = Some(Arc::clone(&parameter_lock_pool));
+        let fx_track = Arc::new(Mutex::new(fx_track));
+
+        let mut tracks = default_tracks(0, true, Some(Arc::clone(&fx_track)));
+        for track in &mut tracks {
+            track.parameter_lock_pool = Some(Arc::clone(&parameter_lock_pool));
+            for trig in track.trigs_mut() {
+                trig.parameter_lock_pool = Some(Arc::clone(&parameter_lock_pool));
+            }
+        }
 
         Self {
             sysex_meta: SysexMeta::default_for_pattern_in_work_buffer(None),
             index: 0,
             version: 5,
-            tracks: default_tracks(0, true, Some(Arc::clone(&fx_track))),
+            tracks,
             fx_track,
-            parameter_lock_pool: Arc::new(Mutex::new(ParameterLockPool::default())),
+            parameter_lock_pool,
             master_length: 16,
             master_change: 1,
             kit_number: 0,

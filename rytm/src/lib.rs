@@ -226,7 +226,7 @@ use error::SysexConversionError;
 use object::{
     global::Global,
     kit::Kit,
-    pattern::Pattern,
+    pattern::{self, Pattern},
     settings::Settings,
     sound::{Sound, SoundType},
 };
@@ -249,19 +249,28 @@ pub struct RytmProject {
     globals: [Global; GLOBAL_MAX_COUNT],
     // TODO: Songs (16)
     settings: Settings,
+
+    pub(crate) last_queried_pattern_index: Option<usize>,
+    pub(crate) last_queried_kit_index: Option<usize>,
+    pub(crate) last_queried_work_buffer_pattern_index: Option<usize>,
+    pub(crate) last_queried_work_buffer_kit_index: Option<usize>,
 }
 
 impl Default for RytmProject {
     fn default() -> Self {
         let mut patterns = Vec::with_capacity(PATTERN_MAX_COUNT);
-        for i in 0..PATTERN_MAX_COUNT {
-            patterns.push(Pattern::try_default(i).unwrap());
-        }
-
         let mut kits = Vec::with_capacity(KIT_MAX_COUNT);
-        for i in 0..KIT_MAX_COUNT {
+
+        // PATTERN_MAX_COUNT == KIT_MAX_COUNT is true.
+        for i in 0..PATTERN_MAX_COUNT {
+            let pattern = Pattern::try_default(i).unwrap();
+            let mut kit = Kit::try_default(i).unwrap();
+            kit.link_parameter_lock_pool(&pattern.parameter_lock_pool);
+            patterns.push(Pattern::try_default(i).unwrap());
             kits.push(Kit::try_default(i).unwrap());
         }
+
+        // TODO: ALSO FOR THE TRACK AND TRIG TYPES!
 
         Self {
             work_buffer: RytmProjectWorkBuffer::default(),
@@ -270,11 +279,17 @@ impl Default for RytmProject {
             kits,
             globals: default_globals(),
             settings: Settings::default(),
+
+            last_queried_pattern_index: None,
+            last_queried_kit_index: None,
+            last_queried_work_buffer_pattern_index: None,
+            last_queried_work_buffer_kit_index: None,
         }
     }
 }
 
 impl RytmProject {
+    #[allow(clippy::too_many_lines)]
     /// Updates the Rytm struct from a sysex response.
     ///
     /// All encoding/decoding is done in [`RytmProject`], so this is the only method that needs to be called to update the struct when a sysex response is received.
@@ -316,36 +331,48 @@ impl RytmProject {
             SysexType::Pattern => {
                 let raw_pattern: &ar_pattern_t =
                     unsafe { &*(raw.as_mut_ptr() as *const ar_pattern_t) };
-                let pattern = Pattern::try_from_raw(meta, raw_pattern)?;
+                let mut pattern = Pattern::try_from_raw(meta, raw_pattern)?;
 
                 // Once a pattern is retrieved it's parameter lock pool will be linked to the kit we assume that it uses.
-                // This doesn't mean the kit is updated, it can be as well out of sync from the device but it's the best we can do.
+                // This doesn't mean the kit itself is updated, it can be as well out of sync from the device but it's the best we can do.
                 // It is the responsibility of the user to update the kit if it is out of sync.
-
-                // For the work buffer pattern, the kit number might return 0xFF which indicates that a kit is not set for the pattern.
-                // Then we link the pool to the work buffer kit.
-
-                // TODO: We need to double check the behaviour here to have consistent behaviour.
-
-                // This is the current strategy:
 
                 let kit_number = pattern.kit_number();
 
                 if kit_number == 0xFF {
-                    self.work_buffer_mut()
-                        .kit_mut()
+                    // When the kit is not set, we assume that the pattern uses the kit in the work buffer.
+                    let work_buffer_pattern_kit_number = self.work_buffer().pattern().kit_number();
+
+                    // We update the kit which has than number with the parameter lock pool of the pattern.
+                    self.kits_mut()[work_buffer_pattern_kit_number]
                         .link_parameter_lock_pool(&pattern.parameter_lock_pool);
+
+                    // We also update the work buffer kit if it is the same kit.
+                    let work_buffer_kit_mut = self.work_buffer_mut().kit_mut();
+                    if work_buffer_kit_mut.index() == work_buffer_pattern_kit_number {
+                        work_buffer_kit_mut.link_parameter_lock_pool(&pattern.parameter_lock_pool);
+                    }
                 } else {
+                    // When the kit is set then we directly update that kit.
                     self.kits_mut()[kit_number]
                         .link_parameter_lock_pool(&pattern.parameter_lock_pool);
+
+                    // We also update the work buffer kit if it is the same kit.
+                    let work_buffer_kit_mut = self.work_buffer_mut().kit_mut();
+                    if work_buffer_kit_mut.index() == kit_number {
+                        work_buffer_kit_mut.link_parameter_lock_pool(&pattern.parameter_lock_pool);
+                    }
                 }
 
                 if meta.is_targeting_work_buffer() {
+                    let index = meta.get_normalized_object_index();
+                    pattern.index = index;
                     self.work_buffer.pattern = pattern;
+
                     return Ok(());
                 }
 
-                let index = (meta.obj_nr & 0b0111_1111) as usize;
+                let index = meta.get_normalized_object_index();
                 self.patterns[index] = pattern;
                 Ok(())
             }
@@ -354,22 +381,8 @@ impl RytmProject {
                 let raw_kit: &ar_kit_t = unsafe { &*(raw.as_mut_ptr() as *const ar_kit_t) };
                 let mut kit = Kit::try_from_raw(meta, raw_kit)?;
 
-                // When a kit is received, we check the existing patterns to see if any of them is linked to the kit.
-                // For a kit which is not a work buffer kit, we'll check pattern kit numbers for this.
-
-                // TODO: Is kit number 0 indexed?
-                // TODO: Check if this works for work buffers really.
-
-                if meta.is_targeting_work_buffer() {
-                    for pattern in self.patterns() {
-                        if pattern.kit_number() == 0xFF {
-                            kit.link_parameter_lock_pool(&pattern.parameter_lock_pool);
-                        }
-                    }
-
-                    self.work_buffer.kit = kit;
-                    return Ok(());
-                }
+                // When a kit is received, we check all the existing patterns to see if any of them is linked to the kit index queried or not.
+                // Then we link the plock pool of those patterns to the updated kit.
 
                 for pattern in self.patterns() {
                     if pattern.kit_number() == kit.index() {
@@ -377,23 +390,40 @@ impl RytmProject {
                     }
                 }
 
-                self.kits[(meta.obj_nr & 0b0111_1111) as usize] = kit;
+                if self.work_buffer().pattern().kit_number() == kit.index() {
+                    kit.link_parameter_lock_pool(&self.work_buffer().pattern().parameter_lock_pool);
+                }
+
+                if meta.is_targeting_work_buffer() {
+                    let index = meta.get_normalized_object_index();
+                    kit.index = index;
+                    self.work_buffer.kit = kit;
+                    return Ok(());
+                }
+
+                let index = meta.get_normalized_object_index();
+                self.kits[index] = kit;
                 Ok(())
             }
 
             SysexType::Sound => {
                 let raw_sound: &ar_sound_t = unsafe { &*(raw.as_mut_ptr() as *const ar_sound_t) };
-                let sound = Sound::try_from_raw(meta, raw_sound, None)?;
+                let mut sound = Sound::try_from_raw(meta, raw_sound, None)?;
 
-                // TODO: About parameter lock pools, for work buffer sounds can we derive a linkage?
-
+                let index = meta.get_normalized_object_index();
                 match sound.sound_type() {
                     SoundType::Pool => {
-                        let index = (meta.obj_nr & 0b0111_1111) as usize;
+                        // Pool sounds will not have a linked parameter lock pool.
+                        // TODO: Would we need linking here?
                         self.pool_sounds[index] = sound;
                     }
                     SoundType::WorkBuffer => {
-                        let index = (meta.obj_nr - 0x80) as usize;
+                        // Work buffer sounds though will be linked to the work buffer pattern's parameter lock pool.
+                        sound
+                            .link_parameter_lock_pool(
+                                &self.work_buffer().pattern().parameter_lock_pool,
+                            )
+                            .unwrap();
                         self.work_buffer.sounds[index] = sound;
                     }
                     SoundType::KitQuery => {
@@ -524,9 +554,16 @@ pub struct RytmProjectWorkBuffer {
 
 impl Default for RytmProjectWorkBuffer {
     fn default() -> Self {
+        let pattern = Pattern::work_buffer_default();
+        let mut kit = Kit::work_buffer_default();
+        kit.link_parameter_lock_pool(&pattern.parameter_lock_pool);
+
+        // TODO: What are work buffer sounds.. hmm..
+        // Should we link their parameter lock pool also?
+
         Self {
-            pattern: Pattern::work_buffer_default(),
-            kit: Kit::work_buffer_default(),
+            pattern,
+            kit,
             sounds: default_work_buffer_sounds(),
             global: Global::work_buffer_default(),
         }

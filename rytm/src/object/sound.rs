@@ -139,7 +139,7 @@ impl Sound {
     /// Calling this method on a pool sound will result in an error.
     pub fn link_parameter_lock_pool(
         &mut self,
-        parameter_lock_pool: Arc<Mutex<ParameterLockPool>>,
+        parameter_lock_pool: &Arc<Mutex<ParameterLockPool>>,
     ) -> Result<(), RytmError> {
         if self.is_pool_sound() {
             return Err(ParameterError::Compatibility {
@@ -149,7 +149,7 @@ impl Sound {
             }
             .into());
         }
-        self.parameter_lock_pool = Some(parameter_lock_pool);
+        self.parameter_lock_pool = Some(Arc::clone(parameter_lock_pool));
         let parameter_lock_pool_ref = Arc::clone(self.parameter_lock_pool.as_ref().unwrap());
         self.machine_parameters
             .link_parameter_lock_pool(parameter_lock_pool_ref);

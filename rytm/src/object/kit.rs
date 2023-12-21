@@ -69,7 +69,7 @@ pub struct Kit {
     sysex_meta: SysexMeta,
     /// Version of the kit structure.
     version: u32,
-    index: usize,
+    pub(crate) index: usize,
 
     /// Name of the kit.
     name: ObjectName,
@@ -149,12 +149,7 @@ impl Kit {
         sysex_meta: SysexMeta,
         raw_kit: &ar_kit_t,
     ) -> Result<Self, RytmError> {
-        let kit_number = if sysex_meta.is_targeting_work_buffer() {
-            // TODO: Double check
-            0
-        } else {
-            sysex_meta.obj_nr as usize
-        };
+        let kit_number = sysex_meta.get_normalized_object_index();
 
         let name = ObjectName::from_u8_array(raw_kit.name);
 
@@ -504,7 +499,7 @@ impl Kit {
     ) {
         for sound in self.sounds_mut() {
             sound
-                .link_parameter_lock_pool(Arc::clone(parameter_lock_pool))
+                .link_parameter_lock_pool(&parameter_lock_pool)
                 .unwrap();
         }
     }
