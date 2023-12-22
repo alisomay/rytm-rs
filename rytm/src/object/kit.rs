@@ -28,6 +28,7 @@ pub(crate) mod unknown;
 
 use std::sync::{Arc, Mutex};
 
+use self::types::ControlInModTarget;
 use self::{
     comp::FxCompressor, delay::FxDelay, dist::FxDistortion, lfo::FxLfo, reverb::FxReverb,
     unknown::KitUnknown,
@@ -88,6 +89,26 @@ pub struct Kit {
     fx_compressor: FxCompressor,
     fx_lfo: FxLfo,
 
+    control_in_1_mod_target_1: ControlInModTarget,
+    control_in_1_mod_target_2: ControlInModTarget,
+    control_in_1_mod_target_3: ControlInModTarget,
+    control_in_1_mod_target_4: ControlInModTarget,
+
+    control_in_2_mod_target_1: ControlInModTarget,
+    control_in_2_mod_target_2: ControlInModTarget,
+    control_in_2_mod_target_3: ControlInModTarget,
+    control_in_2_mod_target_4: ControlInModTarget,
+
+    control_in_1_mod_amt_1: i8,
+    control_in_1_mod_amt_2: i8,
+    control_in_1_mod_amt_3: i8,
+    control_in_1_mod_amt_4: i8,
+
+    control_in_2_mod_amt_1: i8,
+    control_in_2_mod_amt_2: i8,
+    control_in_2_mod_amt_3: i8,
+    control_in_2_mod_amt_4: i8,
+
     // Currently these are out of my interest.
     // Maybe in the feature we can add support for these.
     //
@@ -116,6 +137,27 @@ impl From<&Kit> for ar_kit_t {
             perf_ctl: kit.perf_ctl,
             scene_ctl: kit.scene_ctl,
             current_scene_id: kit.current_scene_id,
+
+            ctrl_in_mod_1_target_1: kit.control_in_1_mod_target_1.into(),
+            ctrl_in_mod_1_target_2: kit.control_in_1_mod_target_2.into(),
+            ctrl_in_mod_1_target_3: kit.control_in_1_mod_target_3.into(),
+            ctrl_in_mod_1_target_4: kit.control_in_1_mod_target_4.into(),
+
+            ctrl_in_mod_2_target_1: kit.control_in_2_mod_target_1.into(),
+            ctrl_in_mod_2__target_2: kit.control_in_2_mod_target_2.into(),
+            ctrl_in_mod_2_target_3: kit.control_in_2_mod_target_3.into(),
+            ctrl_in_mod_2_target_4: kit.control_in_2_mod_target_4.into(),
+
+            ctrl_in_mod_1_amt_1: kit.control_in_1_mod_amt_1 as u8,
+            ctrl_in_mod_1_amt_2: kit.control_in_1_mod_amt_2 as u8,
+            ctrl_in_mod_1_amt_3: kit.control_in_1_mod_amt_3 as u8,
+            ctrl_in_mod_1_amt_4: kit.control_in_1_mod_amt_4 as u8,
+
+            ctrl_in_mod_2_amt_1: kit.control_in_2_mod_amt_1 as u8,
+            ctrl_in_mod_2_amt_2: kit.control_in_2_mod_amt_2 as u8,
+            ctrl_in_mod_2_amt_3: kit.control_in_2_mod_amt_3 as u8,
+            ctrl_in_mod_2_amt_4: kit.control_in_2_mod_amt_4 as u8,
+
             ..Default::default()
         };
 
@@ -198,6 +240,27 @@ impl Kit {
             perf_ctl: raw_kit.perf_ctl,
             scene_ctl: raw_kit.scene_ctl,
             current_scene_id: raw_kit.current_scene_id,
+
+            control_in_1_mod_target_1: raw_kit.ctrl_in_mod_1_target_1.try_into()?,
+            control_in_1_mod_target_2: raw_kit.ctrl_in_mod_1_target_2.try_into()?,
+            control_in_1_mod_target_3: raw_kit.ctrl_in_mod_1_target_3.try_into()?,
+            control_in_1_mod_target_4: raw_kit.ctrl_in_mod_1_target_4.try_into()?,
+
+            control_in_2_mod_target_1: raw_kit.ctrl_in_mod_2_target_1.try_into()?,
+            control_in_2_mod_target_2: raw_kit.ctrl_in_mod_2__target_2.try_into()?,
+            control_in_2_mod_target_3: raw_kit.ctrl_in_mod_2_target_3.try_into()?,
+            control_in_2_mod_target_4: raw_kit.ctrl_in_mod_2_target_4.try_into()?,
+
+            control_in_1_mod_amt_1: raw_kit.ctrl_in_mod_1_amt_1 as i8,
+            control_in_1_mod_amt_2: raw_kit.ctrl_in_mod_1_amt_2 as i8,
+            control_in_1_mod_amt_3: raw_kit.ctrl_in_mod_1_amt_3 as i8,
+            control_in_1_mod_amt_4: raw_kit.ctrl_in_mod_1_amt_4 as i8,
+
+            control_in_2_mod_amt_1: raw_kit.ctrl_in_mod_2_amt_1 as i8,
+            control_in_2_mod_amt_2: raw_kit.ctrl_in_mod_2_amt_2 as i8,
+            control_in_2_mod_amt_3: raw_kit.ctrl_in_mod_2_amt_3 as i8,
+            control_in_2_mod_amt_4: raw_kit.ctrl_in_mod_2_amt_4 as i8,
+
             __unknown: raw_kit.into(),
         })
     }
@@ -211,6 +274,22 @@ impl Kit {
     /// Range: `0..=127`
     #[parameter_range(range = "kit_index:0..=127")]
     pub fn try_default(kit_index: usize) -> Result<Self, RytmError> {
+        //    sU8 ctrl_in_mod_1_amt_1;    /* @0x0A12 (-128..127) */
+        //    sU8 ctrl_in_mod_1_target_1; /* @0x0A14 See sound.h, same as AR_SOUND_MOD_DEST_XXX, AR_SOUND_MOD_DEST_SYN_X variants can not be used. */
+        //    sU8 ctrl_in_mod_1_amt_2;    /* @0x0A15 (-128..127) */
+        //    sU8 ctrl_in_mod_1_target_2; /* @0x0A17 See sound.h, same as AR_SOUND_MOD_DEST_XXX, AR_SOUND_MOD_DEST_SYN_X variants can not be used. */
+        //    sU8 ctrl_in_mod_1_amt_3;    /* @0x0A18 (-128..127) */
+        //    sU8 ctrl_in_mod_1_target_3; /* @0x0A1A See sound.h, same as AR_SOUND_MOD_DEST_XXX, AR_SOUND_MOD_DEST_SYN_X variants can not be used. */
+        //    sU8 ctrl_in_mod_1_amt_4;    /* @0x0A1B (-128..127) */
+        //    sU8 ctrl_in_mod_1_target_4; /* @0x0A1D See sound.h, same as AR_SOUND_MOD_DEST_XXX, AR_SOUND_MOD_DEST_SYN_X variants can not be used. */
+        //    sU8 ctrl_in_mod_2_amt_1;     /* @0x0A22 (-128..127) */
+        //    sU8 ctrl_in_mod_2_target_1;  /* @0x0A24 See sound.h, same as AR_SOUND_MOD_DEST_XXX, AR_SOUND_MOD_DEST_SYN_X variants can not be used. */
+        //    sU8 ctrl_in_mod_2_amt_2;     /* @0x0A25 (-128..127) */
+        //    sU8 ctrl_in_mod_2__target_2; /* @0x0A27 See sound.h, same as AR_SOUND_MOD_DEST_XXX, AR_SOUND_MOD_DEST_SYN_X variants can not be used. */
+        //    sU8 ctrl_in_mod_2_amt_3;     /* @0x0A28 (-128..127) */
+        //    sU8 ctrl_in_mod_2_target_3;  /* @0x0A2A See sound.h, same as AR_SOUND_MOD_DEST_XXX, AR_SOUND_MOD_DEST_SYN_X variants can not be used. */
+        //    sU8 ctrl_in_mod_2_amt_4;     /* @0x0A2B (-128..127) */
+        //    sU8 ctrl_in_mod_2_target_4;  /* @0x0A2D See sound.h, same as AR_SOUND_MOD_DEST_XXX, AR_SOUND_MOD_DEST_SYN_X variants can not be used. */
         let meta = SysexMeta::try_default_for_kit(kit_index, None)?;
         Ok(Self {
             index: kit_index,
@@ -246,6 +325,27 @@ impl Kit {
             perf_ctl: default_perf_ctl_array(),
             scene_ctl: default_scene_ctl_array(),
             current_scene_id: 0,
+
+            control_in_1_mod_target_1: ControlInModTarget::default(),
+            control_in_1_mod_target_2: ControlInModTarget::default(),
+            control_in_1_mod_target_3: ControlInModTarget::default(),
+            control_in_1_mod_target_4: ControlInModTarget::default(),
+
+            control_in_2_mod_target_1: ControlInModTarget::default(),
+            control_in_2_mod_target_2: ControlInModTarget::default(),
+            control_in_2_mod_target_3: ControlInModTarget::default(),
+            control_in_2_mod_target_4: ControlInModTarget::default(),
+
+            control_in_1_mod_amt_1: 0,
+            control_in_1_mod_amt_2: 0,
+            control_in_1_mod_amt_3: 0,
+            control_in_1_mod_amt_4: 0,
+
+            control_in_2_mod_amt_1: 0,
+            control_in_2_mod_amt_2: 0,
+            control_in_2_mod_amt_3: 0,
+            control_in_2_mod_amt_4: 0,
+
             __unknown: KitUnknown::default(),
         })
     }
@@ -288,6 +388,27 @@ impl Kit {
             perf_ctl: default_perf_ctl_array(),
             scene_ctl: default_scene_ctl_array(),
             current_scene_id: 0,
+
+            control_in_1_mod_target_1: ControlInModTarget::default(),
+            control_in_1_mod_target_2: ControlInModTarget::default(),
+            control_in_1_mod_target_3: ControlInModTarget::default(),
+            control_in_1_mod_target_4: ControlInModTarget::default(),
+
+            control_in_2_mod_target_1: ControlInModTarget::default(),
+            control_in_2_mod_target_2: ControlInModTarget::default(),
+            control_in_2_mod_target_3: ControlInModTarget::default(),
+            control_in_2_mod_target_4: ControlInModTarget::default(),
+
+            control_in_1_mod_amt_1: 0,
+            control_in_1_mod_amt_2: 0,
+            control_in_1_mod_amt_3: 0,
+            control_in_1_mod_amt_4: 0,
+
+            control_in_2_mod_amt_1: 0,
+            control_in_2_mod_amt_2: 0,
+            control_in_2_mod_amt_3: 0,
+            control_in_2_mod_amt_4: 0,
+
             __unknown: KitUnknown::default(),
         }
     }
@@ -492,15 +613,245 @@ impl Kit {
         self.index
     }
 
+    /// Sets the control in 1 mod target 1
+    pub fn set_control_in_1_mod_target_1(&mut self, control_in_1_mod_target_1: ControlInModTarget) {
+        self.control_in_1_mod_target_1 = control_in_1_mod_target_1;
+    }
+
+    /// Sets the control in 1 mod target 2
+    pub fn set_control_in_1_mod_target_2(&mut self, control_in_1_mod_target_2: ControlInModTarget) {
+        self.control_in_1_mod_target_2 = control_in_1_mod_target_2;
+    }
+
+    /// Sets the control in 1 mod target 3
+    pub fn set_control_in_1_mod_target_3(&mut self, control_in_1_mod_target_3: ControlInModTarget) {
+        self.control_in_1_mod_target_3 = control_in_1_mod_target_3;
+    }
+
+    /// Sets the control in 1 mod target 4
+    pub fn set_control_in_1_mod_target_4(&mut self, control_in_1_mod_target_4: ControlInModTarget) {
+        self.control_in_1_mod_target_4 = control_in_1_mod_target_4;
+    }
+
+    /// Sets the control in 2 mod target 1
+    pub fn set_control_in_2_mod_target_1(&mut self, control_in_2_mod_target_1: ControlInModTarget) {
+        self.control_in_2_mod_target_1 = control_in_2_mod_target_1;
+    }
+
+    /// Sets the control in 2 mod target 2
+    pub fn set_control_in_2_mod_target_2(&mut self, control_in_2_mod_target_2: ControlInModTarget) {
+        self.control_in_2_mod_target_2 = control_in_2_mod_target_2;
+    }
+
+    /// Sets the control in 2 mod target 3
+    pub fn set_control_in_2_mod_target_3(&mut self, control_in_2_mod_target_3: ControlInModTarget) {
+        self.control_in_2_mod_target_3 = control_in_2_mod_target_3;
+    }
+
+    /// Sets the control in 2 mod target 4
+    pub fn set_control_in_2_mod_target_4(&mut self, control_in_2_mod_target_4: ControlInModTarget) {
+        self.control_in_2_mod_target_4 = control_in_2_mod_target_4;
+    }
+
+    /// Sets the control in 1 mod amt 1
+    ///
+    /// Range: `-128..=127`
+    #[parameter_range(range = "control_in_1_mod_amt_1:-128..=127")]
+    pub fn set_control_in_1_mod_amt_1(
+        &mut self,
+        control_in_1_mod_amt_1: isize,
+    ) -> Result<(), RytmError> {
+        self.control_in_1_mod_amt_1 = control_in_1_mod_amt_1 as i8;
+        Ok(())
+    }
+
+    /// Sets the control in 1 mod amt 2
+    ///
+    /// Range: `-128..=127`
+    #[parameter_range(range = "control_in_1_mod_amt_2:-128..=127")]
+    pub fn set_control_in_1_mod_amt_2(
+        &mut self,
+        control_in_1_mod_amt_2: isize,
+    ) -> Result<(), RytmError> {
+        self.control_in_1_mod_amt_2 = control_in_1_mod_amt_2 as i8;
+        Ok(())
+    }
+
+    /// Sets the control in 1 mod amt 3
+    ///
+    /// Range: `-128..=127`
+    #[parameter_range(range = "control_in_1_mod_amt_3:-128..=127")]
+    pub fn set_control_in_1_mod_amt_3(
+        &mut self,
+        control_in_1_mod_amt_3: isize,
+    ) -> Result<(), RytmError> {
+        self.control_in_1_mod_amt_3 = control_in_1_mod_amt_3 as i8;
+        Ok(())
+    }
+
+    /// Sets the control in 1 mod amt 4
+    ///
+    /// Range: `-128..=127`
+    #[parameter_range(range = "control_in_1_mod_amt_4:-128..=127")]
+    pub fn set_control_in_1_mod_amt_4(
+        &mut self,
+        control_in_1_mod_amt_4: isize,
+    ) -> Result<(), RytmError> {
+        self.control_in_1_mod_amt_4 = control_in_1_mod_amt_4 as i8;
+        Ok(())
+    }
+
+    /// Sets the control in 2 mod amt 1
+    ///
+    /// Range: `-128..=127`
+    #[parameter_range(range = "control_in_2_mod_amt_1:-128..=127")]
+    pub fn set_control_in_2_mod_amt_1(
+        &mut self,
+        control_in_2_mod_amt_1: isize,
+    ) -> Result<(), RytmError> {
+        self.control_in_2_mod_amt_1 = control_in_2_mod_amt_1 as i8;
+        Ok(())
+    }
+
+    /// Sets the control in 2 mod amt 2
+    ///
+    /// Range: `-128..=127`
+    #[parameter_range(range = "control_in_2_mod_amt_2:-128..=127")]
+    pub fn set_control_in_2_mod_amt_2(
+        &mut self,
+        control_in_2_mod_amt_2: isize,
+    ) -> Result<(), RytmError> {
+        self.control_in_2_mod_amt_2 = control_in_2_mod_amt_2 as i8;
+        Ok(())
+    }
+
+    /// Sets the control in 2 mod amt 3
+    ///
+    /// Range: `-128..=127`
+    #[parameter_range(range = "control_in_2_mod_amt_3:-128..=127")]
+    pub fn set_control_in_2_mod_amt_3(
+        &mut self,
+        control_in_2_mod_amt_3: isize,
+    ) -> Result<(), RytmError> {
+        self.control_in_2_mod_amt_3 = control_in_2_mod_amt_3 as i8;
+        Ok(())
+    }
+
+    /// Sets the control in 2 mod amt 4
+    ///
+    /// Range: `-128..=127`
+    #[parameter_range(range = "control_in_2_mod_amt_4:-128..=127")]
+    pub fn set_control_in_2_mod_amt_4(
+        &mut self,
+        control_in_2_mod_amt_4: isize,
+    ) -> Result<(), RytmError> {
+        self.control_in_2_mod_amt_4 = control_in_2_mod_amt_4 as i8;
+        Ok(())
+    }
+
+    /// Gets the control in 1 mod target 1
+    pub const fn control_in_1_mod_target_1(&self) -> ControlInModTarget {
+        self.control_in_1_mod_target_1
+    }
+
+    /// Gets the control in 1 mod target 2
+    pub const fn control_in_1_mod_target_2(&self) -> ControlInModTarget {
+        self.control_in_1_mod_target_2
+    }
+
+    /// Gets the control in 1 mod target 3
+    pub const fn control_in_1_mod_target_3(&self) -> ControlInModTarget {
+        self.control_in_1_mod_target_3
+    }
+
+    /// Gets the control in 1 mod target 4
+    pub const fn control_in_1_mod_target_4(&self) -> ControlInModTarget {
+        self.control_in_1_mod_target_4
+    }
+
+    /// Gets the control in 2 mod target 1
+    pub const fn control_in_2_mod_target_1(&self) -> ControlInModTarget {
+        self.control_in_2_mod_target_1
+    }
+
+    /// Gets the control in 2 mod target 2
+    pub const fn control_in_2_mod_target_2(&self) -> ControlInModTarget {
+        self.control_in_2_mod_target_2
+    }
+
+    /// Gets the control in 2 mod target 3
+    pub const fn control_in_2_mod_target_3(&self) -> ControlInModTarget {
+        self.control_in_2_mod_target_3
+    }
+
+    /// Gets the control in 2 mod target 4
+    pub const fn control_in_2_mod_target_4(&self) -> ControlInModTarget {
+        self.control_in_2_mod_target_4
+    }
+
+    /// Gets the control in 1 mod amt 1
+    ///
+    /// Range: `-128..=127`
+    pub const fn control_in_1_mod_amt_1(&self) -> isize {
+        self.control_in_1_mod_amt_1 as isize
+    }
+
+    /// Gets the control in 1 mod amt 2
+    ///
+    /// Range: `-128..=127`
+    pub const fn control_in_1_mod_amt_2(&self) -> isize {
+        self.control_in_1_mod_amt_2 as isize
+    }
+
+    /// Gets the control in 1 mod amt 3
+    ///
+    /// Range: `-128..=127`
+    pub const fn control_in_1_mod_amt_3(&self) -> isize {
+        self.control_in_1_mod_amt_3 as isize
+    }
+
+    /// Gets the control in 1 mod amt 4
+    ///
+    /// Range: `-128..=127`
+    pub const fn control_in_1_mod_amt_4(&self) -> isize {
+        self.control_in_1_mod_amt_4 as isize
+    }
+
+    /// Gets the control in 2 mod amt 1
+    ///
+    /// Range: `-128..=127`
+    pub const fn control_in_2_mod_amt_1(&self) -> isize {
+        self.control_in_2_mod_amt_1 as isize
+    }
+
+    /// Gets the control in 2 mod amt 2
+    ///
+    /// Range: `-128..=127`
+    pub const fn control_in_2_mod_amt_2(&self) -> isize {
+        self.control_in_2_mod_amt_2 as isize
+    }
+
+    /// Gets the control in 2 mod amt 3
+    ///
+    /// Range: `-128..=127`
+    pub const fn control_in_2_mod_amt_3(&self) -> isize {
+        self.control_in_2_mod_amt_3 as isize
+    }
+
+    /// Gets the control in 2 mod amt 4
+    ///
+    /// Range: `-128..=127`
+    pub const fn control_in_2_mod_amt_4(&self) -> isize {
+        self.control_in_2_mod_amt_4 as isize
+    }
+
     // TODO: Comment
     pub fn link_parameter_lock_pool(
         &mut self,
         parameter_lock_pool: &Arc<Mutex<ParameterLockPool>>,
     ) {
         for sound in self.sounds_mut() {
-            sound
-                .link_parameter_lock_pool(&parameter_lock_pool)
-                .unwrap();
+            sound.link_parameter_lock_pool(parameter_lock_pool).unwrap();
         }
     }
 }

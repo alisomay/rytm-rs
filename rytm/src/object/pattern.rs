@@ -124,9 +124,8 @@ pub struct Pattern {
     /// Range `30.0..=300.0`
     bpm: f32,
 
-    #[derivative(Debug = "ignore")]
-    /// Always 0x01, probably a marker for the end of pattern.
-    pub(crate) __unknown_0x332c: u8,
+    // 1=apply to all tracks, 0=apply only to current track
+    pad_scale_per_pattern: u8,
 
     /// Parameter Lock Pool
     #[derivative(Debug = "ignore")]
@@ -162,7 +161,7 @@ impl From<&Pattern> for ar_pattern_t {
             global_quantize: pattern.global_quantize,
             bpm_msb: (bpm >> 8) as u8,
             bpm_lsb: bpm as u8,
-            __unknown332C: pattern.__unknown_0x332c,
+            pad_scale_per_pattern: pattern.pad_scale_per_pattern,
         }
     }
 }
@@ -224,7 +223,7 @@ impl Pattern {
             speed: raw_pattern.master_speed.try_into()?,
             global_quantize: raw_pattern.global_quantize,
             bpm,
-            __unknown_0x332c: raw_pattern.__unknown332C,
+            pad_scale_per_pattern: raw_pattern.pad_scale_per_pattern,
         })
     }
 
@@ -264,7 +263,7 @@ impl Pattern {
             speed: Speed::default(),
             global_quantize: 0,
             bpm: 120.0,
-            __unknown_0x332c: 0x01,
+            pad_scale_per_pattern: 0x01,
         })
     }
 
@@ -301,7 +300,7 @@ impl Pattern {
             speed: Speed::default(),
             global_quantize: 0,
             bpm: 120.0,
-            __unknown_0x332c: 0x01,
+            pad_scale_per_pattern: 0x01,
         }
     }
 

@@ -12,7 +12,7 @@ pub struct KitUnknown {
 
     pub __unknown_arr2: [u8; 0x4], /* @0x09D9..0x09DD */
     #[serde(with = "BigArray")]
-    pub __unknown_arr6: [u8; 35], /* @0x0A0F..0x0A31 */
+    pub __unknown_arr6: [u8; 3], /* @0x0A0F..0x0A11 */
 
     pub __unused_pad1: u8,  /* @0x07CB   */
     pub __unused_pad2: u8,  /* @0x07CD   */
@@ -51,6 +51,19 @@ pub struct KitUnknown {
     pub __unused_pad34: u8, /* @0x080D   */
     pub __unused_pad35: u8, /* @0x080F   */
     pub __unused_pad36: u8, /* @0x0811   */
+    pub __unused_pad37: u8, /* @0x0A13 */
+    pub __unused_pad38: u8, /* @0x0A16 */
+    pub __unused_pad39: u8, /* @0x0A19 */
+    pub __unused_pad40: u8, /* @0x0A1C */
+
+    pub __unused_pad_group_1: [u8; 4], /* @0x0A1E..0x0A21 */
+
+    pub __unused_pad41: u8, /* @0x0A23 */
+    pub __unused_pad42: u8, /* @0x0A26 */
+    pub __unused_pad43: u8, /* @0x0A29 */
+    pub __unused_pad44: u8, /* @0x0A2C */
+
+    pub __unused_pad_group_2: [u8; 4], /* @0x0A2E..0x0A31 */
 }
 
 impl Default for KitUnknown {
@@ -62,7 +75,7 @@ impl Default for KitUnknown {
             __unknown_09d7: 0,
 
             __unknown_arr2: [0; 0x4],
-            __unknown_arr6: [0; 35],
+            __unknown_arr6: [0, 1, 0],
 
             __unused_pad1: 0,
             __unused_pad2: 0,
@@ -101,6 +114,19 @@ impl Default for KitUnknown {
             __unused_pad34: 0,
             __unused_pad35: 0,
             __unused_pad36: 0,
+            __unused_pad37: 0,
+            __unused_pad38: 0,
+            __unused_pad39: 0,
+            __unused_pad40: 0,
+
+            __unused_pad_group_1: [0; 4],
+
+            __unused_pad41: 0,
+            __unused_pad42: 0,
+            __unused_pad43: 0,
+            __unused_pad44: 0,
+
+            __unused_pad_group_2: [0; 4],
         }
     }
 }
@@ -153,6 +179,20 @@ impl From<&ar_kit_t> for KitUnknown {
             __unused_pad34: raw_kit.__unused_pad34,
             __unused_pad35: raw_kit.__unused_pad35,
             __unused_pad36: raw_kit.__unused_pad36,
+
+            __unused_pad37: raw_kit.__unused_pad37,
+            __unused_pad38: raw_kit.__unused_pad38,
+            __unused_pad39: raw_kit.__unused_pad39,
+            __unused_pad40: raw_kit.__unused_pad40,
+
+            __unused_pad_group_1: raw_kit.__unused_pad_group_1,
+
+            __unused_pad41: raw_kit.__unused_pad41,
+            __unused_pad42: raw_kit.__unused_pad42,
+            __unused_pad43: raw_kit.__unused_pad43,
+            __unused_pad44: raw_kit.__unused_pad44,
+
+            __unused_pad_group_2: raw_kit.__unused_pad_group_2,
         }
     }
 }
@@ -204,5 +244,19 @@ impl KitUnknown {
         raw_kit.__unused_pad34 = self.__unused_pad34;
         raw_kit.__unused_pad35 = self.__unused_pad35;
         raw_kit.__unused_pad36 = self.__unused_pad36;
+
+        raw_kit.__unused_pad37 = self.__unused_pad37;
+        raw_kit.__unused_pad38 = self.__unused_pad38;
+        raw_kit.__unused_pad39 = self.__unused_pad39;
+        raw_kit.__unused_pad40 = self.__unused_pad40;
+
+        raw_kit.__unused_pad_group_1 = self.__unused_pad_group_1;
+
+        raw_kit.__unused_pad41 = self.__unused_pad41;
+        raw_kit.__unused_pad42 = self.__unused_pad42;
+        raw_kit.__unused_pad43 = self.__unused_pad43;
+        raw_kit.__unused_pad44 = self.__unused_pad44;
+
+        raw_kit.__unused_pad_group_2 = self.__unused_pad_group_2;
     }
 }

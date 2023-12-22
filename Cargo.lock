@@ -601,8 +601,6 @@ dependencies = [
 [[package]]
 name = "rytm-sys"
 version = "0.1.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "40994a5b93a7e8df125362326ebd787451135f0eff003e298712600580fe87e6"
 dependencies = [
  "bindgen",
  "cc",

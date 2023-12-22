@@ -41,7 +41,7 @@ impl<'de> Deserialize<'de> for Pattern {
                 let mut speed = None;
                 let mut global_quantize = None;
                 let mut bpm = None;
-                let mut __unknown_0x332c = None;
+                let mut pad_scale_per_pattern = None;
 
                 while let Some(key) = map.next_key()? {
                     match key {
@@ -73,7 +73,7 @@ impl<'de> Deserialize<'de> for Pattern {
                         "speed" => speed = Some(map.next_value()?),
                         "global_quantize" => global_quantize = Some(map.next_value()?),
                         "bpm" => bpm = Some(map.next_value()?),
-                        "__unknown_0x332c" => __unknown_0x332c = Some(map.next_value()?),
+                        "pad_scale_per_pattern" => pad_scale_per_pattern = Some(map.next_value()?),
                         "parameter_lock_pool" => {
                             let parameter_lock_pool_value: ParameterLockPool = map.next_value()?;
                             parameter_lock_pool =
@@ -101,8 +101,8 @@ impl<'de> Deserialize<'de> for Pattern {
                     global_quantize: global_quantize
                         .ok_or_else(|| V::Error::missing_field("global_quantize"))?,
                     bpm: bpm.ok_or_else(|| V::Error::missing_field("bpm"))?,
-                    __unknown_0x332c: __unknown_0x332c
-                        .ok_or_else(|| V::Error::missing_field("__unknown_0x332c"))?,
+                    pad_scale_per_pattern: pad_scale_per_pattern
+                        .ok_or_else(|| V::Error::missing_field("pad_scale_per_pattern"))?,
                     parameter_lock_pool: parameter_lock_pool
                         .ok_or_else(|| V::Error::missing_field("parameter_lock_pool"))?,
                 })
@@ -124,7 +124,7 @@ impl<'de> Deserialize<'de> for Pattern {
             "speed",
             "global_quantize",
             "bpm",
-            "__unknown_0x332c",
+            "pad_scale_per_pattern",
         ];
 
         deserializer.deserialize_struct("Pattern", FIELDS, PatternVisitor)
