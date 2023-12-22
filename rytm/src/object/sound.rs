@@ -25,7 +25,7 @@ use crate::{
     util::arc_mutex_owner,
     ParameterError,
 };
-use crate::{util::assemble_u32_from_u8_array, AnySysexType};
+use crate::{util::assemble_u32_from_u8_array_be, AnySysexType};
 use derivative::Derivative;
 use rytm_rs_macro::parameter_range;
 use rytm_sys::{ar_sound_raw_to_syx, ar_sound_t, ar_sysex_meta_t};
@@ -205,7 +205,7 @@ impl Sound {
             kit_number,
             assigned_track,
             sysex_meta,
-            version: assemble_u32_from_u8_array(&raw_sound.__unknown_arr1[4..=7]),
+            version: assemble_u32_from_u8_array_be(&raw_sound.__unknown_arr1[4..=7]),
 
             name: ObjectName::from_u8_array(raw_sound.name),
 

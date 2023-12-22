@@ -124,6 +124,11 @@ macro_rules! impl_sysex_compatible {
                         return Err(SysexConversionError::from(return_code).into());
                     }
 
+                    let chksum = ((encoded_buf[encoded_buf.len() - 5] as u16) << 8)
+                        | encoded_buf[encoded_buf.len() - 4] as u16;
+                    let size = ((encoded_buf[encoded_buf.len() - 3] as u16) << 8)
+                        | encoded_buf[encoded_buf.len() - 2] as u16;
+                    dbg!(size, chksum);
                     Ok(encoded_buf)
                 }
             }
@@ -179,6 +184,7 @@ pub fn decode_sysex_response_to_raw(response: &[u8]) -> Result<(Vec<u8>, SysexMe
     // The destination buffer, raw buffer.
     let mut dst_buf = vec![0_u8; expected_raw_size];
 
+    dbg!(&response[0..12]);
     unsafe {
         // The count of return error codes from `rytm-sys` is far below 255.
         #[allow(clippy::cast_possible_truncation)]

@@ -34,7 +34,7 @@ use self::{
     unknown::KitUnknown,
 };
 use crate::defaults::{default_perf_ctl_array, default_scene_ctl_array};
-use crate::util::{assemble_u32_from_u8_array, break_u32_into_u8_array};
+use crate::util::{assemble_u32_from_u8_array_be, break_u32_into_u8_array_be};
 use crate::AnySysexType;
 use crate::{
     error::{ParameterError, RytmError, SysexConversionError},
@@ -132,7 +132,7 @@ impl From<&Kit> for ar_kit_t {
     fn from(kit: &Kit) -> Self {
         let mut raw_kit = Self {
             // Version
-            __unknown_arr1: break_u32_into_u8_array(kit.version),
+            __unknown_arr1: break_u32_into_u8_array_be(kit.version),
             name: kit.name.copy_inner(),
             perf_ctl: kit.perf_ctl,
             scene_ctl: kit.scene_ctl,
@@ -223,7 +223,7 @@ impl Kit {
         Ok(Self {
             index: kit_number,
             sysex_meta,
-            version: assemble_u32_from_u8_array(&raw_kit.__unknown_arr1),
+            version: assemble_u32_from_u8_array_be(&raw_kit.__unknown_arr1),
 
             name,
 

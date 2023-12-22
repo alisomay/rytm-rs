@@ -433,7 +433,7 @@ fn settings_type() {
             rytm.update_from_sysex_response(response)?;
             let settings = rytm.settings();
 
-            clearscreen::clear().unwrap();
+            // clearscreen::clear().unwrap();
 
             // let mute: u16 = ((settings.track_mute_msb as u16) << 8) | (settings.track_mute_lsb as u16);
 

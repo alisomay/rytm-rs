@@ -3,7 +3,7 @@ pub mod types;
 pub(crate) mod unknown;
 
 use self::unknown::GlobalUnknown;
-use crate::util::{assemble_u32_from_u8_array, break_u32_into_u8_array};
+use crate::util::{assemble_u32_from_u8_array_be, break_u32_into_u8_array_be};
 use crate::AnySysexType;
 use crate::{
     error::{ParameterError, RytmError, SysexConversionError},
@@ -51,7 +51,7 @@ pub struct Global {
 impl From<&Global> for ar_global_t {
     fn from(global: &Global) -> Self {
         let mut raw_global = Self {
-            version: break_u32_into_u8_array(global.version),
+            version: break_u32_into_u8_array_be(global.version),
             ..Default::default()
         };
 
@@ -82,7 +82,7 @@ impl Global {
         Ok(Self {
             index: slot_number,
             sysex_meta,
-            version: assemble_u32_from_u8_array(&raw_global.version),
+            version: assemble_u32_from_u8_array_be(&raw_global.version),
 
             metronome_settings: raw_global.try_into()?,
             midi_config: raw_global.try_into()?,

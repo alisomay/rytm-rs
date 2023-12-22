@@ -7,8 +7,8 @@ use crate::error::ConversionError;
     Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize,
 )]
 pub enum ParameterMenuItem {
-    #[default]
     Trig,
+    #[default]
     Src,
     Smpl,
     Fltr,
@@ -83,8 +83,8 @@ impl From<ParameterMenuItem> for u8 {
     Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize,
 )]
 pub enum FxParameterMenuItem {
-    #[default]
     Trig,
+    #[default]
     Delay,
     Reverb,
     Dist,

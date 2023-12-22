@@ -15,7 +15,7 @@ use self::types::{
     FxParameterMenuItem, ParameterMenuItem, PatternMode, SampleRecorderRecordingLength,
     SampleRecorderSource, SequencerMode,
 };
-use crate::util::{assemble_u32_from_u8_array, break_u32_into_u8_array};
+use crate::util::{assemble_u32_from_u8_array_be, break_u32_into_u8_array_be};
 use crate::AnySysexType;
 use crate::{
     error::{ParameterError, RytmError, SysexConversionError},
@@ -68,7 +68,7 @@ pub struct Settings {
     sample_recorder_monitor_enable: bool,
     sample_recorder_rlen: SampleRecorderRecordingLength,
 
-    #[derivative(Debug = "ignore")]
+    // #[derivative(Debug = "ignore")]
     __unknown: SettingsUnknown,
 }
 
@@ -82,7 +82,7 @@ impl From<&Settings> for ar_settings_t {
         let track_mute_lsb = settings.mute_flags as u8;
 
         let mut raw_settings = Self {
-            version: break_u32_into_u8_array(settings.version),
+            version: break_u32_into_u8_array_be(settings.version),
             bpm_msb,
             bpm_lsb,
             selected_track: settings.selected_track,
@@ -156,13 +156,13 @@ impl Settings {
     ) -> Result<Self, RytmError> {
         let bpm_project = (raw_settings.bpm_msb as u16) << 8 | raw_settings.bpm_lsb as u16;
         let bpm_project = bpm_project as f32 / 120.0;
-
+        dbg!(&sysex_meta);
         let mute_flags =
             (raw_settings.track_mute_msb as u16) << 8 | raw_settings.track_mute_lsb as u16;
 
         Ok(Self {
             sysex_meta,
-            version: assemble_u32_from_u8_array(&raw_settings.version),
+            version: assemble_u32_from_u8_array_be(&raw_settings.version),
             bpm_project,
             selected_track: raw_settings.selected_track,
 

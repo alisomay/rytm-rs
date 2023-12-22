@@ -2,6 +2,8 @@ use rytm_sys::ar_settings_t;
 use serde::{Deserialize, Serialize};
 use serde_big_array::BigArray;
 
+use crate::defaults::default_settings__unknown0x001f;
+
 /// Unknown fields for settings
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 pub struct SettingsUnknown {
@@ -30,8 +32,8 @@ impl Default for SettingsUnknown {
             __unknown_0x000b: 0,
             __unknown0x000e_0x0014: [0; 7],
             __unknown0x0017_0x0019: [0; 3],
-            __unknown0x001f: [0; 16 * 128],
-            __unknown0x081f: 0,
+            __unknown0x001f: default_settings__unknown0x001f(),
+            __unknown0x081f: 1,
             __unknown0x0821_0x0826: [0; 6],
         }
     }

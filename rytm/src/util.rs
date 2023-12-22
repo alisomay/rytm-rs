@@ -47,18 +47,18 @@ pub const fn to_s_u16_t_union_b_from_u8_as_lsb(value: u8) -> s_u16_t {
     }
 }
 
-pub fn assemble_u32_from_u8_array(array: &[u8]) -> u32 {
+pub fn assemble_u32_from_u8_array_be(array: &[u8]) -> u32 {
     let mut result = 0;
     for (i, byte) in array.iter().enumerate() {
-        result |= (*byte as u32) << (8 * i);
+        result |= (*byte as u32) << (8 * (3 - i));
     }
     result
 }
 
-pub fn break_u32_into_u8_array(value: u32) -> [u8; 4] {
+pub fn break_u32_into_u8_array_be(value: u32) -> [u8; 4] {
     let mut result = [0u8; 4];
     for (i, byte) in result.iter_mut().enumerate() {
-        *byte = (value >> (8 * i)) as u8;
+        *byte = ((value >> (8 * (3 - i))) & 0xFF) as u8;
     }
     result
 }

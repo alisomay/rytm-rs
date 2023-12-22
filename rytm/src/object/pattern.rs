@@ -28,9 +28,9 @@ use crate::{
     impl_sysex_compatible,
     object::pattern::track::Track,
     sysex::{SysexCompatible, SysexMeta, SysexType, PATTERN_SYSEX_SIZE},
-    util::{arc_mutex_owner, assemble_u32_from_u8_array, from_s_u16_t, to_s_u16_t_union_b},
+    util::{arc_mutex_owner, assemble_u32_from_u8_array_be, from_s_u16_t, to_s_u16_t_union_b},
 };
-use crate::{util::break_u32_into_u8_array, AnySysexType};
+use crate::{util::break_u32_into_u8_array_be, AnySysexType};
 use derivative::Derivative;
 use rytm_rs_macro::parameter_range;
 use rytm_sys::{ar_pattern_raw_to_syx, ar_pattern_t, ar_pattern_track_t, ar_sysex_meta_t};
@@ -148,7 +148,7 @@ impl From<&Pattern> for ar_pattern_t {
 
         let bpm = (pattern.bpm * 120.0) as u16;
         Self {
-            magic: break_u32_into_u8_array(pattern.version),
+            magic: break_u32_into_u8_array_be(pattern.version),
             tracks,
             plock_seqs: pattern.parameter_lock_pool.lock().unwrap().as_raw(),
             master_length: to_s_u16_t_union_b(pattern.master_length),
@@ -200,7 +200,7 @@ impl Pattern {
                 Track::try_from_raw(i, track, &parameter_lock_pool, Some(Arc::clone(&fx_track)))?;
         }
 
-        let version = assemble_u32_from_u8_array(&raw_pattern.magic);
+        let version = assemble_u32_from_u8_array_be(&raw_pattern.magic);
 
         let bpm = ((raw_pattern.bpm_msb as u16) << 8) | (raw_pattern.bpm_lsb as u16);
         let bpm = bpm as f32 / 120.0;
