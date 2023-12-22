@@ -215,8 +215,6 @@ pub mod query;
 pub(crate) mod sysex;
 pub(crate) mod util;
 
-use std::sync::Arc;
-
 use serde::{Deserialize, Serialize};
 pub use sysex::{AnySysexType, SysexCompatible, SysexType};
 
@@ -226,7 +224,7 @@ use error::SysexConversionError;
 use object::{
     global::Global,
     kit::Kit,
-    pattern::{self, Pattern},
+    pattern::Pattern,
     settings::Settings,
     sound::{Sound, SoundType},
 };

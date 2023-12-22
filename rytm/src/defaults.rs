@@ -371,6 +371,7 @@ pub fn default_trig_array(track_index: usize) -> [Trig; 64] {
     ]
 }
 
+#[allow(non_snake_case)]
 pub const fn default_settings__unknown0x001f() -> [u8; 16 * 128] {
     [
         0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0,
