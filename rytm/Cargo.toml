@@ -1,6 +1,6 @@
 [package]
 name = "rytm-rs"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["alisomay <alisomay@runbox.com>"]
 edition = "2021"
 license = "MIT"
@@ -19,8 +19,7 @@ exclude = [
 
 [dependencies]
 thiserror = "1"
-# rytm-sys = "0.1"
-rytm-sys = { path = "../../rytm-sys" }
+rytm-sys = "0.1"
 bitstream-io = "2.2.0"
 rytm-rs-macro = "0.1"
 derivative = "2.2.0"
@@ -31,8 +30,7 @@ serde-big-array = "0.5.1"
 
 [dev-dependencies]
 anyhow = "1.0"
-# rytm-sys = "0.1"
-rytm-sys = { path = "../../rytm-sys" }
+rytm-sys = "0.1"
 midir = "0.9"
 clearscreen = "2"
 serde = { version = "1.0", features = ["derive"] }

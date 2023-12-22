@@ -562,7 +562,7 @@ dependencies = [
 
 [[package]]
 name = "rytm-rs"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "anyhow",
  "bitstream-io",
@@ -600,7 +600,9 @@ dependencies = [
 
 [[package]]
 name = "rytm-sys"
-version = "0.1.4"
+version = "0.1.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4bd21baf790797881c7acebbed12c1007f41513c3af67c36b2d2c42f29666684"
 dependencies = [
  "bindgen",
  "cc",
