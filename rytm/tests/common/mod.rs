@@ -39,6 +39,7 @@ pub fn make_input_message_forwarder() -> (
             &rytm_input_port,
             "rytm_test_in",
             move |_stamp, message, _| {
+                dbg!(message.len());
                 // Forward ro the receiver for continuous monitoring.
                 tx.send((message.to_vec(), _stamp)).unwrap();
             },

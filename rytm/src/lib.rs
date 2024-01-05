@@ -215,6 +215,8 @@ pub mod query;
 pub(crate) mod sysex;
 pub(crate) mod util;
 
+use std::{io::Read, path::Path};
+
 use serde::{Deserialize, Serialize};
 pub use sysex::{AnySysexType, SysexCompatible, SysexType};
 
@@ -232,7 +234,7 @@ use object::{
 use defaults::*;
 use rytm_sys::{ar_global_t, ar_kit_t, ar_pattern_t, ar_settings_t, ar_sound_t};
 use serde_big_array::BigArray;
-use sysex::decode_sysex_response_to_raw;
+use sysex::{decode_sysex_response_to_raw, KIT_SYSEX_SIZE, PATTERN_SYSEX_SIZE};
 
 /// [`RytmProject`] represents the state of the analog rytm.
 ///
@@ -461,6 +463,42 @@ impl RytmProject {
         }
     }
 
+    /// Updates the Rytm struct from a sysex file.
+    // pub fn update_from_sysex_file(&mut self, path: &Path) -> Result<(), RytmError> {
+    //     let file = std::fs::File::open(path)?;
+    //     let mut reader = std::io::BufReader::new(file);
+    //     self.read_kits_from_sysex_file(&mut reader)?;
+
+    //     Ok(())
+    // }
+
+    // fn read_kits_from_sysex_file(&mut self, reader: &mut impl Read) -> Result<(), RytmError> {
+    //     let mut buffer = [0; KIT_SYSEX_SIZE]; // 8 bytes for each chunk
+    //     for _ in 0..127 {
+    //         // Read up to the buffer's length in bytes
+    //         match reader.read(&mut buffer) {
+    //             Ok(0) => {
+    //                 // Corrupted file.
+    //                 break;
+    //             }
+    //             Ok(n) => {
+    //                 if n != KIT_SYSEX_SIZE {
+    //                     // Corrupted file.
+    //                     return Err(todo!());
+    //                 }
+    //                 // Process the chunk here
+    //                 // n is the number of bytes read, which might be less than the buffer size
+    //                 let chunk = &buffer[..];
+
+    //                 // Update the rytm project with the chunk.
+    //                 self.update_from_sysex_response(chunk)?;
+    //             }
+    //             Err(e) => return Err(e),
+    //         }
+    //     }
+    //     Ok(())
+    // }
+
     /// Get all patterns.
     ///
     /// Total of 128 patterns.
@@ -611,5 +649,40 @@ impl RytmProjectWorkBuffer {
     /// Get the global in the work buffer mutably.
     pub fn global_mut(&mut self) -> &mut Global {
         &mut self.global
+    }
+}
+
+impl SysexCompatible for RytmProject {
+    // This is meant to be used for sending the entire project so it can be stored in a file and loaded later.
+    fn as_sysex(&self) -> Result<Vec<u8>, RytmError> {
+        let mut sysex = Vec::new();
+
+        for kit in self.kits() {
+            sysex.extend(&kit.as_sysex()?);
+        }
+        sysex.extend(&self.work_buffer().kit().as_sysex()?);
+        for sound in self.pool_sounds() {
+            sysex.extend(&sound.as_sysex()?);
+        }
+        for sound in self.work_buffer().sounds() {
+            sysex.extend(&sound.as_sysex()?);
+        }
+        for pattern in self.patterns() {
+            sysex.extend(&pattern.as_sysex()?);
+        }
+        sysex.extend(&self.work_buffer().pattern().as_sysex()?);
+        // Songs omitted.
+        for global in self.globals() {
+            sysex.extend(&global.as_sysex()?);
+        }
+        sysex.extend(&self.work_buffer().global().as_sysex()?);
+        sysex.extend(&self.settings().as_sysex()?);
+
+        Ok(sysex)
+    }
+
+    fn sysex_type(&self) -> AnySysexType {
+        // This is actually the project dump request id but this is just a dummy implementation since we're not going to work with project dumps from the device currently.
+        AnySysexType::Unknown(96)
     }
 }

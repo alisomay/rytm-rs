@@ -469,3 +469,93 @@ pub fn is_machine_compatible_for_track(track_index: usize, machine: MachineType)
 
     compatible_machines_for_track_slice.contains(&((machine as u8) as i32))
 }
+
+pub fn decode_sys_ex(buffer: &[u8]) -> Result<Vec<u8>, String> {
+    if buffer.is_empty() {
+        return Err("Buffer is empty".to_string());
+    }
+
+    if buffer[0] != 0xF0 {
+        return Err("Missing start byte 0xF0".to_string());
+    }
+
+    let end_byte_index = buffer.iter().position(|&x| x == 0xF7);
+    if end_byte_index.is_none() {
+        return Err("Missing end byte 0xF7".to_string());
+    }
+    let end_byte_index = end_byte_index.unwrap();
+
+    if buffer.iter().filter(|&&x| x == 0xF0).count() > 1
+        || buffer.iter().filter(|&&x| x == 0xF7).count() > 1
+    {
+        return Err("Multiple start or end bytes found".to_string());
+    }
+
+    let mut decoded = Vec::new();
+    let mut current_byte = 0u8;
+    let mut bits_filled = 0;
+
+    for &byte in &buffer[1..end_byte_index] {
+        if byte & 0x80 != 0 {
+            // Ignore bytes with MSB set
+            continue;
+        }
+
+        for bit in (0..7).rev() {
+            let extracted_bit = (byte >> bit) & 1;
+            current_byte = (current_byte << 1) | extracted_bit;
+            bits_filled += 1;
+
+            if bits_filled == 8 {
+                decoded.push(current_byte);
+                current_byte = 0;
+                bits_filled = 0;
+            }
+        }
+    }
+
+    // Pad the last byte with zeros if there are remaining bits
+    if bits_filled > 0 {
+        current_byte <<= 8 - bits_filled;
+        decoded.push(current_byte);
+    }
+
+    Ok(decoded)
+}
+
+pub fn encode_to_sys_ex(buffer: &[u8]) -> Vec<u8> {
+    let mut encoded = vec![0xF0]; // Start with the SysEx start byte
+
+    let mut leftover: u8 = 0; // To store bits overflowing to the next byte
+    let mut leftover_bits: u8 = 0; // Count of leftover bits
+
+    for &byte in buffer {
+        let current_byte = leftover | (byte >> leftover_bits);
+        if current_byte != 0xF0 && current_byte != 0xF7 {
+            // Exclude 0xF0 and 0xF7 from data
+            encoded.push(current_byte);
+        }
+
+        // Update leftover with the overflow bits
+        leftover = byte << (8 - leftover_bits);
+        leftover_bits += 1;
+
+        if leftover_bits == 7 {
+            // If 7 leftover bits are accumulated, push them as a new byte
+            if leftover != 0xF0 && leftover != 0xF7 {
+                encoded.push(leftover);
+            }
+            leftover = 0;
+            leftover_bits = 0;
+        }
+    }
+
+    // Handle any remaining bits
+    if leftover_bits != 0 {
+        encoded.push(leftover);
+    }
+
+    encoded.push(0xF7); // End with the SysEx end byte
+
+    encoded
+}

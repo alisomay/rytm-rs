@@ -5,9 +5,10 @@
 //! The tests are not expected to be stable, and may change at any time.
 
 mod common;
+use std::ffi::CString;
 use std::sync::{Arc, Mutex};
 
-use crate::common::util::decode_sysex_response_to_raw;
+use crate::common::util::{decode_sys_ex, decode_sysex_response_to_raw};
 use common::*;
 use rytm_rs::prelude::*;
 use rytm_rs::{
@@ -678,37 +679,142 @@ fn usage() {
 
 #[test]
 fn stuff() {
-    let mut rytm = RytmProject::default();
-    let ser = serde_json::to_string(&rytm).unwrap();
-    std::fs::write("proj.json", ser).unwrap();
+    // let mut rytm = RytmProject::default();
+    // let ser = serde_json::to_string(&rytm).unwrap();
+    // std::fs::write("proj.json", ser).unwrap();
+    let out = get_connection_to_rytm();
+    let (_conn_in, rx) = make_input_message_forwarder();
+
+    // // let query = SoundQuery::new_targeting_work_buffer(0).unwrap();
+
+    // // let mut rytm = Arc::new(Mutex::new(RytmProject::default()));
     // let out = get_connection_to_rytm();
-    // let (_conn_in, rx) = make_input_message_forwarder();
 
-    // let query = SoundQuery::new_targeting_work_buffer(0).unwrap();
+    // // let rytm1 = rytm.clone();
+    let out1 = out.clone();
+    // F0 00 20 3C 10 00 00 00 01 00 00 01 F7
+    let sys: [u8; 13] = [
+        // STATIC HEADER
+        0xF0, // PAD
+        0x00, // MANUFACTURER ID
+        0x20, 0x3C, // REQUEST MAIN ID
+        0x10, // PAD
+        0x00, // REQ COUNTER
+        0x00, 0x00, 0x7F, // REQUEST TYPE
+        0x00, 0x00, 1, // EOX
+        0xF7,
+    ];
+    out1.lock().unwrap().send(&sys).unwrap();
 
-    // let mut rytm = Arc::new(Mutex::new(RytmProject::default()));
-    // let out = get_connection_to_rytm();
+    while let Ok((msg, _)) = rx.recv() {
+        dbg!(String::from_utf8_lossy(&msg));
+        let decoded = decode_sys_ex(&msg).unwrap();
 
-    // let rytm1 = rytm.clone();
-    // let out1 = out.clone();
+        // dbg!(String::from_utf8_lossy(&decoded));
+    }
 
+    //       _dstBuf[ 0] = 0xF0u;
+    //   _dstBuf[ 1] = 0x00u;
+    //   _dstBuf[ 2] = 0x20u;
+    //   _dstBuf[ 3] = 0x3Cu;
+    //   _dstBuf[ 4] = 0x07u;
+    //   _dstBuf[ 5] = (_meta->dev_id & 15u);
+    //   _dstBuf[ 6] = ar_sysex_meta_get_request_id(_meta);
+    //   _dstBuf[ 7] = _meta->container_version.b.hi;
+    //   _dstBuf[ 8] = _meta->container_version.b.lo;
+    //   _dstBuf[ 9] = (_meta->obj_nr & 127u);
+    //   _dstBuf[10] = 0x00u;
+    //   _dstBuf[11] = 0x00u;
+    //   _dstBuf[12] = 0x00u;
+    //   _dstBuf[13] = 0x05u;
+    //   _dstBuf[14] = 0xF7u;
+
+    // 96 is complete project dump serially
+
+    // REQ:97
+    // Error: 97 timed out
+    // REQ:98
+    // [rytm/tests/common/mod.rs:42] message.len() = 2998
+    // [rytm/tests/reverse_engineering.rs:727] message.len() = 2998
+    // REQ:99
+    // [rytm/tests/common/mod.rs:42] message.len() = 201
+    // [rytm/tests/reverse_engineering.rs:727] message.len() = 201
+    // REQ:100
+    // [rytm/tests/common/mod.rs:42] message.len() = 14988
+    // [rytm/tests/reverse_engineering.rs:727] message.len() = 14988
+    // REQ:101
+    // [rytm/tests/common/mod.rs:42] message.len() = 1506
+    // [rytm/tests/reverse_engineering.rs:727] message.len() = 1506
+    // REQ:102
+    // [rytm/tests/common/mod.rs:42] message.len() = 2401
+    // [rytm/tests/reverse_engineering.rs:727] message.len() = 2401
+    // REQ:103
+    // [rytm/tests/common/mod.rs:42] message.len() = 107
+    // [rytm/tests/reverse_engineering.rs:727] message.len() = 107
+    // REQ:104
+    // [rytm/tests/common/mod.rs:42] message.len() = 2998
+    // [rytm/tests/reverse_engineering.rs:727] message.len() = 2998
+    // REQ:105
+    // [rytm/tests/common/mod.rs:42] message.len() = 201
+    // [rytm/tests/reverse_engineering.rs:727] message.len() = 201
+    // REQ:106
+    // [rytm/tests/common/mod.rs:42] message.len() = 14988
+    // [rytm/tests/reverse_engineering.rs:727] message.len() = 14988
+    // REQ:107
+    // [rytm/tests/common/mod.rs:42] message.len() = 1506
+    // [rytm/tests/reverse_engineering.rs:727] message.len() = 1506
+    // REQ:108
+    // [rytm/tests/common/mod.rs:42] message.len() = 2401
+    // [rytm/tests/reverse_engineering.rs:727] message.len() = 2401
+    // REQ:109
+    // [rytm/tests/common/mod.rs:42] message.len() = 107
+    // [rytm/tests/reverse_engineering.rs:727] message.len() = 107
+
+    // let mut i: usize = 97;
     // std::thread::spawn(move || loop {
     //     out1.lock()
     //         .unwrap()
-    //         .send(&query.as_sysex().unwrap())
+    //         .send(&[
+    //             0xF0, 0x00, 0x20, 0x3C, 0x07, 0x00, i as u8, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00,
+    //             0x05, 0xF7,
+    //         ])
     //         .unwrap();
+    //     // std::thread::park();
 
-    //     match rx.recv() {
+    //     println!("REQ:{i}");
+    //     match rx.recv_timeout(std::time::Duration::from_millis(2000)) {
     //         Ok((message, _stamp)) => {
-    //             callback(&message, rytm, elapsed)?;
+    //             // callback(&message, rytm, elapsed)?;
+    //             dbg!(message.len());
+    //             i += 1;
+    //             if i == 256 {
+    //                 break;
+    //             }
     //         }
-    //         Err(err) => {
-    //             println!("Error: {:?}", err);
+    //         Err(_err) => {
+    //             println!("Error: {i} timed out");
+
+    //             i += 1;
+    //             if i == 256 {
+    //                 break;
+    //             }
+
+    //             // out1.lock()
+    //             //     .unwrap()
+    //             //     .send(&[
+    //             //         0xF0, 0x00, 0x20, 0x3C, 0x07, 0x00, i as u8, 0x01, 0x01, 0x00, 0x00, 0x00,
+    //             //         0x00, 0x05, 0xF7,
+    //             //     ])
+    //             //     .unwrap();
+
+    //             continue;
     //         }
     //     }
 
-    //     std::thread::sleep(std::time::Duration::from_millis(interval_in_millis));
+    //     std::thread::sleep(std::time::Duration::from_millis(2000));
     // });
+
+    // std::thread::park();
 
     // let mut out = out.lock().unwrap();
     // out.send(&query.as_sysex().unwrap()).unwrap();
