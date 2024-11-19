@@ -1,18 +1,19 @@
-use crate::util::scale_f32_to_u16;
 use crate::{
     error::{ParameterError, RytmError},
     object::pattern::plock::ParameterLockPool,
     util::{
         from_s_u16_t, get_u16_min_max_from_float_range, i8_to_u8_midpoint_of_u8_input_range,
-        scale_u16_to_f32, to_s_u16_t_union_a, u8_to_i8_midpoint_of_u8_input_range,
+        scale_f32_to_u16, scale_u16_to_f32, to_s_u16_t_union_a,
+        u8_to_i8_midpoint_of_u8_input_range,
     },
     RytmError::OrphanTrig,
 };
 use derivative::Derivative;
+use parking_lot::Mutex;
 use rytm_rs_macro::{machine_parameters, parameter_range};
 use rytm_sys::ar_sound_t;
 use serde::{Deserialize, Serialize};
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 
 #[machine_parameters(
  lev: "0..=127" #1,

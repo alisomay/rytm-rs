@@ -66,7 +66,7 @@ Starting with importing the prelude is a good idea since it brings the necessary
 Also the [`midir`](https://github.com/Boddlnagg/midir) library will be used for midi communication with the device in these examples but you can use any midi library you want.
 
 ```rust
-use std::sync::{Arc, Mutex};
+use std::sync::Arc; use parking_lot::Mutex;
 use midir::{Ignore, MidiInputConnection, MidiOutputConnection};
 use rytm_rs::prelude::*;
 

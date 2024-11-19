@@ -1,5 +1,6 @@
 use crate::error::ConversionError;
 
+#[allow(dead_code)]
 const PAD_SCALE_ROOT_NOTE_BASE: u8 = 96;
 // Import all the PADSCALE_* constants from rytm_sys
 use rytm_sys::{

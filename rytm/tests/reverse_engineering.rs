@@ -5,24 +5,24 @@
 //! The tests are not expected to be stable, and may change at any time.
 
 mod common;
-use std::sync::{Arc, Mutex};
-
 use crate::common::util::decode_sysex_response_to_raw;
 use common::*;
-use rytm_rs::prelude::*;
+use parking_lot::Mutex;
 use rytm_rs::{
     error::RytmError,
     object::{
         pattern::{track, Pattern},
         sound::types::LfoMultiplier,
     },
+    prelude::*,
     query::{GlobalQuery, KitQuery, PatternQuery, SettingsQuery, SoundQuery},
     RytmProject, SysexCompatible,
 };
+use std::sync::Arc;
 
 #[test]
 fn settings() {
-    let mut rytm = RytmProject::default();
+    let mut rytm = RytmProject::try_default().unwrap();
     let conn_out = get_connection_to_rytm();
     let (_conn_in, rx) = make_input_message_forwarder();
 
@@ -85,7 +85,7 @@ fn settings() {
 
 #[test]
 fn global() {
-    let mut rytm = RytmProject::default();
+    let mut rytm = RytmProject::try_default().unwrap();
     let conn_out = get_connection_to_rytm();
     let (_conn_in, rx) = make_input_message_forwarder();
 
@@ -178,7 +178,7 @@ fn global() {
 
 #[test]
 fn plock_seq() {
-    let mut rytm = RytmProject::default();
+    let mut rytm = RytmProject::try_default().unwrap();
     let conn_out = get_connection_to_rytm();
     let (_conn_in, rx) = make_input_message_forwarder();
 
@@ -298,7 +298,7 @@ fn plock_seq() {
 
 #[test]
 fn sound() {
-    let mut rytm = RytmProject::default();
+    let mut rytm = RytmProject::try_default().unwrap();
     let conn_out = get_connection_to_rytm();
     let (_conn_in, rx) = make_input_message_forwarder();
 
@@ -324,7 +324,7 @@ fn sound() {
 
             // dbg!(elapsed);
             // dbg!(sound[track_index].machine_parameters());
-            dbg!(sound);
+            dbg!(sound[0].name(), sound[0].amplitude());
 
             Ok(())
         };
@@ -334,7 +334,7 @@ fn sound() {
 
 #[test]
 fn kit() {
-    let mut rytm = RytmProject::default();
+    let mut rytm = RytmProject::try_default().unwrap();
     let conn_out = get_connection_to_rytm();
     let (_conn_in, rx) = make_input_message_forwarder();
 
@@ -366,7 +366,7 @@ fn kit() {
 
 #[test]
 fn global_type() {
-    let mut rytm = RytmProject::default();
+    let mut rytm = RytmProject::try_default().unwrap();
     let conn_out = get_connection_to_rytm();
     let (_conn_in, rx) = make_input_message_forwarder();
 
@@ -417,7 +417,7 @@ fn global_type() {
 
 #[test]
 fn settings_type() {
-    let mut rytm = RytmProject::default();
+    let mut rytm = RytmProject::try_default().unwrap();
     let conn_out = get_connection_to_rytm();
     let (_conn_in, rx) = make_input_message_forwarder();
 
@@ -458,7 +458,7 @@ fn settings_type() {
 
 #[test]
 fn pattern_type() {
-    let mut rytm = RytmProject::default();
+    let mut rytm = RytmProject::try_default().unwrap();
     let conn_out = get_connection_to_rytm();
     let (_conn_in, rx) = make_input_message_forwarder();
 
@@ -482,7 +482,7 @@ fn pattern_type() {
             trig0.plock_set_lfo_depth(-66.0).unwrap();
             trig0.plock_set_lfo_speed(-63).unwrap();
             trig0.plock_set_lfo_multiplier(LfoMultiplier::X1).unwrap();
-            out.lock().unwrap().send(&pattern.as_sysex()?).unwrap();
+            out.lock().send(&pattern.as_sysex()?).unwrap();
             // clearscreen::clear().unwrap();
 
             // let mute: u16 = ((settings.track_mute_msb as u16) << 8) | (settings.track_mute_lsb as u16);
@@ -509,8 +509,9 @@ fn pattern_type() {
 #[test]
 fn usage() {
     use midir::{Ignore, MidiInputConnection, MidiOutputConnection};
+    use parking_lot::Mutex;
     use rytm_rs::prelude::*;
-    use std::sync::{Arc, Mutex};
+    use std::sync::Arc;
 
     // We'll be using this connection for sending sysex messages to the device.
     fn get_connection_to_rytm() -> Arc<Mutex<MidiOutputConnection>> {
@@ -552,7 +553,7 @@ fn usage() {
     }
 
     // Make a default rytm project
-    let mut rytm = RytmProject::default();
+    let mut rytm = RytmProject::try_default().unwrap();
 
     // Get a connection to the device
     let conn_out = get_connection_to_rytm();
@@ -564,11 +565,7 @@ fn usage() {
     let query = PatternQuery::new_targeting_work_buffer();
 
     // Send the query to the device
-    conn_out
-        .lock()
-        .unwrap()
-        .send(&query.as_sysex().unwrap())
-        .unwrap();
+    conn_out.lock().send(&query.as_sysex().unwrap()).unwrap();
 
     // Wait for the response
     match rx.recv() {
@@ -591,7 +588,6 @@ fn usage() {
                     // Send the updated pattern to the device if you like
                     conn_out
                         .lock()
-                        .unwrap()
                         .send(&rytm.work_buffer().pattern().as_sysex().unwrap())
                         .unwrap();
                 }
@@ -605,7 +601,7 @@ fn usage() {
         }
     }
 
-    // let mut rytm = RytmProject::default();
+    // let mut rytm = RytmProject::try_default().unwrap();
 
     // let patterns = rytm.patterns_mut();
 
@@ -678,7 +674,7 @@ fn usage() {
 
 #[test]
 fn stuff() {
-    let mut rytm = RytmProject::default();
+    let mut rytm = RytmProject::try_default().unwrap();
     let ser = serde_json::to_string(&rytm).unwrap();
     std::fs::write("proj.json", ser).unwrap();
     // let out = get_connection_to_rytm();
@@ -686,7 +682,7 @@ fn stuff() {
 
     // let query = SoundQuery::new_targeting_work_buffer(0).unwrap();
 
-    // let mut rytm = Arc::new(Mutex::new(RytmProject::default()));
+    // let mut rytm = Arc::new(Mutex::new(RytmProject::try_default().unwrap()));
     // let out = get_connection_to_rytm();
 
     // let rytm1 = rytm.clone();
@@ -710,7 +706,7 @@ fn stuff() {
     //     std::thread::sleep(std::time::Duration::from_millis(interval_in_millis));
     // });
 
-    // let mut out = out.lock().unwrap();
+    // let mut out = out.lock();
     // out.send(&query.as_sysex().unwrap()).unwrap();
 
     // while let Ok((msg, _)) = rx.recv() {
@@ -740,7 +736,7 @@ fn stuff() {
     // trig0.plock_set_lfo_depth(-66.0).unwrap();
     // trig0.plock_set_lfo_speed(-63).unwrap();
     // trig0.plock_set_lfo_multiplier(LfoMultiplier::X1).unwrap();
-    // out.lock().unwrap().send(&pattern.as_sysex()?).unwrap();
+    // out.lock().send(&pattern.as_sysex()?).unwrap();
 }
 
 // pub fn poll_with_query_blocking(

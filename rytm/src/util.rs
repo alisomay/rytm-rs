@@ -64,7 +64,7 @@ pub fn break_u32_into_u8_array_be(value: u32) -> [u8; 4] {
 }
 
 #[allow(clippy::missing_safety_doc)]
-pub unsafe fn from_s_u16_t(value: s_u16_t) -> u16 {
+pub const unsafe fn from_s_u16_t(value: s_u16_t) -> u16 {
     let msb = value.b.hi as u16;
     let lsb = value.b.lo as u16;
     (msb << 8) | lsb
@@ -312,17 +312,16 @@ where
 }
 
 pub mod arc_mutex_owner {
-    use serde::de::Deserializer;
-    use serde::ser::Serializer;
-    use serde::{Deserialize, Serialize};
-    use std::sync::{Arc, Mutex};
+    use parking_lot::Mutex;
+    use serde::{de::Deserializer, ser::Serializer, Deserialize, Serialize};
+    use std::sync::Arc;
 
     pub fn serialize<S, T>(val: &Arc<Mutex<T>>, s: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
         T: Serialize,
     {
-        T::serialize(&*val.lock().unwrap(), s)
+        T::serialize(&*val.lock(), s)
     }
 
     pub fn opt_serialize<S, T>(val: &Option<Arc<Mutex<T>>>, s: S) -> Result<S::Ok, S::Error>
@@ -331,7 +330,7 @@ pub mod arc_mutex_owner {
         T: Serialize,
     {
         if let Some(val) = val {
-            T::serialize(&*val.lock().unwrap(), s)
+            T::serialize(&*val.lock(), s)
         } else {
             s.serialize_none()
         }

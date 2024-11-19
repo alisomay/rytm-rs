@@ -1,6 +1,5 @@
-use crate::sysex::AnySysexType;
-
 use super::ObjectQuery;
+use crate::sysex::AnySysexType;
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 /// A permissive query type that allows for querying any object.

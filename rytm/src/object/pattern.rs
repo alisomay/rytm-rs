@@ -28,14 +28,18 @@ use crate::{
     impl_sysex_compatible,
     object::pattern::track::Track,
     sysex::{SysexCompatible, SysexMeta, SysexType, PATTERN_SYSEX_SIZE},
-    util::{arc_mutex_owner, assemble_u32_from_u8_array_be, from_s_u16_t, to_s_u16_t_union_b},
+    util::{
+        arc_mutex_owner, assemble_u32_from_u8_array_be, break_u32_into_u8_array_be, from_s_u16_t,
+        to_s_u16_t_union_b,
+    },
+    AnySysexType,
 };
-use crate::{util::break_u32_into_u8_array_be, AnySysexType};
 use derivative::Derivative;
+use parking_lot::Mutex;
 use rytm_rs_macro::parameter_range;
 use rytm_sys::{ar_pattern_raw_to_syx, ar_pattern_t, ar_pattern_track_t, ar_sysex_meta_t};
 use serde::Serialize;
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 pub use track::{
     trig::{types::*, Trig},
     types::*,
@@ -139,8 +143,7 @@ impl From<&Pattern> for ar_pattern_t {
 
         for (i, track) in pattern.tracks.iter().enumerate() {
             if i == 12 {
-                let borrow = pattern.fx_track.lock().unwrap();
-                tracks[i] = (&*borrow).into();
+                tracks[i] = (&*pattern.fx_track.lock()).into();
                 break;
             }
             tracks[i] = track.into();
@@ -150,7 +153,7 @@ impl From<&Pattern> for ar_pattern_t {
         Self {
             magic: break_u32_into_u8_array_be(pattern.version),
             tracks,
-            plock_seqs: pattern.parameter_lock_pool.lock().unwrap().as_raw(),
+            plock_seqs: pattern.parameter_lock_pool.lock().as_raw(),
             master_length: to_s_u16_t_union_b(pattern.master_length),
             master_chg_msb: (pattern.master_change >> 8) as u8,
             master_chg_lsb: pattern.master_change as u8,
@@ -489,7 +492,7 @@ impl Pattern {
 
     /// Clears all the parameter locks for this pattern.
     pub fn clear_all_plocks(&mut self) {
-        self.parameter_lock_pool.lock().unwrap().clear_all_plocks();
+        self.parameter_lock_pool.lock().clear_all_plocks();
     }
 
     /// Clears all the parameter locks for the given track in this pattern.
@@ -499,7 +502,6 @@ impl Pattern {
     pub fn clear_all_plocks_for_track(&mut self, track_index: u8) -> Result<(), RytmError> {
         self.parameter_lock_pool
             .lock()
-            .unwrap()
             .clear_all_plocks_for_track(track_index);
 
         Ok(())

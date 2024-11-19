@@ -1,3 +1,5 @@
+#![allow(clippy::too_many_lines)]
+
 use crate::error::ConversionError;
 use serde::{Deserialize, Serialize};
 
@@ -573,7 +575,7 @@ impl TryFrom<&str> for MidiChannel {
                 // TODO: Maybe a new parse error type?
                 let channel = channel
                     .parse::<usize>()
-                    .map_err(|err| ConversionError::Range {
+                    .map_err(|_| ConversionError::Range {
                         value: channel.to_string(),
                         type_name: "MidiChannel".into(),
                     })?;
@@ -1143,19 +1145,11 @@ impl From<HardwareTrack> for u8 {
 ///
 /// This parameter is only available when `USB CONFIG` is set to `USB AUDIO/MIDI`.
 ///
-/// - `PRE-FX` the incoming audio is routed in before the Analog Rytm MKII’s effects and will be affected by
-/// those and then be sent at the main outputs. The audio is also routed to the sampler.
-/// - `POST-FX` the incoming audio is routed in after the Analog Rytm MKII’s effects and will not be affected
-/// by those. The audio is then sent at the main outputs. The audio is also routed to the sampler.
-/// - `TRACK 1–12, L:1–12/R:1–12` Press a `[PAD]` twice to select a single track as a destination. The select-
-/// ed track’s `[PAD]` (or `[PADS]` if you selected a track that shares its voice with another track) lights up
-/// white. The incoming audio is summed to mono and routed to the selected track and is affected by the
-/// tracks parameters (such as filter, envelope). Press first one `[PAD]` and then another to select two separate tracks as destinations. The selected
-/// tracks’ `[PADS]` lights up blue for left channel and red for right channel. The incoming audio’s left and
-/// right signal is then sent to separate tracks and is affected by the tracks’ parameters.
-/// The audio is also routed to the sampler.
-/// - `SAMPLER ONLY` the incoming audio is only routed to the Analog Rytm MKII’s sampler and not to any
-/// track or to the main out.
+/// - `PRE-FX` the incoming audio is routed in before the Analog Rytm MKII’s effects and will be affected by those and then be sent at the main outputs. The audio is also routed to the sampler.
+/// - `POST-FX` the incoming audio is routed in after the Analog Rytm MKII’s effects and will not be affected by those. The audio is then sent at the main outputs. The audio is also routed to the sampler.
+/// - `TRACK 1–12, L:1–12/R:1–12` Press a `[PAD]` twice to select a single track as a destination. The selected track’s `[PAD]` (or `[PADS]` if you selected a track that shares its voice with another track) lights up white. The incoming audio is summed to mono and routed to the selected track and is affected by the tracks parameters (such as filter, envelope). Press first one `[PAD]` and then another to select two separate tracks as destinations. The selected tracks’ `[PADS]` lights up blue for left channel and red for right channel. The incoming audio’s left and right signal is then sent to separate tracks and is affected by the tracks’ parameters. The audio is also routed to the sampler.
+/// - `SAMPLER ONLY` the incoming audio is only routed to the Analog Rytm MKII’s sampler and not to any track or to the main out.
+///
 ///
 /// To be able to hear and process the incoming audio sent to one (or two) of the Analog Rytm
 /// MKII’s tracks, you must place a note trig on the selected track(s) and start the sequencer.
@@ -1532,16 +1526,9 @@ impl From<RoutingUsbInOptions> for u8 {
 /// `USB OUT` sets from where in the Analog Rytm MKII’s signal path, the outgoing audio is routed to the
 /// class compliant device. This parameter is only available when `USB CONFIG` is set to `USB AUDIO/MIDI`.
 ///
-/// - `MAIN OUT` the outgoing audio is routed from the Analog Rytm MKII’s main out at the end of the signal
-/// path.
-/// - `TRACK 1–12, L:1–12/R:1–12` Press a `[PAD]` twice to select a single track as a source The selected
-/// track’s `[PAD]` (or [PADS] if you selected a track that shares its voice with another track) lights up white.
-/// Press first one `[PAD]` and then another to select two separate tracks as sources. The selected tracks’
-/// `[PADS]` lights up blue for left channel and red for right channel. The audio from the tracks is routed
-/// out and sent separately on left and right channel.
-/// - `AUDIO IN` the outgoing audio is routed straight from the Analog Rytm MKII’s audio inputs to the class
-/// compliant device.
-/// `OFF` no audio is sent to the class compliant device.
+/// - `MAIN OUT` the outgoing audio is routed from the Analog Rytm MKII’s main out at the end of the signal path.
+/// - `TRACK 1–12, L:1–12/R:1–12` Press a `[PAD]` twice to select a single track as a source The selected track’s `[PAD]` (or [PADS] if you selected a track that shares its voice with another track) lights up white. Press first one `[PAD]` and then another to select two separate tracks as sources. The selected tracks’`[PADS]` lights up blue for left channel and red for right channel. The audio from the tracks is routed out and sent separately on left and right channel.
+/// - `AUDIO IN` the outgoing audio is routed straight from the Analog Rytm MKII’s audio inputs to the class compliant device. `OFF` no audio is sent to the class compliant device.
 #[derive(
     Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize,
 )]

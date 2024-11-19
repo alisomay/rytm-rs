@@ -58,7 +58,7 @@ use crate::{
 };
 
 /// A trait which is implemented by all structures which can be converted to rytm sysex query messages.
-pub trait ObjectQuery: SysexCompatible {
+pub trait ObjectQuery: SysexCompatible + Send + Sync {
     /// Returns the sysex type of the object.
     fn sysex_type(&self) -> AnySysexType;
 

@@ -18,6 +18,7 @@ mod plock_impl;
 pub mod types;
 
 use self::types::{Length, MicroTime, RetrigRate, TrigCondition};
+use super::Track;
 use crate::{
     error::{ParameterError, RytmError},
     object::pattern::plock::ParameterLockPool,
@@ -25,14 +26,13 @@ use crate::{
 };
 use derivative::Derivative;
 use flags::*;
+use parking_lot::Mutex;
 use rytm_rs_macro::parameter_range;
 use serde::{Deserialize, Serialize};
 use std::{
     ops::{Deref, DerefMut},
-    sync::{Arc, Mutex},
+    sync::Arc,
 };
-
-use super::Track;
 
 pub trait HoldsTrigFlags {
     /// Returns the raw flags value.
@@ -331,7 +331,7 @@ pub struct Trig {
     flags: TrigFlags,
     /// The note value.
     ///
-    /// Follows the midi note convention. C-4 is `0x3C``.
+    /// Follows the midi note convention. C-4 is `0x3C`.
     note: u8,
     /// Stores the state of the trig condition.
     trig_condition: TrigCondition,
@@ -673,9 +673,10 @@ impl Trig {
     pub(crate) fn enable_fx_trig_if_necessary(&self) {
         // Enable fx trig if this method is called on a non-fx trig.
         if let Some(ref fx_track_ref) = self.fx_track_ref {
-            let mut borrow = fx_track_ref.lock().unwrap();
+            let mut borrow = fx_track_ref.lock();
             let fx_trig = &mut borrow.trigs_mut()[self.index];
             fx_trig.set_trig_enable(true);
+            drop(borrow);
         }
     }
 
@@ -685,9 +686,10 @@ impl Trig {
     pub(crate) fn disable_fx_trig_if_necessary(&self) {
         // Disable fx trig if this method is called on a non-fx trig.
         if let Some(ref fx_track_ref) = self.fx_track_ref {
-            let mut borrow = fx_track_ref.lock().unwrap();
+            let mut borrow = fx_track_ref.lock();
             let fx_trig = &mut borrow.trigs_mut()[self.index];
             fx_trig.set_trig_enable(false);
+            drop(borrow);
         }
     }
 }

@@ -4,12 +4,13 @@ pub(crate) mod port;
 pub(crate) mod util;
 
 use midir::{Ignore, MidiInputConnection, MidiOutputConnection};
+use parking_lot::Mutex;
 use rytm_rs::{
     error::{RytmError, SysexConversionError},
     query::ObjectQuery,
     RytmProject,
 };
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 use util::SysexMeta;
 
 pub fn get_connection_to_rytm() -> Arc<Mutex<MidiOutputConnection>> {
@@ -58,11 +59,7 @@ pub fn poll_with_query_blocking(
     mut callback: impl FnMut(&[u8], &mut RytmProject, u64) -> Result<(), RytmError>,
 ) -> Result<(), RytmError> {
     loop {
-        conn_out
-            .lock()
-            .unwrap()
-            .send(&query.as_sysex().unwrap())
-            .unwrap();
+        conn_out.lock().send(&query.as_sysex().unwrap()).unwrap();
         // Timestamp
         let query_start = std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)

@@ -7,27 +7,27 @@ pub const GLOBAL_MAX_COUNT: usize = 4;
 pub const TRACK_MAX_COUNT: usize = 12;
 pub const VOICE_MAX_COUNT: usize = 8;
 
-use std::sync::{Arc, Mutex};
-
 use crate::object::{
     pattern::{track::Track, Trig},
     *,
 };
+use parking_lot::Mutex;
+use std::sync::Arc;
 
 pub fn default_work_buffer_sounds() -> [Sound; TRACK_MAX_COUNT] {
     [
-        Sound::try_default(0).unwrap(),
-        Sound::try_default(1).unwrap(),
-        Sound::try_default(2).unwrap(),
-        Sound::try_default(3).unwrap(),
-        Sound::try_default(4).unwrap(),
-        Sound::try_default(5).unwrap(),
-        Sound::try_default(6).unwrap(),
-        Sound::try_default(7).unwrap(),
-        Sound::try_default(8).unwrap(),
-        Sound::try_default(9).unwrap(),
-        Sound::try_default(10).unwrap(),
-        Sound::try_default(11).unwrap(),
+        Sound::try_work_buffer_default(0).unwrap(),
+        Sound::try_work_buffer_default(1).unwrap(),
+        Sound::try_work_buffer_default(2).unwrap(),
+        Sound::try_work_buffer_default(3).unwrap(),
+        Sound::try_work_buffer_default(4).unwrap(),
+        Sound::try_work_buffer_default(5).unwrap(),
+        Sound::try_work_buffer_default(6).unwrap(),
+        Sound::try_work_buffer_default(7).unwrap(),
+        Sound::try_work_buffer_default(8).unwrap(),
+        Sound::try_work_buffer_default(9).unwrap(),
+        Sound::try_work_buffer_default(10).unwrap(),
+        Sound::try_work_buffer_default(11).unwrap(),
     ]
 }
 

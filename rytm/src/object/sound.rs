@@ -22,15 +22,15 @@ use crate::{
     impl_sysex_compatible,
     object::types::ObjectName,
     sysex::{SysexCompatible, SysexMeta, SysexType, SOUND_SYSEX_SIZE},
-    util::arc_mutex_owner,
-    ParameterError,
+    util::{arc_mutex_owner, assemble_u32_from_u8_array_be},
+    AnySysexType, ParameterError,
 };
-use crate::{util::assemble_u32_from_u8_array_be, AnySysexType};
 use derivative::Derivative;
+use parking_lot::Mutex;
 use rytm_rs_macro::parameter_range;
 use rytm_sys::{ar_sound_raw_to_syx, ar_sound_t, ar_sysex_meta_t};
 use serde::{Deserialize, Serialize};
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 
 /// An enum to understand where the sound is coming from.
 ///
@@ -141,16 +141,21 @@ impl Sound {
         &mut self,
         parameter_lock_pool: &Arc<Mutex<ParameterLockPool>>,
     ) -> Result<(), RytmError> {
-        if self.is_pool_sound() {
-            return Err(ParameterError::Compatibility {
+        let compatibility_error =  ParameterError::Compatibility {
                 value: "ParameterLockPool".into(),
                 parameter_name: "parameter_lock_pool".into(),
                 reason: Some("The sound you're trying to link the parameter lock pool is a pool sound. Pool sounds cannot have parameter locks.".into()),
-            }
-            .into());
+        };
+        if self.is_pool_sound() {
+            return Err(compatibility_error.into());
         }
         self.parameter_lock_pool = Some(Arc::clone(parameter_lock_pool));
-        let parameter_lock_pool_ref = Arc::clone(self.parameter_lock_pool.as_ref().unwrap());
+        let parameter_lock_pool_ref = Arc::clone(
+            self.parameter_lock_pool
+                .as_ref()
+                .ok_or(compatibility_error)?,
+        );
+
         self.machine_parameters
             .link_parameter_lock_pool(parameter_lock_pool_ref);
         Ok(())
@@ -269,6 +274,8 @@ impl Sound {
     ///
     /// Range: `0..=127`
     #[parameter_range(range = "accent_level:0..=127")]
+    // Range is checked
+    #[allow(clippy::cast_possible_truncation)]
     pub fn set_accent_level(&mut self, accent_level: usize) -> Result<(), RytmError> {
         self.accent_level = accent_level as u8;
         Ok(())
@@ -519,7 +526,12 @@ impl Sound {
     }
 
     /// Returns the index of the sound.
+    ///
+    /// Normalized index if this sound is a work buffer sound.
     pub const fn index(&self) -> usize {
+        if self.sysex_meta.is_targeting_work_buffer() {
+            return self.sysex_meta.get_normalized_object_index();
+        }
         self.index
     }
 }

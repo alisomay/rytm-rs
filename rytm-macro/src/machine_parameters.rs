@@ -183,7 +183,7 @@ pub fn generate_setter_and_plock_methods_with_range_check(
         pub fn #plock_getter_fn_name(&self, trig_index: usize) -> Result<Option<#param_input_type>, RytmError> {
             if let Some(ref pool) = self.parameter_lock_pool {
                 let assigned_track = self.assigned_track.ok_or(OrphanTrig)?;
-                let #param_ident = pool.lock().unwrap().get_basic_plock(
+                let #param_ident = pool.lock().get_basic_plock(
                     trig_index,
                     assigned_track as u8,
                     rytm_sys::#syn_param_type_ident as u8,
@@ -204,7 +204,7 @@ pub fn generate_setter_and_plock_methods_with_range_check(
         pub fn #plock_clearer_fn_name(&self, trig_index: usize) -> Result<(), RytmError> {
             if let Some(ref pool) = self.parameter_lock_pool {
                 let assigned_track = self.assigned_track.ok_or(OrphanTrig)?;
-                pool.lock().unwrap().clear_basic_plock(
+                pool.lock().clear_basic_plock(
                     trig_index,
                     assigned_track as u8,
                     rytm_sys::#syn_param_type_ident as u8,
@@ -220,7 +220,7 @@ pub fn generate_setter_and_plock_methods_with_range_check(
         pub fn #plock_clearer_fn_name(&self, trig_index: usize) -> Result<(), RytmError> {
             if let Some(ref pool) = self.parameter_lock_pool {
                 let assigned_track = self.assigned_track.ok_or(OrphanTrig)?;
-                pool.lock().unwrap().clear_compound_plock(
+                pool.lock().clear_compound_plock(
                     trig_index,
                     assigned_track as u8,
                     rytm_sys::#syn_param_type_ident as u8,
@@ -246,7 +246,7 @@ pub fn generate_setter_and_plock_methods_with_range_check(
                 pub fn #plock_setter_fn_name(&self, #param_ident: #param_input_type, trig_index: usize) -> Result<(), RytmError> {
                     if let Some(ref pool) = self.parameter_lock_pool {
                         let assigned_track = self.assigned_track.ok_or(OrphanTrig)?;
-                        pool.lock().unwrap().set_compound_plock(
+                        pool.lock().set_compound_plock(
                             trig_index,
                             assigned_track as u8,
                             rytm_sys::#syn_param_type_ident as u8,
@@ -262,7 +262,7 @@ pub fn generate_setter_and_plock_methods_with_range_check(
                 pub fn #plock_getter_fn_name(&self, trig_index: usize) -> Result<Option<#param_input_type>, RytmError> {
                     if let Some(ref pool) = self.parameter_lock_pool {
                         let assigned_track = self.assigned_track.ok_or(OrphanTrig)?;
-                        let #param_ident = pool.lock().unwrap().get_compound_plock(
+                        let #param_ident = pool.lock().get_compound_plock(
                             trig_index,
                             assigned_track as u8,
                             rytm_sys::#syn_param_type_ident as u8,
@@ -294,7 +294,7 @@ pub fn generate_setter_and_plock_methods_with_range_check(
                 pub fn #plock_setter_fn_name(&self, #param_ident: #param_input_type, trig_index: usize) -> Result<(), RytmError> {
                     if let Some(ref pool) = self.parameter_lock_pool {
                         let assigned_track = self.assigned_track.ok_or(OrphanTrig)?;
-                        pool.lock().unwrap().set_basic_plock(
+                        pool.lock().set_basic_plock(
                             trig_index,
                             assigned_track as u8,
                             rytm_sys::#syn_param_type_ident as u8,
@@ -321,7 +321,7 @@ pub fn generate_setter_and_plock_methods_with_range_check(
                 pub fn #plock_setter_fn_name(&self, #param_ident: #param_input_type, trig_index: usize) -> Result<(), RytmError> {
                     if let Some(ref pool) = self.parameter_lock_pool {
                         let assigned_track = self.assigned_track.ok_or(OrphanTrig)?;
-                        pool.lock().unwrap().set_basic_plock(
+                        pool.lock().set_basic_plock(
                             trig_index,
                             assigned_track as u8,
                             rytm_sys::#syn_param_type_ident as u8,

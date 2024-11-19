@@ -13,7 +13,7 @@ impl Trig {
     #[parameter_range(range = "filter_attack:0..=127")]
     pub fn plock_set_filter_attack(&self, filter_attack: usize) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
-            pool.lock().unwrap().set_basic_plock(
+            pool.lock().set_basic_plock(
                 self.index,
                 self.track_index as u8,
                 rytm_sys::AR_PLOCK_TYPE_FLT_ATTACK as u8,
@@ -30,7 +30,7 @@ impl Trig {
     #[parameter_range(range = "filter_sustain:0..=127")]
     pub fn plock_set_filter_sustain(&self, filter_sustain: usize) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
-            pool.lock().unwrap().set_basic_plock(
+            pool.lock().set_basic_plock(
                 self.index,
                 self.track_index as u8,
                 rytm_sys::AR_PLOCK_TYPE_FLT_SUSTAIN as u8,
@@ -48,7 +48,7 @@ impl Trig {
     #[parameter_range(range = "filter_decay:0..=127")]
     pub fn plock_set_filter_decay(&self, filter_decay: usize) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
-            pool.lock().unwrap().set_basic_plock(
+            pool.lock().set_basic_plock(
                 self.index,
                 self.track_index as u8,
                 rytm_sys::AR_PLOCK_TYPE_FLT_DECAY as u8,
@@ -66,7 +66,7 @@ impl Trig {
     #[parameter_range(range = "filter_release:0..=127")]
     pub fn plock_set_filter_release(&self, filter_release: usize) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
-            pool.lock().unwrap().set_basic_plock(
+            pool.lock().set_basic_plock(
                 self.index,
                 self.track_index as u8,
                 rytm_sys::AR_PLOCK_TYPE_FLT_RELEASE as u8,
@@ -84,7 +84,7 @@ impl Trig {
     #[parameter_range(range = "filter_cutoff:0..=127")]
     pub fn plock_set_filter_cutoff(&self, filter_cutoff: usize) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
-            pool.lock().unwrap().set_basic_plock(
+            pool.lock().set_basic_plock(
                 self.index,
                 self.track_index as u8,
                 rytm_sys::AR_PLOCK_TYPE_FLT_FREQ as u8,
@@ -102,7 +102,7 @@ impl Trig {
     #[parameter_range(range = "filter_resonance:0..=127")]
     pub fn plock_set_filter_resonance(&self, filter_resonance: usize) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
-            pool.lock().unwrap().set_basic_plock(
+            pool.lock().set_basic_plock(
                 self.index,
                 self.track_index as u8,
                 rytm_sys::AR_PLOCK_TYPE_FLT_RESO as u8,
@@ -117,7 +117,7 @@ impl Trig {
     /// Sets a parameter lock for the filter type.
     pub fn plock_set_filter_type(&self, filter_type: FilterType) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
-            pool.lock().unwrap().set_basic_plock(
+            pool.lock().set_basic_plock(
                 self.index,
                 self.track_index as u8,
                 rytm_sys::AR_PLOCK_TYPE_FLT_TYPE as u8,
@@ -138,7 +138,7 @@ impl Trig {
         filter_envelope_amount: isize,
     ) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
-            pool.lock().unwrap().set_basic_plock(
+            pool.lock().set_basic_plock(
                 self.index,
                 self.track_index as u8,
                 rytm_sys::AR_PLOCK_TYPE_FLT_ENV as u8,
@@ -155,7 +155,7 @@ impl Trig {
     /// Range `0..=127`
     pub fn plock_get_filter_attack(&self) -> Result<Option<usize>, RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
-            let value = pool.lock().unwrap().get_basic_plock(
+            let value = pool.lock().get_basic_plock(
                 self.index,
                 self.track_index as u8,
                 rytm_sys::AR_PLOCK_TYPE_FLT_ATTACK as u8,
@@ -175,7 +175,7 @@ impl Trig {
     /// Range `0..=127`
     pub fn plock_get_filter_decay(&self) -> Result<Option<usize>, RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
-            let value = pool.lock().unwrap().get_basic_plock(
+            let value = pool.lock().get_basic_plock(
                 self.index,
                 self.track_index as u8,
                 rytm_sys::AR_PLOCK_TYPE_FLT_DECAY as u8,
@@ -195,7 +195,7 @@ impl Trig {
     /// Range `0..=127`
     pub fn plock_get_filter_sustain(&self) -> Result<Option<usize>, RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
-            let value = pool.lock().unwrap().get_basic_plock(
+            let value = pool.lock().get_basic_plock(
                 self.index,
                 self.track_index as u8,
                 rytm_sys::AR_PLOCK_TYPE_FLT_SUSTAIN as u8,
@@ -215,7 +215,7 @@ impl Trig {
     /// Range `0..=127`
     pub fn plock_get_filter_release(&self) -> Result<Option<usize>, RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
-            let value = pool.lock().unwrap().get_basic_plock(
+            let value = pool.lock().get_basic_plock(
                 self.index,
                 self.track_index as u8,
                 rytm_sys::AR_PLOCK_TYPE_FLT_RELEASE as u8,
@@ -235,7 +235,7 @@ impl Trig {
     /// Range `0..=127`
     pub fn plock_get_filter_cutoff(&self) -> Result<Option<usize>, RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
-            let value = pool.lock().unwrap().get_basic_plock(
+            let value = pool.lock().get_basic_plock(
                 self.index,
                 self.track_index as u8,
                 rytm_sys::AR_PLOCK_TYPE_FLT_FREQ as u8,
@@ -255,7 +255,7 @@ impl Trig {
     /// Range `0..=127`
     pub fn plock_get_filter_resonance(&self) -> Result<Option<usize>, RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
-            let value = pool.lock().unwrap().get_basic_plock(
+            let value = pool.lock().get_basic_plock(
                 self.index,
                 self.track_index as u8,
                 rytm_sys::AR_PLOCK_TYPE_FLT_RESO as u8,
@@ -275,7 +275,7 @@ impl Trig {
     /// Range `0..=127`
     pub fn plock_get_filter_type(&self) -> Result<Option<FilterType>, RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
-            let value = pool.lock().unwrap().get_basic_plock(
+            let value = pool.lock().get_basic_plock(
                 self.index,
                 self.track_index as u8,
                 rytm_sys::AR_PLOCK_TYPE_FLT_TYPE as u8,
@@ -295,7 +295,7 @@ impl Trig {
     /// Range `-64..=63`
     pub fn plock_get_filter_envelope_amount(&self) -> Result<Option<isize>, RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
-            let value = pool.lock().unwrap().get_basic_plock(
+            let value = pool.lock().get_basic_plock(
                 self.index,
                 self.track_index as u8,
                 rytm_sys::AR_PLOCK_TYPE_FLT_ENV as u8,
@@ -315,7 +315,7 @@ impl Trig {
     /// Clears the parameter lock for the filter attack
     pub fn plock_clear_filter_attack(&self) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
-            pool.lock().unwrap().clear_basic_plock(
+            pool.lock().clear_basic_plock(
                 self.index,
                 self.track_index as u8,
                 rytm_sys::AR_PLOCK_TYPE_FLT_ATTACK as u8,
@@ -329,7 +329,7 @@ impl Trig {
     /// Clears the parameter lock for the filter decay
     pub fn plock_clear_filter_decay(&self) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
-            pool.lock().unwrap().clear_basic_plock(
+            pool.lock().clear_basic_plock(
                 self.index,
                 self.track_index as u8,
                 rytm_sys::AR_PLOCK_TYPE_FLT_DECAY as u8,
@@ -343,7 +343,7 @@ impl Trig {
     /// Clears the parameter lock for the filter sustain
     pub fn plock_clear_filter_sustain(&self) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
-            pool.lock().unwrap().clear_basic_plock(
+            pool.lock().clear_basic_plock(
                 self.index,
                 self.track_index as u8,
                 rytm_sys::AR_PLOCK_TYPE_FLT_SUSTAIN as u8,
@@ -357,7 +357,7 @@ impl Trig {
     /// Clears the parameter lock for the filter release
     pub fn plock_clear_filter_release(&self) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
-            pool.lock().unwrap().clear_basic_plock(
+            pool.lock().clear_basic_plock(
                 self.index,
                 self.track_index as u8,
                 rytm_sys::AR_PLOCK_TYPE_FLT_RELEASE as u8,
@@ -371,7 +371,7 @@ impl Trig {
     /// Clears the parameter lock for the filter cutoff
     pub fn plock_clear_filter_cutoff(&self) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
-            pool.lock().unwrap().clear_basic_plock(
+            pool.lock().clear_basic_plock(
                 self.index,
                 self.track_index as u8,
                 rytm_sys::AR_PLOCK_TYPE_FLT_FREQ as u8,
@@ -385,7 +385,7 @@ impl Trig {
     /// Clears the parameter lock for the filter resonance
     pub fn plock_clear_filter_resonance(&self) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
-            pool.lock().unwrap().clear_basic_plock(
+            pool.lock().clear_basic_plock(
                 self.index,
                 self.track_index as u8,
                 rytm_sys::AR_PLOCK_TYPE_FLT_RESO as u8,
@@ -399,7 +399,7 @@ impl Trig {
     /// Clears the parameter lock for the filter type
     pub fn plock_clear_filter_type(&self) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
-            pool.lock().unwrap().clear_basic_plock(
+            pool.lock().clear_basic_plock(
                 self.index,
                 self.track_index as u8,
                 rytm_sys::AR_PLOCK_TYPE_FLT_TYPE as u8,
@@ -413,7 +413,7 @@ impl Trig {
     /// Clears the parameter lock for the filter envelope amount
     pub fn plock_clear_filter_envelope_amount(&self) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
-            pool.lock().unwrap().clear_basic_plock(
+            pool.lock().clear_basic_plock(
                 self.index,
                 self.track_index as u8,
                 rytm_sys::AR_PLOCK_TYPE_FLT_ENV as u8,

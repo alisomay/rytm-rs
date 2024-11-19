@@ -16,7 +16,7 @@ impl Trig {
     #[parameter_range(range = "threshold:0..=127")]
     pub fn plock_set_fx_compressor_threshold(&self, threshold: usize) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
-            pool.lock().unwrap().set_fx_basic_plock(
+            pool.lock().set_fx_basic_plock(
                 self.index,
                 AR_FX_PLOCK_TYPE_COMP_THRESHOLD as u8,
                 threshold as u8,
@@ -32,7 +32,7 @@ impl Trig {
     /// Sets a parameter lock for the FX compressor attack.
     pub fn plock_set_fx_compressor_attack(&self, attack: FxCompAttack) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
-            pool.lock().unwrap().set_fx_basic_plock(
+            pool.lock().set_fx_basic_plock(
                 self.index,
                 AR_FX_PLOCK_TYPE_COMP_ATTACK as u8,
                 attack.into(),
@@ -48,7 +48,7 @@ impl Trig {
     /// Sets a parameter lock for the FX compressor release.
     pub fn plock_set_fx_compressor_release(&self, release: FxCompRelease) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
-            pool.lock().unwrap().set_fx_basic_plock(
+            pool.lock().set_fx_basic_plock(
                 self.index,
                 AR_FX_PLOCK_TYPE_COMP_RELEASE as u8,
                 release.into(),
@@ -64,7 +64,7 @@ impl Trig {
     /// Sets a parameter lock for the FX compressor ratio.
     pub fn plock_set_fx_compressor_ratio(&self, ratio: FxCompRatio) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
-            pool.lock().unwrap().set_fx_basic_plock(
+            pool.lock().set_fx_basic_plock(
                 self.index,
                 AR_FX_PLOCK_TYPE_COMP_RATIO as u8,
                 ratio.into(),
@@ -83,7 +83,7 @@ impl Trig {
         seq: FxCompSideChainEq,
     ) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
-            pool.lock().unwrap().set_fx_basic_plock(
+            pool.lock().set_fx_basic_plock(
                 self.index,
                 AR_FX_PLOCK_TYPE_COMP_SEQ as u8,
                 seq.into(),
@@ -102,7 +102,7 @@ impl Trig {
     #[parameter_range(range = "gain:0..=127")]
     pub fn plock_set_fx_compressor_gain(&self, gain: usize) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
-            pool.lock().unwrap().set_fx_basic_plock(
+            pool.lock().set_fx_basic_plock(
                 self.index,
                 AR_FX_PLOCK_TYPE_COMP_MAKEUP as u8,
                 gain as u8,
@@ -121,7 +121,7 @@ impl Trig {
     #[parameter_range(range = "mix:0..=127")]
     pub fn plock_set_fx_compressor_mix(&self, mix: usize) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
-            pool.lock().unwrap().set_fx_basic_plock(
+            pool.lock().set_fx_basic_plock(
                 self.index,
                 AR_FX_PLOCK_TYPE_COMP_MIX as u8,
                 mix as u8,
@@ -140,7 +140,7 @@ impl Trig {
     #[parameter_range(range = "volume:0..=127")]
     pub fn plock_set_fx_compressor_volume(&self, volume: usize) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
-            pool.lock().unwrap().set_fx_basic_plock(
+            pool.lock().set_fx_basic_plock(
                 self.index,
                 AR_FX_PLOCK_TYPE_COMP_VOL as u8,
                 volume as u8,
@@ -160,7 +160,6 @@ impl Trig {
         if let Some(ref pool) = self.parameter_lock_pool {
             let value = pool
                 .lock()
-                .unwrap()
                 .get_fx_basic_plock(self.index, AR_FX_PLOCK_TYPE_COMP_THRESHOLD as u8);
 
             if let Some(value) = value {
@@ -177,7 +176,6 @@ impl Trig {
         if let Some(ref pool) = self.parameter_lock_pool {
             let value = pool
                 .lock()
-                .unwrap()
                 .get_fx_basic_plock(self.index, AR_FX_PLOCK_TYPE_COMP_ATTACK as u8);
 
             if let Some(value) = value {
@@ -194,7 +192,6 @@ impl Trig {
         if let Some(ref pool) = self.parameter_lock_pool {
             let value = pool
                 .lock()
-                .unwrap()
                 .get_fx_basic_plock(self.index, AR_FX_PLOCK_TYPE_COMP_RELEASE as u8);
 
             if let Some(value) = value {
@@ -211,7 +208,6 @@ impl Trig {
         if let Some(ref pool) = self.parameter_lock_pool {
             let value = pool
                 .lock()
-                .unwrap()
                 .get_fx_basic_plock(self.index, AR_FX_PLOCK_TYPE_COMP_RATIO as u8);
 
             if let Some(value) = value {
@@ -230,7 +226,6 @@ impl Trig {
         if let Some(ref pool) = self.parameter_lock_pool {
             let value = pool
                 .lock()
-                .unwrap()
                 .get_fx_basic_plock(self.index, AR_FX_PLOCK_TYPE_COMP_SEQ as u8);
 
             if let Some(value) = value {
@@ -249,7 +244,6 @@ impl Trig {
         if let Some(ref pool) = self.parameter_lock_pool {
             let value = pool
                 .lock()
-                .unwrap()
                 .get_fx_basic_plock(self.index, AR_FX_PLOCK_TYPE_COMP_MAKEUP as u8);
 
             if let Some(value) = value {
@@ -268,7 +262,6 @@ impl Trig {
         if let Some(ref pool) = self.parameter_lock_pool {
             let value = pool
                 .lock()
-                .unwrap()
                 .get_fx_basic_plock(self.index, AR_FX_PLOCK_TYPE_COMP_MIX as u8);
 
             if let Some(value) = value {
@@ -287,7 +280,6 @@ impl Trig {
         if let Some(ref pool) = self.parameter_lock_pool {
             let value = pool
                 .lock()
-                .unwrap()
                 .get_fx_basic_plock(self.index, AR_FX_PLOCK_TYPE_COMP_VOL as u8);
 
             if let Some(value) = value {
@@ -303,7 +295,6 @@ impl Trig {
     pub fn plock_clear_fx_compressor_threshold(&self) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             pool.lock()
-                .unwrap()
                 .clear_fx_basic_plock(self.index, AR_FX_PLOCK_TYPE_COMP_THRESHOLD as u8);
             self.disable_fx_trig_if_necessary();
 
@@ -316,7 +307,6 @@ impl Trig {
     pub fn plock_clear_fx_compressor_attack(&self) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             pool.lock()
-                .unwrap()
                 .clear_fx_basic_plock(self.index, AR_FX_PLOCK_TYPE_COMP_ATTACK as u8);
             self.disable_fx_trig_if_necessary();
 
@@ -329,7 +319,6 @@ impl Trig {
     pub fn plock_clear_fx_compressor_release(&self) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             pool.lock()
-                .unwrap()
                 .clear_fx_basic_plock(self.index, AR_FX_PLOCK_TYPE_COMP_RELEASE as u8);
             self.disable_fx_trig_if_necessary();
 
@@ -342,7 +331,6 @@ impl Trig {
     pub fn plock_clear_fx_compressor_ratio(&self) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             pool.lock()
-                .unwrap()
                 .clear_fx_basic_plock(self.index, AR_FX_PLOCK_TYPE_COMP_RATIO as u8);
             self.disable_fx_trig_if_necessary();
 
@@ -355,7 +343,6 @@ impl Trig {
     pub fn plock_clear_fx_compressor_side_chain_eq(&self) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             pool.lock()
-                .unwrap()
                 .clear_fx_basic_plock(self.index, AR_FX_PLOCK_TYPE_COMP_SEQ as u8);
             self.disable_fx_trig_if_necessary();
 
@@ -368,7 +355,6 @@ impl Trig {
     pub fn plock_clear_fx_compressor_gain(&self) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             pool.lock()
-                .unwrap()
                 .clear_fx_basic_plock(self.index, AR_FX_PLOCK_TYPE_COMP_MAKEUP as u8);
             self.disable_fx_trig_if_necessary();
 
@@ -381,7 +367,6 @@ impl Trig {
     pub fn plock_clear_fx_compressor_mix(&self) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             pool.lock()
-                .unwrap()
                 .clear_fx_basic_plock(self.index, AR_FX_PLOCK_TYPE_COMP_MIX as u8);
             self.disable_fx_trig_if_necessary();
 
@@ -394,7 +379,6 @@ impl Trig {
     pub fn plock_clear_fx_compressor_volume(&self) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             pool.lock()
-                .unwrap()
                 .clear_fx_basic_plock(self.index, AR_FX_PLOCK_TYPE_COMP_VOL as u8);
             self.disable_fx_trig_if_necessary();
 

@@ -1,6 +1,5 @@
-use serde::{Deserialize, Serialize};
-
 use crate::error::ConversionError;
+use serde::{Deserialize, Serialize};
 
 /// Represents the name of an object.
 ///

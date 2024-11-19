@@ -8,10 +8,11 @@ use crate::{
     RytmError::OrphanTrig,
 };
 use derivative::Derivative;
+use parking_lot::Mutex;
 use rytm_rs_macro::{machine_parameters, parameter_range};
 use rytm_sys::ar_sound_t;
 use serde::{Deserialize, Serialize};
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 
 #[machine_parameters(
     lev: "0..=127" #1,
@@ -79,7 +80,7 @@ impl HhBasicParameters {
     pub fn plock_set_rst(&self, rst: bool, trig_index: usize) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             let assigned_track = self.assigned_track.ok_or(OrphanTrig)?;
-            pool.lock().unwrap().set_basic_plock(
+            pool.lock().set_basic_plock(
                 trig_index,
                 assigned_track as u8,
                 rytm_sys::AR_PLOCK_TYPE_MP6 as u8,
@@ -94,7 +95,7 @@ impl HhBasicParameters {
     pub fn plock_get_rst(&self, trig_index: usize) -> Result<Option<bool>, RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             let assigned_track = self.assigned_track.ok_or(OrphanTrig)?;
-            let rst = pool.lock().unwrap().get_basic_plock(
+            let rst = pool.lock().get_basic_plock(
                 trig_index,
                 assigned_track as u8,
                 rytm_sys::AR_PLOCK_TYPE_MP6 as u8,
@@ -111,7 +112,7 @@ impl HhBasicParameters {
     pub fn plock_clear_rst(&self, trig_index: usize) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             let assigned_track = self.assigned_track.ok_or(OrphanTrig)?;
-            pool.lock().unwrap().clear_basic_plock(
+            pool.lock().clear_basic_plock(
                 trig_index,
                 assigned_track as u8,
                 rytm_sys::AR_PLOCK_TYPE_MP6 as u8,

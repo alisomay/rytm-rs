@@ -99,7 +99,8 @@ macro_rules! impl_sysex_compatible {
                 let mut raw_buffer: Vec<u8> = Vec::with_capacity(raw_size);
 
                 unsafe {
-                    let raw: *const u8 = (&raw_object as *const $object_raw_type).cast::<u8>();
+                    let raw: *const u8 =
+                        std::ptr::from_ref::<$object_raw_type>(&raw_object).cast::<u8>();
                     for i in 0..raw_size {
                         raw_buffer.push(*raw.add(i));
                     }
@@ -112,23 +113,27 @@ macro_rules! impl_sysex_compatible {
                 let meta_ptr = &mut meta as *mut ar_sysex_meta_t;
 
                 unsafe {
+                    #[allow(clippy::cast_possible_truncation)]
                     let return_code = $object_encoder_function(
                         encoded_buf.as_mut_ptr(),
                         raw_buffer.as_ptr(),
+                        // This cast is fine since the size of the object can't be bigger than u32::MAX.
                         std::mem::size_of::<$object_raw_type>() as u32,
-                        &mut encoded_buffer_length as *mut u32,
+                        std::ptr::from_mut::<u32>(&mut encoded_buffer_length),
                         meta_ptr,
-                    ) as u8;
+                    );
 
                     if return_code != 0 {
-                        return Err(SysexConversionError::from(return_code).into());
+                        // libanalogrytm return codes are always below 255, cast is fine.
+                        #[allow(clippy::cast_possible_truncation)]
+                        return Err(SysexConversionError::from(return_code as u8).into());
                     }
 
-                    let chksum = ((encoded_buf[encoded_buf.len() - 5] as u16) << 8)
-                        | encoded_buf[encoded_buf.len() - 4] as u16;
-                    let size = ((encoded_buf[encoded_buf.len() - 3] as u16) << 8)
-                        | encoded_buf[encoded_buf.len() - 2] as u16;
-                    dbg!(size, chksum);
+                    let _chksum = (u16::from(encoded_buf[encoded_buf.len() - 5]) << 8)
+                        | u16::from(encoded_buf[encoded_buf.len() - 4]);
+                    let _size = (u16::from(encoded_buf[encoded_buf.len() - 3]) << 8)
+                        | u16::from(encoded_buf[encoded_buf.len() - 2]);
+
                     Ok(encoded_buf)
                 }
             }
@@ -184,7 +189,6 @@ pub fn decode_sysex_response_to_raw(response: &[u8]) -> Result<(Vec<u8>, SysexMe
     // The destination buffer, raw buffer.
     let mut dst_buf = vec![0_u8; expected_raw_size];
 
-    dbg!(&response[0..12]);
     unsafe {
         // The count of return error codes from `rytm-sys` is far below 255.
         #[allow(clippy::cast_possible_truncation)]

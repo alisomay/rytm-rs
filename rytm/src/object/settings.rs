@@ -15,12 +15,12 @@ use self::types::{
     FxParameterMenuItem, ParameterMenuItem, PatternMode, SampleRecorderRecordingLength,
     SampleRecorderSource, SequencerMode,
 };
-use crate::util::{assemble_u32_from_u8_array_be, break_u32_into_u8_array_be};
-use crate::AnySysexType;
 use crate::{
     error::{ParameterError, RytmError, SysexConversionError},
     impl_sysex_compatible,
     sysex::{SysexCompatible, SysexMeta, SysexType, SETTINGS_SYSEX_SIZE},
+    util::{assemble_u32_from_u8_array_be, break_u32_into_u8_array_be},
+    AnySysexType,
 };
 use derivative::Derivative;
 use rytm_rs_macro::parameter_range;
@@ -156,7 +156,7 @@ impl Settings {
     ) -> Result<Self, RytmError> {
         let bpm_project = (raw_settings.bpm_msb as u16) << 8 | raw_settings.bpm_lsb as u16;
         let bpm_project = bpm_project as f32 / 120.0;
-        dbg!(&sysex_meta);
+
         let mute_flags =
             (raw_settings.track_mute_msb as u16) << 8 | raw_settings.track_mute_lsb as u16;
 

@@ -5,10 +5,11 @@ use crate::{
     RytmError::OrphanTrig,
 };
 use derivative::Derivative;
+use parking_lot::Mutex;
 use rytm_rs_macro::{machine_parameters, parameter_range};
 use rytm_sys::ar_sound_t;
 use serde::{Deserialize, Serialize};
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 
 #[machine_parameters(
  lev: "0..=127" #1,

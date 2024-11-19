@@ -1,6 +1,5 @@
-use serde::{Deserialize, Serialize};
-
 use crate::error::ConversionError;
+use serde::{Deserialize, Serialize};
 
 /// The six sequential square buttons on the right side of the Analog Rytm MKII. Fx mode off.
 #[derive(
@@ -226,21 +225,17 @@ impl From<SequencerMode> for u8 {
 ///
 /// There are four PATTERN modes.
 ///
-/// - SEQUENTIAL changes patterns after the currently playing pattern reaches its end. This mode is the
-/// default mode.
+/// - SEQUENTIAL changes patterns after the currently playing pattern reaches its end. This mode is the default mode.
 /// - DIRECT START immediately changes patterns. The new pattern will start playing from the beginning.
-/// - DIRECT JUMP immediately changes patterns. The new pattern will start playing from the position where
-/// the previous pattern left off.
+/// - DIRECT JUMP immediately changes patterns. The new pattern will start playing from the position where the previous pattern left off.
 /// - TEMP JUMP works a little bit differently from the other PATTERN modes. It works like this:
 ///
-/// 1. Press `[FUNC]` + `[BANK D]` to arm TEMP JUMP PATTERN mode. The Temp Jump LED starts to flash
-/// (if the sequencer is running) to indicate that Temp Jump mode is armed.
-///
+/// 1. Press `[FUNC]` + `[BANK D]` to arm TEMP JUMP PATTERN mode. The Temp Jump LED starts to flash (if the sequencer is running) to indicate that Temp Jump mode is armed.
 /// 2. Select a new pattern. The Temp Jump LED is now firmly lit to indicate that Temp Jump mode is active
-/// The pattern changes immediately and the new pattern starts playing from the position where the pre-
-/// vious pattern left off. It plays the new pattern once to the end and then return to the pattern that was
-/// playing before the change. Once the sequencer has returned to the earlier pattern, then TEMP JUMP
-/// mode is no longer active.
+///     The pattern changes immediately and the new pattern starts playing from the position where the previous
+///     pattern left off. It plays the new pattern once to the end and then return to the pattern that was
+///     playing before the change. Once the sequencer has returned to the earlier pattern, then TEMP JUMP
+///     mode is no longer active.
 ///
 /// You can also use TEMP JUMP mode when you are in CHAIN mode, but then the pattern you change to
 /// instead replaces the current pattern in the chain. For example, say that you have a chain set up like this:
@@ -316,19 +311,19 @@ impl From<PatternMode> for u8 {
 ///
 /// Source selects between different audio sources to sample from.
 /// - AUD L+R sets the input source to sample external audio through the AUDIO IN L+R inputs. The
-/// audio is summed together to mono.
+///     audio is summed together to mono.
 /// - AUD L sets the input source to AUDIO IN L.
 /// - AUD R sets the input source to AUDIO IN R.
 /// - BD, SD, RS/CP, BT, LT, MT/HT, CH/OH, CY/CB sets the input source to the internal audio from the
-/// separate drum tracks.
+///     separate drum tracks.
 /// - MAIN sets the input source to the internal MAIN L+R channels. The audio is summed together to
-/// mono.
+///     mono.
 /// - USB L+R sets the input source to sample external audio (from both left and right channel) through
-/// the USB input. The audio is summed together to mono.
+///     the USB input. The audio is summed together to mono.
 /// - USB L sets the input source to sample external audio from only the left channel of the incoming
-/// audio from the USB input.
+///     audio from the USB input.
 /// - USB R sets the input source to sample external audio from only the right channel of the incoming
-/// audio from the USB input.
+///     audio from the USB input.
 #[derive(
     Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize,
 )]

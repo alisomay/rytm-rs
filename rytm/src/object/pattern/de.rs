@@ -1,14 +1,12 @@
 use super::{Pattern, Trig};
 use crate::object::pattern::{plock::ParameterLockPool, track::Track};
+use parking_lot::Mutex;
 use serde::de::{
     self, Deserialize, DeserializeSeed, Deserializer, Error, MapAccess, SeqAccess, Visitor,
 };
-use std::{
-    fmt,
-    mem::MaybeUninit,
-    sync::{Arc, Mutex},
-};
+use std::{fmt, mem::MaybeUninit, sync::Arc};
 
+#[allow(clippy::too_many_lines)]
 impl<'de> Deserialize<'de> for Pattern {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
@@ -162,7 +160,7 @@ impl<'a, 'de> DeserializeSeed<'de> for TracksArrayDeserializerSeed<'a> {
             where
                 A: SeqAccess<'de>,
             {
-                let mut arr = [(); 12].map(|_| MaybeUninit::<Track>::uninit());
+                let mut arr = [(); 12].map(|()| MaybeUninit::<Track>::uninit());
                 for (i, elem) in arr.iter_mut().enumerate() {
                     // Context for every track deserializer
                     let track_seed = TrackDeserializerSeed {
@@ -174,7 +172,9 @@ impl<'a, 'de> DeserializeSeed<'de> for TracksArrayDeserializerSeed<'a> {
                             .ok_or_else(|| Error::invalid_length(i, &self))?,
                     );
                 }
-                Ok(unsafe { std::mem::transmute::<_, [Track; 12]>(arr) })
+                Ok(unsafe {
+                    std::mem::transmute::<[std::mem::MaybeUninit<Track>; 12], [Track; 12]>(arr)
+                })
             }
         }
 
@@ -222,6 +222,7 @@ impl<'a, 'de> de::Visitor<'de> for TrackVisitor<'a> {
         formatter.write_str("struct Track")
     }
 
+    #[allow(clippy::too_many_lines)]
     fn visit_map<V>(self, mut map: V) -> Result<Track, V::Error>
     where
         V: de::MapAccess<'de>,
@@ -254,7 +255,7 @@ impl<'a, 'de> de::Visitor<'de> for TrackVisitor<'a> {
         while let Some(key) = map.next_key()? {
             match key {
                 "is_owner_pattern_work_buffer" => {
-                    is_owner_pattern_work_buffer = Some(map.next_value()?)
+                    is_owner_pattern_work_buffer = Some(map.next_value()?);
                 }
                 "owner_pattern_index" => owner_pattern_index = Some(map.next_value()?),
                 "index" => index = Some(map.next_value()?),
@@ -263,7 +264,7 @@ impl<'a, 'de> de::Visitor<'de> for TrackVisitor<'a> {
                     trigs = Some(map.next_value_seed(TrigsArrayVisitor {
                         parameter_lock_pool: self.parameter_lock_pool.clone(),
                         fx_track_ref: self.fx_track_ref.clone(),
-                    })?)
+                    })?);
                 }
                 "default_trig_flags" => default_trig_flags = Some(map.next_value()?),
                 "default_trig_note" => default_trig_note = Some(map.next_value()?),
@@ -283,10 +284,10 @@ impl<'a, 'de> de::Visitor<'de> for TrackVisitor<'a> {
                 "pad_scale" => pad_scale = Some(map.next_value()?),
                 "root_note" => root_note = Some(map.next_value()?),
                 "__maybe_useful_flag_from_default_trig_note" => {
-                    __maybe_useful_flag_from_default_trig_note = Some(map.next_value()?)
+                    __maybe_useful_flag_from_default_trig_note = Some(map.next_value()?);
                 }
                 "__maybe_useful_flags_from_flags_and_speed" => {
-                    __maybe_useful_flags_from_flags_and_speed = Some(map.next_value()?)
+                    __maybe_useful_flags_from_flags_and_speed = Some(map.next_value()?);
                 }
                 _ => return Err(de::Error::unknown_field(key, FIELDS)),
             }
@@ -402,26 +403,30 @@ impl<'de> de::DeserializeSeed<'de> for TrigsArrayVisitor {
             {
                 unsafe {
                     let mut arr: [MaybeUninit<Trig>; 64] = MaybeUninit::uninit().assume_init();
-                    for i in 0..64 {
+                    for (i, item) in arr.iter_mut().enumerate() {
                         // Deserialize each Trig normally
                         let mut trig: Trig = seq
                             .next_element()?
                             .ok_or_else(|| serde::de::Error::invalid_length(i, &self))?;
 
                         // Inject the values directly into each Trig
-                        trig.parameter_lock_pool = self.parameter_lock_pool.clone();
-                        trig.fx_track_ref = self.fx_track_ref.clone();
+                        trig.parameter_lock_pool
+                            .clone_from(&self.parameter_lock_pool);
+                        trig.fx_track_ref.clone_from(&self.fx_track_ref);
 
-                        arr[i].as_mut_ptr().write(trig);
+                        item.as_mut_ptr().write(trig);
                     }
-                    Ok(std::mem::transmute::<_, [Trig; 64]>(arr))
+                    Ok(std::mem::transmute::<
+                        [std::mem::MaybeUninit<Trig>; 64],
+                        [Trig; 64],
+                    >(arr))
                 }
             }
         }
 
         deserializer.deserialize_seq(ArrayVisitor {
             parameter_lock_pool: self.parameter_lock_pool.clone(),
-            fx_track_ref: self.fx_track_ref.clone(),
+            fx_track_ref: self.fx_track_ref,
         })
     }
 }

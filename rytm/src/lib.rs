@@ -5,7 +5,9 @@
     clippy::similar_names
 )]
 // TODO: Re-check later.
-#![allow(clippy::must_use_candidate)]
+#![allow(clippy::must_use_candidate, clippy::unsafe_derive_deserialize)]
+// TODO: Convert stack allocating arrays either to vectors ot Box<[T]> and re-enable this lint.
+#![allow(clippy::large_stack_frames)]
 #![doc(
     html_logo_url = "https://raw.githubusercontent.com/alisomay/rytm-rs/main/assets/logo.png",
     html_favicon_url = "https://raw.githubusercontent.com/alisomay/rytm-rs/main/assets/favicon/favicon.ico"
@@ -73,7 +75,7 @@
 //! Also the [`midir`](https://github.com/Boddlnagg/midir) library will be used for midi communication with the device in these examples but you can use any midi library you want.
 //!
 //! ```
-//! use std::sync::{Arc, Mutex};
+//! use std::sync::Arc; use parking_lot::Mutex;
 //! use midir::{Ignore, MidiInputConnection, MidiOutputConnection};
 //! use rytm_rs::prelude::*;
 //!
@@ -215,11 +217,9 @@ pub mod query;
 pub(crate) mod sysex;
 pub(crate) mod util;
 
-use serde::{Deserialize, Serialize};
-pub use sysex::{AnySysexType, SysexCompatible, SysexType};
-
 use self::error::RytmError;
 use crate::error::ParameterError;
+use defaults::*;
 use error::SysexConversionError;
 use object::{
     global::Global,
@@ -228,18 +228,18 @@ use object::{
     settings::Settings,
     sound::{Sound, SoundType},
 };
-
-use defaults::*;
 use rytm_sys::{ar_global_t, ar_kit_t, ar_pattern_t, ar_settings_t, ar_sound_t};
+use serde::{Deserialize, Serialize};
 use serde_big_array::BigArray;
 use sysex::decode_sysex_response_to_raw;
+pub use sysex::{AnySysexType, SysexCompatible, SysexType};
 
 /// [`RytmProject`] represents the state of the analog rytm.
 ///
 /// It contains all structures scoped to an Analog Rytm MKII FW 1.70 project.
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct RytmProject {
-    work_buffer: RytmProjectWorkBuffer,
+    work_buffer: Box<RytmProjectWorkBuffer>,
     patterns: Vec<Pattern>,
     #[serde(with = "BigArray")]
     pool_sounds: [Sound; POOL_SOUND_MAX_COUNT],
@@ -254,24 +254,26 @@ pub struct RytmProject {
     pub(crate) last_queried_work_buffer_kit_index: Option<usize>,
 }
 
-impl Default for RytmProject {
-    fn default() -> Self {
+impl RytmProject {
+    // TODO:
+    #[allow(clippy::missing_errors_doc)]
+    pub fn try_default() -> Result<Self, RytmError> {
         let mut patterns = Vec::with_capacity(PATTERN_MAX_COUNT);
         let mut kits = Vec::with_capacity(KIT_MAX_COUNT);
 
         // PATTERN_MAX_COUNT == KIT_MAX_COUNT is true.
         for i in 0..PATTERN_MAX_COUNT {
-            let pattern = Pattern::try_default(i).unwrap();
-            let mut kit = Kit::try_default(i).unwrap();
-            kit.link_parameter_lock_pool(&pattern.parameter_lock_pool);
-            patterns.push(Pattern::try_default(i).unwrap());
-            kits.push(Kit::try_default(i).unwrap());
+            let pattern = Pattern::try_default(i)?;
+            let mut kit = Kit::try_default(i)?;
+            kit.link_parameter_lock_pool(&pattern.parameter_lock_pool)?;
+            patterns.push(Pattern::try_default(i)?);
+            kits.push(Kit::try_default(i)?);
         }
 
         // TODO: ALSO FOR THE TRACK AND TRIG TYPES!
 
-        Self {
-            work_buffer: RytmProjectWorkBuffer::default(),
+        Ok(Self {
+            work_buffer: Box::new(RytmProjectWorkBuffer::try_default()?),
             patterns,
             pool_sounds: default_pool_sounds(),
             kits,
@@ -282,11 +284,9 @@ impl Default for RytmProject {
             last_queried_kit_index: None,
             last_queried_work_buffer_pattern_index: None,
             last_queried_work_buffer_kit_index: None,
-        }
+        })
     }
-}
 
-impl RytmProject {
     #[allow(clippy::too_many_lines)]
     /// Updates the Rytm struct from a sysex response.
     ///
@@ -304,11 +304,8 @@ impl RytmProject {
     ///
     /// - If the sysex message is invalid in the context of Rytm
     /// - If the sysex message is valid, but the object type is not supported or implemented yet. Example: [`crate::error::RytmError::SysexConversionError::Unimplemented`] variant.
-    /// - If the sysex message is incomplete, this sometimes happens in the initial parts of the transmission and is a behaviour of Rytm.
-    /// You may check for the error [`crate::error::RytmError::SysexConversionError::ShortRead`] and ignore it.
-    /// - If the sysex message is valid, but the size of the expected object does not match the size of the received object.
-    /// This may happen if the firmware version of Rytm is different than the one this library supports which is currently FW 1.70 only.
-    /// Never happened to me in practice but a cut transmission may also cause this in theory.
+    /// - If the sysex message is incomplete, this sometimes happens in the initial parts of the transmission and is a behaviour of Rytm. You may check for the error [`crate::error::RytmError::SysexConversionError::ShortRead`] and ignore it.
+    /// - If the sysex message is valid, but the size of the expected object does not match the size of the received object. This may happen if the firmware version of Rytm is different than the one this library supports which is currently FW 1.70 only. Never happened to me in practice but a cut transmission may also cause this in theory.
     /// - All other  [`crate::error::RytmError::SysexConversionError`] variants are possible which are inherited from [libanalogrytm](https://github.com/bsp2/libanalogrytm).
     pub fn update_from_sysex_response(&mut self, response: &[u8]) -> Result<(), RytmError> {
         if response.len() < 2 {
@@ -343,22 +340,24 @@ impl RytmProject {
 
                     // We update the kit which has than number with the parameter lock pool of the pattern.
                     self.kits_mut()[work_buffer_pattern_kit_number]
-                        .link_parameter_lock_pool(&pattern.parameter_lock_pool);
+                        .link_parameter_lock_pool(&pattern.parameter_lock_pool)?;
 
                     // We also update the work buffer kit if it is the same kit.
                     let work_buffer_kit_mut = self.work_buffer_mut().kit_mut();
                     if work_buffer_kit_mut.index() == work_buffer_pattern_kit_number {
-                        work_buffer_kit_mut.link_parameter_lock_pool(&pattern.parameter_lock_pool);
+                        work_buffer_kit_mut
+                            .link_parameter_lock_pool(&pattern.parameter_lock_pool)?;
                     }
                 } else {
                     // When the kit is set then we directly update that kit.
                     self.kits_mut()[kit_number]
-                        .link_parameter_lock_pool(&pattern.parameter_lock_pool);
+                        .link_parameter_lock_pool(&pattern.parameter_lock_pool)?;
 
                     // We also update the work buffer kit if it is the same kit.
                     let work_buffer_kit_mut = self.work_buffer_mut().kit_mut();
                     if work_buffer_kit_mut.index() == kit_number {
-                        work_buffer_kit_mut.link_parameter_lock_pool(&pattern.parameter_lock_pool);
+                        work_buffer_kit_mut
+                            .link_parameter_lock_pool(&pattern.parameter_lock_pool)?;
                     }
                 }
 
@@ -384,12 +383,14 @@ impl RytmProject {
 
                 for pattern in self.patterns() {
                     if pattern.kit_number() == kit.index() {
-                        kit.link_parameter_lock_pool(&pattern.parameter_lock_pool);
+                        kit.link_parameter_lock_pool(&pattern.parameter_lock_pool)?;
                     }
                 }
 
                 if self.work_buffer().pattern().kit_number() == kit.index() {
-                    kit.link_parameter_lock_pool(&self.work_buffer().pattern().parameter_lock_pool);
+                    kit.link_parameter_lock_pool(
+                        &self.work_buffer().pattern().parameter_lock_pool,
+                    )?;
                 }
 
                 if meta.is_targeting_work_buffer() {
@@ -417,11 +418,9 @@ impl RytmProject {
                     }
                     SoundType::WorkBuffer => {
                         // Work buffer sounds though will be linked to the work buffer pattern's parameter lock pool.
-                        sound
-                            .link_parameter_lock_pool(
-                                &self.work_buffer().pattern().parameter_lock_pool,
-                            )
-                            .unwrap();
+                        sound.link_parameter_lock_pool(
+                            &self.work_buffer().pattern().parameter_lock_pool,
+                        )?;
                         self.work_buffer.sounds[index] = sound;
                     }
                     SoundType::KitQuery => {
@@ -550,25 +549,25 @@ pub struct RytmProjectWorkBuffer {
     // TODO: Work buffer song
 }
 
-impl Default for RytmProjectWorkBuffer {
-    fn default() -> Self {
+impl RytmProjectWorkBuffer {
+    // TODO:
+    #[allow(clippy::missing_errors_doc)]
+    pub fn try_default() -> Result<Self, RytmError> {
         let pattern = Pattern::work_buffer_default();
         let mut kit = Kit::work_buffer_default();
-        kit.link_parameter_lock_pool(&pattern.parameter_lock_pool);
+        kit.link_parameter_lock_pool(&pattern.parameter_lock_pool)?;
 
         // TODO: What are work buffer sounds.. hmm..
         // Should we link their parameter lock pool also?
 
-        Self {
+        Ok(Self {
             pattern,
             kit,
             sounds: default_work_buffer_sounds(),
             global: Global::work_buffer_default(),
-        }
+        })
     }
-}
 
-impl RytmProjectWorkBuffer {
     /// Get the pattern in the work buffer.
     pub const fn pattern(&self) -> &Pattern {
         &self.pattern

@@ -16,14 +16,12 @@ use crate::{
 };
 use bitstream_io::{BigEndian, BitRead, BitReader, BitWrite, BitWriter};
 use derivative::Derivative;
+use parking_lot::Mutex;
 use rytm_rs_macro::parameter_range;
 use rytm_sys::ar_pattern_track_t;
 use serde::Serialize;
 use serde_big_array::BigArray;
-use std::{
-    io::Cursor,
-    sync::{Arc, Mutex},
-};
+use std::{io::Cursor, sync::Arc};
 use trig::Trig;
 
 /// Represents a single track in a pattern.
@@ -60,7 +58,7 @@ pub struct Track {
     pub(crate) pad_scale: PadScale,
     pub(crate) root_note: RootNote,
 
-    /// MSB of default_trig_note.
+    /// MSB of `default_trig_note`.
     ///
     /// For now it is always 0.
     ///
@@ -68,7 +66,7 @@ pub struct Track {
     #[derivative(Debug = "ignore")]
     pub(crate) __maybe_useful_flag_from_default_trig_note: u8,
 
-    /// Mid bits of flags_and_speed.
+    /// Mid bits of `flags_and_speed`.
     ///
     /// For now they're always 0.
     ///
@@ -248,7 +246,7 @@ impl Track {
 
         let default_trig_note = raw_track.default_note & 0b0111_1111;
 
-        let plock_pool = parameter_lock_pool.lock().unwrap();
+        let plock_pool = parameter_lock_pool.lock();
 
         Ok(Self {
             is_owner_pattern_work_buffer: plock_pool.is_owner_pattern_work_buffer,
@@ -564,9 +562,7 @@ impl Track {
     /// Clears all the parameter locks for this track.
     pub fn clear_all_plocks(&self) {
         if let Some(pool) = &self.parameter_lock_pool {
-            pool.lock()
-                .unwrap()
-                .clear_all_plocks_for_track(self.index as u8);
+            pool.lock().clear_all_plocks_for_track(self.index as u8);
         }
     }
 

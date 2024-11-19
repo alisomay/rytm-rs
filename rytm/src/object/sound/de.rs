@@ -1,15 +1,13 @@
-use crate::object::{pattern::plock::ParameterLockPool, sound::machine::MachineParameters};
-
 use super::Sound;
+use crate::object::{pattern::plock::ParameterLockPool, sound::machine::MachineParameters};
+use parking_lot::Mutex;
 use serde::{
     de::{Deserializer, Error, MapAccess, Visitor},
     Deserialize,
 };
-use std::{
-    fmt,
-    sync::{Arc, Mutex},
-};
+use std::{fmt, sync::Arc};
 
+#[allow(clippy::too_many_lines)]
 impl<'de> Deserialize<'de> for Sound {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
@@ -74,7 +72,7 @@ impl<'de> Deserialize<'de> for Sound {
                                     // TODO: When deserializing machine parameters we can also check validity but maybe overkill.
                                     mp.link_parameter_lock_pool(Arc::clone(&pool));
                                 }
-                                parameter_lock_pool = Some(Some(pool))
+                                parameter_lock_pool = Some(Some(pool));
                             } else {
                                 parameter_lock_pool = Some(None);
                             }

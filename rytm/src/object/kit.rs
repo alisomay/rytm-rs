@@ -26,31 +26,30 @@ pub mod reverb;
 pub mod types;
 pub(crate) mod unknown;
 
-use std::sync::{Arc, Mutex};
-
-use self::types::ControlInModTarget;
 use self::{
     comp::FxCompressor, delay::FxDelay, dist::FxDistortion, lfo::FxLfo, reverb::FxReverb,
-    unknown::KitUnknown,
+    types::ControlInModTarget, unknown::KitUnknown,
 };
-use crate::defaults::{default_perf_ctl_array, default_scene_ctl_array};
-use crate::util::{assemble_u32_from_u8_array_be, break_u32_into_u8_array_be};
-use crate::AnySysexType;
+use super::pattern::plock::ParameterLockPool;
 use crate::{
+    defaults::{default_perf_ctl_array, default_scene_ctl_array},
     error::{ParameterError, RytmError, SysexConversionError},
     impl_sysex_compatible,
     object::types::ObjectName,
     sysex::{SysexCompatible, SysexMeta, SysexType, KIT_SYSEX_SIZE},
-    util::to_s_u16_t_union_b_from_u8_as_msb,
-    Sound,
+    util::{
+        assemble_u32_from_u8_array_be, break_u32_into_u8_array_be,
+        to_s_u16_t_union_b_from_u8_as_msb,
+    },
+    AnySysexType, Sound,
 };
 use derivative::Derivative;
+use parking_lot::Mutex;
 use rytm_rs_macro::parameter_range;
 use rytm_sys::{ar_kit_raw_to_syx, ar_kit_t, ar_sysex_meta_t};
 use serde::{Deserialize, Serialize};
 use serde_big_array::BigArray;
-
-use super::pattern::plock::ParameterLockPool;
+use std::sync::Arc;
 
 impl_sysex_compatible!(
     Kit,
@@ -220,6 +219,7 @@ impl Kit {
             track_levels[i] = unsafe { track_level.b.hi };
         }
 
+        #[allow(clippy::cast_possible_wrap)]
         Ok(Self {
             index: kit_number,
             sysex_meta,
@@ -845,13 +845,21 @@ impl Kit {
         self.control_in_2_mod_amt_4 as isize
     }
 
-    // TODO: Comment
+    /// Calls the kit sounds' `link_parameter_lock_pool` method.
+    ///
+    /// Please check [`link_parameter_lock_pool`](crate::object::sound::Sound::link_parameter_lock_pool) for more information.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the sound is a pool sound which does not support parameter locks.
     pub fn link_parameter_lock_pool(
         &mut self,
         parameter_lock_pool: &Arc<Mutex<ParameterLockPool>>,
-    ) {
+    ) -> Result<(), RytmError> {
         for sound in self.sounds_mut() {
-            sound.link_parameter_lock_pool(parameter_lock_pool).unwrap();
+            sound.link_parameter_lock_pool(parameter_lock_pool)?;
         }
+
+        Ok(())
     }
 }

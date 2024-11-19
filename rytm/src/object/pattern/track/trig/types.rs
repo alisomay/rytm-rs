@@ -1,6 +1,7 @@
-use serde::{Deserialize, Serialize};
+#![allow(clippy::too_many_lines)]
 
 use crate::error::ConversionError;
+use serde::{Deserialize, Serialize};
 
 /// Micro timing of a trig.
 #[derive(
@@ -596,7 +597,7 @@ pub enum Length {
     Infinite,
     /// Default value for unset values.
     ///
-    /// `0xFF``
+    /// `0xFF`
     Unset,
 }
 

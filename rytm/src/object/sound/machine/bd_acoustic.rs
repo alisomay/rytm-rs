@@ -1,16 +1,18 @@
-use crate::error::ConversionError;
-use crate::util::scale_f32_to_u16;
 use crate::{
-    error::{ParameterError, RytmError},
+    error::{ConversionError, ParameterError, RytmError},
     object::pattern::plock::ParameterLockPool,
-    util::{from_s_u16_t, get_u16_min_max_from_float_range, scale_u16_to_f32, to_s_u16_t_union_a},
+    util::{
+        from_s_u16_t, get_u16_min_max_from_float_range, scale_f32_to_u16, scale_u16_to_f32,
+        to_s_u16_t_union_a,
+    },
     RytmError::OrphanTrig,
 };
 use derivative::Derivative;
+use parking_lot::Mutex;
 use rytm_rs_macro::{machine_parameters, parameter_range};
 use rytm_sys::ar_sound_t;
 use serde::{Deserialize, Serialize};
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 
 #[derive(Debug, Default, Clone, Copy, Serialize, Deserialize)]
 pub enum BdAcousticWaveform {
@@ -171,7 +173,7 @@ impl BdAcousticParameters {
     ) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             let assigned_track = self.assigned_track.ok_or(OrphanTrig)?;
-            pool.lock().unwrap().set_basic_plock(
+            pool.lock().set_basic_plock(
                 trig_index,
                 assigned_track as u8,
                 rytm_sys::AR_PLOCK_TYPE_MP6 as u8,
@@ -189,7 +191,7 @@ impl BdAcousticParameters {
     ) -> Result<Option<BdAcousticWaveform>, RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             let assigned_track = self.assigned_track.ok_or(OrphanTrig)?;
-            let wav = pool.lock().unwrap().get_basic_plock(
+            let wav = pool.lock().get_basic_plock(
                 trig_index,
                 assigned_track as u8,
                 rytm_sys::AR_PLOCK_TYPE_MP6 as u8,
@@ -206,7 +208,7 @@ impl BdAcousticParameters {
     pub fn plock_clear_wav(&self, trig_index: usize) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             let assigned_track = self.assigned_track.ok_or(OrphanTrig)?;
-            pool.lock().unwrap().clear_basic_plock(
+            pool.lock().clear_basic_plock(
                 trig_index,
                 assigned_track as u8,
                 rytm_sys::AR_PLOCK_TYPE_MP6 as u8,

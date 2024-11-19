@@ -3,12 +3,12 @@ pub mod types;
 pub(crate) mod unknown;
 
 use self::unknown::GlobalUnknown;
-use crate::util::{assemble_u32_from_u8_array_be, break_u32_into_u8_array_be};
-use crate::AnySysexType;
 use crate::{
     error::{ParameterError, RytmError, SysexConversionError},
     impl_sysex_compatible,
     sysex::{SysexCompatible, SysexMeta, SysexType, GLOBAL_SYSEX_SIZE},
+    util::{assemble_u32_from_u8_array_be, break_u32_into_u8_array_be},
+    AnySysexType,
 };
 use derivative::Derivative;
 use menu::*;

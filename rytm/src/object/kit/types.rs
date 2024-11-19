@@ -473,6 +473,9 @@ impl TryFrom<&str> for FxDelayTimeOnTheGrid {
     }
 }
 
+// I know it is not nice to do this but it should be fine if we don't use the last variant.
+// TODO: Update later, too much code to write and I'm lazy.
+#[allow(clippy::fallible_impl_from)]
 impl From<FxDelayTimeOnTheGrid> for &str {
     fn from(value: FxDelayTimeOnTheGrid) -> Self {
         match value {
@@ -491,7 +494,7 @@ impl From<FxDelayTimeOnTheGrid> for &str {
             FxDelayTimeOnTheGrid::HalfDotted => "halfdotted",
             FxDelayTimeOnTheGrid::Whole => "whole",
             FxDelayTimeOnTheGrid::NotOnTheGrid(val) => {
-                panic!("Not on the grid delay time: {}", val)
+                panic!("Not on the grid delay time: {val}")
             }
         }
     }

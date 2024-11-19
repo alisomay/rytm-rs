@@ -13,7 +13,7 @@ impl Trig {
     #[parameter_range(range = "pre_delay:0..=127")]
     pub fn plock_set_fx_reverb_pre_delay(&self, pre_delay: usize) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
-            pool.lock().unwrap().set_fx_basic_plock(
+            pool.lock().set_fx_basic_plock(
                 self.index,
                 AR_FX_PLOCK_TYPE_REVERB_PRE as u8,
                 pre_delay as u8,
@@ -32,7 +32,7 @@ impl Trig {
     #[parameter_range(range = "decay:0..=127")]
     pub fn plock_set_fx_reverb_decay(&self, decay: usize) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
-            pool.lock().unwrap().set_fx_basic_plock(
+            pool.lock().set_fx_basic_plock(
                 self.index,
                 AR_FX_PLOCK_TYPE_REVERB_DECAY as u8,
                 decay as u8,
@@ -51,7 +51,7 @@ impl Trig {
     #[parameter_range(range = "freq:0..=127")]
     pub fn plock_set_fx_reverb_freq(&self, freq: usize) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
-            pool.lock().unwrap().set_fx_basic_plock(
+            pool.lock().set_fx_basic_plock(
                 self.index,
                 AR_FX_PLOCK_TYPE_REVERB_FREQ as u8,
                 freq as u8,
@@ -70,7 +70,7 @@ impl Trig {
     #[parameter_range(range = "gain:0..=127")]
     pub fn plock_set_fx_reverb_gain(&self, gain: usize) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
-            pool.lock().unwrap().set_fx_basic_plock(
+            pool.lock().set_fx_basic_plock(
                 self.index,
                 AR_FX_PLOCK_TYPE_REVERB_GAIN as u8,
                 gain as u8,
@@ -89,7 +89,7 @@ impl Trig {
     #[parameter_range(range = "hpf:0..=127")]
     pub fn plock_set_fx_reverb_hpf(&self, hpf: usize) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
-            pool.lock().unwrap().set_fx_basic_plock(
+            pool.lock().set_fx_basic_plock(
                 self.index,
                 AR_FX_PLOCK_TYPE_REVERB_HPF as u8,
                 hpf as u8,
@@ -108,7 +108,7 @@ impl Trig {
     #[parameter_range(range = "lpf:0..=127")]
     pub fn plock_set_fx_reverb_lpf(&self, lpf: usize) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
-            pool.lock().unwrap().set_fx_basic_plock(
+            pool.lock().set_fx_basic_plock(
                 self.index,
                 AR_FX_PLOCK_TYPE_REVERB_LPF as u8,
                 lpf as u8,
@@ -127,7 +127,7 @@ impl Trig {
     #[parameter_range(range = "volume:0..=127")]
     pub fn plock_set_fx_reverb_volume(&self, volume: usize) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
-            pool.lock().unwrap().set_fx_basic_plock(
+            pool.lock().set_fx_basic_plock(
                 self.index,
                 AR_FX_PLOCK_TYPE_REVERB_VOL as u8,
                 volume as u8,
@@ -147,7 +147,6 @@ impl Trig {
         if let Some(ref pool) = self.parameter_lock_pool {
             let value = pool
                 .lock()
-                .unwrap()
                 .get_fx_basic_plock(self.index, AR_FX_PLOCK_TYPE_REVERB_PRE as u8);
 
             if let Some(value) = value {
@@ -166,7 +165,6 @@ impl Trig {
         if let Some(ref pool) = self.parameter_lock_pool {
             let value = pool
                 .lock()
-                .unwrap()
                 .get_fx_basic_plock(self.index, AR_FX_PLOCK_TYPE_REVERB_DECAY as u8);
 
             if let Some(value) = value {
@@ -185,7 +183,6 @@ impl Trig {
         if let Some(ref pool) = self.parameter_lock_pool {
             let value = pool
                 .lock()
-                .unwrap()
                 .get_fx_basic_plock(self.index, AR_FX_PLOCK_TYPE_REVERB_FREQ as u8);
 
             if let Some(value) = value {
@@ -204,7 +201,6 @@ impl Trig {
         if let Some(ref pool) = self.parameter_lock_pool {
             let value = pool
                 .lock()
-                .unwrap()
                 .get_fx_basic_plock(self.index, AR_FX_PLOCK_TYPE_REVERB_GAIN as u8);
 
             if let Some(value) = value {
@@ -223,7 +219,6 @@ impl Trig {
         if let Some(ref pool) = self.parameter_lock_pool {
             let value = pool
                 .lock()
-                .unwrap()
                 .get_fx_basic_plock(self.index, AR_FX_PLOCK_TYPE_REVERB_HPF as u8);
 
             if let Some(value) = value {
@@ -242,7 +237,6 @@ impl Trig {
         if let Some(ref pool) = self.parameter_lock_pool {
             let value = pool
                 .lock()
-                .unwrap()
                 .get_fx_basic_plock(self.index, AR_FX_PLOCK_TYPE_REVERB_LPF as u8);
 
             if let Some(value) = value {
@@ -261,7 +255,6 @@ impl Trig {
         if let Some(ref pool) = self.parameter_lock_pool {
             let value = pool
                 .lock()
-                .unwrap()
                 .get_fx_basic_plock(self.index, AR_FX_PLOCK_TYPE_REVERB_VOL as u8);
 
             if let Some(value) = value {
@@ -277,7 +270,6 @@ impl Trig {
     pub fn plock_clear_fx_reverb_pre_delay(&self) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             pool.lock()
-                .unwrap()
                 .clear_fx_basic_plock(self.index, AR_FX_PLOCK_TYPE_REVERB_PRE as u8);
             self.disable_fx_trig_if_necessary();
 
@@ -290,7 +282,6 @@ impl Trig {
     pub fn plock_clear_fx_reverb_decay(&self) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             pool.lock()
-                .unwrap()
                 .clear_fx_basic_plock(self.index, AR_FX_PLOCK_TYPE_REVERB_DECAY as u8);
             self.disable_fx_trig_if_necessary();
 
@@ -303,7 +294,6 @@ impl Trig {
     pub fn plock_clear_fx_reverb_freq(&self) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             pool.lock()
-                .unwrap()
                 .clear_fx_basic_plock(self.index, AR_FX_PLOCK_TYPE_REVERB_FREQ as u8);
             self.disable_fx_trig_if_necessary();
 
@@ -316,7 +306,6 @@ impl Trig {
     pub fn plock_clear_fx_reverb_gain(&self) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             pool.lock()
-                .unwrap()
                 .clear_fx_basic_plock(self.index, AR_FX_PLOCK_TYPE_REVERB_GAIN as u8);
             self.disable_fx_trig_if_necessary();
 
@@ -329,7 +318,6 @@ impl Trig {
     pub fn plock_clear_fx_reverb_hpf(&self) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             pool.lock()
-                .unwrap()
                 .clear_fx_basic_plock(self.index, AR_FX_PLOCK_TYPE_REVERB_HPF as u8);
             self.disable_fx_trig_if_necessary();
 
@@ -342,7 +330,6 @@ impl Trig {
     pub fn plock_clear_fx_reverb_lpf(&self) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             pool.lock()
-                .unwrap()
                 .clear_fx_basic_plock(self.index, AR_FX_PLOCK_TYPE_REVERB_LPF as u8);
             self.disable_fx_trig_if_necessary();
 
@@ -355,7 +342,6 @@ impl Trig {
     pub fn plock_clear_fx_reverb_volume(&self) -> Result<(), RytmError> {
         if let Some(ref pool) = self.parameter_lock_pool {
             pool.lock()
-                .unwrap()
                 .clear_fx_basic_plock(self.index, AR_FX_PLOCK_TYPE_REVERB_VOL as u8);
             self.disable_fx_trig_if_necessary();
 

@@ -2,8 +2,7 @@
 
 use rytm_rs::{
     error::{ConversionError, ParameterError, RytmError, SysexConversionError},
-    object::pattern::MicroTime,
-    object::sound::types::MachineType,
+    object::{pattern::MicroTime, sound::types::MachineType},
 };
 use rytm_rs_macro::parameter_range;
 use rytm_sys::{
