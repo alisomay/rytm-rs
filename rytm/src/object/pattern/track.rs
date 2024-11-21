@@ -20,7 +20,6 @@ use parking_lot::Mutex;
 use rytm_rs_macro::parameter_range;
 use rytm_sys::ar_pattern_track_t;
 use serde::Serialize;
-use serde_big_array::BigArray;
 use std::{io::Cursor, sync::Arc};
 use trig::Trig;
 
@@ -34,8 +33,7 @@ pub struct Track {
     pub(crate) owner_pattern_index: usize,
     pub(crate) index: usize,
 
-    #[serde(serialize_with = "BigArray::serialize")]
-    pub(crate) trigs: [Trig; 64],
+    pub(crate) trigs: Vec<Trig>,
 
     pub(crate) default_trig_flags: TrigFlags,
     pub(crate) default_trig_note: u8,
@@ -207,7 +205,7 @@ impl Track {
         parameter_lock_pool: &Arc<Mutex<ParameterLockPool>>,
         fx_track_ref: Option<Arc<Mutex<Self>>>,
     ) -> Result<Self, RytmError> {
-        let mut trigs: [Trig; 64] = default_trig_array(index);
+        let mut trigs: Vec<Trig> = default_trig_array(index);
 
         let trig_cursor = Cursor::new(raw_track.trig_bits);
         let mut bit_reader = BitReader::endian(trig_cursor, BigEndian);
@@ -285,8 +283,8 @@ impl Track {
     /// Returns a mutable reference to the trigs in this track.
     ///
     /// 64 trigs in total.
-    pub fn trigs_mut(&mut self) -> &mut [Trig; 64] {
-        &mut self.trigs
+    pub fn trigs_mut(&mut self) -> &mut [Trig] {
+        self.trigs.as_mut_slice()
     }
 
     /// Sets the default note for any trig in this track.
@@ -438,7 +436,7 @@ impl Track {
     /// Returns a reference to the trigs in this track.
     ///
     /// 64 trigs in total.
-    pub const fn trigs(&self) -> &[Trig; 64] {
+    pub fn trigs(&self) -> &[Trig] {
         &self.trigs
     }
 

@@ -73,7 +73,7 @@ pub struct Pattern {
     /// Tracks
     ///
     /// 12 tracks of analog rytm excluding the FX track.
-    tracks: [Track; 12],
+    tracks: Vec<Track>,
     /// Master Length
     ///
     /// Range `1..=1024`
@@ -193,7 +193,7 @@ impl Pattern {
 
         // Parameters does not matter here since they're going to be replaced.
         // We just provide dummy values.
-        let mut tracks: [Track; 12] = default_tracks(0, false, None);
+        let mut tracks: Vec<Track> = default_tracks(0, false, None);
 
         for (i, track) in raw_pattern.tracks.iter().enumerate() {
             if i == 12 {
@@ -235,8 +235,19 @@ impl Pattern {
     }
 
     /// Makes a new pattern with the project defaults.
+    ///
+    /// Range `0..=127`
     #[parameter_range(range = "index:0..=127")]
     pub fn try_default(index: usize) -> Result<Self, RytmError> {
+        Self::try_default_with_device_id(index, 0)
+    }
+
+    /// Makes a new pattern with the project defaults.
+    ///
+    /// Pattern index range: 0..=127`
+    /// Device id range: `0..=127`
+    #[parameter_range(range = "index:0..=127", range = "device_id:0..=127")]
+    pub fn try_default_with_device_id(index: usize, device_id: u8) -> Result<Self, RytmError> {
         let parameter_lock_pool = Arc::new(Mutex::new(ParameterLockPool::default()));
 
         let mut fx_track = Track::try_default(12, index, false, None).unwrap();
@@ -252,7 +263,7 @@ impl Pattern {
         }
 
         Ok(Self {
-            sysex_meta: SysexMeta::try_default_for_pattern(index, None)?,
+            sysex_meta: SysexMeta::try_default_for_pattern(index, Some(device_id))?,
             index,
             version: 5,
             tracks,
@@ -274,6 +285,13 @@ impl Pattern {
     #[allow(clippy::missing_panics_doc)]
     /// Makes a new pattern with the project defaults as if it is in the work buffer..
     pub fn work_buffer_default() -> Self {
+        Self::work_buffer_default_with_device_id(0)
+    }
+
+    // This function can not panic.
+    #[allow(clippy::missing_panics_doc)]
+    /// Makes a new pattern with the project defaults as if it is in the work buffer..
+    pub fn work_buffer_default_with_device_id(device_id: u8) -> Self {
         let parameter_lock_pool = Arc::new(Mutex::new(ParameterLockPool::default()));
 
         let mut fx_track = Track::try_default(12, 0, true, None).unwrap();
@@ -289,7 +307,7 @@ impl Pattern {
         }
 
         Self {
-            sysex_meta: SysexMeta::default_for_pattern_in_work_buffer(None),
+            sysex_meta: SysexMeta::default_for_pattern_in_work_buffer(Some(device_id)),
             index: 0,
             version: 5,
             tracks,
@@ -400,7 +418,7 @@ impl Pattern {
     /// Returns a reference to the tracks which this pattern contains.
     ///
     /// 13th element is the FX track.
-    pub const fn tracks(&self) -> &[Track] {
+    pub fn tracks(&self) -> &[Track] {
         &self.tracks
     }
 
@@ -505,5 +523,9 @@ impl Pattern {
             .clear_all_plocks_for_track(track_index);
 
         Ok(())
+    }
+
+    pub(crate) fn set_device_id(&mut self, device_id: u8) {
+        self.sysex_meta.set_device_id(device_id);
     }
 }

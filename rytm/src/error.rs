@@ -108,12 +108,15 @@ impl From<u8> for SysexConversionError {
 pub enum RytmError {
     #[error("{0}")]
     Custom(String),
-    #[error("{0}")]
+    #[error(transparent)]
     Conversion(#[from] ConversionError),
-    #[error("{0}")]
+    #[error(transparent)]
     Parameter(#[from] ParameterError),
-    #[error("{0}")]
+    #[error(transparent)]
     SysexConversion(#[from] SysexConversionError),
+
+    #[error(transparent)]
+    Serde(#[from] serde_json::Error),
 
     #[error("Parameter lock memory full.")]
     ParameterLockMemoryFull,

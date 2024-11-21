@@ -6,8 +6,6 @@
 )]
 // TODO: Re-check later.
 #![allow(clippy::must_use_candidate, clippy::unsafe_derive_deserialize)]
-// TODO: Convert stack allocating arrays either to vectors ot Box<[T]> and re-enable this lint.
-#![allow(clippy::large_stack_frames)]
 #![doc(
     html_logo_url = "https://raw.githubusercontent.com/alisomay/rytm-rs/main/assets/logo.png",
     html_favicon_url = "https://raw.githubusercontent.com/alisomay/rytm-rs/main/assets/favicon/favicon.ico"
@@ -230,7 +228,6 @@ use object::{
 };
 use rytm_sys::{ar_global_t, ar_kit_t, ar_pattern_t, ar_settings_t, ar_sound_t};
 use serde::{Deserialize, Serialize};
-use serde_big_array::BigArray;
 use sysex::decode_sysex_response_to_raw;
 pub use sysex::{AnySysexType, SysexCompatible, SysexType};
 
@@ -239,12 +236,11 @@ pub use sysex::{AnySysexType, SysexCompatible, SysexType};
 /// It contains all structures scoped to an Analog Rytm MKII FW 1.70 project.
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct RytmProject {
-    work_buffer: Box<RytmProjectWorkBuffer>,
+    work_buffer: RytmProjectWorkBuffer,
     patterns: Vec<Pattern>,
-    #[serde(with = "BigArray")]
-    pool_sounds: [Sound; POOL_SOUND_MAX_COUNT],
+    pool_sounds: Vec<Sound>,
     kits: Vec<Kit>,
-    globals: [Global; GLOBAL_MAX_COUNT],
+    globals: Vec<Global>,
     // TODO: Songs (16)
     settings: Settings,
 
@@ -255,30 +251,85 @@ pub struct RytmProject {
 }
 
 impl RytmProject {
-    // TODO:
+    /// Try to construct a project from a JSON string.
+    ///
+    /// # Errors
+    /// - Project or JSON might be corrupted.
+    pub fn try_from_str(project_content: &str) -> Result<Self, RytmError> {
+        let project = serde_json::from_str(project_content)?;
+        Ok(project)
+    }
+
+    /// Try to convert the project to a JSON string.
+    ///
+    /// # Errors
+    /// - Project or JSON might be corrupted.
+    pub fn try_to_string(&self) -> Result<String, RytmError> {
+        let project_content = serde_json::to_string(self)?;
+        Ok(project_content)
+    }
+
+    pub fn set_device_id(&mut self, device_id: u8) {
+        // wb
+        self.work_buffer_mut()
+            .pattern_mut()
+            .set_device_id(device_id);
+        self.work_buffer_mut().kit_mut().set_device_id(device_id);
+        for sound in self.work_buffer_mut().sounds_mut().iter_mut() {
+            sound.set_device_id(device_id);
+        }
+        self.work_buffer_mut().global_mut().set_device_id(device_id);
+
+        // Normal
+        for pattern in self.patterns_mut().iter_mut() {
+            pattern.set_device_id(device_id);
+        }
+
+        for kit in self.kits_mut().iter_mut() {
+            kit.set_device_id(device_id);
+        }
+
+        for sound in self.pool_sounds_mut().iter_mut() {
+            sound.set_device_id(device_id);
+        }
+
+        for global in self.globals_mut().iter_mut() {
+            global.set_device_id(device_id);
+        }
+
+        self.settings_mut().set_device_id(device_id);
+    }
+
     #[allow(clippy::missing_errors_doc)]
     pub fn try_default() -> Result<Self, RytmError> {
+        Self::try_default_with_device_id(0)
+    }
+
+    #[allow(clippy::missing_errors_doc)]
+    pub fn try_default_with_device_id(device_id: u8) -> Result<Self, RytmError> {
         let mut patterns = Vec::with_capacity(PATTERN_MAX_COUNT);
+        patterns.reserve_exact(PATTERN_MAX_COUNT);
         let mut kits = Vec::with_capacity(KIT_MAX_COUNT);
+        kits.reserve_exact(KIT_MAX_COUNT);
 
         // PATTERN_MAX_COUNT == KIT_MAX_COUNT is true.
         for i in 0..PATTERN_MAX_COUNT {
-            let pattern = Pattern::try_default(i)?;
-            let mut kit = Kit::try_default(i)?;
+            let pattern = Pattern::try_default_with_device_id(i, device_id)?;
+            let mut kit = Kit::try_default_with_device_id(i, device_id)?;
             kit.link_parameter_lock_pool(&pattern.parameter_lock_pool)?;
-            patterns.push(Pattern::try_default(i)?);
-            kits.push(Kit::try_default(i)?);
+            patterns.push(pattern);
+            kits.push(kit);
         }
 
         // TODO: ALSO FOR THE TRACK AND TRIG TYPES!
 
         Ok(Self {
-            work_buffer: Box::new(RytmProjectWorkBuffer::try_default()?),
+            work_buffer: RytmProjectWorkBuffer::try_default_with_device_id(device_id)?,
             patterns,
-            pool_sounds: default_pool_sounds(),
+            pool_sounds: default_pool_sounds_with_device_id(device_id),
             kits,
-            globals: default_globals(),
-            settings: Settings::default(),
+            globals: default_globals_with_device_id(device_id),
+            settings: Settings::try_default_with_device_id(device_id)?,
 
             last_queried_pattern_index: None,
             last_queried_kit_index: None,
@@ -477,14 +528,14 @@ impl RytmProject {
     /// Get all sounds in the pool.
     ///
     /// Total of 128 sounds.
-    pub const fn pool_sounds(&self) -> &[Sound] {
+    pub fn pool_sounds(&self) -> &[Sound] {
         &self.pool_sounds
     }
 
     /// Get all global slots.
     ///
     /// Total of 4 global slots.
-    pub const fn globals(&self) -> &[Global] {
+    pub fn globals(&self) -> &[Global] {
         &self.globals
     }
 
@@ -544,17 +595,21 @@ impl RytmProject {
 pub struct RytmProjectWorkBuffer {
     pattern: Pattern,
     kit: Kit,
-    sounds: [Sound; TRACK_MAX_COUNT],
+    sounds: Vec<Sound>,
     global: Global,
     // TODO: Work buffer song
 }
 
 impl RytmProjectWorkBuffer {
-    // TODO:
     #[allow(clippy::missing_errors_doc)]
     pub fn try_default() -> Result<Self, RytmError> {
-        let pattern = Pattern::work_buffer_default();
-        let mut kit = Kit::work_buffer_default();
+        Self::try_default_with_device_id(0)
+    }
+
+    #[allow(clippy::missing_errors_doc)]
+    pub fn try_default_with_device_id(device_id: u8) -> Result<Self, RytmError> {
+        let pattern = Pattern::work_buffer_default_with_device_id(device_id);
+        let mut kit = Kit::work_buffer_default_with_device_id(device_id);
         kit.link_parameter_lock_pool(&pattern.parameter_lock_pool)?;
 
         // TODO: What are work buffer sounds.. hmm..
@@ -563,8 +618,8 @@ impl RytmProjectWorkBuffer {
         Ok(Self {
             pattern,
             kit,
-            sounds: default_work_buffer_sounds(),
-            global: Global::work_buffer_default(),
+            sounds: default_work_buffer_sounds_with_device_id(device_id),
+            global: Global::work_buffer_default_with_device_id(device_id),
         })
     }
 
@@ -581,7 +636,7 @@ impl RytmProjectWorkBuffer {
     /// Get the sounds in the work buffer.
     ///
     /// Total of 12 sounds for 12 tracks.
-    pub const fn sounds(&self) -> &[Sound] {
+    pub fn sounds(&self) -> &[Sound] {
         &self.sounds
     }
 

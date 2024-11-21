@@ -77,10 +77,11 @@ pub struct Kit {
     // 13th is the fx track.
     #[derivative(Debug = "ignore")]
     track_levels: [u8; 13],
+    // We don't have retrig settings for the fx track.
     #[derivative(Debug = "ignore")]
-    track_retrig_settings: [retrig::TrackRetrigMenu; 13],
+    track_retrig_settings: [retrig::TrackRetrigMenu; 12],
     #[derivative(Debug = "ignore")]
-    sounds: [Sound; 12],
+    sounds: Vec<Sound>,
 
     fx_delay: FxDelay,
     fx_distortion: FxDistortion,
@@ -194,7 +195,7 @@ impl Kit {
 
         let name = ObjectName::from_u8_array(raw_kit.name);
 
-        let mut sounds = [
+        let mut sounds = vec![
             Sound::try_kit_default(0, kit_number, sysex_meta)?,
             Sound::try_kit_default(1, kit_number, sysex_meta)?,
             Sound::try_kit_default(2, kit_number, sysex_meta)?,
@@ -228,7 +229,7 @@ impl Kit {
             name,
 
             track_levels,
-            track_retrig_settings: retrig::TrackRetrigMenu::get_default_for_13_tracks(),
+            track_retrig_settings: retrig::TrackRetrigMenu::get_default_for_12_tracks(),
             sounds,
 
             fx_delay: raw_kit.try_into()?,
@@ -269,11 +270,20 @@ impl Kit {
         (self.sysex_meta, self.into())
     }
 
+    /// Makes a new kit with the project defaults.
+    ///
+    /// Range `0..=127`
+    #[parameter_range(range = "index:0..=127")]
+    pub fn try_default(index: usize) -> Result<Self, RytmError> {
+        Self::try_default_with_device_id(index, 0)
+    }
+
     /// Makes a new kit with the given index complying to project defaults.
     ///
-    /// Range: `0..=127`
-    #[parameter_range(range = "kit_index:0..=127")]
-    pub fn try_default(kit_index: usize) -> Result<Self, RytmError> {
+    /// Kit index range: 0..=127`
+    /// Device id range: `0..=127`
+    #[parameter_range(range = "kit_index:0..=127", range = "device_id:0..=127")]
+    pub fn try_default_with_device_id(kit_index: usize, device_id: u8) -> Result<Self, RytmError> {
         //    sU8 ctrl_in_mod_1_amt_1;    /* @0x0A12 (-128..127) */
         //    sU8 ctrl_in_mod_1_target_1; /* @0x0A14 See sound.h, same as AR_SOUND_MOD_DEST_XXX, AR_SOUND_MOD_DEST_SYN_X variants can not be used. */
         //    sU8 ctrl_in_mod_1_amt_2;    /* @0x0A15 (-128..127) */
@@ -290,7 +300,7 @@ impl Kit {
         //    sU8 ctrl_in_mod_2_target_3;  /* @0x0A2A See sound.h, same as AR_SOUND_MOD_DEST_XXX, AR_SOUND_MOD_DEST_SYN_X variants can not be used. */
         //    sU8 ctrl_in_mod_2_amt_4;     /* @0x0A2B (-128..127) */
         //    sU8 ctrl_in_mod_2_target_4;  /* @0x0A2D See sound.h, same as AR_SOUND_MOD_DEST_XXX, AR_SOUND_MOD_DEST_SYN_X variants can not be used. */
-        let meta = SysexMeta::try_default_for_kit(kit_index, None)?;
+        let meta = SysexMeta::try_default_for_kit(kit_index, Some(device_id))?;
         Ok(Self {
             index: kit_index,
             sysex_meta: meta,
@@ -299,9 +309,9 @@ impl Kit {
             name: format!("KIT {kit_index}").try_into()?,
 
             track_levels: [100; 13],
-            track_retrig_settings: retrig::TrackRetrigMenu::get_default_for_13_tracks(),
+            track_retrig_settings: retrig::TrackRetrigMenu::get_default_for_12_tracks(),
 
-            sounds: [
+            sounds: vec![
                 Sound::try_kit_default(0, kit_index, meta)?,
                 Sound::try_kit_default(1, kit_index, meta)?,
                 Sound::try_kit_default(2, kit_index, meta)?,
@@ -351,32 +361,37 @@ impl Kit {
     }
 
     /// Makes a new kit in the work buffer complying to project defaults as if it comes from the work buffer.
-    #[allow(clippy::missing_panics_doc)]
     pub fn work_buffer_default() -> Self {
+        Self::work_buffer_default_with_device_id(0)
+    }
+
+    /// Makes a new kit in the work buffer complying to project defaults as if it comes from the work buffer.
+    #[allow(clippy::missing_panics_doc)]
+    pub fn work_buffer_default_with_device_id(device_id: u8) -> Self {
         Self {
             index: 0,
-            sysex_meta: SysexMeta::default_for_kit_in_work_buffer(None),
+            sysex_meta: SysexMeta::default_for_kit_in_work_buffer(Some(device_id)),
             version: 6,
 
             name: "WB_KIT".try_into().unwrap(),
 
             track_levels: [100; 13],
-            track_retrig_settings: retrig::TrackRetrigMenu::get_default_for_13_tracks(),
+            track_retrig_settings: retrig::TrackRetrigMenu::get_default_for_12_tracks(),
 
             // TODO: I don't know if we choose wb defaults or kit defaults for sounds here..
-            sounds: [
-                Sound::try_work_buffer_default(0).unwrap(),
-                Sound::try_work_buffer_default(1).unwrap(),
-                Sound::try_work_buffer_default(2).unwrap(),
-                Sound::try_work_buffer_default(3).unwrap(),
-                Sound::try_work_buffer_default(4).unwrap(),
-                Sound::try_work_buffer_default(5).unwrap(),
-                Sound::try_work_buffer_default(6).unwrap(),
-                Sound::try_work_buffer_default(7).unwrap(),
-                Sound::try_work_buffer_default(8).unwrap(),
-                Sound::try_work_buffer_default(9).unwrap(),
-                Sound::try_work_buffer_default(10).unwrap(),
-                Sound::try_work_buffer_default(11).unwrap(),
+            sounds: vec![
+                Sound::try_work_buffer_default_with_device_id(0, device_id).unwrap(),
+                Sound::try_work_buffer_default_with_device_id(1, device_id).unwrap(),
+                Sound::try_work_buffer_default_with_device_id(2, device_id).unwrap(),
+                Sound::try_work_buffer_default_with_device_id(3, device_id).unwrap(),
+                Sound::try_work_buffer_default_with_device_id(4, device_id).unwrap(),
+                Sound::try_work_buffer_default_with_device_id(5, device_id).unwrap(),
+                Sound::try_work_buffer_default_with_device_id(6, device_id).unwrap(),
+                Sound::try_work_buffer_default_with_device_id(7, device_id).unwrap(),
+                Sound::try_work_buffer_default_with_device_id(8, device_id).unwrap(),
+                Sound::try_work_buffer_default_with_device_id(9, device_id).unwrap(),
+                Sound::try_work_buffer_default_with_device_id(10, device_id).unwrap(),
+                Sound::try_work_buffer_default_with_device_id(11, device_id).unwrap(),
             ],
 
             fx_delay: FxDelay::default(),
@@ -429,18 +444,20 @@ impl Kit {
     }
 
     /// Returns the sounds assigned to the kit in the order of the tracks.
-    pub const fn sounds(&self) -> &[Sound; 12] {
+    pub fn sounds(&self) -> &[Sound] {
         &self.sounds
     }
 
     /// Returns the sounds assigned to the kit in the order of the tracks mutably.
-    pub fn sounds_mut(&mut self) -> &mut [Sound; 12] {
+    pub fn sounds_mut(&mut self) -> &mut [Sound] {
         &mut self.sounds
     }
 
     /// Sets the level of a track.
     ///
-    /// Range `0..=12`
+    /// Range
+    /// - track_index: `0..=12`
+    /// - level: `0..=127`
     ///
     /// 12th track is the fx track.
     #[parameter_range(range = "track_index:0..=12", range = "level:0..=127")]
@@ -861,5 +878,12 @@ impl Kit {
         }
 
         Ok(())
+    }
+
+    pub(crate) fn set_device_id(&mut self, device_id: u8) {
+        self.sysex_meta.set_device_id(device_id);
+        self.sounds_mut()
+            .iter_mut()
+            .for_each(|sound| sound.set_device_id(device_id));
     }
 }

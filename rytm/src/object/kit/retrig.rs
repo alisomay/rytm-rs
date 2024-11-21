@@ -18,7 +18,7 @@ pub struct TrackRetrigMenu {
 }
 
 impl TrackRetrigMenu {
-    pub(crate) fn get_default_for_13_tracks() -> [Self; 13] {
+    pub(crate) fn get_default_for_12_tracks() -> [Self; 12] {
         [
             Self::try_default_for_track(0).unwrap(),
             Self::try_default_for_track(1).unwrap(),
@@ -32,11 +32,11 @@ impl TrackRetrigMenu {
             Self::try_default_for_track(9).unwrap(),
             Self::try_default_for_track(10).unwrap(),
             Self::try_default_for_track(11).unwrap(),
-            Self::try_default_for_track(12).unwrap(),
+            // Self::try_default_for_track(12).unwrap(),
         ]
     }
 
-    #[parameter_range(range = "track_index:0..=12")]
+    #[parameter_range(range = "track_index:0..=11")]
     pub fn try_default_for_track(track_index: usize) -> Result<Self, RytmError> {
         let rate = RetrigRate::default();
         let length = Length::default();
@@ -51,7 +51,7 @@ impl TrackRetrigMenu {
         })
     }
 
-    #[parameter_range(range = "track_index:0..=12")]
+    #[parameter_range(range = "track_index:0..=11")]
     pub(crate) fn try_from_raw(track_index: usize, raw_kit: &ar_kit_t) -> Result<Self, RytmError> {
         let flags = unsafe { from_s_u16_t(raw_kit.retrig_always_on) };
         let always_on = flags & (1 << track_index) != 0;

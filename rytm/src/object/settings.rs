@@ -117,8 +117,18 @@ impl From<&Settings> for ar_settings_t {
 
 impl Default for Settings {
     fn default() -> Self {
-        Self {
-            sysex_meta: SysexMeta::default_for_settings(None),
+        Self::try_default_with_device_id(0).unwrap()
+    }
+}
+
+impl Settings {
+    /// Makes a new settings complying to project defaults.
+    ///
+    /// Range `0..=127`
+    #[parameter_range(range = "device_id:0..=127")]
+    pub fn try_default_with_device_id(device_id: u8) -> Result<Self, RytmError> {
+        Ok(Self {
+            sysex_meta: SysexMeta::default_for_settings(Some(device_id)),
             version: 3,
             bpm_project: 120.0,
             selected_track: 0,
@@ -141,11 +151,9 @@ impl Default for Settings {
             sample_recorder_rlen: SampleRecorderRecordingLength::default(),
 
             __unknown: SettingsUnknown::default(),
-        }
+        })
     }
-}
 
-impl Settings {
     pub(crate) fn as_raw_parts(&self) -> (SysexMeta, ar_settings_t) {
         (self.sysex_meta, self.into())
     }
@@ -498,5 +506,9 @@ impl Settings {
     /// Returns the version of the settings structure.
     pub const fn structure_version(&self) -> u32 {
         self.version
+    }
+
+    pub(crate) fn set_device_id(&mut self, device_id: u8) {
+        self.sysex_meta.set_device_id(device_id);
     }
 }

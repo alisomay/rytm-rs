@@ -390,8 +390,20 @@ impl Sound {
     /// Range: `0..=127`
     #[parameter_range(range = "sound_index:0..=127")]
     pub fn try_default(sound_index: usize) -> Result<Self, RytmError> {
+        Self::try_default_with_device_id(sound_index, 0)
+    }
+
+    /// Makes a new pool sound with the given index complying to project defaults.
+    ///
+    /// Sound index range: 0..=12`
+    /// Device id range: `0..=127`
+    #[parameter_range(range = "sound_index:0..=127", range = "device_id:0..=127")]
+    pub fn try_default_with_device_id(
+        sound_index: usize,
+        device_id: u8,
+    ) -> Result<Self, RytmError> {
         Ok(Self {
-            sysex_meta: SysexMeta::try_default_for_sound(sound_index, None)?,
+            sysex_meta: SysexMeta::try_default_for_sound(sound_index, Some(device_id))?,
             index: sound_index,
             pool_index: Some(sound_index),
             kit_number: None,
@@ -459,13 +471,25 @@ impl Sound {
 
     /// Makes a new sound with the given index complying to project defaults as if it comes from the work buffer.
     ///
+    /// Range: `0..=11`
+    #[allow(clippy::missing_panics_doc)]
+    pub fn work_buffer_default(track_index: usize) -> Self {
+        Self::try_work_buffer_default_with_device_id(track_index, 0).unwrap()
+    }
+
+    /// Makes a new sound with the given index complying to project defaults as if it comes from the work buffer.
+    ///
     /// Track index range: `0..=11`
-    #[parameter_range(range = "track_index:0..=11")]
-    pub fn try_work_buffer_default(track_index: usize) -> Result<Self, RytmError> {
+    /// Device id range: `0..=127`
+    #[parameter_range(range = "track_index:0..=11", range = "device_id:0..=127")]
+    pub fn try_work_buffer_default_with_device_id(
+        track_index: usize,
+        device_id: u8,
+    ) -> Result<Self, RytmError> {
         // Continue indexing from 128 since this is in work buffer.
         let index = track_index | 0b1000_0000;
         Ok(Self {
-            sysex_meta: SysexMeta::default_for_sound_in_work_buffer(track_index, None),
+            sysex_meta: SysexMeta::default_for_sound_in_work_buffer(track_index, Some(device_id)),
             index,
             pool_index: None,
             kit_number: None,
@@ -533,5 +557,9 @@ impl Sound {
             return self.sysex_meta.get_normalized_object_index();
         }
         self.index
+    }
+
+    pub(crate) fn set_device_id(&mut self, device_id: u8) {
+        self.sysex_meta.set_device_id(device_id);
     }
 }

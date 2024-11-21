@@ -4,7 +4,7 @@ use parking_lot::Mutex;
 use serde::de::{
     self, Deserialize, DeserializeSeed, Deserializer, Error, MapAccess, SeqAccess, Visitor,
 };
-use std::{fmt, mem::MaybeUninit, sync::Arc};
+use std::{fmt, sync::Arc};
 
 #[allow(clippy::too_many_lines)]
 impl<'de> Deserialize<'de> for Pattern {
@@ -28,7 +28,7 @@ impl<'de> Deserialize<'de> for Pattern {
                 let mut sysex_meta = None;
                 let mut index = None;
                 let mut version = None;
-                let mut tracks: Option<[Track; 12]> = None;
+                let mut tracks: Option<Vec<Track>> = None;
                 let mut fx_track: Option<Arc<Mutex<Track>>> = None;
                 let mut parameter_lock_pool: Option<Arc<Mutex<ParameterLockPool>>> = None;
                 let mut master_length = None;
@@ -130,55 +130,49 @@ impl<'de> Deserialize<'de> for Pattern {
 }
 
 // Tracks array deserializer
-// Following the pattern of serde_big_array but with context
 struct TracksArrayDeserializerSeed<'a> {
     fx_track_ref: &'a Option<Arc<Mutex<Track>>>,
     parameter_lock_pool: &'a Option<Arc<Mutex<ParameterLockPool>>>,
 }
 
 impl<'a, 'de> DeserializeSeed<'de> for TracksArrayDeserializerSeed<'a> {
-    type Value = [Track; 12];
+    type Value = Vec<Track>;
 
     fn deserialize<D>(self, deserializer: D) -> Result<Self::Value, D::Error>
     where
         D: Deserializer<'de>,
     {
-        // Context for the tracks array deserializer
         struct ArrayVisitor<'a> {
             fx_track_ref: &'a Option<Arc<Mutex<Track>>>,
             parameter_lock_pool: &'a Option<Arc<Mutex<ParameterLockPool>>>,
         }
 
         impl<'a, 'de> Visitor<'de> for ArrayVisitor<'a> {
-            type Value = [Track; 12];
+            type Value = Vec<Track>;
 
             fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
                 formatter.write_str("an array of 12 tracks")
             }
 
-            fn visit_seq<A>(self, mut seq: A) -> Result<[Track; 12], A::Error>
+            fn visit_seq<A>(self, mut seq: A) -> Result<Vec<Track>, A::Error>
             where
                 A: SeqAccess<'de>,
             {
-                let mut arr = [(); 12].map(|()| MaybeUninit::<Track>::uninit());
-                for (i, elem) in arr.iter_mut().enumerate() {
-                    // Context for every track deserializer
+                let mut tracks = Vec::with_capacity(12);
+                for i in 0..12 {
                     let track_seed = TrackDeserializerSeed {
                         fx_track_ref: self.fx_track_ref,
                         parameter_lock_pool: self.parameter_lock_pool,
                     };
-                    *elem = MaybeUninit::new(
+                    tracks.push(
                         seq.next_element_seed(track_seed)?
                             .ok_or_else(|| Error::invalid_length(i, &self))?,
                     );
                 }
-                Ok(unsafe {
-                    std::mem::transmute::<[std::mem::MaybeUninit<Track>; 12], [Track; 12]>(arr)
-                })
+                Ok(tracks)
             }
         }
 
-        // Pass the context into every element of the array
         deserializer.deserialize_seq(ArrayVisitor {
             fx_track_ref: self.fx_track_ref,
             parameter_lock_pool: self.parameter_lock_pool,
@@ -372,16 +366,15 @@ const FIELDS: &[&str] = &[
 ];
 
 // Trigs array deserializer
-// Following the pattern of serde_big_array but with context
 pub struct TrigsArrayVisitor {
     pub parameter_lock_pool: Option<Arc<Mutex<ParameterLockPool>>>,
     pub fx_track_ref: Option<Arc<Mutex<Track>>>,
 }
 
 impl<'de> de::DeserializeSeed<'de> for TrigsArrayVisitor {
-    type Value = [Trig; 64];
+    type Value = Vec<Trig>;
 
-    fn deserialize<D>(self, deserializer: D) -> Result<[Trig; 64], D::Error>
+    fn deserialize<D>(self, deserializer: D) -> Result<Vec<Trig>, D::Error>
     where
         D: Deserializer<'de>,
     {
@@ -391,36 +384,29 @@ impl<'de> de::DeserializeSeed<'de> for TrigsArrayVisitor {
         }
 
         impl<'de> Visitor<'de> for ArrayVisitor {
-            type Value = [Trig; 64];
+            type Value = Vec<Trig>;
 
             fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
                 formatter.write_str("an array of 64 elements")
             }
 
-            fn visit_seq<A>(self, mut seq: A) -> Result<[Trig; 64], A::Error>
+            fn visit_seq<A>(self, mut seq: A) -> Result<Vec<Trig>, A::Error>
             where
                 A: SeqAccess<'de>,
             {
-                unsafe {
-                    let mut arr: [MaybeUninit<Trig>; 64] = MaybeUninit::uninit().assume_init();
-                    for (i, item) in arr.iter_mut().enumerate() {
-                        // Deserialize each Trig normally
-                        let mut trig: Trig = seq
-                            .next_element()?
-                            .ok_or_else(|| serde::de::Error::invalid_length(i, &self))?;
+                let mut trigs = Vec::with_capacity(64);
+                for i in 0..64 {
+                    let mut trig: Trig = seq
+                        .next_element()?
+                        .ok_or_else(|| serde::de::Error::invalid_length(i, &self))?;
 
-                        // Inject the values directly into each Trig
-                        trig.parameter_lock_pool
-                            .clone_from(&self.parameter_lock_pool);
-                        trig.fx_track_ref.clone_from(&self.fx_track_ref);
+                    trig.parameter_lock_pool
+                        .clone_from(&self.parameter_lock_pool);
+                    trig.fx_track_ref.clone_from(&self.fx_track_ref);
 
-                        item.as_mut_ptr().write(trig);
-                    }
-                    Ok(std::mem::transmute::<
-                        [std::mem::MaybeUninit<Trig>; 64],
-                        [Trig; 64],
-                    >(arr))
+                    trigs.push(trig);
                 }
+                Ok(trigs)
             }
         }
 

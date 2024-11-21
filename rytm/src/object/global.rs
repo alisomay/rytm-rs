@@ -95,12 +95,24 @@ impl Global {
 
     /// Makes a new global complying to project defaults.
     ///
-    /// Accepts a global slot index in the range of `0..=3`.
+    /// Range `0..=3`
     #[parameter_range(range = "global_slot:0..=3")]
     pub fn try_default(global_slot: usize) -> Result<Self, RytmError> {
+        Self::try_default_with_device_id(global_slot, 0)
+    }
+
+    /// Makes a new global complying to project defaults.
+    ///
+    /// Global slot range `0..=3`
+    /// Device id range `0..=127`
+    #[parameter_range(range = "global_slot:0..=3", range = "device_id:0..=127")]
+    pub fn try_default_with_device_id(
+        global_slot: usize,
+        device_id: u8,
+    ) -> Result<Self, RytmError> {
         Ok(Self {
             index: global_slot,
-            sysex_meta: SysexMeta::try_default_for_global(global_slot, None)?,
+            sysex_meta: SysexMeta::try_default_for_global(global_slot, Some(device_id))?,
             version: 2,
 
             metronome_settings: MetronomeSettings::default(),
@@ -114,9 +126,14 @@ impl Global {
 
     /// Makes a new global in the work buffer complying to project defaults as if it comes from the work buffer.
     pub fn work_buffer_default() -> Self {
+        Self::work_buffer_default_with_device_id(0)
+    }
+
+    /// Makes a new global in the work buffer complying to project defaults as if it comes from the work buffer.
+    pub fn work_buffer_default_with_device_id(device_id: u8) -> Self {
         Self {
             index: 0,
-            sysex_meta: SysexMeta::default_for_global_in_work_buffer(None),
+            sysex_meta: SysexMeta::default_for_global_in_work_buffer(Some(device_id)),
             version: 2,
 
             metronome_settings: MetronomeSettings::default(),
@@ -181,5 +198,9 @@ impl Global {
     /// Returns the routing mutably.
     pub fn routing_mut(&mut self) -> &mut Routing {
         &mut self.routing
+    }
+
+    pub(crate) fn set_device_id(&mut self, device_id: u8) {
+        self.sysex_meta.set_device_id(device_id);
     }
 }

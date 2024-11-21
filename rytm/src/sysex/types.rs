@@ -248,6 +248,10 @@ impl SysexMeta {
             ..Default::default()
         }
     }
+
+    pub fn set_device_id(&mut self, dev_id: u8) {
+        self.dev_id = dev_id;
+    }
 }
 
 impl From<SysexMeta> for ar_sysex_meta_t {
