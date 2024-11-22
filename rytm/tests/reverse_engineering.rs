@@ -474,15 +474,16 @@ fn pattern_type() {
 
             rytm.update_from_sysex_response(response)?;
             let pattern = rytm.work_buffer_mut().pattern_mut();
+            dbg!(&pattern.tracks()[0].trigs()[0]);
 
-            let t = &mut pattern.tracks_mut()[0];
-            let trigs = t.trigs_mut();
-            let trig0 = &mut trigs[0];
+            // let t = &mut pattern.tracks_mut()[0];
+            // let trigs = t.trigs_mut();
+            // let trig0 = &mut trigs[0];
 
-            trig0.plock_set_lfo_depth(-66.0).unwrap();
-            trig0.plock_set_lfo_speed(-63).unwrap();
-            trig0.plock_set_lfo_multiplier(LfoMultiplier::X1).unwrap();
-            out.lock().send(&pattern.as_sysex()?).unwrap();
+            // trig0.plock_set_lfo_depth(-66.0).unwrap();
+            // trig0.plock_set_lfo_speed(-63).unwrap();
+            // trig0.plock_set_lfo_multiplier(LfoMultiplier::X1).unwrap();
+            // out.lock().send(&pattern.as_sysex()?).unwrap();
             // clearscreen::clear().unwrap();
 
             // let mute: u16 = ((settings.track_mute_msb as u16) << 8) | (settings.track_mute_lsb as u16);

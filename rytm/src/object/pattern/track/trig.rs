@@ -331,6 +331,8 @@ pub struct Trig {
     flags: TrigFlags,
     /// The note value.
     ///
+    /// Range `36..=84`
+    ///
     /// Follows the midi note convention. C-4 is `0x3C`.
     note: u8,
     /// Stores the state of the trig condition.
@@ -381,7 +383,7 @@ impl Trig {
             track_index,
             index: trig_index,
             flags: flags.into(),
-            note: 127,
+            note: 60, // 36 to 84 is valid on device.
             trig_condition: TrigCondition::default(),
             velocity: 0xFF,
             note_length: Length::Unset,
@@ -413,16 +415,20 @@ impl Trig {
         fx_track_ref: Option<Arc<Mutex<Track>>>,
     ) -> Result<Self, RytmError> {
         let trig_condition_msb = note & 0b1000_0000;
+
         let note = note & 0b0111_1111;
 
         let trig_condition_most_significant_mid_bits = micro_timing & 0b1100_0000;
+
         // Shift the micro timing 2 bits to the right so it reads as a relevant signed value. -92..=92 for every value increments and decrements by 4.
         let micro_timing = (micro_timing & 0b0011_1111) << 2;
 
         let trig_condition_least_significant_mid_bit = retrig_length & 0b1000_0000;
+
         let retrig_length = retrig_length & 0b0111_1111;
 
         let trig_condition_least_significant_3_bits = retrig_rate & 0b1110_0000;
+
         let retrig_rate = retrig_rate & 0b0001_1111;
 
         let mut trig_condition_value = 0_u8;
@@ -431,6 +437,14 @@ impl Trig {
             | (trig_condition_most_significant_mid_bits >> 2)
             | (trig_condition_least_significant_mid_bit >> 4)
             | (trig_condition_least_significant_3_bits >> 5);
+
+        // When the trig condition is unset in the device this is how the raw data looks like:
+        // Although this is taken from a new untouched project so everything is in their device defaults.
+
+        // note: 0xFF          // All bits 1
+        // micro_timing: 0xC0  // Top 2 bits 1 (0b11xxxxxx)
+        // retrig_length: 0x80 // Top bit 1  (0b1xxxxxxx)
+        // retrig_rate: 0xE0   // Top 3 bits 1 (0b111xxxxx)
 
         Ok(Self {
             track_index,
@@ -451,28 +465,46 @@ impl Trig {
     }
 
     pub(crate) const fn encode_note(&self) -> u8 {
-        (((self.trig_condition as u8) & 0b0_1000000) << 1) | self.note
+        // Always use standard encoding, even for Unset
+        // This preserves note value in lower 7 bits (0-127 range)
+        // and uses MSB for trig condition AGR_6 bit
+        ((self.trig_condition as u8) & 0b0_1000000) << 1 | self.note
     }
 
     #[allow(overflowing_literals)]
-    pub(crate) const fn encode_micro_timing(&self) -> u8 {
+    pub(crate) fn encode_micro_timing(&self) -> u8 {
         let encoded_byte = crate::util::encode_micro_timing_byte(self.micro_timing);
-        // Shift the micro timing 2 bits to the right to leave space for 2 bits which is a part of encoded trig condition.
-        // Then fill those two bits with the trig condition's most significant mid bits.
-        //
-        // Since we're just setting bits, fabricating values and not doing any arithmetic we can use the literal values.
-        // Overflowing literals are safe in this case.
-        ((encoded_byte >> 2) | (((self.trig_condition as i8) & 0b0_0110000) << 2)) as u8
+        if self.trig_condition == TrigCondition::Unset {
+            // When unset, set top 2 bits (0b1100_0000) and keep the micro timing value
+            0xC0 | ((encoded_byte >> 2) as u8)
+        } else {
+            // Shift the micro timing 2 bits to the right to leave space for 2 bits which is a part of encoded trig condition.
+            // Then fill those two bits with the trig condition's most significant mid bits.
+            //
+            // Since we're just setting bits, fabricating values and not doing any arithmetic we can use the literal values.
+            // Overflowing literals are safe in this case.
+            ((encoded_byte >> 2) | ((self.trig_condition as i8 & 0b0_0110000) << 2)) as u8
+        }
     }
 
-    pub(crate) const fn encode_retrig_length(&self) -> u8 {
-        // Apply the trig condition's least significant mid bit to the retrig length's most significant bit.
-        (((self.trig_condition as u8) & 0b0_0001000) << 4) | self.retrig_length as u8
+    pub(crate) fn encode_retrig_length(&self) -> u8 {
+        if self.trig_condition == TrigCondition::Unset {
+            // When unset, set high bit (0b1000_0000) and keep the length value
+            0x80 | (self.retrig_length as u8)
+        } else {
+            // Apply the trig condition's least significant mid bit to the retrig length's most significant bit.
+            ((self.trig_condition as u8) & 0b0_0001000) << 4 | self.retrig_length as u8
+        }
     }
 
-    pub(crate) const fn encode_retrig_rate(&self) -> u8 {
-        // Apply the trig condition's least significant 3 bits to the retrig rate's most significant 3 bits.
-        (((self.trig_condition as u8) & 0b0_0000111) << 5) | self.retrig_rate as u8
+    pub(crate) fn encode_retrig_rate(&self) -> u8 {
+        if self.trig_condition == TrigCondition::Unset {
+            // When unset, set top 3 bits (0b1110_0000) and keep the rate value
+            0xE0 | (self.retrig_rate as u8)
+        } else {
+            // Apply the trig condition's least significant 3 bits to the retrig rate's most significant 3 bits.
+            ((self.trig_condition as u8) & 0b0_0000111) << 5 | self.retrig_rate as u8
+        }
     }
 
     /// Returns the index of the trig.
@@ -489,14 +521,13 @@ impl Trig {
         self.track_index
     }
 
-    // TODO: On device 36..=84 is valid.
-    // Are values set from here valid?
+    // TODO: Can we try to exceed the range how does the device respond?
     /// Sets the note value.
     ///
-    /// Range `0..=127`
+    /// Range `36..=84`
     ///
     /// Follows the midi note convention. C-4 is `0x3C`.
-    #[parameter_range(range = "note:0..=127")]
+    #[parameter_range(range = "note:36..=84")]
     pub fn set_note(&mut self, note: usize) -> Result<(), RytmError> {
         self.note = note as u8;
         Ok(())
