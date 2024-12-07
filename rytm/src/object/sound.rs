@@ -161,6 +161,17 @@ impl Sound {
         Ok(())
     }
 
+    /// Copies the data from the given sound object.
+    pub fn copy_data_from(&mut self, object: &Self) {
+        self.sample = object.sample;
+        self.filter = object.filter;
+        self.amplitude = object.amplitude;
+        self.lfo = object.lfo;
+        self.settings = object.settings;
+        self.machine_parameters
+            .clone_from(&object.machine_parameters);
+    }
+
     // The panics in this function should be basically unreachable when this function is used correctly.
     pub(crate) fn try_from_raw(
         sysex_meta: SysexMeta,

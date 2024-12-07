@@ -445,8 +445,8 @@ impl From<MachineType> for u8 {
     }
 }
 
-impl From<MachineParameters> for MachineType {
-    fn from(machine: MachineParameters) -> Self {
+impl From<&MachineParameters> for MachineType {
+    fn from(machine: &MachineParameters) -> Self {
         use MachineParameters::*;
         match machine {
             BdHard(_) => Self::BdHard,

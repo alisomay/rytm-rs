@@ -266,6 +266,41 @@ impl Kit {
         })
     }
 
+    /// Mimics the copy kit function in rytm.
+    pub fn copy_data_from(&mut self, object: &Self) {
+        self.name = object.name;
+        self.track_levels = object.track_levels;
+        self.track_retrig_settings = object.track_retrig_settings;
+        self.sounds.clone_from(&object.sounds);
+        self.fx_delay = object.fx_delay;
+        self.fx_distortion = object.fx_distortion;
+        self.fx_reverb = object.fx_reverb;
+        self.fx_compressor = object.fx_compressor;
+        self.fx_lfo = object.fx_lfo;
+        self.perf_ctl = object.perf_ctl;
+        self.scene_ctl = object.scene_ctl;
+        self.current_scene_id = object.current_scene_id;
+        self.control_in_1_mod_target_1 = object.control_in_1_mod_target_1;
+        self.control_in_1_mod_target_2 = object.control_in_1_mod_target_2;
+        self.control_in_1_mod_target_3 = object.control_in_1_mod_target_3;
+        self.control_in_1_mod_target_4 = object.control_in_1_mod_target_4;
+        self.control_in_2_mod_target_1 = object.control_in_2_mod_target_1;
+        self.control_in_2_mod_target_2 = object.control_in_2_mod_target_2;
+        self.control_in_2_mod_target_3 = object.control_in_2_mod_target_3;
+        self.control_in_2_mod_target_4 = object.control_in_2_mod_target_4;
+        self.control_in_1_mod_amt_1 = object.control_in_1_mod_amt_1;
+        self.control_in_1_mod_amt_2 = object.control_in_1_mod_amt_2;
+        self.control_in_1_mod_amt_3 = object.control_in_1_mod_amt_3;
+        self.control_in_1_mod_amt_4 = object.control_in_1_mod_amt_4;
+        self.control_in_2_mod_amt_1 = object.control_in_2_mod_amt_1;
+        self.control_in_2_mod_amt_2 = object.control_in_2_mod_amt_2;
+        self.control_in_2_mod_amt_3 = object.control_in_2_mod_amt_3;
+        self.control_in_2_mod_amt_4 = object.control_in_2_mod_amt_4;
+
+        // TODO: If there is a bug check this part.
+        self.__unknown = object.__unknown;
+    }
+
     pub(crate) fn as_raw_parts(&self) -> (SysexMeta, ar_kit_t) {
         (self.sysex_meta, self.into())
     }

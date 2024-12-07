@@ -357,6 +357,11 @@ impl MachineParameters {
         }
     }
 
+    /// Returns the type of the machine.
+    pub fn machine_type(&self) -> MachineType {
+        self.into()
+    }
+
     /// Returns the default machine parameters for a given track.
     ///
     /// Range `0..=11`

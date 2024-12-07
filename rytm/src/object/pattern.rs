@@ -170,6 +170,24 @@ impl From<&Pattern> for ar_pattern_t {
 }
 
 impl Pattern {
+    /// Mimics the copy pattern function in rytm.
+    ///
+    /// This function only copies the data from the given pattern including the parameter locks.
+    pub fn copy_data_from(&mut self, object: &Self) {
+        self.tracks = object.tracks.iter().map(std::clone::Clone::clone).collect();
+        *self.fx_track.lock() = object.fx_track.lock().clone();
+        *self.parameter_lock_pool.lock() = object.parameter_lock_pool.lock().clone();
+        self.master_length = object.master_length;
+        self.master_change = object.master_change;
+        self.kit_number = object.kit_number;
+        self.swing_amount = object.swing_amount;
+        self.time_mode = object.time_mode;
+        self.speed = object.speed;
+        self.global_quantize = object.global_quantize;
+        self.bpm = object.bpm;
+        self.pad_scale_per_pattern = object.pad_scale_per_pattern;
+    }
+
     #[allow(clippy::too_many_arguments)]
     pub(crate) fn try_from_raw(
         sysex_meta: SysexMeta,
